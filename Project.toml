@@ -1,4 +1,4 @@
-name = "MDTools"
+name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
 version = "1.0.0-DEV"

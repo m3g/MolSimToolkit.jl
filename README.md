@@ -1,1 +1,1 @@
-# MDTools
+# MolSimToolkit

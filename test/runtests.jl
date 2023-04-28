@@ -1,6 +1,6 @@
-using MDTools
+using MolSimToolkit
 using Test
 
-@testset "MDTools.jl" begin
+@testset "MolSimToolkit.jl" begin
     # Write your tests here.
 end

@@ -61,8 +61,8 @@ jobs:
           julia --project=docs -e '
             import Pkg; Pkg.add("Documenter")
             using Documenter: doctest
-            using MDTools
-            doctest(MDTools)'
+            using MolSimToolkit
+            doctest(MolSimToolkit)'
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
