@@ -12,6 +12,7 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 [compat]
 Chemfiles = "0.10.31"
 PDBTools = "0.13.11"
+StaticArrays = "1"
 TestItemRunner = "0.2.1"
 TestItems = "0.1.1"
 julia = "1.6"
