@@ -8,6 +8,7 @@ Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
 PDBTools = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 Chemfiles = "0.10.31"

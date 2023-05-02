@@ -29,7 +29,7 @@ function distances(trajectory::Chemfiles.Trajectory, sel1, sel2; first=1, last=n
         y = SVector{3}(@view(coordinates[:,atom2[1].index]))
         # wrap coordinates according to PBC. Note that here we use an
         # internal function of `CellListMap`. 
-        y_wrapped = wrap_relative_to(y,x,unit_cell)
+        y_wrapped = wrap(y,x,unit_cell)
         # compute distance
         d = norm(y_wrapped-x)
         # add data to distance array
