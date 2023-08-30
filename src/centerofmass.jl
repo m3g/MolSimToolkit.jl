@@ -4,7 +4,8 @@
 Calculate the center of mass of a selection of atoms.
 
 """
-function centerofmass(selection::Vector{Atom{T}}) where {T}
+function centerofmass(selection::Vector{PDBTools.Atom}) 
+    T = Float64
     totmass = zero(T)
     cm = zeros(MVector{T,3})
     for atom in selection
@@ -15,7 +16,7 @@ function centerofmass(selection::Vector{Atom{T}}) where {T}
     return SVector(cm)
 end
 
-function centerofmass(selection::Vector{Atom}, unitcell::Chemfiles.UnitCell; center=SVector(0.0, 0.0, 0.0))
+function centerofmass(selection::Vector{PDBTools.Atom}, unitcell::Chemfiles.UnitCell; center=SVector(0.0, 0.0, 0.0))
     totmass = eltype(atom.position)
     cm = MVector{3}(0.0, 0.0, 0.0)
     for atom in selection

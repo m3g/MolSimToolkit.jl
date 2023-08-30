@@ -1,5 +1,3 @@
-export wrap 
-
 """
     wrap(x, xref, unit_cell_matrix::SMatrix{N,N,T}) where {N,T}
     wrap(x,xref,sides::AbstractVector)
@@ -112,7 +110,6 @@ end
     end
     return x
 end
-
 
 @testitem "wrap" begin
     # Test wrapping of a vector
