@@ -25,17 +25,16 @@ function distances(
             Chemfiles.read!(trajectory, frame)
             continue
         end
-        unitcell_read = Chemfiles.matrix(Chemfiles.UnitCell(frame))
-        unit_cell = SMatrix{3,3}(transpose(unitcell_read))
+        unitcell = UnitCell(frame)
         # read coordinates, convert them to small static vectors
-        coordinates = Chemfiles.positions(frame)
+        coordinates = Positions(frame)
         # TODO: below we compute the distance between the first atom of each selection
         # this has to be replaced by the computation of their centers of mass
-        x = SVector{3}(@view(coordinates[:,atoms1[1].index]))
-        y = SVector{3}(@view(coordinates[:,atoms2[1].index]))
+        x = coordinates[atoms1[1].index]
+        y = coordinates[atoms2[1].index]
         # wrap coordinates according to PBC. Note that here we use an
         # internal function of `CellListMap`. 
-        y_wrapped = wrap(y,x,unit_cell)
+        y_wrapped = wrap(y,x,unitcell)
         # compute distance
         d = norm(y_wrapped-x)
         # add data to distance array

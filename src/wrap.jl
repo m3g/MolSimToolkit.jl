@@ -15,6 +15,11 @@ may be given as a matrix of dimension `NxN` or as a vector of length `N` with th
     return oneunit(T) * unit_cell_matrix * (xw - xref_f) + xref
 end
 
+@inline function wrap(x::AbstractVector, xref::AbstractVector, matrix::AbstractMatrix)
+    N = size(matrix,1)
+    return wrap(x, xref, SMatrix{N,N,eltype(matrix),N*N}(matrix))
+end
+
 @inline function wrap(x::AbstractVector, xref::AbstractVector, sides::AbstractVector)
     xw = mod.(x - xref, sides)
     xw = _wrap_single_coordinate.(xw, sides)
@@ -72,10 +77,6 @@ end
 """
     wrap_to_first(x,unit_cell_matrix)
 
-$(INTERNAL)
-
-# Extended help
-
 Wraps the coordinates of point `x` such that the returning coordinates are in the
 first unit cell with all-positive coordinates. 
 
@@ -112,26 +113,34 @@ end
 end
 
 @testitem "wrap" begin
+    import Chemfiles
+    using StaticArrays
     # Test wrapping of a vector
     x = SVector{3}([0.5, 0.5, 0.5])
     x_ref = SVector{3}([0.0, 0.0, 0.0])
-    unitcell = Chemfiles.UnitCell([ 10.0 0.0 0.0 
-                                    0.0 10.0 0.0
-                                    0.0 0.0 10.0 ])    
+    unitcell = Chemfiles.matrix(
+        Chemfiles.UnitCell([ 10.0 0.0 0.0 
+                             0.0 10.0 0.0
+                             0.0 0.0 10.0 ])
+        )
     @test wrap(x, x_ref, unitcell) ≈ x
     # Test if vector is not inside unit cell
     x = SVector{3}([10.5, 10.5, 10.5])
     x_ref = SVector{3}([0.0, 0.0, 0.0])
     @test wrap(x, x_ref, unitcell) ≈ SVector{3}([0.5, 0.5, 0.5])
     # Test with a triclinic cell
-    unitcell = Chemfiles.UnitCell([ 10.0 5.0 5.0 
-                                    0.0 10.0 5.0
-                                    0.0 0.0 10.0])
+    unitcell = transpose(Chemfiles.matrix(
+        Chemfiles.UnitCell([ 10.0 5.0 5.0 
+                             0.0 10.0 5.0
+                             0.0 0.0 10.0])
+        ))
     x = SVector{3}([0.5, 0.5, 0.5])
     x_ref = SVector{3}([0.0, 0.0, 0.0])
     @test wrap(x, x_ref, unitcell) ≈ SVector{3}([0.5, 0.5, 0.5])
     # Test with atoms far from each other
     x = SVector{3}([10.5, 10.5, 10.5])
     x_ref = SVector{3}([0.0, 0.0, 0.0])
-    @test wrap(x, x_ref, unitcell) ≈ SVector{3}([0.5, 0.5, 0.5])
+    @test wrap(x, x_ref, unitcell) ≈ SVector{3}([0.5, -4.5, 0.5])
 end
+
+
