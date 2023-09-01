@@ -1,18 +1,26 @@
 export Trajectory
-export length, nframes
+export frame_range
+export index_frame
+export length
+export nframes
 export close
-export setrange!
+export restart!
+export currentframe
 export nextframe!
+export set_frame_range!
 
 """
-    Trajectory
+    Trajectory(file::String; first=1, last=nothing, step=1)
 
-A Trajectory object represents a trajectory file. It can be iterated over to
-obtain the frames in the trajectory. The Trajectory object is a mutable struct
+Creates a new `Trajectory` object from a file. If `first`, `last`, and `step` are not specified, the
+`Trajectory` will iterate over all frames in the file. 
+
+A `Trajectory` object represents a trajectory file. It can be iterated over to
+obtain the frames in the trajectory. The `Trajectory` object is a mutable struct
 that contains the following data, that can be retrived by the corresponding
 functions:
 
-- `range(::Trajectory)`: the range of frames to be iterated over
+- `frame_range(::Trajectory)`: the range of frames to be iterated over
 - `index_frame(::Trajectory)`: the index of the current frame in the trajectory
 - `frame(::Trajectory)`: the current frame in the trajectory
 - `length(::Trajectory)`: the number of frames in the trajectory file
@@ -22,22 +30,52 @@ The Trajectory object can also be manipulated by the following functions:
 
 - `close(::Trajectory)`: closes the trajectory file
 - `restart!(::Trajectory)`: restarts the iteration over the trajectory file
+- `currentframe(::Trajectory)`: returns the current frame in the trajectory
 - `nextframe!(::Trajectory)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
-- `setrange!(::Trajectory; first, last, step)`: resets the range of frames to be iterated over. 
+- `set_frame_range!(::Trajectory; first, last, step)`: resets the range of frames to be iterated over. 
 
+One important feature of the `Trajectory` object is that i can be iterated over, frame by frame.
+
+# Examples
+
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> trajectory = Trajectory(Testing.namd_traj, first = 2, step = 2, last = 4);
+
+julia> for frame in trajectory 
+           @show index_frame(trajectory)
+           # show x coordinate of first atom 
+           @show Positions(frame)[1].x
+       end
+
+
+```
 """
 mutable struct Trajectory{R<:AbstractRange, F<:Chemfiles.Frame, T<:Chemfiles.Trajectory}
-    range::R
+    frame_range::R
     frame::F
     index_frame::Int
     trajectory::T
 end
 
-#=
-    Trajectory(trajectory::Chemfiles.Trajectory, range::AbstractRange)
+import Base: show
+function show(io::IO, trajectory::Trajectory)
+    print(io, chomp("""
+    Trajectory
+        Trajectory file: $(path(trajectory))
+        Total number of frames: $(length(trajectory))
+        Frame range: $(frame_range(trajectory))
+        Number of frames in range: $(nframes(trajectory))
+        Current frame: $(index_frame(trajectory))
+    """))
+end
 
-Creates a new Trajectory object from a Chemfiles.Trajectory. If `range` is not
-specified, the Trajectory will iterate over all frames in the file. If `range`
+#=
+    Trajectory(trajectory::Chemfiles.Trajectory, frame_range::AbstractRange)
+
+Creates a new Trajectory object from a Chemfiles.Trajectory. If `frame_range` is not
+specified, the Trajectory will iterate over all frames in the file. If `frame_range`
 is specified, the Trajectory will iterate over the frames in the range.
 
 This function is not supposed to be called directly. Use the Trajectory(file) function.
@@ -45,54 +83,40 @@ This function is not supposed to be called directly. Use the Trajectory(file) fu
 =#
 function Trajectory(
     trajectory::Chemfiles.Trajectory, 
-    range::AbstractRange
+    frame_range::AbstractRange
 )
     frame = Chemfiles.read(trajectory)
-    for _ in 2:first(range)
+    for _ in 2:first(frame_range)
         Chemfiles.read!(trajectory, frame)
     end
-    index_frame = first(range)
-    Trajectory(range, frame, index_frame, trajectory)
+    index_frame = first(frame_range)
+    return Trajectory(frame_range, frame, index_frame, trajectory)
 end
 
-"""
+#= 
     Trajectory(file::String; first=1, last=nothing, step=1)
 
 Creates a new Trajectory object from a file. If `first`, `last`, and `step` are not specified, the
-Trajectory will iterate over all frames in the file. 
+Trajectory will iterate over all frames in the file. This is the default constructor expected
+to be used.
 
-# Examples
-
-```julia
-traj = Trajectory("traj.dcd"; first=1, step=5)
-```
-
-```julia
-traj = Trajectory("traj.dcd"; first=1, step=5, last=100)
-```
-
-```julia
-traj = Trajectory("traj.dcd"; first=1, last=100)
-```
-
-"""
+=#
 function Trajectory(file::String; first=1, last=nothing, step=1) 
     if isnothing(last)
-        range = first:step:Int(Chemfiles.length(Chemfiles.Trajectory(file)))
+        frame_range = first:step:Int(Chemfiles.length(Chemfiles.Trajectory(file)))
     else
-        range = first:step:last
+        frame_range = first:step:last
     end
-    Trajectory(Chemfiles.Trajectory(file), range=range)
+    return Trajectory(Chemfiles.Trajectory(file), frame_range)
 end
 
-# Overloading Base.range here is sort of odd. Probably this interface will change.
 """
-    range(trajectory::Trajectory)
+    frame_range(trajectory::Trajectory)
 
 Returns the range of frames to be iterated over.
 
 """
-Base.range(trajectory::Trajectory) = trajectory.range
+frame_range(trajectory::Trajectory) = trajectory.frame_range
 
 """
     index_frame(trajectory::Trajectory)
@@ -130,10 +154,10 @@ Base.length(trajectory::Trajectory) = Int(Chemfiles.length(trajectory.trajectory
     nframes(trajectory::Trajectory)
 
 Returns the number of frames to be iterated over in the trajectory file,
-considering the current range.
+considering the current frame range.
 
 """
-nframes(trajectory::Trajectory) = length(trajectory.range)
+nframes(trajectory::Trajectory) = length(trajectory.frame_range)
 
 """
     path(trajectory::Trajectory)
@@ -141,7 +165,7 @@ nframes(trajectory::Trajectory) = length(trajectory.range)
 Returns the path to the trajectory file.
 
 """
-path(trajectory::Trajectory) = trajectory.trajectory.path
+path(trajectory::Trajectory) = Chemfiles.path(trajectory.trajectory)
 
 """
     restart!(trajectory::Trajectory)
@@ -150,63 +174,75 @@ Restarts the iteration over the trajectory file.
 
 """
 function restart!(trajectory::Trajectory)
+    trajectory_file = path(trajectory)
     close(trajectory)
-    trajectory.trajectory = Chemfiles.Trajectory(path(trajectory))
+    trajectory.trajectory = Chemfiles.Trajectory(trajectory_file)
+    trajectory.index_frame = first(frame_range(trajectory))
     return trajectory
 end
+
+"""
+    currentframe(trajectory::Trajectory)
+
+Returns the current frame in the trajectory.
+
+"""
+currentframe(trajectory::Trajectory) = trajectory.frame
 
 """
     nextframe!(trajectory::Trajectory)
 
 Reads the next frame in the trajectory file and returns it. Moves the current
-frame to the next one.
+frame to the next one in the range to be considered (given by `frame_range(trajectory)`).
+
+This function return `nothing` if the last frame was reached.
 
 """
 function nextframe!(trajectory::Trajectory) 
-    if index_frame(trajectory) < last(range(trajectory))
-        trajectory.index_frame += 1
-        Chemfiles.read!(trajectory.trajectory, trajectory.frame)
-    else
-        error("End of trajectory")
+    if index_frame(trajectory) == last(frame_range(trajectory))
+        error("End of trajectory.")
     end
-    return frame(trajectory)
+    Chemfiles.read!(trajectory.trajectory, trajectory.frame)
+    iframe = index_frame(trajectory) + 1
+    while iframe ∉ frame_range(trajectory) && iframe < last(frame_range(trajectory)) 
+        Chemfiles.read!(trajectory.trajectory, trajectory.frame)
+        iframe += 1
+    end
+    # If the last frame was reached, check if it is in the frame range
+    if iframe ∉ frame_range(trajectory)
+        error("End of trajectory.")
+    end
+    trajectory.index_frame = iframe
+    return currentframe(trajectory)
 end
 
 import Base: iterate
-function iterate(trajectory::Trajectory, state=nothing)
-    if isnothing(state)
+function iterate(trajectory::Trajectory, iframe=nothing)
+    if isnothing(iframe)
         restart!(trajectory)
-        frame = frame(trajectory)
-        for _ in 1:first(trajectory.range)-1
-           frame = nextframe!(trajectory) 
-        end
-        return (frame, index_frame(trajectory))
-    elseif state <= last(trajectory.range)
-
-        Chemfiles.read!(trajectory.trajectory, frame)
-        return (frame, state + 1)
+        return (currentframe(trajectory), index_frame(trajectory))
+    elseif iframe < last(frame_range(trajectory))
+        return (nextframe!(trajectory), index_frame(trajectory))
     else
-        #voltar
-#        Chemfiles.
-#        return nothing
+        return nothing
     end
 end
 
 """
-    setrange!(trajectory::Trajectory; first=1, last=nothing, step=1)
+    set_frame_range!(trajectory::Trajectory; first=1, last=nothing, step=1)
 
-Resets the range of frames to be iterated over. This function will restart the
+Resets the frame range to be iterated over. This function will restart the
 iteration from the first frame of the new range.
 
 """
-function setrange!(trajectory::Trajectory; first=1, last=nothing, step=1)
+function set_frame_range!(trajectory::Trajectory; first=1, last=nothing, step=1)
     if isnothing(last)
-        range = first:step:length(trajectory)
+        frame_range = first:step:length(trajectory)
     else
-        range = first:step:last
+        frame_range = first:step:last
     end
-    trajectory.range = range
-    trajectory.index_frame = first(range)
+    trajectory.frame_range = frame_range
+    trajectory.index_frame = first(frame_range)
     restart!(trajectory)
 end
 
@@ -214,24 +250,25 @@ end
     import Chemfiles
     using MolSimToolkit.Testing
 
-    # Read the first atom coordinate of each frame, to test iterations
-    traj_cm = Chemfiles.Trajectory(Testing.namd_traj)
-    cm_first_coordinates = zeros(Chemfiles.length(traj))
-    frame_cm = Chemfiles.read(traj_cm)
-    cm_first_coordinates[1] = Chemfiles.positions(frame_cm)[1,1]
-    for i in 2:Chemfiles.length(traj)
-        Chemfiles.read!(traj_cm, frame_cm)
-        cm_first_coordinates[i] = Chemfiles.positions(frame_cm)[1,1]
+    t = Chemfiles.Trajectory(Testing.namd_traj)
+    c = zeros(Chemfiles.length(t))
+    f = Chemfiles.read(t)
+    c[1] = Chemfiles.positions(f)[1,1]
+    for i in 2:Chemfiles.length(t)
+        Chemfiles.read!(t, f)
+        c[i] = Chemfiles.positions(f)[1,1]
     end
-    Chemfiles.close(traj_cm)
+    Chemfiles.close(t)
 
-    # Test the Trajectory iteration
-    traj = Trajectory(Testing.namd_traj)
+    trajectory = Trajectory(Testing.namd_traj)
+    c2 = zeros(length(trajectory))
+    i = 0
+    for frame in trajectory
+        i += 1
+        c2[i] = Positions(frame)[1].x
+    end
 
-
-
-
-
+    @test c == c2
 
 end
 
