@@ -178,6 +178,7 @@ function restart!(trajectory::Trajectory)
     close(trajectory)
     trajectory.trajectory = Chemfiles.Trajectory(trajectory_file)
     trajectory.index_frame = first(frame_range(trajectory))
+    trajectory.frame = Chemfiles.read(trajectory.trajectory)
     return trajectory
 end
 
@@ -194,8 +195,6 @@ currentframe(trajectory::Trajectory) = trajectory.frame
 
 Reads the next frame in the trajectory file and returns it. Moves the current
 frame to the next one in the range to be considered (given by `frame_range(trajectory)`).
-
-This function return `nothing` if the last frame was reached.
 
 """
 function nextframe!(trajectory::Trajectory) 
@@ -222,7 +221,8 @@ function iterate(trajectory::Trajectory, iframe=nothing)
         restart!(trajectory)
         return (currentframe(trajectory), index_frame(trajectory))
     elseif iframe < last(frame_range(trajectory))
-        return (nextframe!(trajectory), index_frame(trajectory))
+        nextframe!(trajectory)
+        return (currentframe(trajectory), index_frame(trajectory))
     else
         return nothing
     end
@@ -250,6 +250,12 @@ end
     import Chemfiles
     using MolSimToolkit.Testing
 
+
+    #
+    # Test iterator by reading coordinates
+    #
+
+    # Read coordinates with Chemfiles interface
     t = Chemfiles.Trajectory(Testing.namd_traj)
     c = zeros(Chemfiles.length(t))
     f = Chemfiles.read(t)
@@ -260,6 +266,7 @@ end
     end
     Chemfiles.close(t)
 
+    # Read coordinates with the Trajectory interface
     trajectory = Trajectory(Testing.namd_traj)
     c2 = zeros(length(trajectory))
     i = 0
@@ -267,6 +274,7 @@ end
         i += 1
         c2[i] = Positions(frame)[1].x
     end
+    close(trajectory)
 
     @test c == c2
 
