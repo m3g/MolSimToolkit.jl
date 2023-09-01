@@ -259,20 +259,18 @@ end
     t = Chemfiles.Trajectory(Testing.namd_traj)
     c = zeros(Chemfiles.length(t))
     f = Chemfiles.read(t)
-    c[1] = Chemfiles.positions(f)[1,1]
+    c = [Chemfiles.positions(f)[1,1]]
     for i in 2:Chemfiles.length(t)
         Chemfiles.read!(t, f)
-        c[i] = Chemfiles.positions(f)[1,1]
+        push!(c, Chemfiles.positions(f)[1,1])
     end
     Chemfiles.close(t)
 
     # Read coordinates with the Trajectory interface
     trajectory = Trajectory(Testing.namd_traj)
-    c2 = zeros(length(trajectory))
-    i = 0
+    c2 = Float64[]
     for frame in trajectory
-        i += 1
-        c2[i] = Positions(frame)[1].x
+        push!(c2, Positions(frame)[1].x)
     end
     close(trajectory)
 
