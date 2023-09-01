@@ -224,7 +224,6 @@ function iterate(trajectory::Trajectory, iframe=nothing)
         nextframe!(trajectory)
         return (currentframe(trajectory), index_frame(trajectory))
     else
-        close(trajectory)
         return nothing
     end
 end

@@ -24,6 +24,6 @@ include("./datastructures/UnitCell.jl")
 # Basic functions
 include("./wrap.jl")
 include("./distances.jl")
-include("./centerofmass.jl")
+include("./center_of_mass.jl")
 
 end

@@ -8,6 +8,7 @@ makedocs(
     sitename = "MolSimToolkit.jl",
     pages = [
         "Home" => "index.md",
+        "Functions" => "functions.md",
         "Developer zone" => "Developer.md",
     ],
 )
