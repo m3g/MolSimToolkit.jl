@@ -1,7 +1,7 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
-version = "0.1.0"
+version = "0.1.1-DEV"
 
 [deps]
 CellListMap = "69e1c6dd-3888-40e6-b3c8-31ac5f578864"
