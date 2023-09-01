@@ -9,17 +9,15 @@ from a `Chemfiles.Frame` is transparent to the user, without any further convers
 
 # Example
 
-```julia-repl
-julia> using MolSimToolkit
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> import Chemfiles
+julia> trajectory = Trajectory(Testing.namd_traj);
 
-julia> traj = Chemfiles.Trajectory(Testing.namd_traj);
-
-julia> frame = Chemfiles.read(traj);
+julia> frame = currentframe(trajectory);
 
 julia> unitcell = UnitCell(frame)
-MolSimToolkit.UnitCell{Float64}
+UnitCell{Float64}
   47.411   0.000   0.000
    0.000  47.411   0.000
    0.000   0.000  87.798
@@ -39,8 +37,6 @@ struct UnitCell{T}
 end
 UnitCell(u::Chemfiles.UnitCell) = UnitCell(SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u))))
 UnitCell(f::Chemfiles.Frame) = UnitCell(Chemfiles.UnitCell(f))
-wrap(x::Point3D, x_ref::Point3D, u::UnitCell) = wrap(x, x_ref, u.matrix)
-wrap_to_first(x::Point3D, u::UnitCell) = wrap_to_first(x, u.matrix)
 
 function Base.show(io::IO, u::UnitCell) 
     print(io, "$(typeof(u))")
