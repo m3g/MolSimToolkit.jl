@@ -1,5 +1,5 @@
-
-export Point3D, Positions
+export Point3D
+export Positions
 
 """
     Point3D{T}
@@ -18,18 +18,21 @@ end
 
 Container for the positions of a set of atoms. The positions are stored in a matrix,
 where each column corresponds to the coordinates of an atom. The container is used
-such that using the coodinates from a `Chemfiles.Frame` is transparent to the user.
+such that using the coodinates from a `Chemfiles.Frame` is transparent to the user,
+and the coordinates can be accessed as `positions[i]` where `i` is the index of the
+atom. 
+
+The coordinates of the atom can be accessed as `positions[i].x`, `positions[i].y`,
+and `positions[i].z`.
 
 # Example
 
-```julia-repl
-julia> using MolSimToolkit
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> import Chemfiles
+julia> trajectory = Trajectory(Testing.namd_traj);
 
-julia> traj = Chemfiles.Trajectory(Testing.namd_traj);
-
-julia> frame = Chemfiles.read(traj);
+julia> frame = currentframe(trajectory);
 
 julia> positions = Positions(frame);
 
@@ -39,14 +42,14 @@ julia> positions[1]
  10.768872261047363
  28.277008056640625
 
- julia> positions[1].x
- 5.912472724914551
- 
- julia> positions[1].y
- 10.768872261047363
- 
- julia> positions[1].z
- 28.277008056640625
+julia> positions[1].x
+5.912472724914551
+
+julia> positions[1].y
+10.768872261047363
+
+julia> positions[1].z
+28.277008056640625
 
 ```
 
@@ -56,6 +59,11 @@ struct Positions{T<:AbstractArray}
 end
 Positions(f::Chemfiles.Frame) = Positions(Chemfiles.positions(f))
 Base.getindex(x::Positions, i::Int) = Point3D(@view(x.positions[:,i]))
+
+import Base: show
+function show(io::IO, positions::Positions)
+    print(io, "Positions{", eltype(positions.positions), "} with ", size(positions.positions,2), " atoms")
+end
 
 @testitem "Positions" begin
     m = rand(3,10)
