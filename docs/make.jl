@@ -1,8 +1,9 @@
 import Pkg
 Pkg.add("Documenter")
 using Documenter
-using MolSimToolkit 
+push!(LOAD_PATH, "../")
 push!(LOAD_PATH, "../src/")
+using MolSimToolkit 
 makedocs(
     modules = [MolSimToolkit],
     sitename = "MolSimToolkit.jl",
