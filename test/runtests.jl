@@ -1,6 +1,7 @@
-using MolSimToolkit
-using Test
+using TestItemRunner
+@run_package_tests
 
-@testset "MolSimToolkit.jl" begin
-    # Write your tests here.
+@testitem "Aqua.test_all" begin
+    import Aqua
+    Aqua.test_all(MolSimToolkit)
 end
