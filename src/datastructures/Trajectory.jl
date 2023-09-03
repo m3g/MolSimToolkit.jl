@@ -240,6 +240,9 @@ lastindex(trajectory::Trajectory) = last(frame_range(trajectory))
 import Base: keys
 keys(trajectory::Trajectory) = frame_range(trajectory)
 
+import Base:eachindex 
+eachindex(trajectory::Trajectory) = frame_range(trajectory)
+
 import Base: iterate
 function iterate(trajectory::Trajectory, iframe=nothing)
     if isnothing(iframe)
