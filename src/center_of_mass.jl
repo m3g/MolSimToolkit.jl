@@ -15,7 +15,7 @@ If a unitcell is provided, the positions are wrapped relative, by default, to th
 first atom in the selection. This can be changed by setting `iref` to the index
 of the atom to be used as the reference.
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using PDBTools

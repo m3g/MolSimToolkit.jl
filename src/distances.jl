@@ -4,7 +4,7 @@
 Function that calculates the distance between the center of masses of the selections in a trajectory,
 or the center of coordinates if masses are not provided.
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Testing

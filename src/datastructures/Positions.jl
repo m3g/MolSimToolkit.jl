@@ -27,7 +27,7 @@ and `positions[i].z`.
 
 # Example
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> trajectory = Trajectory(Testing.namd_traj);

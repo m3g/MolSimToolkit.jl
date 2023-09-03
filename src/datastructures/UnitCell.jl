@@ -9,7 +9,7 @@ from a `Chemfiles.Frame` is transparent to the user, without any further convers
 
 # Example
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> trajectory = Trajectory(Testing.namd_traj);

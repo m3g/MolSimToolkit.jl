@@ -41,7 +41,7 @@ first unit cell with all-positive coordinates. The unit cell may be given as a
 
 ## Example
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using MolSimToolkit, StaticArrays
 
 julia> unitcell = UnitCell(@SMatrix[10 0 0; 0 10 0; 0 0 10])
