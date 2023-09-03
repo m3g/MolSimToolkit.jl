@@ -14,7 +14,7 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 [compat]
 Aqua = "0.7"
 Chemfiles = "0.10.31"
-PDBTools = "0.13.11"
+PDBTools = "0.13.11, 0.14"
 StaticArrays = "1.6"
 TestItemRunner = "0.2.1"
 TestItems = "0.1.1"
