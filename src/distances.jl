@@ -9,7 +9,7 @@ julia> using PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> traj = Trajectory(Testing.namd_traj);
+julia> trajectory = Trajectory(Testing.namd_traj);
 
 julia> atoms = readPDB(Testing.namd_pdb);
 
