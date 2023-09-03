@@ -1,8 +1,8 @@
 export Trajectory
 export frame_range
-export index_frame
+export frame_index
 export length
-export nframes
+export raw_length
 export close
 export restart!
 export currentframe
@@ -21,10 +21,10 @@ that contains the following data, that can be retrived by the corresponding
 functions:
 
 - `frame_range(::Trajectory)`: the range of frames to be iterated over
-- `index_frame(::Trajectory)`: the index of the current frame in the trajectory
+- `frame_index(::Trajectory)`: the index of the current frame in the trajectory
 - `frame(::Trajectory)`: the current frame in the trajectory
-- `length(::Trajectory)`: the number of frames in the trajectory file
-- `nframes(::Trajectory)`: the number of frames to be iterated over in the trajectory file, considering the current range
+- `length(::Trajectory)`: the number of frames to be iterated over in the trajectory file, considering the current range
+- `raw_length(::Trajectory)`: the number of frames in the trajectory file
 
 The Trajectory object can also be manipulated by the following functions:
 
@@ -34,7 +34,10 @@ The Trajectory object can also be manipulated by the following functions:
 - `nextframe!(::Trajectory)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
 - `set_frame_range!(::Trajectory; first, last, step)`: resets the range of frames to be iterated over. 
 
-One important feature of the `Trajectory` object is that i can be iterated over, frame by frame.
+One important feature of the `Trajectory` object is that i can be iterated over, frame by frame. The
+`pairs` iterator can also be used to iterate over the frames, returning a tuple with the frame index
+and the frame itself. The `enumerate` iterator can also be used to iterate over the frames, returning
+a tuple with the frame counter and the frame itself.
 
 # Examples
 
@@ -44,18 +47,33 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 julia> trajectory = Trajectory(Testing.namd_traj, first = 2, step = 2, last = 4);
 
 julia> for frame in trajectory 
-           @show index_frame(trajectory)
+           @show frame_index(trajectory)
            # show x coordinate of first atom 
            @show Positions(frame)[1].x
        end
+frame_index(trajectory) = 2
+((Positions(frame))[1]).x = 5.912472724914551
+frame_index(trajectory) = 4
+((Positions(frame))[1]).x = 7.346549034118652
 
+julia> for (i, frame) in pairs(trajectory)
+           @show i, frame_index(trajectory)
+       end
+(i, frame_index(trajectory)) = (2, 2)
+(i, frame_index(trajectory)) = (4, 4)  
+
+julia> for (i, frame) in enumerate(trajectory)
+           @show i, frame_index(trajectory)
+       end
+(i, frame_index(trajectory)) = (1, 2)
+(i, frame_index(trajectory)) = (2, 4)
 
 ```
 """
 mutable struct Trajectory{R<:AbstractRange, F<:Chemfiles.Frame, T<:Chemfiles.Trajectory}
     frame_range::R
     frame::F
-    index_frame::Int
+    frame_index::Int
     trajectory::T
 end
 
@@ -66,8 +84,8 @@ function show(io::IO, trajectory::Trajectory)
         Trajectory file: $(path(trajectory))
         Total number of frames: $(length(trajectory))
         Frame range: $(frame_range(trajectory))
-        Number of frames in range: $(nframes(trajectory))
-        Current frame: $(index_frame(trajectory))
+        Number of frames in range: $(length(trajectory))
+        Current frame: $(frame_index(trajectory))
     """))
 end
 
@@ -89,8 +107,8 @@ function Trajectory(
     for _ in 2:first(frame_range)
         Chemfiles.read!(trajectory, frame)
     end
-    index_frame = first(frame_range)
-    return Trajectory(frame_range, frame, index_frame, trajectory)
+    frame_index = first(frame_range)
+    return Trajectory(frame_range, frame, frame_index, trajectory)
 end
 
 #= 
@@ -119,12 +137,12 @@ Returns the range of frames to be iterated over.
 frame_range(trajectory::Trajectory) = trajectory.frame_range
 
 """
-    index_frame(trajectory::Trajectory)
+    frame_index(trajectory::Trajectory)
 
 Returns the index of the current frame in the trajectory.
 
 """
-index_frame(trajectory::Trajectory) = trajectory.index_frame
+frame_index(trajectory::Trajectory) = trajectory.frame_index
 
 """
     frame(trajectory::Trajectory)
@@ -143,21 +161,21 @@ Closes the trajectory file.
 Base.close(trajectory::Trajectory) = Chemfiles.close(trajectory.trajectory)
 
 """
-    length(trajectory::Trajectory)
+    raw_length(trajectory::Trajectory)
 
 Returns the number of frames in the trajectory file.
 
 """
-Base.length(trajectory::Trajectory) = Int(Chemfiles.length(trajectory.trajectory))
+raw_length(trajectory::Trajectory) = Int(Chemfiles.length(trajectory.trajectory))
 
 """
-    nframes(trajectory::Trajectory)
+    length(trajectory::Trajectory)
 
 Returns the number of frames to be iterated over in the trajectory file,
 considering the current frame range.
 
 """
-nframes(trajectory::Trajectory) = length(trajectory.frame_range)
+length(trajectory::Trajectory) = length(trajectory.frame_range)
 
 """
     path(trajectory::Trajectory)
@@ -177,7 +195,7 @@ function restart!(trajectory::Trajectory)
     trajectory_file = path(trajectory)
     close(trajectory)
     trajectory.trajectory = Chemfiles.Trajectory(trajectory_file)
-    trajectory.index_frame = first(frame_range(trajectory))
+    trajectory.frame_index = first(frame_range(trajectory))
     trajectory.frame = Chemfiles.read(trajectory.trajectory)
     return trajectory
 end
@@ -198,11 +216,11 @@ frame to the next one in the range to be considered (given by `frame_range(traje
 
 """
 function nextframe!(trajectory::Trajectory) 
-    if index_frame(trajectory) == last(frame_range(trajectory))
+    if frame_index(trajectory) == last(frame_range(trajectory))
         error("End of trajectory.")
     end
     Chemfiles.read!(trajectory.trajectory, trajectory.frame)
-    iframe = index_frame(trajectory) + 1
+    iframe = frame_index(trajectory) + 1
     while iframe ∉ frame_range(trajectory) && iframe < last(frame_range(trajectory)) 
         Chemfiles.read!(trajectory.trajectory, trajectory.frame)
         iframe += 1
@@ -211,18 +229,25 @@ function nextframe!(trajectory::Trajectory)
     if iframe ∉ frame_range(trajectory)
         error("End of trajectory.")
     end
-    trajectory.index_frame = iframe
+    trajectory.frame_index = iframe
     return currentframe(trajectory)
 end
+
+import Base: firstindex, lastindex
+firstindex(trajectory::Trajectory) = first(frame_range(trajectory))
+lastindex(trajectory::Trajectory) = last(frame_range(trajectory))
+
+import Base: keys
+keys(trajectory::Trajectory) = frame_range(trajectory)
 
 import Base: iterate
 function iterate(trajectory::Trajectory, iframe=nothing)
     if isnothing(iframe)
         restart!(trajectory)
-        return (currentframe(trajectory), index_frame(trajectory))
+        return (currentframe(trajectory), frame_index(trajectory))
     elseif iframe < last(frame_range(trajectory))
         nextframe!(trajectory)
-        return (currentframe(trajectory), index_frame(trajectory))
+        return (currentframe(trajectory), frame_index(trajectory))
     else
         return nothing
     end
@@ -242,7 +267,7 @@ function set_frame_range!(trajectory::Trajectory; first=1, last=nothing, step=1)
         frame_range = first:step:last
     end
     trajectory.frame_range = frame_range
-    trajectory.index_frame = first(frame_range)
+    trajectory.frame_index = first(frame_range)
     restart!(trajectory)
 end
 
