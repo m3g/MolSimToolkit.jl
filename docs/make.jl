@@ -7,6 +7,7 @@ using MolSimToolkit
 makedocs(
     modules = [MolSimToolkit],
     sitename = "MolSimToolkit.jl",
+    doctest = false, 
     pages = [
         "Home" => "index.md",
         "Functions" => "functions.md",
