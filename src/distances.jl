@@ -1,8 +1,10 @@
 """
     distances(trajectory, indexes1, indexes2; masses=nothing)
 
-Function that calculates the distance between the center of masses of the selections in a trajectory,
+Function that calculates the distance between the centers of mass of the selections in a trajectory,
 or the center of coordinates if masses are not provided.
+
+The selections are defined by the indexes1 and indexes2 vectors, which are the indexes of the atoms.
 
 ```julia-repl # to be doctest
 julia> using PDBTools
