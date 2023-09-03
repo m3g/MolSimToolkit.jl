@@ -36,10 +36,8 @@ function distances(
     indexes2::AbstractVector{Int};
     masses = nothing,
 )
-    distances = zeros(nframes(trajectory))
-    iframe = 0
-    for frame in trajectory
-        iframe += 1
+    distances = zeros(length(trajectory))
+    for (iframe, frame) in enumerate(trajectory)
         unitcell = UnitCell(frame)
         coordinates = Positions(frame)
         cm1 = center_of_mass(coordinates, indexes1; masses = masses, unitcell = unitcell)
