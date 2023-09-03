@@ -175,7 +175,7 @@ Returns the number of frames to be iterated over in the trajectory file,
 considering the current frame range.
 
 """
-length(trajectory::Trajectory) = length(trajectory.frame_range)
+Base.length(trajectory::Trajectory) = length(trajectory.frame_range)
 
 """
     path(trajectory::Trajectory)
