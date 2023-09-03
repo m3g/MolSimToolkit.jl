@@ -1,7 +1,7 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
-version = "0.1.1-DEV"
+version = "0.2.1-DEV"
 
 [deps]
 Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
