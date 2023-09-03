@@ -41,7 +41,7 @@ a tuple with the frame counter and the frame itself.
 
 # Examples
 
-```jldoctest
+```julia-repl # to be doctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> trajectory = Trajectory(Testing.namd_traj, first = 2, step = 2, last = 4);
