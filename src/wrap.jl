@@ -1,15 +1,12 @@
 """
-    wrap(x::Point3D, xref::Point3D, unitcell::UnitCell) 
     wrap(x, xref, unit_cell_matrix::SMatrix{N,N,T}) where {N,T}
     wrap(x, xref, sides::AbstractVector)
 
 Wraps the coordinates of point `x` such that it is the minimum image relative to `xref`. The unit cell 
-may be given as a `UnitCell` structure, a static matrix of size `(N,N)` or as a vector of length `N`.
+may be given a a static matrix of size `(N,N)` or as a vector of length `N`.
 
 """
 function wrap end
-
-@inline wrap(x::Point3D, x_ref::Point3D, u::UnitCell) = wrap(x, x_ref, u.matrix)
 
 @inline function wrap(x::AbstractVector, xref::AbstractVector, unit_cell_matrix::SMatrix{N,N,T}) where {N,T}
     invu = inv(oneunit(T))
@@ -32,25 +29,24 @@ end
 end
 
 """
-    wrap_to_first(x::Point3D, unitcell::UnitCell)
     wrap_to_first(x, unit_cell_matrix)
 
 Wraps the coordinates of point `x` such that the returning coordinates are in the
-first unit cell with all-positive coordinates. The unit cell may be given as a
-`UnitCell` structure or as a static matrix of size `(N,N)`.
+first unit cell with all-positive coordinates. The unit cell 
+has to be a matrix of size `(N,N)`.
 
 ## Example
 
 ```julia-repl # to be doctest
-julia> using MolSimToolkit, StaticArrays
+julia> using MolSimToolkit
 
-julia> unitcell = UnitCell(@SMatrix[10 0 0; 0 10 0; 0 0 10])
+julia> uc = [10 0 0; 0 10 0; 0 0 10]
 UnitCell{Int64}
   10.000   0.000   0.000
    0.000  10.000   0.000
    0.000   0.000  10.000
 
-julia> wrap_to_first(Point3D(15, 13, 2), unitcell)
+julia> wrap_to_first(Point3D(15.0, 13.0, 2.0), uc)
 3-element SVector{3, Float64} with indices SOneTo(3):
  5.0
  3.0000000000000004
@@ -60,12 +56,10 @@ julia> wrap_to_first(Point3D(15, 13, 2), unitcell)
 """
 function wrap_to_first end
 
-@inline function wrap_to_first(x, unit_cell_matrix)
+@inline function wrap_to_first(x::AbstractVector{T}, unit_cell_matrix) where {T<:AbstractFloat}
     p = wrap_cell_fraction(x, unit_cell_matrix)
-    return unit_cell_matrix * p
+    return typeof(x)(unit_cell_matrix * p)
 end
-
-@inline wrap_to_first(x::Point3D, u::UnitCell) = wrap_to_first(x, u.matrix)
 
 #=
     fastmod1(x)

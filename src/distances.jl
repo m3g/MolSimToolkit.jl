@@ -1,27 +1,24 @@
 """
-    distances(trajectory, indexes1, indexes2; masses=nothing)
+    distances(simulation, indexes1, indexes2)
 
-Function that calculates the distance between the centers of mass of the selections in a trajectory,
-or the center of coordinates if masses are not provided.
+Function that calculates the distance between the centers of mass of two selections in a simulation.
 
 The selections are defined by the indexes1 and indexes2 vectors, which are the indexes of the atoms.
 
+# Example
+
 ```julia-repl # to be doctest
-julia> using PDBTools
+julia> import PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> trajectory = Trajectory(Testing.namd_traj);
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> atoms = readPDB(Testing.namd_pdb);
+julia> i1 = PDBTools.selindex(atoms(simulation), "protein and residue 1");
 
-julia> masses = mass.(atoms);
+julia> i2 = PDBTools.selindex(atoms(simulation), "protein and residue 15");
 
-julia> i1 = selindex(atoms, "protein and residue 1");
-
-julia> i2 = selindex(atoms, "protein and residue 15");
-
-julia> distances(trajectory, i1, i2; masses = masses)
+julia> distances(simulation, i1, i2)
 5-element Vector{Float64}:
  23.433267858947584
  30.13791365033211
@@ -33,18 +30,16 @@ julia> distances(trajectory, i1, i2; masses = masses)
 
 """
 function distances(
-    trajectory::Trajectory, 
+    simulation::Simulation, 
     indexes1::AbstractVector{Int}, 
     indexes2::AbstractVector{Int};
-    masses = nothing,
 )
-    distances = zeros(length(trajectory))
-    for (iframe, frame) in enumerate(trajectory)
-        unitcell = UnitCell(frame)
-        coordinates = Positions(frame)
-        cm1 = center_of_mass(coordinates, indexes1; masses = masses, unitcell = unitcell)
-        cm2 = center_of_mass(coordinates, indexes2; masses = masses, unitcell = unitcell)
-        cm2_wrapped = wrap(cm2,cm1,unitcell)
+    distances = zeros(length(simulation))
+    for (iframe, frame) in enumerate(simulation)
+        coor = positions(frame)
+        cm1 = center_of_mass(indexes1, simulation, coor)
+        cm2 = center_of_mass(indexes2, simulation, coor)
+        cm2_wrapped = wrap(cm2, cm1, unitcell(frame))
         d = norm(cm2_wrapped - cm1)
         distances[iframe] = d
     end
@@ -52,14 +47,13 @@ function distances(
 end
 
 @testitem "distances" begin
-    using PDBTools
+    import PDBTools
     using MolSimToolkit.Testing
-    trajectory = Trajectory(Testing.namd_traj)
-    atoms = readPDB(Testing.namd_pdb)
-    masses = mass.(atoms)
-    i1 = selindex(atoms, "protein and residue 1")
-    i2 = selindex(atoms, "protein and residue 15")
-    @test distances(trajectory, i1, i2; masses = masses) ≈ 
+    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    atoms = PDBTools.readPDB(Testing.namd_pdb)
+    i1 = PDBTools.selindex(atoms, "protein and residue 1")
+    i2 = PDBTools.selindex(atoms, "protein and residue 15")
+    @test distances(simulation, i1, i2) ≈ 
         [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
 
 end

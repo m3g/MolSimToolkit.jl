@@ -1,10 +1,10 @@
 # Developer zone
 
-## Trajectory
+## Simulation
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "datastructures/Trajectory.jl" ]
+Pages = [ "datastructures/Simulation.jl" ]
 ```
 
 ## Positions

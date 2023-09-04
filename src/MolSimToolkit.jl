@@ -17,9 +17,8 @@ const INTERNAL = "Internal function or structure - interface may change."
 include("./Testing.jl")
 
 # Data structures
-include("./datastructures/Trajectory.jl")
+include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
-include("./datastructures/UnitCell.jl")
 
 # Basic functions
 include("./wrap.jl")

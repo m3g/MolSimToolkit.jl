@@ -2,63 +2,54 @@ export center_of_mass
 
 """
     center_of_mass(
-        positions::Positions, indexes::AbstractVector{Int}; 
-        masses::Union{Nothing,AbstractVector{<:Real}} = nothing, 
-        unitcell::Union{Nothing,UnitCell} = nothing,
-        iref::Int = indexes[1],
+        indexes::AbstractVector{Int};
+        simulation::Simulation,
+        positions::Positions,
+        iref::Int = max(1, div(length(indexes),2)),
     )
 
-Calculate the center of coordinates of a selection of atoms, or optionally
-the center of mass if masses are provided. 
+Calculate the center of mass of a selection of atoms in a simulation given the
+positions. The selection is defined by the `indexes` vector, which is the indexes of the atoms.
 
-If a unitcell is provided, the positions are wrapped relative, by default, to the
-first atom in the selection. This can be changed by setting `iref` to the index
-of the atom to be used as the reference.
+The `iref` parameter is the index of the reference atom. The center of mass is calculated
+by first computing the minimum-image of all atoms relative to this atom. By default,
+it is the atom closest to the middle of the indexes vector.
 
 ```julia-repl # to be doctest
+julia> import PDBTools 
+
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> using PDBTools
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> atoms = readPDB(Testing.namd_pdb);
+julia> protein_indexes = PDBTools.selindex(atoms(simulation), "protein");
 
-julia> protein_indexes = selindex(atoms, "protein");
+julia> coor = positions(current_frame(simulation));
 
-julia> protein_masses = mass.(atoms);
-
-julia> trajectory = Trajectory(Testing.namd_traj);
-
-julia> positions = Positions(currentframe(trajectory));
-
-julia> unitcell = UnitCell(currentframe(trajectory));
-
-julia> cm = center_of_mass(positions, protein_indexes, masses=protein_masses, unitcell=unitcell)
+julia> cm = center_of_mass(protein_indexes, simulation, coor)
 3-element Point3D{Float64} with indices SOneTo(3):
  -3.7290442807974906
- -1.0539450244972206
- 24.513632812542127
+ -1.5339226637687564
+  1.960640754560446
 
 ```
 
 """
 function center_of_mass(
-    positions::Positions, indexes::AbstractVector{Int}; 
-    masses::Union{Nothing,AbstractVector{<:Real}} = nothing, 
-    unitcell::Union{Nothing,UnitCell} = nothing,
-    iref::Int = indexes[1],
+    indexes::AbstractVector{Int},
+    simulation::Simulation,
+    p::Positions;    
+    iref::Int = max(1, div(length(indexes),2)),
 )
+    xref = p[iref]
+    uc = unitcell(current_frame(simulation))
     totmass = 0.0
     cm = MVector{3}(0.0, 0.0, 0.0)
-    xref = positions[iref]
     for i in indexes
-        m = isnothing(masses) ? 1.0 : masses[i]
-        totmass += m
-        if !isnothing(unitcell) 
-            x = wrap(positions[i], xref, unitcell)
-        else 
-            x = positions[i]
-        end
+        m = PDBTools.mass(atoms(simulation)[i])
+        x = wrap(p[i], xref, uc)
         cm += x * m
+        totmass += m
     end
     return Point3D(cm /= totmass)
 end
@@ -66,6 +57,5 @@ end
 @testitem "centerofmass" begin
     using MolSimToolkit.Testing
     using PDBTools
-
 
 end
