@@ -5,6 +5,7 @@
 ```@autodocs
 Modules = [ MolSimToolkit ]
 Pages = [ "datastructures/Simulation.jl" ]
+Filter = (f) -> !(nameof(f) === :unitcell)
 ```
 
 ## Positions
@@ -18,7 +19,8 @@ Pages = [ "datastructures/Positions.jl" ]
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "datastructures/UnitCell.jl" ]
+Pages = [ "datastructures/Simulation.jl" ]
+Filter = (f) -> (nameof(f) === :unitcell)
 ```
 
 ## Wrap coordinates
