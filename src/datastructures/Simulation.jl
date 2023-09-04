@@ -284,7 +284,9 @@ function nextframe!(simulation::Simulation)
 end
 
 """
-    unitcell(simulation::Simulation)
+    unitcell(frame::Chemfiles.Frame)
+
+Returns the unit cell of the current frame in the trajectory.
 
 """
 unitcell(f::Chemfiles.Frame) = unitcell(Chemfiles.UnitCell(f))
@@ -327,7 +329,7 @@ end
     set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
 
 Resets the frame range to be iterated over. This function will restart the
-iteration from the first frame of the new range.
+iteration of the simulation trajectory.
 
 """
 function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
