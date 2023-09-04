@@ -76,13 +76,20 @@ julia> for (i, frame) in enumerate(simulation)
 
 ```
 """
-mutable struct Simulation{V<:Vector{PDBTools.Atom}, R<:AbstractRange, F<:Chemfiles.Frame, T<:Chemfiles.Trajectory}
+mutable struct Simulation{
+    V<:Vector{PDBTools.Atom}, 
+    R<:AbstractRange, 
+    F<:Chemfiles.Frame, 
+    T<:Chemfiles.Trajectory,
+    L<:ReentrantLock
+}
     pdb_file::String
     atoms::V 
     frame_range::R
     frame::F
-    frame_index::Int
+    frame_index::Union{Nothing,Int}
     trajectory::T
+    read_lock::L
 end
 
 import Base: show
@@ -97,6 +104,9 @@ function show(io::IO, simulation::Simulation)
         Current frame: $(frame_index(simulation))
     """))
 end
+
+import Base: lock
+lock(f::F, simulation::Simulation) where {F<:Function} = lock(f, simulation.read_lock)
 
 #=
     Simulation(
@@ -119,11 +129,11 @@ function Simulation(
     frame_range::AbstractRange
 )
     frame = Chemfiles.read(trajectory)
-    for _ in 2:first(frame_range)
-        Chemfiles.read!(trajectory, frame)
-    end
-    frame_index = first(frame_range)
-    return Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory)
+    read_lock = ReentrantLock()
+    frame_index = nothing
+    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
+    restart!(simulation)
+    return simulation
 end
 
 #= 
@@ -155,7 +165,8 @@ frame_range(simulation::Simulation) = simulation.frame_range
 """
     frame_index(simulation::Simulation)
 
-Returns the index of the current frame in the trajectory.
+Returns the index of the current frame in the trajectory. Returns `nothing` 
+if no frame frame from the trajectory range has been read yet.
 
 """
 frame_index(simulation::Simulation) = simulation.frame_index
@@ -224,11 +235,12 @@ Restarts the iteration over the trajectory file.
 
 """
 function restart!(simulation::Simulation)
-    trajectory_file = path_trajectory(simulation)
-    close(simulation)
-    simulation.trajectory = Chemfiles.Trajectory(trajectory_file)
-    simulation.frame_index = first(frame_range(simulation))
-    simulation.frame = Chemfiles.read(simulation.trajectory)
+    lock(simulation) do 
+        trajectory_file = path_trajectory(simulation)
+        close(simulation)
+        simulation.trajectory = Chemfiles.Trajectory(trajectory_file)
+        simulation.frame_index = nothing
+    end # release lock
     return simulation
 end
 
@@ -248,20 +260,26 @@ frame to the next one in the range to be considered (given by `frame_range(simul
 
 """
 function nextframe!(simulation::Simulation) 
-    if frame_index(simulation) == last(frame_range(simulation))
-        error("End of trajectory.")
-    end
-    Chemfiles.read!(simulation.trajectory, simulation.frame)
-    iframe = frame_index(simulation) + 1
-    while iframe ∉ frame_range(simulation) && iframe < last(frame_range(simulation)) 
-        Chemfiles.read!(simulation.trajectory, current_frame(simulation))
-        iframe += 1
-    end
-    # If the last frame was reached, check if it is in the frame range
-    if iframe ∉ frame_range(simulation)
-        error("End of trajectory.")
-    end
-    simulation.frame_index = iframe
+    lock(simulation) do 
+        if frame_index(simulation) == last(frame_range(simulation))
+            error("End of trajectory.")
+        end
+        Chemfiles.read!(simulation.trajectory, simulation.frame)
+        if isnothing(frame_index(simulation))
+            iframe = first(frame_range(simulation))
+        else
+            iframe = frame_index(simulation) + 1
+        end
+        while iframe ∉ frame_range(simulation) && iframe < last(frame_range(simulation)) 
+            Chemfiles.read!(simulation.trajectory, current_frame(simulation))
+            iframe += 1
+        end
+        # If the last frame was reached, check if it is in the frame range
+        if iframe ∉ frame_range(simulation)
+            error("End of trajectory.")
+        end
+        simulation.frame_index = iframe
+    end # release lock
     return current_frame(simulation)
 end
 
@@ -295,15 +313,14 @@ eachindex(simulation::Simulation) = frame_range(simulation)
 
 import Base: iterate
 function iterate(simulation::Simulation, iframe=nothing)
-    if isnothing(iframe)
-        restart!(simulation)
-        return (current_frame(simulation), frame_index(simulation))
-    elseif iframe < last(frame_range(simulation))
-        nextframe!(simulation)
-        return (current_frame(simulation), frame_index(simulation))
-    else
+    if iframe == last(frame_range(simulation))
         return nothing
     end
+    if isnothing(iframe)
+        restart!(simulation)
+    end
+    nextframe!(simulation)
+    return (current_frame(simulation), frame_index(simulation))
 end
 
 """
