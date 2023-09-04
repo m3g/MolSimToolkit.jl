@@ -30,7 +30,6 @@ functions:
 - `length(::Simulation)`: the number of frames to be iterated over in the trajectory file, considering the current range
 - `raw_length(::Simulation)`: the number of frames in the trajectory file
 - `atoms(::Simulation)`: the atoms in the simulation
-- `unitcell(::Simulation)`: the unit cell of the current frame
 
 The Simulation object can also be manipulated by the following functions:
 
@@ -40,9 +39,12 @@ The Simulation object can also be manipulated by the following functions:
 - `nextframe!(::Simulation)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
 - `set_frame_range!(::Simulation; first, last, step)`: resets the range of frames to be iterated over. 
 
-One important feature of the `Simulation` object is that i can be iterated over, frame by frame. The
-`pairs` iterator can also be used to iterate over the frames, returning a tuple with the frame index
-and the frame itself. The `enumerate` iterator can also be used to iterate over the frames, returning
+One important feature of the `Simulation` object is that it can be iterated over, frame by frame. 
+
+The `pairs` iterator can also be used to iterate over the frames, returning a tuple with the frame index
+and the frame itself. 
+
+The `enumerate` iterator can also be used to iterate over the frames, returning
 a tuple with the frame counter and the frame itself.
 
 # Examples
