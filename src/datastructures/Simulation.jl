@@ -56,12 +56,12 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj, first = 2, s
 julia> for frame in simulation 
            @show frame_index(simulation)
            # show x coordinate of first atom 
-           @show Positions(frame)[1].x
+           @show positions(frame)[1].x
        end
 frame_index(simulation) = 2
-((Positions(frame))[1]).x = 5.912472724914551
+((positions(frame))[1]).x = 5.912472724914551
 frame_index(simulation) = 4
-((Positions(frame))[1]).x = 7.346549034118652
+((positions(frame))[1]).x = 7.346549034118652
 
 julia> for (i, frame) in pairs(simulation)
            @show i, frame_index(simulation)
@@ -339,7 +339,6 @@ end
     import Chemfiles
     using MolSimToolkit.Testing
 
-
     #
     # Test iterator by reading coordinates
     #
@@ -359,7 +358,7 @@ end
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     c2 = Float64[]
     for frame in simulation
-        push!(c2, Positions(frame)[1].x)
+        push!(c2, positions(frame)[1].x)
     end
     close(simulation)
 

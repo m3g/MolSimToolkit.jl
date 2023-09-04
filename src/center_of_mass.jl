@@ -4,7 +4,7 @@ export center_of_mass
     center_of_mass(
         indexes::AbstractVector{Int};
         simulation::Simulation,
-        positions::Positions,
+        positions::FramePositions,
         iref::Int = max(1, div(length(indexes),2)),
     )
 
@@ -38,7 +38,7 @@ julia> cm = center_of_mass(protein_indexes, simulation, coor)
 function center_of_mass(
     indexes::AbstractVector{Int},
     simulation::Simulation,
-    p::Positions;    
+    p::FramePositions;    
     iref::Int = max(1, div(length(indexes),2)),
 )
     xref = p[iref]

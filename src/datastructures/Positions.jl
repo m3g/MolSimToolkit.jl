@@ -1,5 +1,5 @@
 export Point3D
-export Positions
+export FramePositions
 export positions
 
 """
@@ -16,7 +16,7 @@ end
 Point3D(x::Vector{T}) where {T} = Point3D{T}(x[1], x[2], x[3])
 
 """
-    Positions{T<:AbstractArray}
+    FramePositions{T<:AbstractArray}
 
 Container for the positions of a set of atoms. The positions are stored in a matrix,
 where each column corresponds to the coordinates of an atom. The container is used
@@ -26,7 +26,8 @@ atom.
 
 The coordinates of the atom can be accessed as `p[i].x`, `p[i].y`, and `p[i].z`.
 
-A `Positions` object can be created with the `positions` function.
+A `FramePositions` object can be created with the `positions` function. The
+construction with `FramePositions` is not considered part of the public API.
 
 # Example
 
@@ -37,7 +38,8 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> frame = current_frame(simulation);
 
-julia> p = positions(frame);
+julia> p = positions(frame)
+FramePositions{Float64} with 20465 atoms
 
 julia> p[1]
 3-element Point3D{Float64} with indices SOneTo(3):
@@ -57,21 +59,49 @@ julia> p[1].z
 ```
 
 """
-struct Positions{T<:AbstractArray}
+struct FramePositions{T<:AbstractArray}
     positions::T
 end
-positions(f::Chemfiles.Frame) = Positions(Chemfiles.positions(f))
-Positions(f::Chemfiles.Frame) = Positions(Chemfiles.positions(f))
-Base.getindex(x::Positions, i::Int) = Point3D(@view(x.positions[:,i]))
+FramePositions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
+Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:,i]))
+
+"""
+    positions(frame::Chemfiles.Frame)
+
+Return the positions of the atoms in a `Chemfiles.Frame` as a `FramePositions` object.
+
+This is the default way to access the positions of the atoms in a simulation.
+
+# Example
+
+```julia-repl # to be doctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> frame = current_frame(simulation);
+
+julia> p = positions(frame);
+
+julia> p[1].x 
+5.912472724914551
+
+```
+
+"""
+positions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
 
 import Base: show
-function show(io::IO, positions::Positions)
-    print(io, "Positions{", eltype(positions.positions), "} with ", size(positions.positions,2), " atoms")
+function show(io::IO, positions::FramePositions)
+    print(io, "FramePositions{", eltype(positions.positions), "} with ", size(positions.positions,2), " atoms")
 end
 
-@testitem "Positions" begin
+import Base: copy
+copy(positions::FramePositions) = FramePositions(copy(positions.positions))
+
+@testitem "FramePositions" begin
     m = rand(3,10)
-    p = Positions(m)
+    p = FramePositions(m)
     @test p[1] == Point3D(m[1,1], m[2,1], m[3,1])
     @test p[1].x == m[1,1]
     @test p[1].y == m[2,1]
