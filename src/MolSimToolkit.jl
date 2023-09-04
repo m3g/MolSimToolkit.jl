@@ -10,9 +10,6 @@ import LinearAlgebra: norm
 export wrap, wrap_to_first
 export distances
 
-# Flag for internal function doc entries
-const INTERNAL = "Internal function or structure - interface may change."
-
 # Testing module
 include("./Testing.jl")
 
