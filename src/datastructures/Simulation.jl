@@ -337,7 +337,6 @@ function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
         frame_range = first:step:last
     end
     simulation.frame_range = frame_range
-    simulation.frame_index = first(frame_range)
     restart!(simulation)
 end
 
