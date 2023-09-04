@@ -26,7 +26,6 @@ functions:
 
 - `frame_range(::Simulation)`: the range of frames to be iterated over
 - `frame_index(::Simulation)`: the index of the current frame in the trajectory
-- `frame(::Simulation)`: the current frame in the trajectory
 - `length(::Simulation)`: the number of frames to be iterated over in the trajectory file, considering the current range
 - `raw_length(::Simulation)`: the number of frames in the trajectory file
 - `atoms(::Simulation)`: the atoms in the simulation
@@ -172,14 +171,6 @@ if no frame frame from the trajectory range has been read yet.
 
 """
 frame_index(simulation::Simulation) = simulation.frame_index
-
-"""
-    frame(simulation::Simulation)
-
-Returns the current frame in the trajectory.
-
-"""
-frame(simulation::Simulation) = simulation.frame
 
 """
     close(simulation::Simulation)
