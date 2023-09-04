@@ -51,7 +51,10 @@ a tuple with the frame counter and the frame itself.
 ```julia-repl # to be doctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj, first = 2, step = 2, last = 4);
+julia> simulation = Simulation(
+           Testing.namd_pdb, Testing.namd_traj; 
+           first = 2, step = 2, last = 4
+       );
 
 julia> for frame in simulation 
            @show frame_index(simulation)
