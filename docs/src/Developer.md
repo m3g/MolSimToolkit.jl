@@ -13,6 +13,7 @@ Filter = (f) -> !(nameof(f) === :unitcell)
 ```@autodocs
 Modules = [ MolSimToolkit ]
 Pages = [ "datastructures/Positions.jl" ]
+Order = [ :function, :type ]
 ```
 
 ## Unit cell
