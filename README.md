@@ -4,3 +4,13 @@
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 # MolSimToolkit
+
+This package provides functions to analyze molecular dynamics simulations, and a framework for the development of custom
+analysis tools.
+
+It is currently on very early development stage.
+
+
+
+
+
