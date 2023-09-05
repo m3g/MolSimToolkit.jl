@@ -46,7 +46,7 @@ function center_of_mass(
     totmass = 0.0
     cm = MVector{3}(0.0, 0.0, 0.0)
     for i in indexes
-        m = PDBTools.mass(atoms(simulation)[i])
+        m = atomic_mass(atoms(simulation)[i])
         x = wrap(p[i], xref, uc)
         cm += x * m
         totmass += m
