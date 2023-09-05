@@ -15,9 +15,18 @@ export path_trajectory
 
 """
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1) 
 
-Creates a new `Simulation` object from a file. If `first`, `last`, and `step` are not specified, the
-`Simulation` will iterate over all frames in the file. 
+Creates a new `Simulation` object. 
+
+The first constructor creates a `Simulation` object from a PDB file and a trajectory file. It will use the
+`PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
+
+With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
+are provided by a different source than the PDB file. If the `AtomType` of the `atoms` vector conforms
+the `AtomsBase` interface, most functions in the `MolSimToolkit` will work with the `Simulation` object.
+
+If `first`, `last`, and `step` are not specified, the `Simulation` will iterate over all frames in the file. 
 
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
@@ -81,7 +90,8 @@ julia> for (i, frame) in enumerate(simulation)
 ```
 """
 mutable struct Simulation{
-    V<:Vector{PDBTools.Atom}, 
+    AtomType,
+    V<:Vector{<:AtomType}, 
     R<:AbstractRange, 
     F<:Chemfiles.Frame, 
     T<:Chemfiles.Trajectory,
@@ -99,7 +109,8 @@ end
 import Base: show
 function show(io::IO, simulation::Simulation)
     print(io, chomp("""
-    Simulation
+    Simulation 
+        Atom type: $(eltype(simulation.atoms))
         PDB file: $(path_pdb(simulation))
         Simulation file: $(path_trajectory(simulation))
         Total number of frames: $(length(simulation))
