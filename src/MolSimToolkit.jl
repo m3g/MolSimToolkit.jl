@@ -1,6 +1,7 @@
 module MolSimToolkit
 
 using TestItems
+using AtomsBase
 using StaticArrays
 import Chemfiles
 using Printf
