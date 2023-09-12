@@ -65,6 +65,7 @@ end
 FramePositions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
 Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:,i]))
 Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:,r])
+Base.getindex(x::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(x.positions[:,ivec])
 
 """
     positions(frame::Chemfiles.Frame)
@@ -106,6 +107,7 @@ import Base: ==, ≈
 
 import Base: view
 view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(positions.positions[:,r]))
+view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(@view(positions.positions[:,ivec]))
 
 
 @testitem "FramePositions" begin
@@ -120,4 +122,8 @@ view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(pos
     @test p[2:3] == FramePositions(m[:,2:3])
     @test p[2:3] ≈ FramePositions(m[:,2:3])
     @test @view(p[2:3]) == FramePositions(m[:,2:3])
+    inds = [2, 3, 5]
+    @test p[inds] == FramePositions(m[:,inds])
+    @test @view(p[inds]) == FramePositions(m[:,inds])
+
 end
