@@ -64,6 +64,7 @@ struct FramePositions{T<:AbstractArray}
 end
 FramePositions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
 Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:,i]))
+Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(@view(x.positions[:,r]))
 
 """
     positions(frame::Chemfiles.Frame)
@@ -106,4 +107,7 @@ copy(positions::FramePositions) = FramePositions(copy(positions.positions))
     @test p[1].x == m[1,1]
     @test p[1].y == m[2,1]
     @test p[1].z == m[3,1]
+
+    # test with range
+    @test p[2:3] == FramePositions(m[:,2:3])
 end
