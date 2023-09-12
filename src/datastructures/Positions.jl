@@ -100,6 +100,11 @@ end
 import Base: copy
 copy(positions::FramePositions) = FramePositions(copy(positions.positions))
 
+import Base: ==, ≈ 
+==(x::FramePositions, y::FramePositions) = ==(x.positions, y.positions)
+≈(x::FramePositions, y::FramePositions; kargs...) = ≈(x.positions, y.positions; kargs...)
+
+
 @testitem "FramePositions" begin
     m = rand(3,10)
     p = FramePositions(m)
@@ -110,4 +115,5 @@ copy(positions::FramePositions) = FramePositions(copy(positions.positions))
 
     # test with range
     @test p[2:3] == FramePositions(m[:,2:3])
+    @test p[2:3] ≈ FramePositions(m[:,2:3])
 end
