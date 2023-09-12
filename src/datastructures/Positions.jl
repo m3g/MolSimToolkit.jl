@@ -104,6 +104,9 @@ import Base: ==, ≈
 ==(x::FramePositions, y::FramePositions) = ==(x.positions, y.positions)
 ≈(x::FramePositions, y::FramePositions; kargs...) = ≈(x.positions, y.positions; kargs...)
 
+import Base: view
+view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(positions.positions[:,r]))
+
 
 @testitem "FramePositions" begin
     m = rand(3,10)
