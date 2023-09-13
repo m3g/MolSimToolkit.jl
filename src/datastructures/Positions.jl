@@ -16,7 +16,7 @@ end
 Point3D(x::Vector{T}) where {T} = Point3D{T}(x[1], x[2], x[3])
 
 """
-    FramePositions{T<:AbstractArray}
+    FramePositions{T,P<:Point3D{T},M<:AbstractArray{T}} <: AbstractVector{P}
 
 Container for the positions of a set of atoms. The positions are stored in a matrix,
 where each column corresponds to the coordinates of an atom. The container is used
@@ -39,7 +39,11 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 julia> frame = current_frame(simulation);
 
 julia> p = positions(frame)
-FramePositions{Float64} with 20465 atoms
+20465-element FramePositions{Float64, Point3D{Float64}, Chemfiles.ChemfilesArray}:
+ [5.912472724914551, 10.768872261047363, 28.277008056640625]
+ [5.040304183959961, 10.810898780822754, 27.71207046508789]
+ ⋮
+ [11.16289234161377, -37.30374526977539, 22.80788230895996]
 
 julia> p[1]
 3-element Point3D{Float64} with indices SOneTo(3):
@@ -55,17 +59,36 @@ julia> p[1].y
 
 julia> p[1].z
 28.277008056640625
+```
 
+It is also possible to take slices and views of the positions:
+
+```
+julia> p[1:2]
+2-element FramePositions{Float64, Point3D{Float64}, Matrix{Float64}}:
+ [5.912472724914551, 10.768872261047363, 28.277008056640625]
+ [5.040304183959961, 10.810898780822754, 27.71207046508789]
+
+julia> @view(coor[1:2])
+ 2-element FramePositions{Float64, Point3D{Float64}, SubArray{Float64, 2, Chemfiles.ChemfilesArray, Tuple{Base.Slice{Base.OneTo{Int64}}, UnitRange{Int64}}, false}}:
+  [5.912472724914551, 10.768872261047363, 28.277008056640625]
+  [5.040304183959961, 10.810898780822754, 27.71207046508789]
+ 
 ```
 
 """
-struct FramePositions{T<:AbstractArray}
-    positions::T
+struct FramePositions{T,P<:Point3D{T},M<:AbstractArray{T}} <: AbstractVector{P}
+    positions::M
 end
-FramePositions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
+FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T, Point3D{T}, typeof(m)}(m)
+FramePositions(f::Chemfiles.Frame) = positions(Chemfiles.positions(f))
+FramePositions(x::FramePositions{T,P}) where {T,P} = FramePositions{T,P,typeof(x.positions)}(x.positions)
 Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:,i]))
 Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:,r])
 Base.getindex(x::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(x.positions[:,ivec])
+Base.length(x::FramePositions) = size(x.positions,2)
+Base.size(x::FramePositions) = (length(x),)
+
 
 """
     positions(frame::Chemfiles.Frame)
@@ -91,11 +114,9 @@ julia> p[1].x
 ```
 
 """
-positions(f::Chemfiles.Frame) = FramePositions(Chemfiles.positions(f))
-
-import Base: show
-function show(io::IO, positions::FramePositions)
-    print(io, "FramePositions{", eltype(positions.positions), "} with ", size(positions.positions,2), " atoms")
+function positions(f::Chemfiles.Frame) 
+    p = Chemfiles.positions(f)
+    return FramePositions{eltype(p), Point3D{eltype(p)}, typeof(p)}(p)
 end
 
 import Base: copy
