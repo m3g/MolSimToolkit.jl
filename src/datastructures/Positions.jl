@@ -132,6 +132,8 @@ view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePosition
 
 
 @testitem "FramePositions" begin
+    using BenchmarkTools
+
     m = rand(3,10)
     p = FramePositions(m)
     @test p[1] == Point3D(m[1,1], m[2,1], m[3,1])
@@ -146,6 +148,6 @@ view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePosition
     inds = [2, 3, 5]
     @test p[inds] == FramePositions(m[:,inds])
     @test @view(p[inds]) == FramePositions(m[:,inds])
-    @test @ballocated @view($p[$inds]) == 0
+    @test iszero(@ballocated @view($p[$inds]))
 
 end
