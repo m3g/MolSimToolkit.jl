@@ -112,7 +112,7 @@ function show(io::IO, simulation::Simulation)
     Simulation 
         Atom type: $(eltype(simulation.atoms))
         PDB file: $(path_pdb(simulation))
-        Simulation file: $(path_trajectory(simulation))
+        Trajectory file: $(path_trajectory(simulation))
         Total number of frames: $(length(simulation))
         Frame range: $(frame_range(simulation))
         Number of frames in range: $(length(simulation))
