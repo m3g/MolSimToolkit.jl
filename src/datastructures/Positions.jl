@@ -146,5 +146,6 @@ view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePosition
     inds = [2, 3, 5]
     @test p[inds] == FramePositions(m[:,inds])
     @test @view(p[inds]) == FramePositions(m[:,inds])
+    @test @ballocated @view($p[$inds]) == 0
 
 end
