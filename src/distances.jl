@@ -30,8 +30,8 @@ julia> distances(simulation, i1, i2)
 
 """
 function distances(
-    simulation::Simulation, 
-    indexes1::AbstractVector{Int}, 
+    simulation::Simulation,
+    indexes1::AbstractVector{Int},
     indexes2::AbstractVector{Int};
 )
     distances = zeros(length(simulation))
@@ -53,8 +53,8 @@ end
     atoms = PDBTools.readPDB(Testing.namd_pdb)
     i1 = PDBTools.selindex(atoms, "protein and residue 1")
     i2 = PDBTools.selindex(atoms, "protein and residue 15")
-    @test distances(simulation, i1, i2) ≈ 
-        [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
+    @test distances(simulation, i1, i2) ≈
+          [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
 
 end
 

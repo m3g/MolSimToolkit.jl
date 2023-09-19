@@ -80,13 +80,13 @@ julia> @view(coor[1:2])
 struct FramePositions{T,P<:Point3D{T},M<:AbstractArray{T}} <: AbstractVector{P}
     positions::M
 end
-FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T, Point3D{T}, typeof(m)}(m)
+FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T,Point3D{T},typeof(m)}(m)
 FramePositions(f::Chemfiles.Frame) = positions(Chemfiles.positions(f))
 FramePositions(x::FramePositions{T,P}) where {T,P} = FramePositions{T,P,typeof(x.positions)}(x.positions)
-Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:,i]))
-Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:,r])
-Base.getindex(x::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(x.positions[:,ivec])
-Base.length(x::FramePositions) = size(x.positions,2)
+Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:, i]))
+Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:, r])
+Base.getindex(x::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(x.positions[:, ivec])
+Base.length(x::FramePositions) = size(x.positions, 2)
 Base.size(x::FramePositions) = (length(x),)
 
 
@@ -114,40 +114,40 @@ julia> p[1].x
 ```
 
 """
-function positions(f::Chemfiles.Frame) 
+function positions(f::Chemfiles.Frame)
     p = Chemfiles.positions(f)
-    return FramePositions{eltype(p), Point3D{eltype(p)}, typeof(p)}(p)
+    return FramePositions{eltype(p),Point3D{eltype(p)},typeof(p)}(p)
 end
 
 import Base: copy
 copy(positions::FramePositions) = FramePositions(copy(positions.positions))
 
-import Base: ==, ≈ 
+import Base: ==, ≈
 ==(x::FramePositions, y::FramePositions) = ==(x.positions, y.positions)
 ≈(x::FramePositions, y::FramePositions; kargs...) = ≈(x.positions, y.positions; kargs...)
 
 import Base: view
-view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(positions.positions[:,r]))
-view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(@view(positions.positions[:,ivec]))
+view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(positions.positions[:, r]))
+view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(@view(positions.positions[:, ivec]))
 
 
 @testitem "FramePositions" begin
     using BenchmarkTools
 
-    m = rand(3,10)
+    m = rand(3, 10)
     p = FramePositions(m)
-    @test p[1] == Point3D(m[1,1], m[2,1], m[3,1])
-    @test p[1].x == m[1,1]
-    @test p[1].y == m[2,1]
-    @test p[1].z == m[3,1]
+    @test p[1] == Point3D(m[1, 1], m[2, 1], m[3, 1])
+    @test p[1].x == m[1, 1]
+    @test p[1].y == m[2, 1]
+    @test p[1].z == m[3, 1]
 
     # test with range
-    @test p[2:3] == FramePositions(m[:,2:3])
-    @test p[2:3] ≈ FramePositions(m[:,2:3])
-    @test @view(p[2:3]) == FramePositions(m[:,2:3])
+    @test p[2:3] == FramePositions(m[:, 2:3])
+    @test p[2:3] ≈ FramePositions(m[:, 2:3])
+    @test @view(p[2:3]) == FramePositions(m[:, 2:3])
     inds = [2, 3, 5]
-    @test p[inds] == FramePositions(m[:,inds])
-    @test @view(p[inds]) == FramePositions(m[:,inds])
+    @test p[inds] == FramePositions(m[:, inds])
+    @test @view(p[inds]) == FramePositions(m[:, inds])
     @test iszero(@ballocated @view($p[$inds]))
 
 end

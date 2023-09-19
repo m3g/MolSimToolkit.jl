@@ -11,15 +11,15 @@ function wrap end
 @inline function wrap(x::AbstractVector, xref::AbstractVector, unit_cell_matrix::SMatrix{N,N,T}) where {N,T}
     invu = inv(oneunit(T))
     unit_cell_matrix = invu * unit_cell_matrix
-    x_f = wrap_cell_fraction(invu*x, unit_cell_matrix)
-    xref_f = wrap_cell_fraction(invu*xref, unit_cell_matrix)
+    x_f = wrap_cell_fraction(invu * x, unit_cell_matrix)
+    xref_f = wrap_cell_fraction(invu * xref, unit_cell_matrix)
     xw = wrap(x_f, xref_f, SVector{N,eltype(x_f)}(ntuple(i -> 1, N)))
     return oneunit(T) * unit_cell_matrix * (xw - xref_f) + xref
 end
 
 @inline function wrap(x::AbstractVector, xref::AbstractVector, matrix::AbstractMatrix)
-    N = size(matrix,1)
-    return wrap(x, xref, SMatrix{N,N,eltype(matrix),N*N}(matrix))
+    N = size(matrix, 1)
+    return wrap(x, xref, SMatrix{N,N,eltype(matrix),N * N}(matrix))
 end
 
 @inline function wrap(x::AbstractVector, xref::AbstractVector, sides::AbstractVector)

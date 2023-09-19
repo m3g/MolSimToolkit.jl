@@ -38,8 +38,8 @@ julia> cm = center_of_mass(protein_indexes, simulation, coor)
 function center_of_mass(
     indexes::AbstractVector{Int},
     simulation::Simulation,
-    p::FramePositions;    
-    iref::Int = max(1, div(length(indexes),2)),
+    p::FramePositions;
+    iref::Int=max(1, div(length(indexes), 2))
 )
     xref = p[iref]
     uc = unitcell(current_frame(simulation))
@@ -57,9 +57,9 @@ end
 @testitem "centerofmass" begin
     using MolSimToolkit.Testing
     import PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
-    protein_indexes = PDBTools.selindex(atoms(simulation), "protein");
-    coor = positions(current_frame(simulation));
+    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    protein_indexes = PDBTools.selindex(atoms(simulation), "protein")
+    coor = positions(current_frame(simulation))
     @test center_of_mass(protein_indexes, simulation, coor) ≈
-        [ -3.7290442807974906, -1.5339226637687564, 1.960640754560446]
+          [-3.7290442807974906, -1.5339226637687564, 1.960640754560446]
 end

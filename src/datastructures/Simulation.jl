@@ -91,14 +91,14 @@ julia> for (i, frame) in enumerate(simulation)
 """
 mutable struct Simulation{
     AtomType,
-    V<:Vector{<:AtomType}, 
-    R<:AbstractRange, 
-    F<:Chemfiles.Frame, 
+    V<:Vector{<:AtomType},
+    R<:AbstractRange,
+    F<:Chemfiles.Frame,
     T<:Chemfiles.Trajectory,
     L<:ReentrantLock
 }
     pdb_file::String
-    atoms::V 
+    atoms::V
     frame_range::R
     frame::F
     frame_index::Union{Nothing,Int}
@@ -140,7 +140,7 @@ This function is not supposed to be called directly. Use the Simulation(file) fu
 function Simulation(
     pdb_file::String,
     atoms::AbstractVector{PDBTools.Atom},
-    trajectory::Chemfiles.Trajectory, 
+    trajectory::Chemfiles.Trajectory,
     frame_range::AbstractRange
 )
     frame = Chemfiles.read(trajectory)
@@ -159,7 +159,7 @@ Simulation will iterate over all frames in the file. This is the default constru
 to be used.
 
 =#
-function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1) 
+function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
     if isnothing(last)
         frame_range = first:step:Int(Chemfiles.length(Chemfiles.Trajectory(trajectory_file)))
     else
@@ -242,7 +242,7 @@ Restarts the iteration over the trajectory file.
 
 """
 function restart!(simulation::Simulation)
-    lock(simulation) do 
+    lock(simulation) do
         trajectory_file = path_trajectory(simulation)
         close(simulation)
         simulation.trajectory = Chemfiles.Trajectory(trajectory_file)
@@ -266,8 +266,8 @@ Reads the next frame in the trajectory file and returns it. Moves the current
 frame to the next one in the range to be considered (given by `frame_range(simulation)`).
 
 """
-function nextframe!(simulation::Simulation) 
-    lock(simulation) do 
+function nextframe!(simulation::Simulation)
+    lock(simulation) do
         if frame_index(simulation) == last(frame_range(simulation))
             error("End of trajectory.")
         end
@@ -277,7 +277,7 @@ function nextframe!(simulation::Simulation)
         else
             iframe = frame_index(simulation) + 1
         end
-        while iframe ∉ frame_range(simulation) && iframe < last(frame_range(simulation)) 
+        while iframe ∉ frame_range(simulation) && iframe < last(frame_range(simulation))
             Chemfiles.read!(simulation.trajectory, current_frame(simulation))
             iframe += 1
         end
@@ -317,7 +317,7 @@ lastindex(simulation::Simulation) = last(frame_range(simulation))
 import Base: keys
 keys(simulation::Simulation) = frame_range(simulation)
 
-import Base:eachindex 
+import Base: eachindex
 eachindex(simulation::Simulation) = frame_range(simulation)
 
 import Base: iterate
@@ -361,10 +361,10 @@ end
     t = Chemfiles.Trajectory(Testing.namd_traj)
     c = zeros(Chemfiles.length(t))
     f = Chemfiles.read(t)
-    c = [Chemfiles.positions(f)[1,1]]
+    c = [Chemfiles.positions(f)[1, 1]]
     for i in 2:Chemfiles.length(t)
         Chemfiles.read!(t, f)
-        push!(c, Chemfiles.positions(f)[1,1])
+        push!(c, Chemfiles.positions(f)[1, 1])
     end
     Chemfiles.close(t)
 
