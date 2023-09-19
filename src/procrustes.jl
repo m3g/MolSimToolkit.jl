@@ -22,7 +22,8 @@ function procrustes(x::AbstractMatrix{T}, y::AbstractMatrix{T})
 end
 
 function procrustes(x::AbstractVector{<:AbstractVector}, y::AbstractVector{<:AbtractVector}; mass = nothing)
-    xnew = 
+    # to be implemented
+end
 
 function procrustes(x::AbstractVector{<:AbstractVector}, y::AbstractVector{<:AbtractVector}; mass = nothing)
     length(x) == length(y) || throw(DimensionMismatch("x and y must have the same length"))
