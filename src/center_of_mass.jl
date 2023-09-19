@@ -63,3 +63,6 @@ end
     @test center_of_mass(protein_indexes, simulation, coor) ≈
           [-3.7290442807974906, -1.5339226637687564, 1.960640754560446]
 end
+
+center_of_mass(x::AbstractVector{<:AbstractVector}, mass::AbstractVector) =
+    sum(x[i] * mass[i] for i in eachindex(x, mass)) / sum(mass)
