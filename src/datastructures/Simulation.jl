@@ -97,7 +97,7 @@ mutable struct Simulation{
     T<:Chemfiles.Trajectory,
     L<:ReentrantLock
 }
-    pdb_file::String
+    pdb_file::Union{Nothing,String}
     atoms::V
     frame_range::R
     frame::F
@@ -111,7 +111,7 @@ function show(io::IO, simulation::Simulation)
     print(io, chomp("""
     Simulation 
         Atom type: $(eltype(simulation.atoms))
-        PDB file: $(path_pdb(simulation))
+        PDB file: $(isnothing(simululation.pdb_file) ? "Nothin" : path_pdb(simulation))
         Trajectory file: $(path_trajectory(simulation))
         Total number of frames: $(length(simulation))
         Frame range: $(frame_range(simulation))
@@ -122,6 +122,15 @@ end
 
 import Base: lock
 lock(f::F, simulation::Simulation) where {F<:Function} = lock(f, simulation.read_lock)
+
+function _set_range(trajectory, first, last, step)
+    if isnothing(last)
+        frame_range = first:step:Int(Chemfiles.length(trajectory))
+    else
+        frame_range = first:step:last
+    end
+    return frame_range
+end
 
 #=
     Simulation(
@@ -138,15 +147,16 @@ This function is not supposed to be called directly. Use the Simulation(file) fu
 
 =#
 function Simulation(
-    pdb_file::String,
-    atoms::AbstractVector{PDBTools.Atom},
+    pdb_file::Union{Nothing,String},
+    atoms::AbstractVector{AtomType},
     trajectory::Chemfiles.Trajectory,
-    frame_range::AbstractRange
-)
+    first, last, step
+) where {AtomType}
+    frame_range = _set_range(trajectory, first, last, step)
     frame = Chemfiles.read(trajectory)
     read_lock = ReentrantLock()
     frame_index = nothing
-    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
+    simulation = Simulation{AtomType}(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
     restart!(simulation)
     return simulation
 end
@@ -160,13 +170,12 @@ to be used.
 
 =#
 function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
-    if isnothing(last)
-        frame_range = first:step:Int(Chemfiles.length(Chemfiles.Trajectory(trajectory_file)))
-    else
-        frame_range = first:step:last
-    end
     atoms = PDBTools.readPDB(pdb_file)
-    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), frame_range)
+    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
+end
+
+function Simulation(atoms::AbstractVector{AtomType}, trajectory_file::String; first=1, last=nothing, step=1) where {AtomType}
+    return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
 end
 
 """
