@@ -111,7 +111,7 @@ function show(io::IO, simulation::Simulation)
     print(io, chomp("""
     Simulation 
         Atom type: $(eltype(simulation.atoms))
-        PDB file: $(isnothing(simululation.pdb_file) ? "Nothin" : path_pdb(simulation))
+        PDB file: $(isnothing(simulation.pdb_file) ? "-" : path_pdb(simulation))
         Trajectory file: $(path_trajectory(simulation))
         Total number of frames: $(length(simulation))
         Frame range: $(frame_range(simulation))
@@ -156,7 +156,7 @@ function Simulation(
     frame = Chemfiles.read(trajectory)
     read_lock = ReentrantLock()
     frame_index = nothing
-    simulation = Simulation{AtomType}(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
+    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
     restart!(simulation)
     return simulation
 end
@@ -234,7 +234,7 @@ atoms(simulation::Simulation) = simulation.atoms
 Returns the path to the pdb file of the simulation.
 
 """
-path_pdb(simulation::Simulation) = simulation.pdb_file
+path_pdb(simulation::Simulation) = isnothing(simulation.pdb_file) ? nothing : normpath(simulation.pdb_file)
 
 """
     path_trajectory(simulation::Simulation)
@@ -242,7 +242,7 @@ path_pdb(simulation::Simulation) = simulation.pdb_file
 Returns the path to the trajectory file of the simulation.
 
 """
-path_trajectory(simulation::Simulation) = Chemfiles.path(simulation.trajectory)
+path_trajectory(simulation::Simulation) = normpath(Chemfiles.path(simulation.trajectory))
 
 """
     restart!(simulation::Simulation)
@@ -358,7 +358,7 @@ function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
     restart!(simulation)
 end
 
-@testitem "Trajectory" begin
+@testitem "Simulation" begin
     import Chemfiles
     using MolSimToolkit.Testing
 
@@ -384,8 +384,15 @@ end
         push!(c2, positions(frame)[1].x)
     end
     close(simulation)
-
     @test c == c2
+end
 
+@testitem "no-pdb construct" begin
+    import PDBTools
+    using MolSimToolkit.Testing
+    pdb = PDBTools.readPDB(Testing.namd_pdb)
+    simulation = Simulation(pdb, Testing.namd_traj)
+    @test positions(current_frame(simulation))[1].x == 5.912472724914551
+    @test isnothing(path_pdb(simulation))
 end
 
