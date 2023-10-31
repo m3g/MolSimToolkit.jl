@@ -1,10 +1,10 @@
 module BlockAverages
 
-using DocStringExtensions
-using Statistics: mean
-using StatsBase
-using EasyFit
-
+import LinearAlgebra: dot
+import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+import Statistics: mean
+import StatsBase: autocor
+import EasyFit: fitexp, upper, lower
 export BlockAverageData, BlockDistribution
 export block_average, block_distribution
 
@@ -59,7 +59,7 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
     merr = findmax(b.xmean_stderr)
-    izerolag = findfirst(x -> x <=0, b.autocor)
+    izerolag = findfirst(x -> x <= 0, b.autocor)
     izerolag = isnothing(izerolag) ? 1 : izerolag
     print(io, chomp(
         """
@@ -230,7 +230,7 @@ function block_average(
         auto_cor = autocor(x, lags)
     end
 
-    tau = EasyFit.fitexp(lags, auto_cor, c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    tau = fitexp(lags, auto_cor, c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
 
     return BlockAverageData{T}(
         x,
@@ -328,7 +328,7 @@ function block_distribution(by::Function, x_input::AbstractVector, block_size::I
     end
     return BlockDistribution{nblocks}(mean(x), std(block_mean), block_mean, std(block_mean) / sqrt(nblocks))
 end
-block_distribution(x_input::AbstractVector; block_size::Int = 0) = block_distribution(mean, x_input, block_size)
+block_distribution(x_input::AbstractVector; block_size::Int=0) = block_distribution(mean, x_input, block_size)
 
 # Range of indices for block i of size block_size
 function brange(i, block_size)
