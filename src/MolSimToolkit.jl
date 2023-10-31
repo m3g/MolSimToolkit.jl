@@ -7,6 +7,7 @@ import Chemfiles
 using Printf
 import PDBTools
 import LinearAlgebra: norm
+import Reexport: @reexport
 
 export wrap, wrap_to_first
 export distances
@@ -22,5 +23,9 @@ include("./datastructures/Positions.jl")
 include("./wrap.jl")
 include("./distances.jl")
 include("./center_of_mass.jl")
+
+# Analysis functions and modules
+include("./BlockAverages.jl")
+@reexport using .BlockAverages 
 
 end
