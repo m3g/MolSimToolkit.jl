@@ -11,6 +11,7 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Functions" => "functions.md",
+        "Block averages" => "block_averages.md",
         "Developer zone" => "Developer.md",
     ],
 )
