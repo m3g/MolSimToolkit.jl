@@ -1,13 +1,15 @@
 module MolSimToolkit
 
+using Printf
 using TestItems
 using AtomsBase
 using StaticArrays
 import Chemfiles
-using Printf
 import PDBTools
 import LinearAlgebra: norm
 import Reexport: @reexport
+
+import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
 export wrap, wrap_to_first
 export distances
@@ -26,6 +28,6 @@ include("./center_of_mass.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")
-@reexport using .BlockAverages 
+@reexport using .BlockAverages
 
 end
