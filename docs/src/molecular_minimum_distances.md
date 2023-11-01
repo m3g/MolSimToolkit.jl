@@ -248,6 +248,9 @@ Distance found, d = 9.652277658666891
 The fields `within_cutoff`, `i`, `j`, and `d` show if a distance was found within the cutoff,
 the indexes of the atoms involved in the contact, and their distance.
 
+Getter functions are available to extract eac hof these fields, to add some convenience:
+`within_cutoff`, `iatom`, `jatom`, and `distance`.
+
 !!! note
     If the solute has more than one molecule, this will not be taken into 
     consideration in this mode. All molecules will be considered as part
