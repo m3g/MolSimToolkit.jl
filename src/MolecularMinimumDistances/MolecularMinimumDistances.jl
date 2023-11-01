@@ -11,6 +11,7 @@ import CellListMap.PeriodicSystems: PeriodicSystem, map_pairwise, map_pairwise!,
 export MinimumDistance
 export SelfPairs, CrossPairs, AllPairs
 export minimum_distances, minimum_distances!
+export within_cutoff, distance, iatom, jatom
 
 """
     MinimumDistance{T}
@@ -49,6 +50,49 @@ end
 import Base: zero, copy
 zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
 copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
+
+#
+# useful getter functions
+#
+"""
+    within_cutoff(md::MinimumDistance) = md.within_cutoff
+
+Returns `true` if the distance is within the cutoff, and `false` otherwise.
+
+"""
+within_cutoff(md::MinimumDistance) = md.within_cutoff
+
+"""
+    distance(md::MinimumDistance) = md.d
+
+Returns the distance between the atoms of the pair.
+
+"""
+distance(md::MinimumDistance) = md.d
+
+"""
+    iatom(md::MinimumDistance) = md.i
+
+Returns the index of the atom of the first set that is closer to the atom of the second set.
+
+"""
+iatom(md::MinimumDistance) = md.i
+
+"""
+    jatom(md::MinimumDistance) = md.j
+
+Returns the index of the atom of the second set that is closer to the atom of the first set.
+
+"""
+jatom(md::MinimumDistance) = md.j
+
+@testitem "MinimumDistance getter functions" begin
+    md = MinimumDistance(true, 2, 5, 1.f0)
+    @test within_cutoff(md) == true
+    @test distance(md) == 1.f0
+    @test iatom(md) == 2
+    @test jatom(md) == 5
+end
 
 import Base.show
 function Base.show(io::IO, mime::MIME"text/plain", md::MinimumDistance{T}) where T
