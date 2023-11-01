@@ -10,8 +10,9 @@ makedocs(
     doctest = false,  
     pages = [
         "Home" => "index.md",
-        "Functions" => "functions.md",
+        "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         "Block averages" => "block_averages.md",
+        "Functions" => "functions.md",
         "Developer zone" => "Developer.md",
     ],
 )
