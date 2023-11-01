@@ -29,5 +29,7 @@ include("./center_of_mass.jl")
 # Analysis functions and modules
 include("./BlockAverages.jl")
 @reexport using .BlockAverages
+include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
+@reexport using .MolecularMinimumDistances
 
 end
