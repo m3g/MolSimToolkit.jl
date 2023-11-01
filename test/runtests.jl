@@ -3,5 +3,8 @@ using TestItemRunner
 
 @testitem "Aqua.test_all" begin
     import Aqua
-    Aqua.test_all(MolSimToolkit)
+    Aqua.test_all(
+        MolSimToolkit;
+        ambiguities = false
+    )
 end

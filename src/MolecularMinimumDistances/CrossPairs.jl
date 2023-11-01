@@ -113,10 +113,10 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    pos = positions(current_frame(simulation))
+    coor = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(pos), length(popc))
-    xsolute = zeros(eltype(pos), length(protein))
+    xsolvent = zeros(eltype(coor), length(popc))
+    xsolute = zeros(eltype(coor), length(protein))
     sys = CrossPairs(
         xpositions = xsolvent,
         ypositions = xsolute,
