@@ -13,7 +13,7 @@ It is currently on very early development stage.
 ## Installation
 
 ```julia
-import Pkg; Pkg.add(url="http://github.com/m3g/MolSimToolkit.jl")
+import Pkg; Pkg.add("MolSimToolkit")
 ```
 
 ## Using
