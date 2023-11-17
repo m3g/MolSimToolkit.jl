@@ -31,5 +31,6 @@ include("./BlockAverages.jl")
 @reexport using .BlockAverages
 include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
 @reexport using .MolecularMinimumDistances
+include("./gromacs/remd.jl")
 
 end
