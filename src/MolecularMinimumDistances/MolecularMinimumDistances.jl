@@ -3,10 +3,11 @@ module MolecularMinimumDistances
 import TestItems: @testitem
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
+import PDBTools: distance
 import StaticArrays: SVector
 import CellListMap: _uround # interal function, used for showing the unitcell
-import CellListMap.PeriodicSystems: PeriodicSystem, map_pairwise, map_pairwise!, 
-                                    update_cutoff!, update_unitcell!
+import CellListMap.PeriodicSystems: PeriodicSystem, map_pairwise, map_pairwise!,
+    update_cutoff!, update_unitcell!
 
 export MinimumDistance
 export SelfPairs, CrossPairs, AllPairs
@@ -22,7 +23,9 @@ of this vector corresponds to the index of the molecule in the original array.
 `MinimumDistance{T}` is a simple structure that contains four fields: a boolean marker indicating
 if the distance is within the cutoff, the indexes `i` and `j` of the atoms of the 
 molecules that are closer to each other, and the distance `d`, with type `T`, which is
-the same as that of the coordinates of the input vectors of coordinates.
+the same as that of the coordinates of the input vectors of coordinates. The best way
+to access the information of a `MinimumDistance` element is through the getter functions
+`within_cutoff`, `distance`, `iatom`, and `jatom`.
 
 ## Example
 
@@ -30,14 +33,17 @@ the same as that of the coordinates of the input vectors of coordinates.
 julia> md = MinimumDistance{Float32}(true, 2, 5, 1.f0)
 MinimumDistance{Float32}(true, 2, 5, 1.0f0)
 
-julia> md.i
+julia> iatom(md)
 2
 
-julia> md.j
+julia> jatom(md)
 5
 
-julia> md.d
+julia> distance(md)
 1.0f0
+
+julia> within_cutoff(md)
+true
 ```
 
 """
@@ -62,6 +68,7 @@ Returns `true` if the distance is within the cutoff, and `false` otherwise.
 """
 within_cutoff(md::MinimumDistance) = md.within_cutoff
 
+# The next function adds a method to PDBTools.distance
 """
     distance(md::MinimumDistance) = md.d
 
@@ -87,23 +94,23 @@ Returns the index of the atom of the second set that is closer to the atom of th
 jatom(md::MinimumDistance) = md.j
 
 @testitem "MinimumDistance getter functions" begin
-    md = MinimumDistance(true, 2, 5, 1.f0)
+    md = MinimumDistance(true, 2, 5, 1.0f0)
     @test within_cutoff(md) == true
-    @test distance(md) == 1.f0
+    @test distance(md) == 1.0f0
     @test iatom(md) == 2
     @test jatom(md) == 5
 end
 
 import Base.show
-function Base.show(io::IO, mime::MIME"text/plain", md::MinimumDistance{T}) where T
-    print(io,chomp("""
-    $(md)
+function Base.show(io::IO, mime::MIME"text/plain", md::MinimumDistance{T}) where {T}
+    print(io, chomp("""
+     $(md)
 
-    Distance within cutoff, within_cutoff = $(md.within_cutoff)
-    x atom of pair, i = $(md.i)
-    y atom of pair, j = $(md.j)
-    Distance found, d = $(md.d)
-    """))
+     Distance within cutoff, within_cutoff = $(md.within_cutoff)
+     x atom of pair, i = $(md.i)
+     y atom of pair, j = $(md.j)
+     Distance found, d = $(md.d)
+     """))
 end
 
 #=
@@ -131,7 +138,7 @@ end
 
 # Simplify signature of arrays of MinimumDistance and its tuples.
 List{T} = Vector{<:MinimumDistance{T}}
-ListTuple{T} = Tuple{Vector{<:MinimumDistance{T}}, Vector{<:MinimumDistance{T}}} 
+ListTuple{T} = Tuple{Vector{<:MinimumDistance{T}},Vector{<:MinimumDistance{T}}}
 
 #=
     init_list(x, mol_indices::F) where F<:Function
@@ -212,8 +219,8 @@ init_list(::Type{T}, n::Int) where {T} = fill(zero(MinimumDistance{T}), n)
 # reset_output! and reducer functions.
 #
 import CellListMap.PeriodicSystems: copy_output, reset_output!, reducer
-reset_output!(md::MinimumDistance{T}) where T = zero(MinimumDistance{T})
-reducer(md1::MinimumDistance{T}, md2::MinimumDistance{T}) where T = md1.d < md2.d ? md1 : md2
+reset_output!(md::MinimumDistance{T}) where {T} = zero(MinimumDistance{T})
+reducer(md1::MinimumDistance{T}, md2::MinimumDistance{T}) where {T} = md1.d < md2.d ? md1 : md2
 copy_output(list::ListTuple) = (copy_output(list[1]), copy_output(list[2]))
 copy_output(x::MinimumDistance) = copy(x)
 function reset_output!(list::ListTuple)
@@ -456,24 +463,24 @@ abstract type SystemPairs end
 
 import Base: getproperty, propertynames
 getproperty(sys::SystemPairs, s::Symbol) = getproperty(sys, Val(s))
-getproperty(sys::SystemPairs, ::Val{:system}) = getfield(sys,:system)
-getproperty(sys::SystemPairs, ::Val{:mol_indices}) = getfield(sys,:mol_indices)
-getproperty(sys::SystemPairs, ::Val{:xmol_indices}) = getfield(sys,:xmol_indices)
-getproperty(sys::SystemPairs, ::Val{:ymol_indices}) = getfield(sys,:ymol_indices)
+getproperty(sys::SystemPairs, ::Val{:system}) = getfield(sys, :system)
+getproperty(sys::SystemPairs, ::Val{:mol_indices}) = getfield(sys, :mol_indices)
+getproperty(sys::SystemPairs, ::Val{:xmol_indices}) = getfield(sys, :xmol_indices)
+getproperty(sys::SystemPairs, ::Val{:ymol_indices}) = getfield(sys, :ymol_indices)
 getproperty(sys::SystemPairs, ::Val{:minimum_distances}) = sys.system.output
 getproperty(sys::SystemPairs, ::Val{:xpositions}) = sys.system.xpositions
 getproperty(sys::SystemPairs, ::Val{:ypositions}) = sys.system.ypositions
 getproperty(sys::SystemPairs, ::Val{:cutoff}) = sys.system.cutoff
 getproperty(sys::SystemPairs, ::Val{:unitcell}) = sys.system.unitcell
 getproperty(sys::SystemPairs, ::Val{:parallel}) = sys.system.parallel
-propertynames(sys::SystemPairs, private::Bool) = 
+propertynames(sys::SystemPairs, private::Bool) =
     (:system, :mol_indices, :minimum_distances, :xpositions, :ypositions, :unitcell, :cutoff)
 
 import Base: setproperty!
 setproperty!(sys::SystemPairs, s::Symbol, value) = setproperty!(sys, Val(s), value)
 setproperty!(sys::SystemPairs, ::Val{:cutoff}, cutoff) = update_cutoff!(sys.system, cutoff)
 setproperty!(sys::SystemPairs, ::Val{:unitcell}, unitcell) = update_unitcell!(sys.system, unitcell)
-setproperty!(sys::SystemPairs, ::Val{:parallel}, parallel) = sys.system.parallel = parallel 
+setproperty!(sys::SystemPairs, ::Val{:parallel}, parallel) = sys.system.parallel = parallel
 
 #
 # Functions for when the lists of minimum-distances is that of a single
