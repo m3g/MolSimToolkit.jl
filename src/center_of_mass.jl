@@ -66,3 +66,6 @@ end
 
 center_of_mass(x::AbstractVector{<:AbstractVector}, mass::AbstractVector) =
     sum(x[i] * mass[i] for i in eachindex(x, mass)) / sum(mass)
+
+center_of_mass(atoms::AbstractVector{<:PDBTools.Atom}) =
+    sum(PDBTools.coor(atom) * atomic_mass(atom) for atom in atoms) / sum(atomic_mass, atoms)
