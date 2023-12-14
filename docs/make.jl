@@ -10,6 +10,7 @@ makedocs(
     doctest=false,
     pages=[
         "Home" => "index.md",
+        "System setup" => "system_setup.md",
         "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",

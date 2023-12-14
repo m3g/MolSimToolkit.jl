@@ -5,7 +5,6 @@ using PDBTools
 using TestItems
 
 export convert_concentration
-export interpolate_concentration
 export density_pure_solvent, density_pure_cossolvent
 export write_packmol_input
 export SolutionBoxUSC
@@ -63,14 +62,14 @@ const CMV = 1e24 / 6.02e23
 # conversion factor from mol/L to molecules/Å^3
 const CMC = 6.02e23 / 1e27
 
-"""
+#=
     interpolate_concentration(system, x)
 
 Obtain by interpolation the value of of ρ[:,2] that corresponds
 to a the best estimate given a value of x corresponding to 
 to the domain ρ[:,1].
 
-"""
+=#
 function interpolate_concentration(system, x)
     ρ = system.density_table
     i = findfirst(d -> d >= x, @view(ρ[:, 1]))
