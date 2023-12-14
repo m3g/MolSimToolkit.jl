@@ -217,6 +217,8 @@ function write_packmol_input(
     output="system.pdb",
     box_sides::Union{AbstractVector{<:Real},Nothing} = nothing,
     margin::Union{Real,Nothing} = nothing, 
+    # testing option
+    debug = false,
 )
 
     (; solute_pdbfile,
@@ -232,10 +234,33 @@ function write_packmol_input(
     Mc = cossolvent_molar_mass
     Mw = solvent_molar_mass
 
+    # If the concentration was given in mol/L we need to find to which
+    # this corresponds in molar fraction
+    c_x = if cunit == "mol/L"
+        xl = 0.0
+        xr = 1.0
+        it = 0
+        while xr - xl > 1e-6 
+            xm = (xl + xr) / 2
+            ρxm = interpolate_concentration(system, xm)
+            if convert_concentration(system, xm, "x" => "mol/L"; density = ρxm) > concentration
+                xr = xm
+            else
+                xl = xm
+            end
+            it += 1
+            if it > 1000
+                throw(ArgumentError("Could not find the molar fraction corresponding to the given concentration."))
+            end
+        end
+        xl
+    else
+        convert_concentration(system, concentration, cunit => "x")
+    end
+
     # Convert concentrations, for checking
-    c_x = convert_concentration(system, concentration, cunit => "x")
-    c_vv = convert_concentration(system, concentration, cunit => "vv")
     ρ = interpolate_concentration(system, c_x)
+    c_vv = convert_concentration(system, concentration, cunit => "vv"; density = ρ)
     cc_mol = convert_concentration(system, concentration, cunit => "mol/L"; density = ρ)
 
     # aliases for clearer formulas
@@ -370,7 +395,12 @@ function write_packmol_input(
 
         ==================================================================
         """))
-
+    
+    if debug 
+        return nw, nc, l
+    else
+        return nothing
+    end
 end # function write_packmol_input
 
 # Tests

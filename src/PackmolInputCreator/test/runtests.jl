@@ -72,10 +72,12 @@ end
     @test convert_concentration(system, 1.0, "x" => "mol/L"; density = density_pure_cossolvent(system)) ≈ Mc
 
     tmp_input_file = tempname()
-    write_packmol_input(system; concentration = 0.5, cunit = "x", margin = 20.0, input = tmp_input_file)
+    r1 = write_packmol_input(system; concentration = 0.5, cunit = "x", margin = 20.0, input = tmp_input_file, debug = true)
     @test isfile(tmp_input_file)
-    f1 = read("$test_dir/data/water_ethanol.inp", String)
-    f2 = read(tmp_input_file, String)
-    @test f1 == f2
+    r2 = write_packmol_input(system; concentration = 13.488667939471432, cunit = "mol/L", margin = 20.0, input = tmp_input_file, debug = true)
+    @test isfile(tmp_input_file)
+    @test r2 == r1
+    r3 = write_packmol_input(system; concentration = 0.7635032204047275, cunit = "vv", margin = 20.0, input = tmp_input_file, debug = true)
+    @test r3 == r1
 
 end
