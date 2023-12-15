@@ -4,7 +4,7 @@ using ..MolSimToolkit: center_of_mass
 using PDBTools
 using TestItems
 
-export convert_concentration
+export convert_concentration, convert_density_table
 export density_pure_solvent, density_pure_cossolvent
 export write_packmol_input
 export SolutionBoxUSC
@@ -15,7 +15,8 @@ density_pure_cossolvent(system::SolutionBox) = system.density_table[end, 2]
 
 const PackmolInputCreatorDirectory = @__DIR__
 
-@kwdef struct SolutionBoxUSC <: SolutionBox
+@kwdef mutable struct SolutionBoxUSC <: SolutionBox
+    concentration_units::String = "x"
     solute_pdbfile::String
     solvent_pdbfile::String
     cossolvent_pdbfile::String
@@ -31,12 +32,23 @@ end
         solvent_pdbfile::String,
         cossolvent_pdbfile::String,
         density_table::Matrix{Float64},
+        concentration_units = "x",
     )
 
 Setup a system composed of a solute (U) a solvent (S) and a cossolvent (C). 
 
+The concentration units of the density table can be provided explicitly and
+are assumed by default to be the molar fraction, `x`, of the cossolvent.
+
 """
 function SolutionBoxUSC end
+
+function unit_name(u::String)
+    u == "mol/L" && return "molarity"
+    u == "x" && return "molar fraction"
+    u == "vv" && return "volume fraction"
+    u == "mm" && return "mass fraction"
+end
 
 function Base.show(io::IO, ::MIME"text/plain", system::SolutionBoxUSC)
     print(io, chomp("""
@@ -52,6 +64,8 @@ function Base.show(io::IO, ::MIME"text/plain", system::SolutionBoxUSC)
             solute: $(system.solute_molar_mass) g/mol
             solvent: $(system.solvent_molar_mass) g/mol
             cossolvent: $(system.cossolvent_molar_mass) g/mol
+        Concentration units: $(system.concentration_units) ($(unit_name(system.concentration_units)))
+        Cocentration range: $(first(system.density_table[:, 1])) - $(last(system.density_table[:, 1]))
     ==================================================================
     """))
 end
@@ -80,24 +94,40 @@ function interpolate_concentration(system, x)
     return d
 end
 
+# Adjust x to be in the [0,1] range, to avoid problems with numerical precision
+fixrange(x) = x < 0 ? 0 : (x > 1 ? 1 : x)
+
 """
     convert_concentration(
         system::SolutionBoxUSC,
         input_concentration, 
         units;
-        density, # of the solution, required if the input concentration is mol/L
+        density, # of the solution, required when converting from/to mol/L
     )
 
 Convert concentration from one unit to another. The input
 concentration is given in `input_concentration`, and the unit conversion 
 is given by `units` keyword, that can be one of the following pairs:
 
-- `"mol/L"` => `"x"`: from molarity to molar fraction
-- `"mol/L"` => `"vv"`: from molarity to volume fraction
-- `"x"` => `"mol/L"`: from molar fraction to molarity
-- `"x"` => `"vv"`: from molar fraction to volume fraction
-- `"vv"` => `"mol/L"`: from volume fraction to molarity
-- `"vv"` => `"x"`: from volume fraction to molar fraction
+The supported concentration units are:
+
+- `"mol/L"`: molarity
+- `"x"`: molar fraction
+- `"vv"`: volume fraction
+- `"mm"`: mass fraction
+
+Conversion among types consists in passing the `units` keyword argument,
+which is a pair of the form `"from" => "to"`, where `"from"` and `"to"`
+are one of the supported units.
+
+# Example
+
+For example, to convert from molarity to molar fraction, use:
+
+```julia
+convert_concentration(system, 55.5, "mol/L" => "x")
+```
+where `system` is a `SolutionBoxUSC` object, and `55.5` is the molarity.
 
 """
 function convert_concentration(
@@ -141,12 +171,15 @@ function convert_concentration(
         Nw = ρw * (1 - vv) / Mw # number of solvent molecules in 1mL of ideal solution
         if last(units) == "x"
             x = Nc / (Nc + Nw) # molar fraction
-            return x
+            return fixrange(x)
         end
         if last(units) == "mol/L"
             mt = Nc * Mc + Nw * Mw # mass of the solution (for 1 mol total)
             v = mt / (1000*ρ) # volume of the solution (for 1 mol total)
             return Nc / v # mol/L
+        end
+        if last(units) == "mm"
+            return fixrange(Nc * Mc / (Nc * Mc + Nw * Mw))
         end
     end
 
@@ -164,7 +197,10 @@ function convert_concentration(
             vc = Mc *  x / ρc # Volume of x mols of pure cossolvent 
             vw = Mw * (1 - x) / ρw # Volume of (1-x) mols of pure solvent 
             vv = vc / (vc + vw) # volume fraction of cossolvent in ideal solution
-            return vv
+            return fixrange(vv)
+        end
+        if last(units) == "mm"
+            return fixrange(x * Mc / (x * Mc + (1 - x) * Mw))
         end
     end
 
@@ -176,22 +212,75 @@ function convert_concentration(
         nc = input_concentration / 1000
         nw = (ρ - nc * Mc) / Mw
         if last(units) == "x"
-            return nc / (nc + nw)
+            return fixrange(nc / (nc + nw))
         end
         if last(units) == "vv"
             vc = nc * Mc / ρc
             vw = nw * Mw / ρw
-            return vc / (vc + vw)
+            return fixrange(vc / (vc + vw))
+        end
+        if last(units) == "mm"
+            return fixrange(nc * Mc / (nc * Mc + nw * Mw))
         end
     end
 
+    if first(units) == "mm"
+        if !(0 <= input_concentration <= 1)
+            throw(ArgumentError("Mass fraction must be in the [0,1] range."))
+        end
+        mm = input_concentration # mass fraction
+        Nc = mm * 1 / Mc # mol of ethanol in 1g
+        Nw = (1 - mm) / Mw # mol of water in 1g
+        if last(units) == "x"
+            return fixrange(Nc / (Nc + Nw)) # molar fraction
+        end
+        if last(units) == "vv"
+            vc = Nc * Mc  / ρc 
+            vw = Nw * Mw / ρw
+            return fixrange(vc / (vc + vw)) # volume fraction
+        end
+        if last(units) == "mol/L"
+            v = 1 / ρ # volume of 1g of solution
+            return 1000 * Nc / v # mol/L
+        end
+    end
+end
+
+"""
+    convert_density_table(system::SolutionBoxUSC, target_units)
+
+Converts the density table of the system from one unit to another. Returns the 
+input `system` with the density table converted to the new units.
+
+The target units may be one of: `"mol/L"`, `"x"`, `"vv"`, `"mm"`.
+
+## Example
+
+```julia
+convert_density_table(system, "mol/L")
+```
+
+"""
+function convert_density_table(
+    system::SolutionBoxUSC,
+    target_units::String;
+)
+    current_units = system.concentration_units
+    density_table = system.density_table
+    for irow in eachindex(eachrow(density_table))
+        cin = density_table[irow, 1]
+        ρ = density_table[irow, 2]
+        cout = convert_concentration(system, cin, current_units => target_units; density = ρ)
+        density_table[irow, 1] = cout
+    end
+    system.concentration_units = target_units
+    return system
 end
 
 """
     write_packmol_input(
         system::SolutionBoxUSC;
         concentration::Real, 
-        cunit="mol/L",
         input="box.inp",
         output="system.pdb",
         # box size
@@ -199,9 +288,7 @@ end
         margin::Real
     )
 
-Function that generates an input file for Packmol. By default, 
-the concentrations is given in `mol/L`, but it can also be 
-given in molar fraction "x" or volume fraction "vv", using `cunit="x"` or `cunit="vv"`. 
+Function that generates an input file for Packmol. 
 
 The box sides are given in Ångströms, and can be provided as a vector of 3 elements.
 Alternativelly, the margin can be provided, and the box sides will be calculated as
@@ -211,7 +298,6 @@ the maximum and minimum coordinates of the solute plus the margin in all 3 dimen
 function write_packmol_input(
     system::SolutionBoxUSC;
     concentration::Real, 
-    cunit="mol/L",
     input="box.inp",
     output="system.pdb",
     box_sides::Union{AbstractVector{<:Real},Nothing} = nothing,
@@ -233,34 +319,24 @@ function write_packmol_input(
     Mc = cossolvent_molar_mass
     Mw = solvent_molar_mass
 
-    # If the concentration was given in mol/L we need to find to which
-    # this corresponds in molar fraction
-    c_x = if cunit == "mol/L"
-        xl = 0.0
-        xr = 1.0
-        it = 0
-        while xr - xl > 1e-6 
-            xm = (xl + xr) / 2
-            ρxm = interpolate_concentration(system, xm)
-            if convert_concentration(system, xm, "x" => "mol/L"; density = ρxm) > concentration
-                xr = xm
-            else
-                xl = xm
-            end
-            it += 1
-            if it > 1000
-                throw(ArgumentError("Could not find the molar fraction corresponding to the given concentration."))
-            end
-        end
-        xl
-    else
-        convert_concentration(system, concentration, cunit => "x")
+    # Check consistency of the concentrations given
+    cunit = system.concentration_units
+    ρs = @view(system.density_table[:, 1])
+    if cunit == "mol/L" && (first(ρs) < 1e-3 && last(ρs) ≈ 1)
+        throw(ArgumentError("Concentrations in density table do not appear to be in mol/L."))
+    end
+    if (cunit in ("x", "mm", "vv")) && (any(x -> !(0 <= x <= 1), ρs)) 
+        throw(ArgumentError("Concentrations in density table outside [0,1] range, and units are: $cunit"))
     end
 
-    # Convert concentrations, for checking
-    ρ = interpolate_concentration(system, c_x)
+    # Find the density corresponding to the target concentration
+    ρ = interpolate_concentration(system, concentration)
+
+    # Obtain the concentration in all units, for testing
+    c_x = convert_concentration(system, concentration, cunit => "x"; density = ρ)
     c_vv = convert_concentration(system, concentration, cunit => "vv"; density = ρ)
     cc_mol = convert_concentration(system, concentration, cunit => "mol/L"; density = ρ)
+    cc_mm = convert_concentration(system, concentration, cunit => "mm"; density = ρ)
 
     # aliases for clearer formulas
     ρc = density_pure_cossolvent(system) # of the pure cossolvent
@@ -325,8 +401,9 @@ function write_packmol_input(
         ==================================================================
 
         Target concentration = $cc_mol mol/L
-                             = $c_vv volume fraction
                              = $c_x molar fraction
+                             = $c_vv volume fraction
+                             = $cc_mm mass fraction 
                              = $cc molecules/Å³
 
         Box volume = $vbox Å³

@@ -7,6 +7,9 @@ This module helps the setup of a `Packmol` input file, by computing the number o
 and sizes necessary to build different systems. Currently (as of version 1.2.0) the module
 supports the construction of systems of a solute solvated by a mixture of two solvents. 
 
+!!! compat
+    The functionality described here is available in MolSimToolkit version 1.3.0.
+
 ### How to use it
 
 ```julia-repl
@@ -20,7 +23,7 @@ a function of the molar fraction of ethanol are available in a data table:
 
 ```julia
 density_table = [
-# x ethanol     density
+# x ethanol     density (g/mL)
    0.0000       0.9981
    0.0416       0.9820
    0.0890       0.9685
@@ -47,17 +50,28 @@ system = SolutionBoxUSC(
     solvent_pdbfile = "$test_dir/data/water.pdb",
     cossolvent_pdbfile = "$test_dir/data/ethanol.pdb",
     density_table = density_table,
+    concentration_units = "x", # molar fraction
 )
 ```
 
-Here, `SolutionBoxUSC` stands for `Solute (U)`, `Solvent (S)`, and `Cossolvent (C)`. 
+Here, `SolutionBoxUSC` stands for `Solute (U)`, `Solvent (S)`, and `Cossolvent (C)`.  
+The concentration units can be one of `"mol/L"` (molarity), `"x"` (molar fraction),
+`"vv"` (volume fraction), and `"mm"` (mass fraction). The density is assumed
+to be in `g/mL`. 
+
+!!! tip
+    The density table can be converted among different units with the function `convert_density_table`,
+    which acts on the `SystemBox` object. For example:
+    ```julia-repl
+    julia> convert_density_table(system, "mol/L")
+    ```
 
 Finally, we can generate an input file for `Packmol` with:
 
 ```julia
 write_packmol_input(
     system; 
-    concentration = 0.5, cunit = "x", 
+    concentration = 0.5,
     margin = 20.0, 
     input = "box.inp",
     output = "system.pdb"

@@ -643,7 +643,6 @@ Order = [:function, :type]
 
 
 
-
 ## Details of the illustration
 
 The initial illustration here consists of a toy solute-solvent example, where the solute is an approximately hexagonal molecule, and the solvent is composed by 40 diatomic molecules. The toy system is built as follows:
