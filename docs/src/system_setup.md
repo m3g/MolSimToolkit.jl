@@ -8,7 +8,7 @@ and sizes necessary to build different systems. Currently (as of version 1.2.0) 
 supports the construction of systems of a solute solvated by a mixture of two solvents. 
 
 !!! compat
-    The functionality described here is available in MolSimToolkit version 1.3.0.
+    The functionality described here is available in MolSimToolkit version 1.3.2.
 
 ### How to use it
 
@@ -60,10 +60,10 @@ The concentration units can be one of `"mol/L"` (molarity), `"x"` (molar fractio
 to be in `g/mL`. 
 
 !!! tip
-    The density table can be converted among different units with the function `convert_density_table`,
+    The density table can be converted among different units with the function `convert_density_table!`,
     which acts on the `SystemBox` object. For example:
     ```julia-repl
-    julia> convert_density_table(system, "mol/L")
+    julia> convert_density_table!(system, "mol/L")
     ```
 
 Finally, we can generate an input file for `Packmol` with:

@@ -13,16 +13,16 @@
     mw = 55.508250191225926
     for x in (0.0, 0.2, 0.5, 0.7, 1.0)
         @test convert_concentration(system, x, "x" => "vv") ≈ x atol = 1e-3
-        @test convert_concentration(system, x, "x" => "mol/L"; density = 1.0) ≈ x * mw atol = 1e-3
+        @test convert_concentration(system, x, "x" => "mol/L") ≈ x * mw atol = 1e-3
         @test convert_concentration(system, x, "x" => "mm") ≈ x atol = 1e-3
 
         @test convert_concentration(system, x, "vv" => "x") ≈ x atol = 1e-3
-        @test convert_concentration(system, x, "vv" => "mol/L"; density = 1.0) ≈ x * mw atol = 1e-3
+        @test convert_concentration(system, x, "vv" => "mol/L") ≈ x * mw atol = 1e-3
         @test convert_concentration(system, x, "vv" => "mm") ≈ x atol = 1e-3
 
-        @test convert_concentration(system, x * mw, "mol/L" => "x"; density = 1.0) ≈ x atol = 1e-3 
-        @test convert_concentration(system, x * mw, "mol/L" => "vv"; density = 1.0) ≈ x atol = 1e-3
-        @test convert_concentration(system, x * mw, "mol/L" => "mm"; density = 1.0) ≈ x atol = 1e-3
+        @test convert_concentration(system, x * mw, "mol/L" => "x") ≈ x atol = 1e-3 
+        @test convert_concentration(system, x * mw, "mol/L" => "vv") ≈ x atol = 1e-3
+        @test convert_concentration(system, x * mw, "mol/L" => "mm") ≈ x atol = 1e-3
     end
 
     # system with ideal solution 
@@ -50,17 +50,39 @@
     # Concentration conversions
     for x in (0.0, 0.2, 0.5, 0.7, 1.0)
         @test convert_concentration(system, x, "x" => "vv") ≈ vv(x) 
-        @test convert_concentration(system, x, "x" => "mol/L"; density = ρ(x)) ≈ mx(x)
+        @test convert_concentration(system, x, "x" => "mol/L") ≈ mx(x)
         @test convert_concentration(system, x, "x" => "mm") ≈ x
 
         @test convert_concentration(system, vv(x), "vv" => "x") ≈ x 
-        @test convert_concentration(system, vv(x), "vv" => "mol/L"; density = ρ(x)) ≈ mx(x) 
+        @test convert_concentration(system, vv(x), "vv" => "mol/L") ≈ mx(x) 
         @test convert_concentration(system, vv(x), "vv" => "mm") ≈ x
 
-        @test convert_concentration(system, mx(x), "mol/L" => "x"; density = ρ(x)) ≈ x 
-        @test convert_concentration(system, mx(x), "mol/L" => "vv"; density = ρ(x)) ≈ vv(x) 
-        @test convert_concentration(system, mx(x), "mol/L" => "mm"; density = ρ(x)) ≈ x
+        @test convert_concentration(system, mx(x), "mol/L" => "x") ≈ x 
+        @test convert_concentration(system, mx(x), "mol/L" => "vv") ≈ vv(x) 
+        @test convert_concentration(system, mx(x), "mol/L" => "mm") ≈ x
     end
+
+    # Water as cossolvent
+    dw = [
+        0.0     0.7906
+        0.2214  0.8195
+        0.3902  0.845
+        0.5231  0.8685
+        0.6305  0.8923
+        0.7191  0.9151
+        0.7934  0.9369
+        0.8566  0.9537
+        0.911   0.9685
+        0.9584  0.982
+        1.0     0.9981
+    ]
+    system = SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw
+    )
+    @test convert_concentration(system, 1.0, "x" => "mol/L") ≈ 55.40278451586260
 
 end
 
@@ -82,7 +104,7 @@ end
     Mc = 1000 * density_pure_cossolvent(system) / system.cossolvent_molar_mass # mol / L pure ethanol
 
     # Test concentration conversions for real data
-    @test convert_concentration(system, 1.0, "x" => "mol/L"; density = density_pure_cossolvent(system)) ≈ Mc
+    @test convert_concentration(system, 1.0, "x" => "mol/L") ≈ Mc
 
     mm = 0.3997224931406948
     vv = 0.45671854335897716
@@ -91,40 +113,43 @@ end
     ρ = 0.9369
 
     @test convert_concentration(system, x, "x" => "vv") ≈ vv
-    @test convert_concentration(system, x, "x" => "mol/L"; density = ρ) ≈ M
+    @test convert_concentration(system, x, "x" => "mol/L") ≈ M
     @test convert_concentration(system, x, "x" => "mm") ≈ mm 
 
     @test convert_concentration(system, vv, "vv" => "x") ≈ x
-    @test convert_concentration(system, vv, "vv" => "mol/L"; density = ρ) ≈ M
+    @test convert_concentration(system, vv, "vv" => "mol/L") ≈ M
     @test convert_concentration(system, vv, "vv" => "mm") ≈ mm 
 
-    @test convert_concentration(system, M, "mol/L" => "x"; density = ρ) ≈ x
-    @test convert_concentration(system, M, "mol/L" => "mm"; density = ρ) ≈ mm
-    @test convert_concentration(system, M, "mol/L" => "vv"; density = ρ) ≈ vv
+    @test convert_concentration(system, M, "mol/L" => "x") ≈ x
+    @test convert_concentration(system, M, "mol/L" => "mm") ≈ mm
+    @test convert_concentration(system, M, "mol/L" => "vv") ≈ vv
 
     @test convert_concentration(system, mm, "mm" => "x") ≈ x
-    @test convert_concentration(system, mm, "mm" => "mol/L"; density = ρ) ≈ M
+    @test convert_concentration(system, mm, "mm" => "mol/L") ≈ M
     @test convert_concentration(system, mm, "mm" => "vv") ≈ vv
 
     tmp_input_file = tempname()
 
-    convert_density_table(system, "x")
+    convert_density_table!(system, "x")
+    r1 = write_packmol_input(system; concentration = 0.0, box_sides=[120,120,120], input = tmp_input_file, debug = true)
+    @test r1[1] == 57322
+    
     r1 = write_packmol_input(system; concentration = 0.5, margin = 20.0, input = tmp_input_file, debug = true)
     @test isfile(tmp_input_file)
 
-    convert_density_table(system, "mol/L")
+    convert_density_table!(system, "mol/L")
     r2 = write_packmol_input(system; concentration = 13.488667939471432, margin = 20.0, input = tmp_input_file, debug = true)
     @test all(isapprox.(r2,r1,rtol=0.005))
 
-    convert_density_table(system, "vv")
+    convert_density_table!(system, "vv")
     r3 = write_packmol_input(system; concentration = 0.7635032204047275, margin = 20.0, input = tmp_input_file, debug = true)
     @test all(isapprox.(r3,r1,rtol=0.005))
 
-    convert_density_table(system, "mm")
+    convert_density_table!(system, "mm")
     r4 = write_packmol_input(system; concentration = 0.7188817400010237, margin = 20.0, input = tmp_input_file, debug = true)
     @test all(isapprox.(r4,r1,rtol=0.005))
 
-    convert_density_table(system, "mol/L")
+    convert_density_table!(system, "mol/L")
     system.concentration_units = "x"
     @test_throws ArgumentError write_packmol_input(system; concentration = 0.5, margin = 20.0, input = tmp_input_file, debug = true)
     system.concentration_units = "mol/L"
