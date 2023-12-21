@@ -8,7 +8,7 @@ and sizes necessary to build different systems. Currently (as of version 1.2.0) 
 supports the construction of systems of a solute solvated by a mixture of two solvents. 
 
 !!! compat
-    The functionality described here is available in MolSimToolkit version 1.3.3.
+    The functionality described here is available in MolSimToolkit version 1.3.2.
 
 ### How to use it
 
