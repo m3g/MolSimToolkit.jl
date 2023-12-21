@@ -4,7 +4,7 @@ using ..MolSimToolkit: center_of_mass
 using PDBTools
 using TestItems
 
-export convert_concentration, convert_density_table
+export convert_concentration, convert_density_table!
 export density_pure_solvent, density_pure_cossolvent
 export write_packmol_input
 export SolutionBoxUSC
@@ -15,15 +15,15 @@ density_pure_cossolvent(system::SolutionBox) = system.density_table[end, 2]
 
 const PackmolInputCreatorDirectory = @__DIR__
 
-@kwdef mutable struct SolutionBoxUSC <: SolutionBox
-    concentration_units::String = "x"
+mutable struct SolutionBoxUSC <: SolutionBox
+    concentration_units::String
     solute_pdbfile::String
     solvent_pdbfile::String
     cossolvent_pdbfile::String
     density_table::Matrix{Float64}
-    solute_molar_mass::Float64 = mass(readPDB(solute_pdbfile))
-    solvent_molar_mass::Float64 = mass(readPDB(solvent_pdbfile))
-    cossolvent_molar_mass::Float64 = mass(readPDB(cossolvent_pdbfile))
+    solute_molar_mass::Float64
+    solvent_molar_mass::Float64
+    cossolvent_molar_mass::Float64
 end
 
 """
@@ -41,7 +41,49 @@ The concentration units of the density table can be provided explicitly and
 are assumed by default to be the molar fraction, `x`, of the cossolvent.
 
 """
-function SolutionBoxUSC end
+function SolutionBoxUSC(;
+        solute_pdbfile::String, 
+        solvent_pdbfile::String,
+        cossolvent_pdbfile::String,
+        density_table::Matrix{Float64},
+        concentration_units::Union{Nothing,String} = nothing,
+    )
+    if isnothing(concentration_units)
+        concentration_units = "x"
+        @warn "Concentration units not provided, assuming molar fraction." _file=nothing _line=nothing
+    end
+    if !(density_table[begin, 1] == 0.0)
+        throw(ArgumentError("First line of density table be the density of pure solvent, with cossolvent concentration equal to 0.0"))
+    end
+    if concentration_units in ("x", "vv", "mm") && !(density_table[end, 1] == 1.0)
+        throw(ArgumentError("Last line of density table be the density of pure cossolvent, with cossolvent concentration equal to 1.0"))
+    end
+    solute_molar_mass = mass(readPDB(solute_pdbfile))
+    solvent_molar_mass = mass(readPDB(solvent_pdbfile))
+    cossolvent_molar_mass = mass(readPDB(cossolvent_pdbfile))
+    system = SolutionBoxUSC(
+        concentration_units,
+        solute_pdbfile,
+        solvent_pdbfile,
+        cossolvent_pdbfile,
+        density_table,
+        solute_molar_mass,
+        solvent_molar_mass,
+        cossolvent_molar_mass,
+    )
+    if concentration_units == "mol/L"
+        x = convert_concentration(system, density_table[end, 1], "mol/L" => "x")
+        if !(x ≈ 1)
+            throw(ArgumentError(chomp("""
+            Conversion of concentration of last line into molar fraction gives: $x which is different from 1.0. 
+
+            The last line of the density_table must contain the density of pure cossolvent.
+
+            """)))
+        end
+    end
+    return system
+end
 
 function unit_name(u::String)
     u == "mol/L" && return "molarity"
@@ -101,8 +143,7 @@ fixrange(x) = x < 0 ? 0 : (x > 1 ? 1 : x)
     convert_concentration(
         system::SolutionBoxUSC,
         input_concentration, 
-        units;
-        density, # of the solution, required when converting from/to mol/L
+        units
     )
 
 Convert concentration from one unit to another. The input
@@ -133,8 +174,7 @@ where `system` is a `SolutionBoxUSC` object, and `55.5` is the molarity.
 function convert_concentration(
     system::SolutionBoxUSC,
     input_concentration::Real, 
-    units::Pair{String,String};
-    density::Union{Real,Nothing} = nothing, # of the solution
+    units::Pair{String,String}
 )
 
     (; solvent_molar_mass, cossolvent_molar_mass) = system
@@ -142,23 +182,20 @@ function convert_concentration(
     # If the units didn't change, just return the input concentrations
     first(units) == last(units) && return input_concentration
 
-    ρ = density # density of the solution
+    # Obtain density of the solution by interpolation
+    if first(units) != system.concentration_units
+        input_concentration_units = system.concentration_units
+        convert_density_table!(system, first(units))
+        ρ = interpolate_concentration(system, input_concentration)
+        convert_density_table!(system, input_concentration_units)
+    else
+        ρ = interpolate_concentration(system, input_concentration)
+    end
+
     ρc = density_pure_cossolvent(system) # density of the pure cossolvent
     ρw = density_pure_solvent(system) # density of the pure solvent
     Mw = solvent_molar_mass # molar mass of solvent 
     Mc = cossolvent_molar_mass # molar mass of the cossolvent
-
-    # Check if density of solution was provided, in the case of molar
-    # fraction conversions. Also, to converto to other units from molarity, we need ρ
-    if isnothing(ρ)
-        if last(units) == "mol/L" || last(units) == "mol/L" 
-            throw(ArgumentError(
-                """
-                Density of solution is required to convert from/to molarity.
-                Use the optional keyword argument `density` to provide it.
-                """))
-        end
-    end
 
     # nc and nw are the molar concentrations
     if first(units) == "vv"
@@ -247,7 +284,7 @@ function convert_concentration(
 end
 
 """
-    convert_density_table(system::SolutionBoxUSC, target_units)
+    convert_density_table!(system::SolutionBoxUSC, target_units)
 
 Converts the density table of the system from one unit to another. Returns the 
 input `system` with the density table converted to the new units.
@@ -257,22 +294,23 @@ The target units may be one of: `"mol/L"`, `"x"`, `"vv"`, `"mm"`.
 ## Example
 
 ```julia
-convert_density_table(system, "mol/L")
+convert_density_table!(system, "mol/L")
 ```
 
 """
-function convert_density_table(
+function convert_density_table!(
     system::SolutionBoxUSC,
     target_units::String;
 )
     current_units = system.concentration_units
-    density_table = system.density_table
-    for irow in eachindex(eachrow(density_table))
-        cin = density_table[irow, 1]
-        ρ = density_table[irow, 2]
-        cout = convert_concentration(system, cin, current_units => target_units; density = ρ)
-        density_table[irow, 1] = cout
+    new_density_table = copy(system.density_table)
+    for irow in eachindex(eachrow(new_density_table))
+        cin = new_density_table[irow, 1]
+        ρ = new_density_table[irow, 2]
+        cout = convert_concentration(system, cin, current_units => target_units)
+        new_density_table[irow, 1] = cout
     end
+    system.density_table .= new_density_table
     system.concentration_units = target_units
     return system
 end
@@ -333,10 +371,10 @@ function write_packmol_input(
     ρ = interpolate_concentration(system, concentration)
 
     # Obtain the concentration in all units, for testing
-    c_x = convert_concentration(system, concentration, cunit => "x"; density = ρ)
-    c_vv = convert_concentration(system, concentration, cunit => "vv"; density = ρ)
-    cc_mol = convert_concentration(system, concentration, cunit => "mol/L"; density = ρ)
-    cc_mm = convert_concentration(system, concentration, cunit => "mm"; density = ρ)
+    c_x = convert_concentration(system, concentration, cunit => "x")
+    c_vv = convert_concentration(system, concentration, cunit => "vv")
+    cc_mol = convert_concentration(system, concentration, cunit => "mol/L")
+    cc_mm = convert_concentration(system, concentration, cunit => "mm")
 
     # aliases for clearer formulas
     ρc = density_pure_cossolvent(system) 
@@ -368,7 +406,11 @@ function write_packmol_input(
     nc = round(Int, cc * vs)
 
     # Number of solvent molecules
-    nw = round(Int, nc * (1 - c_x) / c_x)
+    if nc != 0
+        nw = round(Int, nc * (1 - c_x) / c_x)
+    else
+        nw = round(Int, vs * (ρw/CMV) / Mw)
+    end
 
     # Final density of the solution (not inclusing solute volume)
     ρ = CMV * (Mc * nc + Mw * nw) / vs
@@ -469,7 +511,7 @@ function write_packmol_input(
         """))
     
     if debug 
-        return nw, nc, l
+        return nw, nc, 2*l
     else
         return nothing
     end
