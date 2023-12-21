@@ -76,13 +76,54 @@
         0.9584  0.982
         1.0     0.9981
     ]
-    system = SolutionBoxUSC(
+    system = @test_logs (:warn,) SolutionBoxUSC(
         solute_pdbfile = "$test_dir/data/poly_h.pdb",
         solvent_pdbfile = "$test_dir/data/ethanol.pdb",
         cossolvent_pdbfile = "$test_dir/data/water.pdb",
         density_table = dw
     )
     @test convert_concentration(system, 1.0, "x" => "mol/L") ≈ 55.40278451586260
+    dw[end, 1] = 0.99
+    @test_throws ArgumentError SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw
+    )
+    dw[end, 1] = 1.0
+    dw[begin, 1] = 0.1
+    @test_throws ArgumentError SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw
+    )
+    dw[begin, 1] = 0.0
+    convert_density_table!(system, "mol/L")
+    dw = copy(system.density_table)
+    @test_throws ArgumentError SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw,
+        concentration_units = "x",
+    )
+    system = SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw,
+        concentration_units = "mol/L",
+    )
+    @test density_pure_cossolvent(system) ≈ 0.9981
+    dw[end, 1] = dw[end, 1] + 0.01
+    @test_throws ArgumentError SolutionBoxUSC(
+        solute_pdbfile = "$test_dir/data/poly_h.pdb",
+        solvent_pdbfile = "$test_dir/data/ethanol.pdb",
+        cossolvent_pdbfile = "$test_dir/data/water.pdb",
+        density_table = dw,
+        concentration_units = "mol/L",
+    )
 
 end
 

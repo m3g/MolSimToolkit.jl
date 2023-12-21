@@ -53,10 +53,10 @@ function SolutionBoxUSC(;
         @warn "Concentration units not provided, assuming molar fraction." _file=nothing _line=nothing
     end
     if !(density_table[begin, 1] == 0.0)
-        throw(ArgumentError("First line of density table be the density of pure solvent, with cossolvent concentration equal to 0.0"))
+        throw(ArgumentError("First line of density table must be the density of pure solvent, with cossolvent concentration equal to 0.0"))
     end
     if concentration_units in ("x", "vv", "mm") && !(density_table[end, 1] == 1.0)
-        throw(ArgumentError("Last line of density table be the density of pure cossolvent, with cossolvent concentration equal to 1.0"))
+        throw(ArgumentError("Last line of density table must be the density of pure cossolvent, with cossolvent concentration equal to 1.0"))
     end
     solute_molar_mass = mass(readPDB(solute_pdbfile))
     solvent_molar_mass = mass(readPDB(solvent_pdbfile))
@@ -243,7 +243,8 @@ function convert_concentration(
 
     if first(units) == "mol/L"
         pure_c = 1000 * ρc / Mc  
-        if !(0 <= input_concentration <= pure_c)
+        if !(0 <= input_concentration <= pure_c) && !(input_concentration ≈ pure_c)
+            @show input_concentration
             throw(ArgumentError("Cossolvent molarity must be in the [0,$pure_c] range."))
         end
         nc = input_concentration / 1000
