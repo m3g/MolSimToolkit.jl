@@ -4,11 +4,11 @@
 ## Packmol Input Creator
 
 This module helps the setup of a `Packmol` input file, by computing the number of molecules
-and sizes necessary to build different systems. Currently (as of version 1.2.0) the module
+and sizes necessary to build different systems. Currently (as of version 1.3.3) the module
 supports the construction of systems of a solute solvated by a mixture of two solvents. 
 
 !!! compat
-    The functionality described here is available in MolSimToolkit version 1.3.2.
+    The functionality described here is available in MolSimToolkit version 1.3.3 or greater.
 
 ### How to use it
 
