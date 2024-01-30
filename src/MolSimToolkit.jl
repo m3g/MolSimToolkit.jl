@@ -35,5 +35,6 @@ include("./gromacs/remd.jl")
 
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
+include("./Ressampling/Ressampling.jl")
 
 end

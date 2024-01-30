@@ -14,6 +14,7 @@ makedocs(
         "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",
+        "Ressampling" => "ressampling.md",
         "Functions" => "functions.md",
         "Developer zone" => "Developer.md",
     ],
