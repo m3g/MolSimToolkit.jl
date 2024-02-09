@@ -10,6 +10,8 @@ possibly preview the outcome of a new simulation with these modifications.
 ## How to use it
 
 ```julia-repl
+julia> import Pkg; Pkg.add("MolSimToolkit")
+
 julia> using MolSimToolkit.Resampling
 ```
 
