@@ -38,8 +38,8 @@ This result is the energy difference between the  perturbed frame and the origin
 ```
 """
 struct Results
-    prob::Vector{Float64}
-    prob_rel::Vector{Float64}
+    probability::Vector{Float64}
+    relative_probability::Vector{Float64}
     energy::Vector{Float64}
 end
 
