@@ -10,7 +10,6 @@ const testdir = "$(@__DIR__)/test"
 include("./newweights.jl")
 include("./ij_equations.jl")
 include("./r_equations.jl")
-include("sampling_graph.jl")
 
 end
 
