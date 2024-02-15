@@ -50,7 +50,7 @@ standard deviation = 0.18914961672164302
 Mode = 0.005052431023061191
 
 -------------------------------------------------
-FRAME PROBABILITIES RELATIVE TO THE ORIGINAL ONES
+FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
 -------------------------------------------------
 
 Average probability = 1.8635690577652066e-7
@@ -159,7 +159,7 @@ function Base.show(io::IO, mime::MIME"text/plain", res::Resampling_results)
     Mode = $(mode(res.probability))
 
     -------------------------------------------------
-    FRAME PROBABILITIES RELATIVE TO THE ORIGINAL ONES
+    FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
     -------------------------------------------------
 
     Average probability = $(mean(res.relative_probability))
