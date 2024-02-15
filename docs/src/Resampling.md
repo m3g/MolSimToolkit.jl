@@ -103,8 +103,17 @@ Average energy = 9.439727822732474
 standard deviation = 2.219086818369851
 ```
 
-Now, with this ```weights```structure, we can extract three results: each frame's weight, using ```weights.probability```, each frame's weights relative to its original
-probability using ```weights.relative_probability```, and last, but not least, the energy difference for each frame, using ```weights.energy```.
+The data in ```weights``` structure is organized as it follows:
+
+```julia-repl
+struct Resampling_results
+    probability::Vector{Float64}
+    relative_probability::Vector{Float64}
+    energy::Vector{Float64}
+end
+```
+
+As an example, if we want the absolute weights computed for our simulation:
 
 ```julia-repl
 julia> weights.probability
@@ -131,4 +140,3 @@ julia> weights.probability
  0.004453135199832921
  0.15077485017197673
 ```
-
