@@ -1,4 +1,4 @@
-# Resampling
+# Simulation Reweighting
 
 Computes the new weight for a frame of a simulation based on the energy difference between the perturbed and non-perturbed original sampling
 
@@ -17,7 +17,7 @@ julia> using MolSimToolkit.Resampling
 
 ## Setting functions
 
-In other to obtain these weights, we have to use three function: the ```new_weights``` , which will computate each weight, an ```"ij"``` function to apply the 
+In other to obtain these weights, we have to use three function: the ```reweight``` , which will computate each weight, an ```"ij"``` function to apply the 
 ```"perturbation"``` function to each distance between atomic pairs computated in the frame. The last one is responsible for calculate the resulted energy for that distance in that frame, applying the desired perturbation.
 
 Firstly, we define the ```simulation``` object and set the atoms that will determine which interactions will be perturbed:
@@ -66,7 +66,7 @@ julia> function intermol_perturb(i::Int64, j::Int64, d2::Float64, perturbation::
 intermol_perturb (generic function with 1 method)
 ```
 
-And finally, using the ```new_weights``` function, we pass both the ```simulation``` and the last function anonymously in the input:
+And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
 
 ```julia-repl
 julia> alpha = 2.e-5
@@ -78,7 +78,7 @@ julia> beta = 5.e-3
 julia> cut_off = 12.0
 12.0
 
-julia> weights = new_weigths(simulation, (i,j,d2) -> intermol_perturb(i, j, d2, r -> gaussian_decay(r, alpha, beta, cut_off)), i1, i2, cut_off)
+julia> weights = reweight(simulation, (i,j,d2) -> intermol_perturb(i, j, d2, r -> gaussian_decay(r, alpha, beta, cut_off)), i1, i2, cut_off)
 -------------
 FRAME WEIGHTS
 -------------
@@ -139,4 +139,12 @@ julia> weights.probability
  0.02730599234002224
  0.004453135199832921
  0.15077485017197673
+```
+
+## Reference functions
+
+```@autodocs
+Modules = [MolSimToolkit.Resampling]
+Pages = ["newweights.jl"]
+Order = [:function, :type]
 ```
