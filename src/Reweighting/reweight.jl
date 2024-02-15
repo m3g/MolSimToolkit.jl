@@ -27,11 +27,11 @@ julia> import PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Resampling
 
-julia> simulation = Simulation("$testdir/Testing_resampling.pdb", "$testdir/Testing_resampling_small_trajectory.xtc")
+julia> simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_small_trajectory.xtc")
 Simulation 
     Atom type: Atom
-    PDB file: /home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test/Testing_resampling.pdb
-    Trajectory file: /home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test/Testing_resampling_small_trajectory.xtc
+    PDB file: /home/lucasv/.julia/dev/MolSimToolkit/src/Reweighting/test/Testing_reweighting.pdb
+    Trajectory file: /home/lucasv/.julia/dev/MolSimToolkit/src/Reweighting/test/Testing_reweighting_small_trajectory.xtc
     Total number of frames: 21
     Frame range: 1:1:21
     Number of frames in range: 21

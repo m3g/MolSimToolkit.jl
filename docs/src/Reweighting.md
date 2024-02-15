@@ -145,6 +145,6 @@ julia> weights.probability
 
 ```@autodocs
 Modules = [MolSimToolkit.Reweighting]
-Pages = ["newweights.jl"]
+Pages = ["reweight.jl"]
 Order = [:function, :type]
 ```
