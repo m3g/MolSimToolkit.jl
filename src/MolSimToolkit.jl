@@ -32,6 +32,7 @@ include("./BlockAverages.jl")
 include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
 @reexport using .MolecularMinimumDistances
 include("./gromacs/remd.jl")
+include("./Reweighting/reweighting.jl")
 
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")

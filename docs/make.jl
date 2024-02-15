@@ -15,6 +15,7 @@ makedocs(
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",
         "Functions" => "functions.md",
+        "Reweighting"  => "Reweighting.md",
         "Developer zone" => "Developer.md",
     ],
 )
