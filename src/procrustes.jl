@@ -121,6 +121,8 @@ If the set is compared toi tself, the RMSD should be zero:
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
+julia> using PDBTools
+
 julia> ca = coor(readPDB(Testing.namd_pdb), "name CA");
 
 julia> rmsd(ca, ca)
