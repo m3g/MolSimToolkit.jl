@@ -224,6 +224,7 @@ end
     x = positions(current_frame(simulation))[cas]
     xref = copy(x)
     for (iframe, frame) in enumerate(simulation)
+        local x, z
         x = positions(frame)[cas]
         rmsd_notaligned[iframe] = rmsd(x,xref)
         z = align(x,xref)
