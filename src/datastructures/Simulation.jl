@@ -428,6 +428,7 @@ end
     using MolSimToolkit.Testing
     pdb = PDBTools.readPDB(Testing.namd_pdb)
     simulation = Simulation(pdb, Testing.namd_traj)
+    firstframe!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
     @test isnothing(path_pdb(simulation))
 end

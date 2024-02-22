@@ -58,6 +58,7 @@ end
     using MolSimToolkit.Testing
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    firstframe!(simulation)
     protein_indexes = PDBTools.selindex(atoms(simulation), "protein")
     coor = positions(current_frame(simulation))
     @test center_of_mass(protein_indexes, simulation, coor) ≈

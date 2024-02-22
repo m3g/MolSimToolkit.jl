@@ -207,6 +207,7 @@ end
 
     # same test, but with coordinates obtained from a simulation frame
     simulation = Simulation(namd_pdb, namd_traj)
+    firstframe!(simulation)
     cas = findall(Select("name CA"), atoms)
     x = positions(current_frame(simulation))[cas]
     y = x .+ Ref(SVector{3}(45.0, -15.0, 31.5))
