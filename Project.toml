@@ -40,6 +40,7 @@ PDBTools = "0.14.2, 0.15, 1"
 Plots = "1.39"
 Printf = "1.9"
 Reexport = "1.2.2"
+Rotations = "1.7"
 StaticArrays = "1.6"
 Statistics = "1"
 StatsBase = "0.34"
@@ -51,8 +52,9 @@ julia = "1.9"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Aqua", "Test", "TestItemRunner", "BenchmarkTools", "DelimitedFiles"]
+test = ["Aqua", "Test", "TestItemRunner", "BenchmarkTools", "DelimitedFiles", "Rotations"]
