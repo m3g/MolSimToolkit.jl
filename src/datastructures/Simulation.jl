@@ -282,7 +282,7 @@ Restarts the trajectory buffer, and places the current frame at the first frame 
 
 # Example
 
-```jldoctest filter = r"^(?!.*(?:pdb|dcd)).*"
+```julia-repl
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
@@ -290,8 +290,8 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 julia> firstframe!(simulation) 
 Simulation 
     Atom type: Atom
-    PDB file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/structure.pdb
-    Trajectory file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/structure.dcd
+    PDB file: structure.pdb
+    Trajectory file: structure.dcd
     Total number of frames: 5
     Frame range: 1:1:5
     Number of frames in range: 5
