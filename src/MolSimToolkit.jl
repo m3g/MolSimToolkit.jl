@@ -13,6 +13,7 @@ import LaTeXStrings # only because Aqua complains: used in the Plotting extensio
 
 export wrap, wrap_to_first
 export distances
+export align, align!, rmsd, rmsd_matrix
 
 # Testing module
 include("./Testing.jl")
@@ -25,6 +26,7 @@ include("./datastructures/Positions.jl")
 include("./wrap.jl")
 include("./distances.jl")
 include("./center_of_mass.jl")
+include("./procrustes.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")
