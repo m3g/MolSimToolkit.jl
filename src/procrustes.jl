@@ -285,6 +285,9 @@ function rmsd_matrix(
     mass::Union{AbstractVector{Int}, Nothing} = nothing,
     align::Bool = true,
 )
+    if !isnothing(mass) && (length(indices) != length(mass))
+        throw(ArgumentError("indices and mass vectors must have the same length"))
+    end
     # This is very memory inefficient, but it is a simple way to compute the RMSD matrix
     coordinates = [positions(frame)[indices] for frame in simulation]
     rmsd_matrix = zeros(length(simulation), length(simulation))
@@ -315,6 +318,8 @@ end
         0.375474  0.403302  0.317572  0.0       0.454195
         0.580039  0.713736  0.527873  0.454195  0.0
     ] .< 1e-6)
+
+    @test_throws ArgumentError rmsd_matrix(simulation, cas; mass = [1, 2, 3, 4, 5])
 end
 
 
