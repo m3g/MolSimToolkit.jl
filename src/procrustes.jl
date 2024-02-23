@@ -7,7 +7,7 @@ using StaticArrays: SVector, MMatrix, SMatrix
 
 Aligns two structures (sets of points in 3D space). Solves
 the "Procrustes" problem, which is to find the best
-translation, rotation, and scaling that aligns the two
+translation, and rotation, that aligns the two
 structures, minimizing the RMSD between them.
 
 Structures are expected to be of the same size, and the 
