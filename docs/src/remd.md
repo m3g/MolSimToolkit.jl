@@ -6,8 +6,10 @@ of the quality of the exchange process.
 
 !!! compat
     This function was introduced in `MolSimToolkit` version 1.1.0. 
-    The function was tested to read log files produced by Gromacs 2019.3. Compatibility with 
-    other versions is not guaranteed (issue reporting and contributions are welcome). 
+    The function was tested to read log files produced by Gromacs versions: 
+      - 2019.4
+      - 5.0.4
+    Compatibility with other versions is not guaranteed (issue reporting and contributions are welcome). 
 
 ## Reading REMD data
 
@@ -16,7 +18,7 @@ First, read the data from the Gromacs simulation log file:
 ```julia-repl
 julia> using MolSimToolkit
 
-julia> data = remd_data(MolSimToolkit.hrmed_production_log)
+julia> data = remd_data(MolSimToolkit.remd_production_log)
 ```
 where `MolSimToolkit.hremd_production_log` is an example `log` file produced by Gromacs.
 

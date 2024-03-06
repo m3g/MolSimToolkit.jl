@@ -1,0 +1,1948 @@
+Log file opened on Mon Mar  4 17:50:47 2024
+Host: 13700KF-32GB-05  pid: 397079  rank ID: 0  number of ranks:  1
+GROMACS:    gmx mdrun, VERSION 5.0.4
+
+GROMACS is written by:
+Emile Apol         Rossen Apostolov   Herman J.C. Berendsen Par Bjelkmar       
+Aldert van Buuren  Rudi van Drunen    Anton Feenstra     Sebastian Fritsch  
+Gerrit Groenhof    Christoph Junghans Peter Kasson       Carsten Kutzner    
+Per Larsson        Justin A. Lemkul   Magnus Lundborg    Pieter Meulenhoff  
+Erik Marklund      Teemu Murtola      Szilard Pall       Sander Pronk       
+Roland Schulz      Alexey Shvetsov    Michael Shirts     Alfons Sijbers     
+Peter Tieleman     Christian Wennberg Maarten Wolf       
+and the project leaders:
+Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
+
+Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+Copyright (c) 2001-2014, The GROMACS development team at
+Uppsala University, Stockholm University and
+the Royal Institute of Technology, Sweden.
+check out http://www.gromacs.org for more information.
+
+GROMACS is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2.1
+of the License, or (at your option) any later version.
+
+GROMACS:      gmx mdrun, VERSION 5.0.4
+Executable:   /usr/local/gromacs/bin/gmx_mpi
+Library dir:  /usr/local/gromacs/share/gromacs/top
+Command line:
+  gmx_mpi mdrun -v -table table.xvg -tablep table.xvg -replex 1000 -noappend -maxh 12 -multi 16 -rdd 5
+
+Gromacs version:    VERSION 5.0.4
+Precision:          single
+Memory model:       64 bit
+MPI library:        MPI
+OpenMP support:     enabled
+GPU support:        disabled
+invsqrt routine:    gmx_software_invsqrt(x)
+SIMD instructions:  AVX2_256
+FFT library:        fftw-3.3.3-sse2
+RDTSCP usage:       enabled
+C++11 compilation:  enabled
+TNG support:        enabled
+Tracing support:    disabled
+Built on:           seg 26 fev 2024 17:35:33 -03
+Built by:           user@13700KF-32GB-05 [CMAKE]
+Build OS/arch:      Linux 5.15.0-82-generic x86_64
+Build CPU vendor:   GenuineIntel
+Build CPU brand:    13th Gen Intel(R) Core(TM) i7-13700KF
+Build CPU family:   6   Model: 183   Stepping: 1
+Build CPU features: aes apic avx avx2 clfsh cmov cx8 cx16 f16c fma htt lahf_lm mmx msr nonstop_tsc pcid pclmuldq pdcm pdpe1gb popcnt pse rdrnd rdtscp sse2 sse3 sse4.1 sse4.2 ssse3 tdt x2apic
+C compiler:         /usr/bin/cc GNU 11.4.0
+C compiler flags:    -march=core-avx2    -Wno-maybe-uninitialized -Wextra -Wno-missing-field-initializers -Wno-sign-compare -Wpointer-arith -Wall -Wno-unused -Wunused-value -Wunused-parameter  -O3 -DNDEBUG -fomit-frame-pointer -funroll-all-loops -fexcess-precision=fast  -Wno-array-bounds 
+C++ compiler:       /usr/bin/c++ GNU 11.4.0
+C++ compiler flags:  -march=core-avx2   -std=c++0x  -Wextra -Wno-missing-field-initializers -Wpointer-arith -Wall -Wno-unused-function  -O3 -DNDEBUG -fomit-frame-pointer -funroll-all-loops -fexcess-precision=fast  -Wno-array-bounds 
+Boost version:      1.55.0 (internal)
+
+
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+B. Hess and C. Kutzner and D. van der Spoel and E. Lindahl
+GROMACS 4: Algorithms for highly efficient, load-balanced, and scalable
+molecular simulation
+J. Chem. Theory Comput. 4 (2008) pp. 435-447
+-------- -------- --- Thank You --- -------- --------
+
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+D. van der Spoel, E. Lindahl, B. Hess, G. Groenhof, A. E. Mark and H. J. C.
+Berendsen
+GROMACS: Fast, Flexible and Free
+J. Comp. Chem. 26 (2005) pp. 1701-1719
+-------- -------- --- Thank You --- -------- --------
+
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+E. Lindahl and B. Hess and D. van der Spoel
+GROMACS 3.0: A package for molecular simulation and trajectory analysis
+J. Mol. Mod. 7 (2001) pp. 306-317
+-------- -------- --- Thank You --- -------- --------
+
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+H. J. C. Berendsen, D. van der Spoel and R. van Drunen
+GROMACS: A message-passing parallel molecular dynamics implementation
+Comp. Phys. Comm. 91 (1995) pp. 43-56
+-------- -------- --- Thank You --- -------- --------
+
+Input Parameters:
+   integrator                     = sd
+   tinit                          = 0
+   dt                             = 0.001
+   nsteps                         = 512000000
+   init-step                      = 0
+   simulation-part                = 1
+   comm-mode                      = Angular
+   nstcomm                        = 100
+   bd-fric                        = 0
+   ld-seed                        = 3360099603
+   emtol                          = 10
+   emstep                         = 0.01
+   niter                          = 20
+   fcstep                         = 0
+   nstcgsteep                     = 1000
+   nbfgscorr                      = 10
+   rtpi                           = 0.05
+   nstxout                        = 0
+   nstvout                        = 0
+   nstfout                        = 0
+   nstlog                         = 5000
+   nstcalcenergy                  = 100
+   nstenergy                      = 5000
+   nstxout-compressed             = 5000
+   compressed-x-precision         = 1000
+   cutoff-scheme                  = Group
+   nstlist                        = 20
+   ns-type                        = Grid
+   pbc                            = xyz
+   periodic-molecules             = FALSE
+   verlet-buffer-tolerance        = 0.005
+   rlist                          = 3
+   rlistlong                      = 3
+   nstcalclr                      = 0
+   coulombtype                    = User
+   coulomb-modifier               = None
+   rcoulomb-switch                = 0
+   rcoulomb                       = 3
+   epsilon-r                      = 1
+   epsilon-rf                     = inf
+   vdw-type                       = User
+   vdw-modifier                   = None
+   rvdw-switch                    = 0
+   rvdw                           = 3
+   DispCorr                       = No
+   table-extension                = 13
+   fourierspacing                 = 0.12
+   fourier-nx                     = 0
+   fourier-ny                     = 0
+   fourier-nz                     = 0
+   pme-order                      = 4
+   ewald-rtol                     = 1e-05
+   ewald-rtol-lj                  = 0.001
+   lj-pme-comb-rule               = Geometric
+   ewald-geometry                 = 0
+   epsilon-surface                = 0
+   implicit-solvent               = No
+   gb-algorithm                   = Still
+   nstgbradii                     = 1
+   rgbradii                       = 1
+   gb-epsilon-solvent             = 80
+   gb-saltconc                    = 0
+   gb-obc-alpha                   = 1
+   gb-obc-beta                    = 0.8
+   gb-obc-gamma                   = 4.85
+   gb-dielectric-offset           = 0.009
+   sa-algorithm                   = Ace-approximation
+   sa-surface-tension             = 2.05016
+   tcoupl                         = No
+   nsttcouple                     = -1
+   nh-chain-length                = 0
+   print-nose-hoover-chain-variables = FALSE
+   pcoupl                         = No
+   pcoupltype                     = Isotropic
+   nstpcouple                     = -1
+   tau-p                          = 1
+   compressibility (3x3):
+      compressibility[    0]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      compressibility[    1]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      compressibility[    2]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+   ref-p (3x3):
+      ref-p[    0]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      ref-p[    1]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      ref-p[    2]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+   refcoord-scaling               = No
+   posres-com (3):
+      posres-com[0]= 0.00000e+00
+      posres-com[1]= 0.00000e+00
+      posres-com[2]= 0.00000e+00
+   posres-comB (3):
+      posres-comB[0]= 0.00000e+00
+      posres-comB[1]= 0.00000e+00
+      posres-comB[2]= 0.00000e+00
+   QMMM                           = FALSE
+   QMconstraints                  = 0
+   QMMMscheme                     = 0
+   MMChargeScaleFactor            = 1
+qm-opts:
+   ngQM                           = 0
+   constraint-algorithm           = Lincs
+   continuation                   = FALSE
+   Shake-SOR                      = FALSE
+   shake-tol                      = 0.0001
+   lincs-order                    = 4
+   lincs-iter                     = 1
+   lincs-warnangle                = 30
+   nwall                          = 0
+   wall-type                      = 9-3
+   wall-r-linpot                  = -1
+   wall-atomtype[0]               = -1
+   wall-atomtype[1]               = -1
+   wall-density[0]                = 0
+   wall-density[1]                = 0
+   wall-ewald-zfac                = 3
+   pull                           = no
+   rotation                       = FALSE
+   interactiveMD                  = FALSE
+   disre                          = No
+   disre-weighting                = Conservative
+   disre-mixed                    = FALSE
+   dr-fc                          = 1000
+   dr-tau                         = 0
+   nstdisreout                    = 100
+   orire-fc                       = 0
+   orire-tau                      = 0
+   nstorireout                    = 100
+   free-energy                    = no
+   cos-acceleration               = 0
+   deform (3x3):
+      deform[    0]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      deform[    1]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+      deform[    2]={ 0.00000e+00,  0.00000e+00,  0.00000e+00}
+   simulated-tempering            = FALSE
+   E-x:
+      n = 0
+   E-xt:
+      n = 0
+   E-y:
+      n = 0
+   E-yt:
+      n = 0
+   E-z:
+      n = 0
+   E-zt:
+      n = 0
+   swapcoords                     = no
+   adress                         = FALSE
+   userint1                       = 0
+   userint2                       = 0
+   userint3                       = 0
+   userint4                       = 0
+   userreal1                      = 0
+   userreal2                      = 0
+   userreal3                      = 0
+   userreal4                      = 0
+grpopts:
+   nrdf:         492
+   ref-t:         166
+   tau-t:           1
+annealing:          No
+annealing-npoints:           0
+   acc:	           0           0           0
+   nfreeze:           N           N           N
+   energygrp-flags[  0]: 0
+This is simulation 13 out of 16 running as a composite Gromacs
+multi-simulation job. Setup for this simulation:
+
+Using 1 MPI process
+
+Detecting CPU SIMD instructions.
+Present hardware specification:
+Vendor: GenuineIntel
+Brand:  13th Gen Intel(R) Core(TM) i7-13700KF
+Family:  6  Model: 183  Stepping:  1
+Features: aes apic avx avx2 clfsh cmov cx8 cx16 f16c fma htt lahf_lm mmx msr nonstop_tsc pcid pclmuldq pdcm pdpe1gb popcnt pse rdrnd rdtscp sse2 sse3 sse4.1 sse4.2 ssse3 tdt x2apic
+SIMD instructions most likely to fit this hardware: AVX2_256
+SIMD instructions selected at GROMACS compile time: AVX2_256
+
+
+NOTE: This file uses the deprecated 'group' cutoff_scheme. This will be
+removed in a future release when 'verlet' supports all interaction forms.
+
+Table routines are used for coulomb: TRUE
+Table routines are used for vdw:     TRUE
+Cut-off's:   NS: 3   Coulomb: 3   LJ: 3
+System total charge: 0.000
+Read user tables from table.xvg with 15001 data points.
+Tabscale = 500 points/nm
+Read user tables from table.xvg with 15001 data points.
+Tabscale = 500 points/nm
+Potential shift: LJ r^-12: 0.000e+00 r^-6: 0.000e+00
+Removing pbc first time
+
+NOTE: The number of threads is not equal to the number of (logical) cores
+      and the -pin option is set to auto: will not pin thread to cores.
+      This can lead to significant performance degradation.
+      Consider using -pin on (and -pinoffset in case you run multiple jobs).
+
+Center of mass motion removal mode is Angular
+We have the following groups for center of mass motion removal:
+  0:  rest
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+N. Goga and A. J. Rzepiela and A. H. de Vries and S. J. Marrink and H. J. C.
+Berendsen
+Efficient Algorithms for Langevin and DPD Dynamics
+J. Chem. Theory Comput. 8 (2012) pp. 3637--3649
+-------- -------- --- Thank You --- -------- --------
+
+There are: 166 Atoms
+Max number of connections per atom is 34
+Total number of connections is 4056
+Max number of graph edges per atom is 2
+Total number of graph edges is 330
+
+Initializing Replica Exchange
+Repl  There are 16 replicas:
+Multi-checking the number of atoms ... OK
+Multi-checking the integrator ... OK
+Multi-checking init_step+nsteps ... OK
+Multi-checking first exchange step: init_step/-replex ... OK
+Multi-checking the temperature coupling ... OK
+Multi-checking the number of temperature coupling groups ... OK
+Multi-checking the pressure coupling ... OK
+Multi-checking free energy ... OK
+Multi-checking number of lambda states ... OK
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+Y. Sugita, Y. Okamoto
+Replica-exchange molecular dynamics method for protein folding
+Chem. Phys. Lett. 314 (1999) pp. 141-151
+-------- -------- --- Thank You --- -------- --------
+
+
+Replica exchange in temperature
+ 140.0 142.0 144.0 146.0 148.0 150.0 152.0 154.0 156.0 158.0 160.0 162.0 164.0 166.0 168.0 170.0
+
+Replica exchange interval: 1000
+
+Replica random seed: 815470833
+Replica exchange information below: x=exchange, pr=probability
+Initial temperature: 100.868 K
+
+Started mdrun on rank 0 Mon Mar  4 17:50:47 2024
+           Step           Time         Lambda
+              0        0.00000        0.00000
+
+
+Grid: 5 x 5 x 5 cells
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    5.34950e-08    1.50635e-09    3.60110e-10   -5.57000e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.43858e-01    0.00000e+00   -5.56856e+02    2.05692e+02
+   Total Energy    Temperature Pressure (bar)
+   -3.51164e+02    1.00565e+02    7.77643e-01
+
+Replica exchange at step 1000 time 1.00000
+Repl 12 <-> 13  dE_term = -4.622e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .79       1.0       .95       .93       1.0       1.0       1.0       .83
+
+Exchanging 13 with 12
+Replica exchange at step 2000 time 2.00000
+Repl 13 <-> 14  dE_term = -3.072e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .72       .75       .66       1.0       .74       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 3000 time 3.00000
+Repl 12 <-> 13  dE_term = -5.647e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .92       1.0       1.0       1.0       1.0       .87       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 4000 time 4.00000
+Repl 13 <-> 14  dE_term =  4.847e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .77       1.0       1.0       .84       1.0       1.0       .95     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+           5000        5.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.20517e+02    6.65974e+01    5.56343e+01   -4.05118e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.45158e-01    0.00000e+00   -1.61924e+02    3.11611e+02
+   Total Energy    Temperature Pressure (bar)
+    1.49687e+02    1.52349e+02   -1.60514e+00
+
+Replica exchange at step 5000 time 5.00000
+Repl 12 <-> 13  dE_term = -7.316e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .69       1.0       .99       .80       1.0       1.0       .77
+
+Exchanging 13 with 12
+Replica exchange at step 6000 time 6.00000
+Repl 13 <-> 14  dE_term = -1.848e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .73       1.0       .95       1.0       1.0       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 7000 time 7.00000
+Repl 12 <-> 13  dE_term = -6.263e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .71       1.0       1.0       .92       1.0       .77       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 8000 time 8.00000
+Repl 13 <-> 14  dE_term = -2.348e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .83       1.0       .50       1.0       .70       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 9000 time 9.00000
+Repl 12 <-> 13  dE_term =  1.338e+00 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .58       .94       .98       1.0       .66       1.0       .26       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          10000       10.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.04440e+02    6.15926e+01    4.87185e+01   -3.81661e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.96538e-01    0.00000e+00   -1.66613e+02    2.96612e+02
+   Total Energy    Temperature Pressure (bar)
+    1.30000e+02    1.45016e+02    8.41651e-01
+
+Replica exchange at step 10000 time 10.00000
+Repl 13 <-> 14  dE_term =  8.861e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .74       .65       .96       1.0       1.0       .74       .41     
+
+Exchanging 13 with 14
+Replica exchange at step 11000 time 11.00000
+Repl 12 <-> 13  dE_term =  3.565e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6    7    8 x  9   10 x 11   12   13   14   15
+Repl pr   1.0       .75       1.0       .57       .77       .90       .70       .37
+
+Replica exchange at step 12000 time 12.00000
+Repl 13 <-> 14  dE_term = -2.732e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .89       1.0       .91       1.0       .37       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 13000 time 13.00000
+Repl 12 <-> 13  dE_term = -5.684e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14   15
+Repl pr   1.0       .41       1.0       1.0       .79       .44       1.0       .43
+
+Exchanging 13 with 12
+Replica exchange at step 14000 time 14.00000
+Repl 13 <-> 14  dE_term = -2.380e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .40       1.0       1.0       .50       1.0       1.0       1.0     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          15000       15.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.02311e+02    1.12846e+02    5.48134e+01   -3.85265e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    3.99909e-01    0.00000e+00   -1.14895e+02    3.18968e+02
+   Total Energy    Temperature Pressure (bar)
+    2.04073e+02    1.55947e+02   -2.50679e-01
+
+Replica exchange at step 15000 time 15.00000
+Repl 12 <-> 13  dE_term = -3.436e-01 (kT)
+Repl ex  0    1    2 x  3    4    5    6    7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .65       1.0       .85       .47       1.0       .87       1.0       .72
+
+Exchanging 13 with 12
+Replica exchange at step 16000 time 16.00000
+Repl 13 <-> 14  dE_term = -6.109e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .66       1.0       1.0       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 17000 time 17.00000
+Repl 12 <-> 13  dE_term =  9.107e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .79       .99       .39       1.0       1.0       .65       .40       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 18000 time 18.00000
+Repl 13 <-> 14  dE_term =  4.540e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .59       .86       .69       .91       1.0       .34       .96     
+
+Exchanging 13 with 14
+Replica exchange at step 19000 time 19.00000
+Repl 12 <-> 13  dE_term = -3.198e-01 (kT)
+Repl ex  0    1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .54       1.0       .72       1.0       .90       1.0       1.0       .43
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          20000       20.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.42161e+02    9.96007e+01    7.72930e+01   -3.58048e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.58259e-01    0.00000e+00   -3.87344e+01    3.43777e+02
+   Total Energy    Temperature Pressure (bar)
+    3.05043e+02    1.68076e+02    1.09378e+00
+
+Replica exchange at step 20000 time 20.00000
+Repl 13 <-> 14  dE_term = -6.911e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .41       1.0       1.0       .50       .66       .81       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 21000 time 21.00000
+Repl 12 <-> 13  dE_term = -5.834e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   1.0       .68       .65       .82       1.0       .73       1.0       .47
+
+Exchanging 13 with 12
+Replica exchange at step 22000 time 22.00000
+Repl 13 <-> 14  dE_term =  1.898e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .85       1.0       .71       1.0       .78       1.0       .83     
+
+Exchanging 13 with 14
+Replica exchange at step 23000 time 23.00000
+Repl 12 <-> 13  dE_term = -2.008e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   1.0       .85       1.0       1.0       1.0       .95       1.0       .60
+
+Exchanging 13 with 12
+Replica exchange at step 24000 time 24.00000
+Repl 13 <-> 14  dE_term = -6.130e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .81       1.0       .52       .93       .38       1.0     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          25000       25.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.31926e+02    1.11868e+02    5.48218e+01   -3.65529e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    5.10237e-01    0.00000e+00   -6.64035e+01    3.51328e+02
+   Total Energy    Temperature Pressure (bar)
+    2.84924e+02    1.71767e+02   -7.39644e-01
+
+Replica exchange at step 25000 time 25.00000
+Repl 12 <-> 13  dE_term =  9.194e-01 (kT)
+Repl ex  0    1    2    3    4 x  5    6 x  7    8 x  9   10   11   12   13   14 x 15
+Repl pr   .36       .66       1.0       .65       .76       .37       .40       .69
+
+Replica exchange at step 26000 time 26.00000
+Repl 13 <-> 14  dE_term =  4.432e-01 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .74       .66       .58       1.0       .80       1.0       .64     
+
+Replica exchange at step 27000 time 27.00000
+Repl 12 <-> 13  dE_term =  6.470e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .74       1.0       .78       1.0       .53       .42       .52       .96
+
+Exchanging 13 with 12
+Replica exchange at step 28000 time 28.00000
+Repl 13 <-> 14  dE_term =  1.667e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .69       1.0       .55       1.0       .57       .92       .85     
+
+Exchanging 13 with 14
+Replica exchange at step 29000 time 29.00000
+Repl 12 <-> 13  dE_term =  1.723e-01 (kT)
+Repl ex  0 x  1    2    3    4    5    6    7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   1.0       .57       .29       .85       1.0       .58       .84       .37
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          30000       30.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.26460e+02    8.37595e+01    5.99404e+01   -3.83564e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.98504e-01    0.00000e+00   -1.13206e+02    3.20355e+02
+   Total Energy    Temperature Pressure (bar)
+    2.07149e+02    1.56624e+02    9.08374e-01
+
+Replica exchange at step 30000 time 30.00000
+Repl 13 <-> 14  dE_term = -1.998e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       1.0       .57       .72       .67       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 31000 time 31.00000
+Repl 12 <-> 13  dE_term =  4.680e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .94       1.0       .90       .52       1.0       .63       .51
+
+Exchanging 13 with 12
+Replica exchange at step 32000 time 32.00000
+Repl 13 <-> 14  dE_term =  4.031e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .93       .94       1.0       .64       .35       1.0       .67     
+
+Exchanging 13 with 14
+Replica exchange at step 33000 time 33.00000
+Repl 12 <-> 13  dE_term = -1.513e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .85       .73       .46       .85       .77       1.0       1.0       .71
+
+Exchanging 13 with 12
+Replica exchange at step 34000 time 34.00000
+Repl 13 <-> 14  dE_term =  3.122e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .90       1.0       1.0       1.0       .90       .73     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          35000       35.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.10872e+02    9.25397e+01    7.25889e+01   -3.54840e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    8.01637e-01    0.00000e+00   -7.80378e+01    3.46193e+02
+   Total Energy    Temperature Pressure (bar)
+    2.68155e+02    1.69257e+02   -1.68800e+00
+
+Replica exchange at step 35000 time 35.00000
+Repl 12 <-> 13  dE_term =  1.753e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .60       .39       .98       .57       .45       .63       .84       .77
+
+Exchanging 13 with 12
+Replica exchange at step 36000 time 36.00000
+Repl 13 <-> 14  dE_term =  1.771e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .85       .98       .98       1.0       .59       .34       .84     
+
+Exchanging 13 with 14
+Replica exchange at step 37000 time 37.00000
+Repl 12 <-> 13  dE_term = -1.400e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6    7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .92       .50       .44       .34       1.0       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 38000 time 38.00000
+Repl 13 <-> 14  dE_term = -6.469e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .76       1.0       1.0       .22       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 39000 time 39.00000
+Repl 12 <-> 13  dE_term = -2.513e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .49       1.0       .93       .35       1.0       .25       1.0       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          40000       40.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.15676e+02    9.45291e+01    7.91889e+01   -3.43786e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.92819e+00    0.00000e+00   -5.24637e+01    3.20018e+02
+   Total Energy    Temperature Pressure (bar)
+    2.67555e+02    1.56460e+02    2.50718e+00
+
+Replica exchange at step 40000 time 40.00000
+Repl 13 <-> 14  dE_term = -2.137e-01 (kT)
+Repl ex  0    1 x  2    3    4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .95       .77       1.0       .78       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 41000 time 41.00000
+Repl 12 <-> 13  dE_term = -8.539e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .62       .72       .96       1.0       .47       .40       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 42000 time 42.00000
+Repl 13 <-> 14  dE_term = -8.378e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        1.0       .73       1.0       1.0       .76       .85       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 43000 time 43.00000
+Repl 12 <-> 13  dE_term =  4.334e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .54       1.0       .60       .95       1.0       .65       .82
+
+Exchanging 13 with 12
+Replica exchange at step 44000 time 44.00000
+Repl 13 <-> 14  dE_term =  1.437e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11   12   13   14   15
+Repl pr        1.0       1.0       .66       .96       1.0       .72       .24     
+
+           Step           Time         Lambda
+          45000       45.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.28589e+02    8.73219e+01    7.46097e+01   -3.66276e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    3.84134e-01    0.00000e+00   -7.53716e+01    3.33153e+02
+   Total Energy    Temperature Pressure (bar)
+    2.57782e+02    1.62882e+02   -2.22510e+00
+
+Replica exchange at step 45000 time 45.00000
+Repl 12 <-> 13  dE_term =  2.986e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .97       .97       1.0       1.0       .97       .69
+
+Exchanging 13 with 12
+Replica exchange at step 46000 time 46.00000
+Repl 13 <-> 14  dE_term =  4.883e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .69       .66       .77       1.0       .90       1.0       .95     
+
+Exchanging 13 with 14
+Replica exchange at step 47000 time 47.00000
+Repl 12 <-> 13  dE_term =  1.534e-01 (kT)
+Repl ex  0    1    2    3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14   15
+Repl pr   .41       .41       1.0       1.0       1.0       .50       .86       .73
+
+Exchanging 13 with 12
+Replica exchange at step 48000 time 48.00000
+Repl 13 <-> 14  dE_term =  6.566e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        .86       .95       .91       1.0       .58       1.0       .52     
+
+Replica exchange at step 49000 time 49.00000
+Repl 12 <-> 13  dE_term =  1.823e-02 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .68       .92       .95       1.0       .91       .58       .98       .79
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          50000       50.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.14051e+02    8.13812e+01    7.24547e+01   -3.47772e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    3.48227e-01    0.00000e+00   -7.95369e+01    3.80500e+02
+   Total Energy    Temperature Pressure (bar)
+    3.00963e+02    1.86030e+02    1.89916e+00
+
+Replica exchange at step 50000 time 50.00000
+Repl 13 <-> 14  dE_term =  5.210e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .66       .40       1.0       .58       .96       .73       .59     
+
+Exchanging 13 with 14
+Replica exchange at step 51000 time 51.00000
+Repl 12 <-> 13  dE_term =  1.595e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14   15
+Repl pr   1.0       .82       1.0       1.0       .82       .66       .85       .83
+
+Exchanging 13 with 12
+Replica exchange at step 52000 time 52.00000
+Repl 13 <-> 14  dE_term =  6.231e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .58       1.0       .64       1.0       1.0       .39       .54     
+
+Replica exchange at step 53000 time 53.00000
+Repl 12 <-> 13  dE_term =  2.167e-02 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .63       1.0       1.0       .69       1.0       .33       .98       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 54000 time 54.00000
+Repl 13 <-> 14  dE_term =  1.599e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        1.0       .89       1.0       1.0       .21       1.0       .85     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          55000       55.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.10876e+02    9.61212e+01    7.35606e+01   -3.60226e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.59135e+00    0.00000e+00   -7.80771e+01    3.12906e+02
+   Total Energy    Temperature Pressure (bar)
+    2.34829e+02    1.52983e+02    1.17397e+00
+
+Replica exchange at step 55000 time 55.00000
+Repl 12 <-> 13  dE_term =  6.626e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .79       .73       .96       .90       1.0       1.0       .52       .90
+
+Exchanging 13 with 12
+Replica exchange at step 56000 time 56.00000
+Repl 13 <-> 14  dE_term =  8.697e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .88       .50       .49       .89       .96       1.0       .42     
+
+Replica exchange at step 57000 time 57.00000
+Repl 12 <-> 13  dE_term = -5.159e-01 (kT)
+Repl ex  0    1    2    3    4 x  5    6    7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .67       .45       .84       .50       1.0       .93       1.0       .77
+
+Exchanging 13 with 12
+Replica exchange at step 58000 time 58.00000
+Repl 13 <-> 14  dE_term = -1.962e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .59       1.0       1.0       1.0       .78       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 59000 time 59.00000
+Repl 12 <-> 13  dE_term =  3.222e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .80       .77       .95       1.0       .93       .72       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          60000       60.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    8.55172e+01    8.34130e+01    4.73077e+01   -3.93073e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.36767e-01    0.00000e+00   -1.76699e+02    3.24198e+02
+   Total Energy    Temperature Pressure (bar)
+    1.47499e+02    1.58503e+02    3.32740e-01
+
+Replica exchange at step 60000 time 60.00000
+Repl 13 <-> 14  dE_term =  5.253e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .75       .36       .59       1.0       1.0       1.0       .59     
+
+Exchanging 13 with 14
+Replica exchange at step 61000 time 61.00000
+Repl 12 <-> 13  dE_term =  6.715e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14   15
+Repl pr   .38       .67       .82       .94       .42       1.0       .51       .54
+
+Replica exchange at step 62000 time 62.00000
+Repl 13 <-> 14  dE_term = -4.252e-02 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .33       .62       .81       .87       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 63000 time 63.00000
+Repl 12 <-> 13  dE_term =  9.695e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       1.0       1.0       .87       .65       .91       .86
+
+Exchanging 13 with 12
+Replica exchange at step 64000 time 64.00000
+Repl 13 <-> 14  dE_term =  6.431e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .85       .78       .92       1.0       1.0       .87       .53     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          65000       65.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.14242e+02    8.65719e+01    8.50983e+01   -3.11810e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.42587e+00    0.00000e+00   -2.44724e+01    3.32356e+02
+   Total Energy    Temperature Pressure (bar)
+    3.07883e+02    1.62492e+02   -1.72003e+00
+
+Replica exchange at step 65000 time 65.00000
+Repl 12 <-> 13  dE_term =  7.759e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       .89       .68       .69       1.0       .51       .46       .80
+
+Exchanging 13 with 12
+Replica exchange at step 66000 time 66.00000
+Repl 13 <-> 14  dE_term =  6.813e-01 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .45       .86       .59       .90       1.0       1.0       .51     
+
+Replica exchange at step 67000 time 67.00000
+Repl 12 <-> 13  dE_term = -2.630e-01 (kT)
+Repl ex  0    1    2 x  3    4    5    6    7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .95       .75       .57       .62       1.0       .72       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 68000 time 68.00000
+Repl 13 <-> 14  dE_term =  3.271e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .98       1.0       .92       1.0       .35       1.0       .72     
+
+Exchanging 13 with 14
+Replica exchange at step 69000 time 69.00000
+Repl 12 <-> 13  dE_term =  9.642e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   .68       .60       1.0       1.0       1.0       1.0       .91       .92
+
+           Step           Time         Lambda
+          70000       70.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.06339e+02    1.08000e+02    7.00750e+01   -3.75980e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.15196e-01    0.00000e+00   -9.13504e+01    3.73931e+02
+   Total Energy    Temperature Pressure (bar)
+    2.82581e+02    1.82818e+02    2.04775e+00
+
+Replica exchange at step 70000 time 70.00000
+Repl 13 <-> 14  dE_term =  1.171e-02 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .27       .51       .89       .75       1.0       1.0       .99     
+
+Exchanging 13 with 14
+Replica exchange at step 71000 time 71.00000
+Repl 12 <-> 13  dE_term = -1.506e+00 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6    7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .42       .83       .96       .45       .94       .49       1.0       .90
+
+Exchanging 13 with 12
+Replica exchange at step 72000 time 72.00000
+Repl 13 <-> 14  dE_term = -5.089e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .78       .95       1.0       1.0       .43       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 73000 time 73.00000
+Repl 12 <-> 13  dE_term =  6.532e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .68       .74       1.0       1.0       1.0       1.0       .52       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 74000 time 74.00000
+Repl 13 <-> 14  dE_term =  8.766e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        1.0       .89       .83       1.0       .61       .76       .42     
+
+           Step           Time         Lambda
+          75000       75.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.02451e+02    9.76394e+01    6.69454e+01   -3.46237e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    3.20192e-01    0.00000e+00   -7.88815e+01    3.14629e+02
+   Total Energy    Temperature Pressure (bar)
+    2.35747e+02    1.53825e+02   -7.50894e-01
+
+Replica exchange at step 75000 time 75.00000
+Repl 12 <-> 13  dE_term = -2.082e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .73       .79       .58       .34       1.0       .92
+
+Exchanging 13 with 12
+Replica exchange at step 76000 time 76.00000
+Repl 13 <-> 14  dE_term =  6.287e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7    8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .86       .40       .47       .87       1.0       .53     
+
+Exchanging 13 with 14
+Replica exchange at step 77000 time 77.00000
+Repl 12 <-> 13  dE_term =  2.800e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       1.0       1.0       1.0       .46       .97       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 78000 time 78.00000
+Repl 13 <-> 14  dE_term = -3.621e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .78       .67       1.0       .74       .56       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 79000 time 79.00000
+Repl 12 <-> 13  dE_term = -5.862e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .83       .59       1.0       .80       1.0       .35       1.0       .93
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+          80000       80.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.26328e+02    7.71742e+01    5.63338e+01   -3.38391e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.69836e-01    0.00000e+00   -7.83855e+01    3.58765e+02
+   Total Energy    Temperature Pressure (bar)
+    2.80379e+02    1.75403e+02   -1.24991e+00
+
+Replica exchange at step 80000 time 80.00000
+Repl 13 <-> 14  dE_term =  7.110e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .65       .79       .65       1.0       .93     
+
+Exchanging 13 with 14
+Replica exchange at step 81000 time 81.00000
+Repl 12 <-> 13  dE_term = -8.078e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .89       1.0       .39       .60       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 82000 time 82.00000
+Repl 13 <-> 14  dE_term = -8.950e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7    8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .94       .51       .95       .56       .84       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 83000 time 83.00000
+Repl 12 <-> 13  dE_term =  1.669e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .92       .34       .97       1.0       1.0       .67       .85       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 84000 time 84.00000
+Repl 13 <-> 14  dE_term =  3.942e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .68       .23       .68       .86       1.0       1.0       .67     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          85000       85.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    9.69433e+01    9.18112e+01    9.59489e+01   -3.04225e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.00061e-01    0.00000e+00   -1.91215e+01    3.12838e+02
+   Total Energy    Temperature Pressure (bar)
+    2.93716e+02    1.52949e+02   -5.71356e-01
+
+Replica exchange at step 85000 time 85.00000
+Repl 12 <-> 13  dE_term =  2.147e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .52       .25       .69       .81       1.0       .77       .81       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 86000 time 86.00000
+Repl 13 <-> 14  dE_term =  2.583e-01 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .57       .60       .38       1.0       .70       .31       .77     
+
+Exchanging 13 with 14
+Replica exchange at step 87000 time 87.00000
+Repl 12 <-> 13  dE_term = -3.775e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .89       1.0       .94       1.0       1.0       .48       1.0       .32
+
+Exchanging 13 with 12
+Replica exchange at step 88000 time 88.00000
+Repl 13 <-> 14  dE_term =  1.631e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .55       1.0       .33       1.0       .85     
+
+Exchanging 13 with 14
+Replica exchange at step 89000 time 89.00000
+Repl 12 <-> 13  dE_term =  5.979e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   .93       1.0       1.0       .99       .80       .50       .55       1.0
+
+           Step           Time         Lambda
+          90000       90.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.23108e+02    8.40918e+01    7.42042e+01   -3.53403e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.03596e-01    0.00000e+00   -7.17946e+01    3.07537e+02
+   Total Energy    Temperature Pressure (bar)
+    2.35743e+02    1.50358e+02   -6.99716e-02
+
+Replica exchange at step 90000 time 90.00000
+Repl 13 <-> 14  dE_term = -2.394e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .87       .34       1.0       .31       .83       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 91000 time 91.00000
+Repl 12 <-> 13  dE_term =  1.439e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6    7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .62       .65       1.0       .40       .33       .62       .87       .88
+
+Exchanging 13 with 12
+Replica exchange at step 92000 time 92.00000
+Repl 13 <-> 14  dE_term =  2.798e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .87       .93       1.0       1.0       .71       .81       .76     
+
+Exchanging 13 with 14
+Replica exchange at step 93000 time 93.00000
+Repl 12 <-> 13  dE_term = -4.365e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       1.0       .96       1.0       .65       1.0       .65
+
+Exchanging 13 with 12
+Replica exchange at step 94000 time 94.00000
+Repl 13 <-> 14  dE_term = -2.859e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11   12   13 x 14   15
+Repl pr        1.0       1.0       .60       .73       .64       .67       1.0     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+          95000       95.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.15357e+02    9.21374e+01    6.77309e+01   -3.57364e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.03587e+00    0.00000e+00   -8.11030e+01    3.63423e+02
+   Total Energy    Temperature Pressure (bar)
+    2.82320e+02    1.77681e+02   -3.66068e-01
+
+Replica exchange at step 95000 time 95.00000
+Repl 12 <-> 13  dE_term =  6.674e-02 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .79       .80       .75       .43       .90       1.0       .94       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 96000 time 96.00000
+Repl 13 <-> 14  dE_term = -2.156e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .71       .75       .91       1.0       .94       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 97000 time 97.00000
+Repl 12 <-> 13  dE_term = -5.475e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       .59       .58       1.0       .39       .47       1.0       .71
+
+Exchanging 13 with 12
+Replica exchange at step 98000 time 98.00000
+Repl 13 <-> 14  dE_term =  1.574e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .50       1.0       1.0       .87       1.0       .85     
+
+Exchanging 13 with 14
+Replica exchange at step 99000 time 99.00000
+Repl 12 <-> 13  dE_term =  1.882e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .70       1.0       1.0       1.0       1.0       .33       .83       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         100000      100.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.15397e+02    7.63643e+01    1.00521e+02   -3.13329e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    5.53945e-01    0.00000e+00   -2.04928e+01    3.54917e+02
+   Total Energy    Temperature Pressure (bar)
+    3.34424e+02    1.73522e+02   -2.33628e-01
+
+Replica exchange at step 100000 time 100.00000
+Repl 13 <-> 14  dE_term =  8.007e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .90       .76       1.0       1.0       1.0       .70       .92     
+
+Exchanging 13 with 14
+Replica exchange at step 101000 time 101.00000
+Repl 12 <-> 13  dE_term =  2.232e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8    9   10 x 11   12   13   14 x 15
+Repl pr   .51       .49       1.0       1.0       .85       .68       .80       .73
+
+Replica exchange at step 102000 time 102.00000
+Repl 13 <-> 14  dE_term =  9.629e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .74       1.0       .90       .80       1.0       .38     
+
+Exchanging 13 with 14
+Replica exchange at step 103000 time 103.00000
+Repl 12 <-> 13  dE_term =  3.088e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .85       1.0       1.0       1.0       .87       .73       .30
+
+Exchanging 13 with 12
+Replica exchange at step 104000 time 104.00000
+Repl 13 <-> 14  dE_term =  1.085e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        1.0       1.0       .52       1.0       .46       .65       .34     
+
+           Step           Time         Lambda
+         105000      105.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.16571e+02    9.11419e+01    6.70570e+01   -3.65693e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.34498e-01    0.00000e+00   -9.04881e+01    3.60305e+02
+   Total Energy    Temperature Pressure (bar)
+    2.69816e+02    1.76156e+02    4.57822e-01
+
+Replica exchange at step 105000 time 105.00000
+Repl 12 <-> 13  dE_term =  2.151e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .53       1.0       .43       1.0       1.0       .41       .81       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 106000 time 106.00000
+Repl 13 <-> 14  dE_term =  9.648e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        1.0       .71       1.0       1.0       .41       1.0       .38     
+
+Replica exchange at step 107000 time 107.00000
+Repl 12 <-> 13  dE_term = -1.303e+00 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .95       1.0       1.0       1.0       1.0       .70
+
+Exchanging 13 with 12
+Replica exchange at step 108000 time 108.00000
+Repl 13 <-> 14  dE_term =  6.986e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .70       1.0       .69       1.0       .66       1.0       .50     
+
+Replica exchange at step 109000 time 109.00000
+Repl 12 <-> 13  dE_term =  7.634e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .66       1.0       1.0       .61       1.0       .47       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         110000      110.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.03271e+02    9.29535e+01    7.50874e+01   -3.49464e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.82122e-01    0.00000e+00   -7.78707e+01    3.15779e+02
+   Total Energy    Temperature Pressure (bar)
+    2.37909e+02    1.54387e+02    9.81662e-01
+
+Replica exchange at step 110000 time 110.00000
+Repl 13 <-> 14  dE_term =  8.039e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        .91       1.0       1.0       .67       .69       .25       .45     
+
+Replica exchange at step 111000 time 111.00000
+Repl 12 <-> 13  dE_term =  2.193e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .68       1.0       .62       .22       .80       .58
+
+Exchanging 13 with 12
+Replica exchange at step 112000 time 112.00000
+Repl 13 <-> 14  dE_term =  1.762e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11   12   13   14   15
+Repl pr        .56       1.0       .50       1.0       .21       .67       .17     
+
+Replica exchange at step 113000 time 113.00000
+Repl 12 <-> 13  dE_term = -2.199e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .51       1.0       .73       .79       1.0       1.0       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 114000 time 114.00000
+Repl 13 <-> 14  dE_term =  1.027e+00 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        1.0       .46       .80       .60       .80       1.0       .36     
+
+           Step           Time         Lambda
+         115000      115.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.06874e+02    8.93104e+01    5.13427e+01   -3.56220e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.50624e-01    0.00000e+00   -1.08543e+02    3.19053e+02
+   Total Energy    Temperature Pressure (bar)
+    2.10511e+02    1.55988e+02   -8.67032e-01
+
+Replica exchange at step 115000 time 115.00000
+Repl 12 <-> 13  dE_term = -2.962e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       1.0       1.0       1.0       1.0       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 116000 time 116.00000
+Repl 13 <-> 14  dE_term =  1.253e+00 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .71       .71       1.0       1.0       .86       .90       .29     
+
+Replica exchange at step 117000 time 117.00000
+Repl 12 <-> 13  dE_term = -1.515e-02 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8    9   10 x 11   12 x 13   14   15
+Repl pr   .46       .55       .54       1.0       .52       .96       1.0       .34
+
+Exchanging 13 with 12
+Replica exchange at step 118000 time 118.00000
+Repl 13 <-> 14  dE_term =  1.218e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        1.0       .79       .90       1.0       1.0       .86       .30     
+
+Replica exchange at step 119000 time 119.00000
+Repl 12 <-> 13  dE_term =  4.512e-02 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .58       .69       .53       .82       1.0       .68       .96       .64
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         120000      120.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.34031e+02    7.62796e+01    5.48713e+01   -3.73187e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.46595e-01    0.00000e+00   -1.07858e+02    3.12408e+02
+   Total Energy    Temperature Pressure (bar)
+    2.04550e+02    1.52739e+02    6.96610e-01
+
+Replica exchange at step 120000 time 120.00000
+Repl 13 <-> 14  dE_term =  1.557e+00 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .84       .25       .59       1.0       .46       1.0       .21     
+
+Replica exchange at step 121000 time 121.00000
+Repl 12 <-> 13  dE_term =  3.221e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   1.0       .72       1.0       1.0       1.0       .65       .72       1.0
+
+Replica exchange at step 122000 time 122.00000
+Repl 13 <-> 14  dE_term =  1.606e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .74       .95       1.0       .72       1.0       1.0       .85     
+
+Exchanging 13 with 14
+Replica exchange at step 123000 time 123.00000
+Repl 12 <-> 13  dE_term =  3.587e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   .91       .51       1.0       1.0       .87       1.0       .70       .49
+
+Replica exchange at step 124000 time 124.00000
+Repl 13 <-> 14  dE_term =  4.151e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        .86       .80       1.0       .42       .66       1.0       .66     
+
+           Step           Time         Lambda
+         125000      125.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    9.45807e+01    9.57195e+01    8.86395e+01   -3.23197e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.61387e+00    0.00000e+00   -4.26439e+01    3.55463e+02
+   Total Energy    Temperature Pressure (bar)
+    3.12819e+02    1.73789e+02   -7.99557e-02
+
+Replica exchange at step 125000 time 125.00000
+Repl 12 <-> 13  dE_term =  3.096e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8    9   10   11   12 x 13   14 x 15
+Repl pr   1.0       .99       .60       1.0       .71       .52       .73       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 126000 time 126.00000
+Repl 13 <-> 14  dE_term = -4.422e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .69       1.0       1.0       1.0       .85       .60       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 127000 time 127.00000
+Repl 12 <-> 13  dE_term = -7.264e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14   15
+Repl pr   1.0       1.0       1.0       1.0       .59       .53       1.0       .52
+
+Exchanging 13 with 12
+Replica exchange at step 128000 time 128.00000
+Repl 13 <-> 14  dE_term = -1.022e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .62       1.0       1.0       1.0       1.0       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 129000 time 129.00000
+Repl 12 <-> 13  dE_term =  4.926e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .69       .54       1.0       .60       .64       .75       .61       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         130000      130.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    8.76700e+01    1.16299e+02    8.04848e+01   -3.30051e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.83039e+00    0.00000e+00   -4.37672e+01    3.43470e+02
+   Total Energy    Temperature Pressure (bar)
+    2.99703e+02    1.67926e+02   -1.42496e-01
+
+Replica exchange at step 130000 time 130.00000
+Repl 13 <-> 14  dE_term =  4.505e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .77       .71       .91       .89       .87       .95       .64     
+
+Exchanging 13 with 14
+Replica exchange at step 131000 time 131.00000
+Repl 12 <-> 13  dE_term =  2.656e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12   13   14   15
+Repl pr   .89       .97       .37       1.0       .72       1.0       .77       .43
+
+Replica exchange at step 132000 time 132.00000
+Repl 13 <-> 14  dE_term = -1.476e-02 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .68       .57       1.0       .76       .34       .64       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 133000 time 133.00000
+Repl 12 <-> 13  dE_term = -8.087e-02 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .72       1.0       .90       .29       1.0       .99
+
+Exchanging 13 with 12
+Replica exchange at step 134000 time 134.00000
+Repl 13 <-> 14  dE_term =  6.663e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       1.0       1.0       .93       .67       .51     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         135000      135.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.07460e+02    8.59489e+01    8.23014e+01   -3.39426e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    3.25859e-01    0.00000e+00   -6.33898e+01    3.51835e+02
+   Total Energy    Temperature Pressure (bar)
+    2.88445e+02    1.72015e+02    2.37751e+00
+
+Replica exchange at step 135000 time 135.00000
+Repl 12 <-> 13  dE_term =  5.446e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .65       1.0       .67       .70       .56       .70       .58       .45
+
+Exchanging 13 with 12
+Replica exchange at step 136000 time 136.00000
+Repl 13 <-> 14  dE_term =  1.273e+00 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7    8    9 x 10   11   12   13   14   15
+Repl pr        .88       .58       .94       .78       1.0       .40       .28     
+
+Replica exchange at step 137000 time 137.00000
+Repl 12 <-> 13  dE_term = -4.047e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .97       .48       .88       1.0       1.0       1.0       .93
+
+Exchanging 13 with 12
+Replica exchange at step 138000 time 138.00000
+Repl 13 <-> 14  dE_term = -3.861e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .85       .95       1.0       .73       1.0       .72       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 139000 time 139.00000
+Repl 12 <-> 13  dE_term =  5.515e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6    7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .69       1.0       .67       .60       .94       1.0       .95       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         140000      140.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    9.99526e+01    9.18100e+01    6.13224e+01   -3.68578e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    6.18038e-01    0.00000e+00   -1.14875e+02    3.64946e+02
+   Total Energy    Temperature Pressure (bar)
+    2.50071e+02    1.78426e+02    7.97498e-01
+
+Replica exchange at step 140000 time 140.00000
+Repl 13 <-> 14  dE_term =  4.188e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .27       .74       .55       .60       .84       .66     
+
+Exchanging 13 with 14
+Replica exchange at step 141000 time 141.00000
+Repl 12 <-> 13  dE_term = -1.623e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .51       .62       .83       .52       1.0       .54
+
+Exchanging 13 with 12
+Replica exchange at step 142000 time 142.00000
+Repl 13 <-> 14  dE_term =  3.789e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .59       .98       .75       .93       .63       .68     
+
+Exchanging 13 with 14
+Replica exchange at step 143000 time 143.00000
+Repl 12 <-> 13  dE_term =  2.066e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   .79       .42       .60       1.0       .83       .29       .81       .61
+
+Exchanging 13 with 12
+Replica exchange at step 144000 time 144.00000
+Repl 13 <-> 14  dE_term =  9.843e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       1.0       1.0       .83       .75       .91     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         145000      145.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.22955e+02    8.61669e+01    7.73680e+01   -3.24359e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    7.35153e-01    0.00000e+00   -3.71334e+01    3.30525e+02
+   Total Energy    Temperature Pressure (bar)
+    2.93392e+02    1.61597e+02   -7.16573e-01
+
+Replica exchange at step 145000 time 145.00000
+Repl 12 <-> 13  dE_term =  5.883e-01 (kT)
+Repl ex  0    1    2    3    4 x  5    6    7    8 x  9   10   11   12   13   14 x 15
+Repl pr   .65       .90       1.0       .54       1.0       .22       .56       1.0
+
+Replica exchange at step 146000 time 146.00000
+Repl 13 <-> 14  dE_term = -5.068e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .37       .85       .67       .72       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 147000 time 147.00000
+Repl 12 <-> 13  dE_term = -2.620e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       .65       1.0       1.0       1.0       .66       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 148000 time 148.00000
+Repl 13 <-> 14  dE_term = -3.885e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        .92       .73       .74       1.0       .60       .77       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 149000 time 149.00000
+Repl 12 <-> 13  dE_term = -3.701e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .84       .85       .56       1.0       .60       1.0       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         150000      150.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.16107e+02    8.78333e+01    7.89581e+01   -3.28025e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.21845e-01    0.00000e+00   -4.49040e+01    3.69029e+02
+   Total Energy    Temperature Pressure (bar)
+    3.24125e+02    1.80422e+02   -6.98810e-01
+
+Replica exchange at step 150000 time 150.00000
+Repl 13 <-> 14  dE_term = -3.064e-01 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .62       .62       .27       .94       1.0       .76       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 151000 time 151.00000
+Repl 12 <-> 13  dE_term =  4.350e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .97       .98       .38       1.0       .65       .69
+
+Exchanging 13 with 12
+Replica exchange at step 152000 time 152.00000
+Repl 13 <-> 14  dE_term =  1.054e+00 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .70       .82       .43       1.0       1.0       1.0       .35     
+
+Replica exchange at step 153000 time 153.00000
+Repl 12 <-> 13  dE_term = -5.228e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .53       1.0       .99       1.0       1.0       1.0       .87
+
+Exchanging 13 with 12
+Replica exchange at step 154000 time 154.00000
+Repl 13 <-> 14  dE_term =  3.787e-01 (kT)
+Repl ex  0    1    2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .55       .85       .87       .64       1.0       .72       .68     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         155000      155.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.30788e+02    9.72680e+01    7.13913e+01   -3.19007e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    9.06887e-02    0.00000e+00   -1.94691e+01    3.71294e+02
+   Total Energy    Temperature Pressure (bar)
+    3.51825e+02    1.81529e+02   -5.36870e-01
+
+Replica exchange at step 155000 time 155.00000
+Repl 12 <-> 13  dE_term =  1.310e+00 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .80       .78       1.0       .73       .41       1.0       .27       .54
+
+Exchanging 13 with 12
+Replica exchange at step 156000 time 156.00000
+Repl 13 <-> 14  dE_term =  3.217e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7    8    9 x 10   11   12   13   14   15
+Repl pr        .63       .84       .54       .56       .94       .43       .72     
+
+Replica exchange at step 157000 time 157.00000
+Repl 12 <-> 13  dE_term = -1.600e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   .75       .72       .79       .81       1.0       .79       1.0       .25
+
+Exchanging 13 with 12
+Replica exchange at step 158000 time 158.00000
+Repl 13 <-> 14  dE_term = -3.152e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .70       .76       1.0       1.0       1.0       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 159000 time 159.00000
+Repl 12 <-> 13  dE_term = -5.177e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .81       .73       .83       .89       .93       1.0       1.0       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         160000      160.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.10383e+02    8.17679e+01    6.03918e+01   -3.61520e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.23310e-01    0.00000e+00   -1.08754e+02    3.40130e+02
+   Total Energy    Temperature Pressure (bar)
+    2.31376e+02    1.66293e+02   -3.09655e+00
+
+Replica exchange at step 160000 time 160.00000
+Repl 13 <-> 14  dE_term =  4.064e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7    8    9 x 10   11   12   13 x 14   15
+Repl pr        .82       1.0       .37       .49       .93       .79       .67     
+
+Exchanging 13 with 14
+Replica exchange at step 161000 time 161.00000
+Repl 12 <-> 13  dE_term =  1.214e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .32       1.0       .85       .87       1.0       .56       .89       .51
+
+Exchanging 13 with 12
+Replica exchange at step 162000 time 162.00000
+Repl 13 <-> 14  dE_term =  1.193e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7    8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .72       1.0       .59       .59       .52       .89     
+
+Exchanging 13 with 14
+Replica exchange at step 163000 time 163.00000
+Repl 12 <-> 13  dE_term =  7.552e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .78       1.0       1.0       .73       .77       .47       .94
+
+Exchanging 13 with 12
+Replica exchange at step 164000 time 164.00000
+Repl 13 <-> 14  dE_term = -1.668e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7    8    9   10   11 x 12   13 x 14   15
+Repl pr        .72       1.0       1.0       .51       .61       .85       1.0     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         165000      165.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.03576e+02    8.58334e+01    5.67585e+01   -3.94228e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.65646e-01    0.00000e+00   -1.47895e+02    3.45089e+02
+   Total Energy    Temperature Pressure (bar)
+    1.97194e+02    1.68717e+02   -4.73593e-01
+
+Replica exchange at step 165000 time 165.00000
+Repl 12 <-> 13  dE_term = -4.454e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .90       .97       1.0       .73       1.0       .77       1.0       .93
+
+Exchanging 13 with 12
+Replica exchange at step 166000 time 166.00000
+Repl 13 <-> 14  dE_term = -1.202e-02 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .94       .65       1.0       1.0       .81       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 167000 time 167.00000
+Repl 12 <-> 13  dE_term = -4.509e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6    7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .88       .97       .28       .38       .44       1.0       1.0       .85
+
+Exchanging 13 with 12
+Replica exchange at step 168000 time 168.00000
+Repl 13 <-> 14  dE_term =  1.413e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7    8    9   10   11 x 12   13 x 14   15
+Repl pr        .93       .91       1.0       .51       .77       1.0       .87     
+
+Exchanging 13 with 14
+Replica exchange at step 169000 time 169.00000
+Repl 12 <-> 13  dE_term = -2.005e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .68       1.0       1.0       1.0       1.0       1.0       1.0       1.0
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         170000      170.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.15839e+02    9.43331e+01    6.42799e+01   -3.50435e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    2.75528e-01    0.00000e+00   -7.57074e+01    2.91522e+02
+   Total Energy    Temperature Pressure (bar)
+    2.15815e+02    1.42528e+02    1.86534e+00
+
+Replica exchange at step 170000 time 170.00000
+Repl 13 <-> 14  dE_term = -2.323e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .61       1.0       .75       .76       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 171000 time 171.00000
+Repl 12 <-> 13  dE_term = -4.215e-02 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   1.0       1.0       .99       1.0       1.0       .98       1.0       .53
+
+Exchanging 13 with 12
+Replica exchange at step 172000 time 172.00000
+Repl 13 <-> 14  dE_term =  2.631e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       1.0       .76       1.0       .95       .65       .77     
+
+Exchanging 13 with 14
+Replica exchange at step 173000 time 173.00000
+Repl 12 <-> 13  dE_term = -5.428e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14   15
+Repl pr   1.0       .74       1.0       1.0       .90       .49       1.0       .89
+
+Exchanging 13 with 12
+Replica exchange at step 174000 time 174.00000
+Repl 13 <-> 14  dE_term =  2.221e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .60       1.0       .93       1.0       .74       .76       .80     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         175000      175.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.00386e+02    9.24218e+01    7.28048e+01   -3.81690e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.56904e-01    0.00000e+00   -1.15621e+02    3.52341e+02
+   Total Energy    Temperature Pressure (bar)
+    2.36721e+02    1.72263e+02   -5.87396e-01
+
+Replica exchange at step 175000 time 175.00000
+Repl 12 <-> 13  dE_term = -4.537e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       .61       .90       1.0       .60       1.0       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 176000 time 176.00000
+Repl 13 <-> 14  dE_term = -4.340e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .57       .73       .64       1.0       .82       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 177000 time 177.00000
+Repl 12 <-> 13  dE_term =  5.139e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .78       .85       .58       .78       1.0       .65       .60       .98
+
+Exchanging 13 with 12
+Replica exchange at step 178000 time 178.00000
+Repl 13 <-> 14  dE_term =  4.228e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .48       1.0       .83       1.0       .72       .99       .66     
+
+Exchanging 13 with 14
+Replica exchange at step 179000 time 179.00000
+Repl 12 <-> 13  dE_term =  2.615e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .62       1.0       .67       1.0       1.0       1.0       .77       .72
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         180000      180.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.17638e+02    7.82889e+01    6.48604e+01   -3.57049e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.06227e-01    0.00000e+00   -9.58557e+01    3.71236e+02
+   Total Energy    Temperature Pressure (bar)
+    2.75380e+02    1.81501e+02    9.27761e-01
+
+Replica exchange at step 180000 time 180.00000
+Repl 13 <-> 14  dE_term =  4.356e-01 (kT)
+Repl ex  0    1    2    3    4    5 x  6    7 x  8    9 x 10   11   12   13   14   15
+Repl pr        .65       .84       .83       1.0       1.0       .56       .65     
+
+Replica exchange at step 181000 time 181.00000
+Repl 12 <-> 13  dE_term =  1.007e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .81       .63       .85       .77       1.0       1.0       .90       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 182000 time 182.00000
+Repl 13 <-> 14  dE_term = -5.449e-01 (kT)
+Repl ex  0    1 x  2    3    4    5    6    7 x  8    9   10   11 x 12   13 x 14   15
+Repl pr        1.0       .45       .49       .70       .43       .73       1.0     
+
+Exchanging 13 with 14
+Replica exchange at step 183000 time 183.00000
+Repl 12 <-> 13  dE_term =  3.877e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .86       1.0       1.0       .95       .47       1.0       .68       .65
+
+Exchanging 13 with 12
+Replica exchange at step 184000 time 184.00000
+Repl 13 <-> 14  dE_term =  5.741e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .96       1.0       .88       1.0       .93       .48       .56     
+
+           Step           Time         Lambda
+         185000      185.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.17726e+02    9.87198e+01    6.54203e+01   -3.67869e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    1.95249e-01    0.00000e+00   -8.58076e+01    3.49023e+02
+   Total Energy    Temperature Pressure (bar)
+    2.63215e+02    1.70640e+02   -1.73102e+00
+
+Replica exchange at step 185000 time 185.00000
+Repl 12 <-> 13  dE_term =  3.588e-01 (kT)
+Repl ex  0 x  1    2 x  3    4    5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   1.0       .80       .80       1.0       .74       1.0       .70       1.0
+
+Replica exchange at step 186000 time 186.00000
+Repl 13 <-> 14  dE_term =  4.376e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9   10   11 x 12   13   14   15
+Repl pr        1.0       .46       1.0       .95       .85       1.0       .65     
+
+Replica exchange at step 187000 time 187.00000
+Repl 12 <-> 13  dE_term = -4.355e-01 (kT)
+Repl ex  0    1    2 x  3    4 x  5    6 x  7    8    9   10 x 11   12 x 13   14 x 15
+Repl pr   .53       .47       1.0       .44       .46       1.0       1.0       .89
+
+Exchanging 13 with 12
+Replica exchange at step 188000 time 188.00000
+Repl 13 <-> 14  dE_term =  2.781e-01 (kT)
+Repl ex  0    1    2    3 x  4    5    6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .42       1.0       .40       .85       1.0       .77       .76     
+
+Exchanging 13 with 14
+Replica exchange at step 189000 time 189.00000
+Repl 12 <-> 13  dE_term =  2.289e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8    9   10   11   12 x 13   14 x 15
+Repl pr   1.0       1.0       1.0       1.0       .79       .63       .80       .66
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         190000      190.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.18490e+02    8.57568e+01    7.42281e+01   -3.37410e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    5.20211e-01    0.00000e+00   -5.84153e+01    3.47810e+02
+   Total Energy    Temperature Pressure (bar)
+    2.89394e+02    1.70047e+02    1.12448e+00
+
+Replica exchange at step 190000 time 190.00000
+Repl 13 <-> 14  dE_term =  4.917e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        1.0       1.0       1.0       1.0       1.0       .90       .61     
+
+Replica exchange at step 191000 time 191.00000
+Repl 12 <-> 13  dE_term =  6.523e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .89       .89       .95       .82       1.0       .52       1.0
+
+Exchanging 13 with 12
+Replica exchange at step 192000 time 192.00000
+Repl 13 <-> 14  dE_term =  8.101e-01 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13   14   15
+Repl pr        .55       .51       1.0       .74       1.0       .98       .44     
+
+Replica exchange at step 193000 time 193.00000
+Repl 12 <-> 13  dE_term = -5.074e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   1.0       .69       1.0       .56       .70       .91       1.0       .96
+
+Exchanging 13 with 12
+Replica exchange at step 194000 time 194.00000
+Repl 13 <-> 14  dE_term =  5.329e-02 (kT)
+Repl ex  0    1 x  2    3    4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        1.0       .72       .72       .73       .73       1.0       .95     
+
+Exchanging 13 with 14
+           Step           Time         Lambda
+         195000      195.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.16556e+02    1.09445e+02    1.03179e+02   -3.35951e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    4.09709e-01    0.00000e+00   -6.36049e+00    3.63586e+02
+   Total Energy    Temperature Pressure (bar)
+    3.57226e+02    1.77761e+02   -1.25265e+00
+
+Replica exchange at step 195000 time 195.00000
+Repl 12 <-> 13  dE_term =  9.654e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6 x  7    8 x  9   10 x 11   12   13   14 x 15
+Repl pr   .58       1.0       .73       1.0       .81       1.0       .38       1.0
+
+Replica exchange at step 196000 time 196.00000
+Repl 13 <-> 14  dE_term =  3.061e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5    6    7    8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .69       .51       .65       .43       1.0       1.0       .74     
+
+Exchanging 13 with 14
+Replica exchange at step 197000 time 197.00000
+Repl 12 <-> 13  dE_term =  3.795e-01 (kT)
+Repl ex  0 x  1    2 x  3    4 x  5    6    7    8 x  9   10 x 11   12 x 13   14 x 15
+Repl pr   .97       .86       .82       .69       1.0       1.0       .68       .97
+
+Exchanging 13 with 12
+Replica exchange at step 198000 time 198.00000
+Repl 13 <-> 14  dE_term =  2.330e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11   12   13 x 14   15
+Repl pr        .80       1.0       1.0       1.0       .87       .56       .79     
+
+Exchanging 13 with 14
+Replica exchange at step 199000 time 199.00000
+Repl 12 <-> 13  dE_term =  5.110e-01 (kT)
+Repl ex  0 x  1    2    3    4 x  5    6 x  7    8 x  9   10 x 11   12 x 13   14   15
+Repl pr   1.0       .65       1.0       .74       .69       1.0       .60       .70
+
+Exchanging 13 with 12
+           Step           Time         Lambda
+         200000      200.00000        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle    Proper Dih.          LJ-14         VDW-14
+    1.18820e+02    8.15784e+01    7.22776e+01   -3.45683e+02    0.00000e+00
+     Coulomb-14        LJ (SR)   Coulomb (SR)      Potential    Kinetic En.
+    0.00000e+00    8.16164e-01    0.00000e+00   -7.21906e+01    3.55786e+02
+   Total Energy    Temperature Pressure (bar)
+    2.83596e+02    1.73947e+02   -7.18329e-01
+
+Replica exchange at step 200000 time 200.00000
+Repl 13 <-> 14  dE_term = -1.432e-01 (kT)
+Repl ex  0    1 x  2    3 x  4    5 x  6    7 x  8    9 x 10   11 x 12   13 x 14   15
+Repl pr        .93       1.0       1.0       .71       .96       1.0       1.0     

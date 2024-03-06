@@ -14,24 +14,27 @@ This structure contains three fields:
   perturbation.
 
 """
-struct GromacsHRMEDlog
+struct GromacsREMDlog
     steps::Vector{Int}
     exchange_matrix::Matrix{Int}
     probability_matrix::Matrix{Float64}
 end
-const hrmed_production_log = "$(@__DIR__)" * "/../../test/data/hrmed/production.log"
+const gmx2019_4_log = "$(@__DIR__)" * "/../../test/data/remd/gmx-2019.4.log"
+const gmx5_0_4_log = "$(@__DIR__)" * "/../../test/data/remd/gmx-5.0.4.log"
 
 """
     remd_data(log::String)
 
 Function to read the log file from a (H)REMD simulation performed with Gromacs.
 
-Returns a `GromacsHRMEDlog` structure, containing the steps at which the exchange
+Returns a `GromacsREMDlog` structure, containing the steps at which the exchange
 was tried, the exchange matrix and the probability matrix. The exchange matrix
 contains the replica number at each level of perturbation for each step. The
 probability matrix contains the probability of finding each replica at each level.
 
-Tested with Gromacs version 2019.4 output log.
+Tested with log files of Gromacs versions: 
+    - 2019.4
+    - 5.0.4
 
 # Example
 
@@ -40,7 +43,7 @@ First obtaina the REMD data from the log file:
 ```julia-repl
 julia> using MolSimToolkit
 
-julia> data = remd_data(MolSimToolkit.hrmed_production_log)
+julia> data = remd_data(MolSimToolkit.gmx2019_9_log)
 
 ```
 
@@ -122,6 +125,25 @@ function remd_data(log::String)
     for iframe in eachindex(exchanges)
         exchange_matrix[iframe, :] .= exchanges[iframe]
     end
-    probability_matrix = reduce(hcat, [[count(==(i), exchange_matrix[:, j]) for i in 0:9] for j in 1:10]) ./ length(steps)
-    return GromacsHRMEDlog(steps, exchange_matrix, probability_matrix)
+    probability_matrix = reduce(hcat, 
+            [[count(==(i), exchange_matrix[:, j]) for i in 0:nreplicas-1] for j in 1:nreplicas]
+        ) ./ length(steps)
+    return GromacsREMDlog(steps, exchange_matrix, probability_matrix)
+end
+
+@testitem "REMD" begin
+    using MolSimToolkit
+    using MolSimToolkit: gmx2019_4_log, gmx5_0_4_log
+    data = remd_data(gmx2019_4_log)
+    @test size(data.exchange_matrix) == (251,10)
+    @test size(data.probability_matrix) == (10,10)
+    @test all(≈(1), sum(data.probability_matrix, dims=1))
+    @test all(≈(1), sum(data.probability_matrix, dims=2))
+    @test length(data.steps) == 251
+    data = remd_data(gmx5_0_4_log)
+    @test size(data.exchange_matrix) == (201,16)
+    @test size(data.probability_matrix) == (16,16)
+    @test all(≈(1), sum(data.probability_matrix, dims=1))
+    @test all(≈(1), sum(data.probability_matrix, dims=2))
+    @test length(data.steps) == 201
 end
