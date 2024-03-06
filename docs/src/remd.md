@@ -72,6 +72,10 @@ which mean a proper interchange of replicas among the levels from 0 to 12.
 
 ## Replica path
 
+!!! compat 
+    The `remd_replica_path` function was introduced in version 1.5.0.
+
+
 A heatmap as the one above suggests checking the path of the replicas along the exchange. 
 This can be obtained with the `remd_replica_path` function. For example, to obtain the path
 of the replica of number 1, which appears to be trapped in the top temperatures, do:
@@ -96,27 +100,9 @@ Producing the following plot:
 
 ![](./assets/figures/remd/replica_path.png)
 
+The plot confirms that the replica starting at position 1 was trapped in the higher energy states. 
 
-A visualiation of the exchange process can be obtained, for example, with:
-
-```julia-repl
-julia> using Plots
-
-julia> plt = plot(
-           data.steps, data.exchange_matrix,
-           label=nothing,
-           xlabel="simulations step",
-           ylabel="replica at position",
-           linewidth=2,
-           palette = cgrad(:rainbow, rev=true),
-           margin=0.5Plots.Measures.cm,
-           ylims=[0, 9], yticks=(0:1:9, 0:1:9),
-       )
-```
-
-The above code will produce the following plot:
-
-![hremd1.svg](./images/REMD/hremd1.svg)
+## Probability data
 
 An alternative visualization of the exchange process is
 given by the probability matrix:
