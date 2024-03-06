@@ -1,4 +1,5 @@
 export remd_data
+export remd_replica_path
 
 """
     GromacsRMEDlog
@@ -112,9 +113,9 @@ function remd_data(log::String)
                 for i in eachindex(data)
                     if data[i] == "x"
                         swaps[iswap-1], swaps[iswap] = swaps[iswap], swaps[iswap-1]
-                        iswap -= 1
+                    else
+                        iswap += 1
                     end
-                    iswap += 1
                 end
                 push!(steps, step)
                 push!(exchanges, copy(swaps))
@@ -130,6 +131,15 @@ function remd_data(log::String)
         ) ./ length(steps)
     return GromacsREMDlog(steps, exchange_matrix, probability_matrix)
 end
+
+"""
+    remd_replica_path(data::GromacsREMDlog, replica::Int)
+
+Function to obtain the path of a replica in the exchange matrix.
+
+"""
+remd_replica_path(data::GromacsREMDlog, replica::Int) = 
+    [ findfirst(==(replica), data.exchange_matrix[i,:]) - 1 for i in axes(data.exchange_matrix,1) ];
 
 @testitem "REMD" begin
     using MolSimToolkit

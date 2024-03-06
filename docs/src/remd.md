@@ -31,7 +31,71 @@ This will result in a data structure with three fields:
   perturbation. Each column corresponds to a replica and each row to a level of
   perturbation.
 
-## Visualiation of the exchange
+## Probability heatmap
+
+One way to visualize the exchange it to produce a heatmap of expected probabilities. This
+can be done, for example, with:
+
+```julia
+using Plots
+using MolSimToolkit
+
+data = remd_data("./gromacs_log.dat")
+
+nreplicas = size(data.probability_matrix,1) # number of replicas
+maxprob = maximum(data.probability_matrix) # maximum observed probability - for setting color limits
+
+default(fontfamily="Computer Modern")
+heatmap(
+    transpose(data.probability_matrix .- (1/nreplicas)),
+    xlabel="replica", ylabel="level", 
+    clims=(-maxprob, maxprob), 
+    color=cgrad(:balance), 
+    xticks=(1:nreplicas, 0:nreplicas-1), 
+    yticks=(1:nreplicas, 0:nreplicas-1), 
+    framestyle=:box, 
+    colorbar_title="Relative probability", 
+)
+```
+
+Which will produce a plot of the following form:
+
+![](./assets/figures/remd/remd_heatmap.png)
+
+The plot was built such that the zero of the color scale is the expected probability in a 
+perfect sampling, for that number of replicas (in this case, $1/16$). 
+
+Here, we see that replicas 1, 3, and 12 got trapped in levels 13, 14, 15, and display roughly
+30% probability of being at the top temperatures. Thus, these replicas didn't exchange well
+with the rest of the replica system. The other replicas show colors that are close to zero,
+which mean a proper interchange of replicas among the levels from 0 to 12. 
+
+## Replica path
+
+A heatmap as the one above suggests checking the path of the replicas along the exchange. 
+This can be obtained with the `remd_replica_path` function. For example, to obtain the path
+of the replica of number 1, which appears to be trapped in the top temperatures, do:
+
+```julia
+# Obtain the path
+path = remd_replica_path(data, 1)
+
+# Plot the path
+default(fontfamily="Computer Modern")
+plot(
+  data.steps,
+  path, 
+  xlabel="step",
+  ylabel="replica level",
+  label="Replica 1",
+  framestyle=:box
+)
+```
+
+Producing the following plot:
+
+![](./assets/figures/remd/replica_path.png)
+
 
 A visualiation of the exchange process can be obtained, for example, with:
 
