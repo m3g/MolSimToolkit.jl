@@ -1,5 +1,9 @@
 # Developer zone
 
+```@meta
+CollapsedDocStrings = true
+```
+
 ## Simulation
 
 ```@autodocs
