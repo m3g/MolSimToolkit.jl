@@ -6,10 +6,13 @@ of the quality of the exchange process.
 
 !!! compat
     This function was introduced in `MolSimToolkit` version 1.1.0. 
+
     The function was tested to read log files produced by Gromacs versions: 
       - 2019.4
       - 5.0.4
     Compatibility with other versions is not guaranteed (issue reporting and contributions are welcome). 
+
+    The `heatmap` and the support for the `stride` argument in `remd_replica_path` where introduced in version 1.6.0
 
 ## Reading REMD data
 
@@ -34,36 +37,23 @@ This will result in a data structure with three fields:
 ## Probability heatmap
 
 One way to visualize the exchange it to produce a heatmap of expected probabilities. This
-can be done, for example, with:
+can be done with the auxiliary `heatmap` function that is provided for the output
+of `remd_data`: 
 
 ```julia
-using Plots
 using MolSimToolkit
-
+using Plots
 data = remd_data("./gromacs_log.dat")
-
-nreplicas = size(data.probability_matrix,1) # number of replicas
-maxprob = maximum(data.probability_matrix) # maximum observed probability - for setting color limits
-
-default(fontfamily="Computer Modern")
-heatmap(
-    transpose(data.probability_matrix .- (1/nreplicas)),
-    xlabel="replica", ylabel="level", 
-    clims=(-maxprob, maxprob), 
-    color=cgrad(:balance), 
-    xticks=(1:nreplicas, 0:nreplicas-1), 
-    yticks=(1:nreplicas, 0:nreplicas-1), 
-    framestyle=:box, 
-    colorbar_title="Relative probability", 
-)
+heatmap(data)
 ```
 
 Which will produce a plot of the following form:
 
-![](./assets/figures/remd/remd_heatmap.png)
+![](./images/REMD/remd_heatmap.png)
 
-The plot was built such that the zero of the color scale is the expected probability in a 
-perfect sampling, for that number of replicas (in this case, $1/16$). 
+The number of replicas here is 16, thus the expected ideal probabilty of finding each replica
+in each level is $1/16$. The probabilities are divided by $1/16$, such that $1.0$ implies 
+an optimal exchange at that replica and level. 
 
 Here, we see that replicas 1, 3, and 12 got trapped in levels 13, 14, 15, and display roughly
 30% probability of being at the top temperatures. Thus, these replicas didn't exchange well
@@ -72,35 +62,33 @@ which mean a proper interchange of replicas among the levels from 0 to 12.
 
 ## Replica path
 
-!!! compat 
-    The `remd_replica_path` function was introduced in version 1.5.0.
-
-
 A heatmap as the one above suggests checking the path of the replicas along the exchange. 
 This can be obtained with the `remd_replica_path` function. For example, to obtain the path
-of the replica of number 1, which appears to be trapped in the top temperatures, do:
+of the replicas of number 0 and 1. Replica 0 appeares to have visited reasonably well 
+all levels from 0 to 12, and replica 1 appears to be trapped in leves 13 to 15.
 
 ```julia
-# Obtain the path
-path = remd_replica_path(data, 1)
+# Obtain the paths
+path0 = remd_replica_path(data, 0; stride = 500)
+path1 = remd_replica_path(data, 1; stride = 500)
 
 # Plot the path
 default(fontfamily="Computer Modern")
 plot(
-  data.steps,
-  path, 
+  [path0  path1],
   xlabel="step",
   ylabel="replica level",
-  label="Replica 1",
+  label=[ "Replica 0" "Replica 1" ],
   framestyle=:box
 )
 ```
 
 Producing the following plot:
 
-![](./assets/figures/remd/replica_path.png)
+![](./images/REMD/replica_path.png)
 
-The plot confirms that the replica starting at position 1 was trapped in the higher energy states. 
+The plot confirms that the replica starting at position 0 sampled properly all states from 0 to 12,
+while the replica starting at position 1 was trapped in the high energy states.
 
 ## Probability data
 
