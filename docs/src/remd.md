@@ -60,6 +60,12 @@ Here, we see that replicas 1, 3, and 12 got trapped in levels 13, 14, 15, and di
 with the rest of the replica system. The other replicas show colors that are close to zero,
 which mean a proper interchange of replicas among the levels from 0 to 12. 
 
+To produce a similar heatmap, but with the absolute (not normalized) probabilities of 
+observing each replica at each level, use `heatmap(data; probability_type=:absolute)`. 
+
+!!! compat
+    The `probability_type` option of `heatmap` was introduced in version 1.7.0.
+
 ## Replica path
 
 A heatmap as the one above suggests checking the path of the replicas along the exchange. 
