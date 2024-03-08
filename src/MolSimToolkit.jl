@@ -6,8 +6,9 @@ using AtomsBase
 using StaticArrays
 import Chemfiles
 import PDBTools
-import LinearAlgebra: norm
-import Reexport: @reexport
+using LinearAlgebra: norm
+using Reexport: @reexport
+using ProgressMeter: Progress, next!
 
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
