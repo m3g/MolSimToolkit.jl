@@ -106,18 +106,17 @@ end
 Computes the root mean square deviation (RMSD) between two sets of points in 
 space, or along a trajectory.
 
-The rmsd(x,y) function computes the RMSD between two sets of points `x` and `y`. 
+The `rmsd(x,y)` method computes the RMSD between two sets of points `x` and `y`. 
 The sets are expected to be of the same size, and the correspondence is assumed from the vector indices.
 
-The rmsd(simulation, indices) function computes the RMSD along a trajectory. 
-The `indices` vector contains the indices of the atoms to be considered. 
-The `mass` argument can be used to provide the mass of the atoms if they are not the same.
-
-The `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
-
-- If `reference_frame == nothing`, the first frame will be used (default behavior).
-- If `reference_frame == :average`, the average structure will be used.
-- If `reference_frame` is an integer, the frame at that index will be used as reference.
+The `rmsd(simulation::Simulation, indices)` method computes the RMSD along a trajectory. With the 
+following options: 
+- The `indices` vector contains the indices of the atoms to be considered. 
+- The `mass` argument can be used to provide the mass of the atoms if they are not the same.
+- The `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
+    - If `reference_frame == nothing`, the first frame will be used (default behavior).
+    - If `reference_frame == :average`, the average structure will be used.
+    - If `reference_frame` is an integer, the frame at that index will be used as reference.
 
 # Examples
 
