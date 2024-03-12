@@ -2,8 +2,8 @@
     intermittent_correlation(data::AbstractVector; maxdelta = length(data) ÷ 10)
 
 Calculate the intermittent correlation function of a time series. That is,
-computes the probability of finding a value of the same type at a distance
-`delta` in the time series, given that it was present in step `i`.
+computes the probability of finding a value of the same type at a step
+`i + delta` in the time series, given that it was present in step `i`.
 
 Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 `0` is `1.0`, corresponding to the normalized count of events. 
@@ -34,6 +34,9 @@ julia> intermittent_correlation(data; maxdelta=4)
  0.0
  1.0
 ```
+
+!!! compat
+    This function was added in version 1.9.0 of MolSimToolkit.
 
 """
 function intermittent_correlation(
