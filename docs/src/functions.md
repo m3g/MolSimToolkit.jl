@@ -6,7 +6,11 @@ CollapsedDocStrings = true
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "distances.jl", "center_of_mass.jl" ]
+Pages = [ 
+    "intermittent_correlation.jl",
+    "distances.jl", 
+    "center_of_mass.jl" 
+]
 ```
 
 
