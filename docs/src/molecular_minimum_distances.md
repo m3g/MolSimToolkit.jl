@@ -246,7 +246,7 @@ Distance found, d = 9.652277658666891
 ```
 
 The fields `within_cutoff`, `i`, `j`, and `d` show if a distance was found within the cutoff,
-the indexes of the atoms involved in the contact, and their distance.
+the indices of the atoms involved in the contact, and their distance.
 
 Getter functions are available to extract eac hof these fields, to add some convenience:
 `within_cutoff`, `iatom`, `jatom`, and `distance`.
@@ -464,7 +464,7 @@ julia> mol_indices(4,3) # fourth atom belongs to second molecule
 2
 ```
 
-Typically, as we will show, this function will be used for setting up molecule indexes.
+Typically, as we will show, this function will be used for setting up molecule indices.
 
 However, more general indexing can be used. For instance, let us suppose that the 9 atoms of the `x` array of coordinates above belong to `2` molecules, with `4` and `5` atoms each. Then, we could define, for example:
 
@@ -479,12 +479,12 @@ julia> my_mol_indices(5)
 2
 ```
 
-Since the function can close-over an array of molecular indexes, the definition can be completely general, that is:
+Since the function can close-over an array of molecular indices, the definition can be completely general, that is:
 
 ```julia-repl
-julia> molecular_indexes = [ 1, 3, 3, 2, 2, 1, 3, 1, 2 ];
+julia> molecular_indices = [ 1, 3, 3, 2, 2, 1, 3, 1, 2 ];
 
-julia> my_mol_indices(i) = molecular_indexes[i]
+julia> my_mol_indices(i) = molecular_indices[i]
 my_mol_indices (generic function with 1 method)
 
 julia> my_mol_indices(1)
@@ -684,7 +684,7 @@ julia> list = minimum_distances(
  MinimumDistance{Float64}(false, 0, 0, Inf)
 ```
 
-The output is a list of `MinimumDistance` data structures, one for each molecule in `x`. The `true` indicates that a distance smaller than the cutoff was found, and for these the indexes of the atoms in `x` and `y` associated are reported, along with the distance between them.
+The output is a list of `MinimumDistance` data structures, one for each molecule in `x`. The `true` indicates that a distance smaller than the cutoff was found, and for these the indices of the atoms in `x` and `y` associated are reported, along with the distance between them.
 
 In this example, from the 40 molecules of `x`, eleven had atoms closer than the cutoff to some
 atom of `y`:

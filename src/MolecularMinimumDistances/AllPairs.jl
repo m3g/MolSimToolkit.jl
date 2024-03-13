@@ -152,7 +152,7 @@ end
         yn_atoms_per_molecule = length(protein),
     )
     xmd_min = zeros(length(simulation))
-    ymd_indexes = zeros(Int, length(simulation))
+    ymd_indices = zeros(Int, length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
         sys.xpositions .= @view(pos[popc])
@@ -160,10 +160,10 @@ end
         sys.unitcell = unitcell(frame)
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
-        ymd_indexes[iframe] = minimum(p -> p.i, md[2])
+        ymd_indices[iframe] = minimum(p -> p.i, md[2])
     end
     @test xmd_min ≈ [1.9533253817007286, 1.6489800900283895, 1.6469793433779658, 1.5597538784005365, 1.5163768980822412] 
-    @test ymd_indexes ≈ [378, 597, 597, 577, 576]
+    @test ymd_indices ≈ [378, 597, 597, 577, 576]
 end
 
 
