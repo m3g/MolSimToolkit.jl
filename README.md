@@ -5,10 +5,9 @@
 
 # MolSimToolkit
 
-This package provides functions to analyze molecular dynamics simulations, and a framework for the development of custom
+[MolSimToolkit.jl](https://github.com/m3g/MolSimToolkit.jl) provides a set of tools to 
+analyse molecular dynamics simulations, and a framework for the development of custom
 analysis tools.
-
-It is currently on very early development stage.
 
 ## Installation
 
@@ -28,7 +27,7 @@ Also install `PDBTools`:
 
 ```julia
 import Pkg; Pkg.add("PDBTools")
-import PDBTools
+using PDBTools
 ```
 
 
