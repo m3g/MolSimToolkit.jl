@@ -1,17 +1,16 @@
 module MolSimToolkit
 
-using Printf
-using TestItems
-using AtomsBase
-using StaticArrays
 import Chemfiles
 import PDBTools
 import OffsetArrays
+import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
+
+using TestItems: @testitem
+using AtomsBase: atomic_mass
+using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm
 using Reexport: @reexport
 using ProgressMeter: Progress, next!
-
-import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
 export wrap, wrap_to_first
 export distances
@@ -25,12 +24,16 @@ include("./Testing.jl")
 include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
 
-# Basic functions
+# Coordinate PBC wrapping functions
 include("./wrap.jl")
-include("./simple_functions/distances.jl")
-include("./simple_functions/center_of_mass.jl")
+
+# Miscelaneous functions
+include("./miscelaneous_functions/distances.jl")
+include("./miscelaneous_functions/center_of_mass.jl")
+include("./miscelaneous_functions/intermittent_correlation.jl")
+
+#  Structural alignment
 include("./procrustes.jl")
-include("./simple_functions/intermittent_correlation.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")

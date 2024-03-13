@@ -1,4 +1,4 @@
-# Analysis functions
+# Miscelaneous functions
 
 ```@meta
 CollapsedDocStrings = true

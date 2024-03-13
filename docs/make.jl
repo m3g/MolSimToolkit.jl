@@ -15,7 +15,7 @@ makedocs(
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",
         "Structural alignment" => "procrustes.md",
-        "Functions" => "functions.md",
+        "Miscelaneous functions" => "miscelaneous.md",
         "Developer zone" => "Developer.md",
     ],
 )
