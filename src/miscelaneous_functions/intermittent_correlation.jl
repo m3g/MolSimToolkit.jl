@@ -60,16 +60,16 @@ of the `0` values.
 
 """
 function intermittent_correlation(
-    data::AbstractVector; 
-    maxdelta::Integer = max(1, length(data) ÷ 10),
-    types::F = x -> true,
+    data::AbstractVector;
+    maxdelta::Integer=max(1, length(data) ÷ 10),
+    types::F=x -> true,
 ) where {F<:Function}
     if maxdelta > length(data) - 1
         throw(ArgumentError("maxdelta must be less than the length of the data minus 1"))
     end
     types_considered = filter!(types, unique(data))
-    counts = OffsetArrays.OffsetArray(zeros(maxdelta+1), 0:maxdelta)
-    chances = OffsetArrays.OffsetArray(zeros(maxdelta+1), 0:maxdelta)
+    counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
+    chances = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     for type in types_considered
         positions = findall(x -> isequal(x, type), data)
         np = length(positions)
@@ -94,24 +94,24 @@ end
 @testitem "intermittent_correlation" begin
     using MolSimToolkit
     using OffsetArrays
-    data = [ 1, 0, 1, 0, 1 ]
+    data = [1, 0, 1, 0, 1]
     c = intermittent_correlation(data; maxdelta=4)
-    @test c == OffsetArray([ 1.0, 0.0, 1.0, 0.0, 1.0 ], 0:4)
-    c = intermittent_correlation(data; types = x -> x != 0)
-    @test c == OffsetArray([ 1.0, 0.0 ], 0:1)
-    c = intermittent_correlation(data; maxdelta = 4, types = x -> x != 0)
-    @test c == OffsetArray([ 1.0, 0.0, 1.0, 0.0, 1.0 ], 0:4)
+    @test c == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
+    c = intermittent_correlation(data; types=x -> x != 0)
+    @test c == OffsetArray([1.0, 0.0], 0:1)
+    c = intermittent_correlation(data; maxdelta=4, types=x -> x != 0)
+    @test c == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
     data = [0]
     for i in 2:101
-        push!(data, data[i-1] + (mod(i,2) == 0))
+        push!(data, data[i-1] + (mod(i, 2) == 0))
     end
     c = intermittent_correlation(data)
     @test c[0:1] == [1.0, 0.5]
     @test all(==(0), c[2:end])
     data = [0, 1, 1, 2, 2]
     @test intermittent_correlation(data) == OffsetArray([1.0, 0.5], 0:1)
-    @test intermittent_correlation(data; types = x -> x > 0) ≈ OffsetArray([1.0, 2/3], 0:1)
-    @test intermittent_correlation(data; types = x -> x != 1) == OffsetArray([1.0, 0.5], 0:1)
-    @test intermittent_correlation(data; types = x -> x == 1) == OffsetArray([1.0, 0.5], 0:1)
+    @test intermittent_correlation(data; types=x -> x > 0) ≈ OffsetArray([1.0, 2 / 3], 0:1)
+    @test intermittent_correlation(data; types=x -> x != 1) == OffsetArray([1.0, 0.5], 0:1)
+    @test intermittent_correlation(data; types=x -> x == 1) == OffsetArray([1.0, 0.5], 0:1)
     @test_throws ArgumentError intermittent_correlation(data; maxdelta=5)
 end
