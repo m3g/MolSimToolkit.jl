@@ -41,7 +41,7 @@ julia> intermittent_correlation(data; maxdelta=4)
 """
 function intermittent_correlation(
     data::AbstractVector; 
-    maxdelta::Integer = min(1, length(data) ÷ 10)
+    maxdelta::Integer = max(1, length(data) ÷ 10)
 )
     types = unique(data)
     counts = OffsetArrays.OffsetArray(zeros(maxdelta+1), 0:maxdelta)
@@ -59,4 +59,22 @@ function intermittent_correlation(
         counts[i] /= length(data) - i
     end
     return counts
+end
+
+@testitem "intermittent_correlation" begin
+    using MolSimToolkit
+    data = [ mod(i,2) for i in 1:10^3 ];
+    c = intermittent_correlation(data)
+    @test all(==(1), c[0:2:end])  
+    @test all(==(0), c[1:2:end])  
+    @test length(c) == 101
+    c = intermittent_correlation(data; maxdelta=4)
+    @test length(c) == 5
+    data = [1]
+    for i in 2:101
+        push!(data, data[i-1] + (mod(i,2) == 0))
+    end
+    c = intermittent_correlation(data)
+    @test c[0:1] == [1.0, 0.5]
+    @test all(==(0), c[2:end])
 end
