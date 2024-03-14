@@ -69,7 +69,7 @@ function intermittent_correlation(
     end
     types_considered = filter!(types, unique(data))
     counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
-    chances = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
+    chances = copy(counts)
     for type in types_considered
         positions = findall(x -> isequal(x, type), data)
         np = length(positions)
@@ -88,7 +88,9 @@ function intermittent_correlation(
             end
         end
     end
-    return counts ./ chances
+    # Convert counts to probabilities
+    counts ./= chances
+    return counts
 end
 
 @testitem "intermittent_correlation" begin
