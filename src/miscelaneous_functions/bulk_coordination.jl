@@ -35,6 +35,9 @@ coordination number of water relative to TMAO, as a function of the distance to 
 The function returns the the distances and the histogram of the coordination number as a function of 
 the distance.
 
+!!! compat
+    This function was introduced in version 1.11.0 of MolSimToolkit.jl.
+
 # Arguments
 
 - `simulation::Simulation`: The simulation object
