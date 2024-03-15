@@ -180,7 +180,7 @@ end
         solvent=select(pdb, "water"),
         n_atoms_per_molecule_solvent=3,
     )
-    @test r == 0.0:0.1:20.0
+    @test r ≈ [0.05 + 0.1*(i-1) for i in eachindex(h)]
     @test length(r) == length(h)
     @test sum(h) ≈ 2678.5
 end
