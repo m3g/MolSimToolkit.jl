@@ -82,7 +82,12 @@ julia> r, h = bulk_coordination(
 
 julia> using Plots
 
-julia> plot(r, h) # plots `h` as a function of `r`
+julia> plot(r, h, # plots `h` as a function of `r`
+           xlabel = "Distance to protein (Å)",
+           ylabel = "TMAO-water Coordination number",
+           linewidth=2,
+           label=:none, framestyle=:box, fontfamily="Computer Modern",
+       )
 ```
 
 """
@@ -126,7 +131,7 @@ function bulk_coordination(
     )
 
     # Initialize the histogram
-    histogram = zeros(ceil(Int, cutoff / bin_size) + 1)
+    histogram = zeros(ceil(Int, cutoff / bin_size))
     nmols_in_bin = copy(histogram)
 
     progress = Progress(length(simulation); enabled=show_progress)
@@ -157,7 +162,8 @@ function bulk_coordination(
     end
 
     histogram ./= max.(1, nmols_in_bin)
-    return 0.0:bin_size:cutoff, histogram
+    r = [(i-1)*bin_size + 0.5*bin_size for i in eachindex(histogram) ]
+    return r, histogram
 end
 
 @testitem "bulk_coordination" begin
