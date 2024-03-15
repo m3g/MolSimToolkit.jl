@@ -17,6 +17,7 @@ makedocs(
         "Structural alignment" => "procrustes.md",
         "Miscelaneous functions" => "miscelaneous.md",
         "Developer zone" => "Developer.md",
+        "Plotting style" => "plotting_style.md",
     ],
 )
 deploydocs(

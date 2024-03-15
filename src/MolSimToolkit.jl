@@ -47,4 +47,8 @@ include("./gromacs/remd.jl")
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
 
+# Structure for plotting styles
+struct MolSimStyle end
+export MolSimStyle
+
 end
