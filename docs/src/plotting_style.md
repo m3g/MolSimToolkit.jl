@@ -1,7 +1,7 @@
 # Plotting style
 
 This package provides a simple type to overload the default plotting styles of `Plots`, such
-that figure that are prettier (in our oppinion) are produced. To use the style, add `MolSimStyle`
+figures that are prettier (in our oppinion) are produced. To use the style, add `MolSimStyle`
 as the first argument of the plotting functions. 
 
 In brief, use the `Plots` plotting functions with, for example:
