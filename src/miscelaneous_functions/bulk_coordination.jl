@@ -8,7 +8,7 @@
 # - `n` is the number of atoms per molecule
 # - `indices` is the vector with the indices of the atoms of the group
 #
-_imol_atoms(imol, n, indices) = first(indices) .+ ( ((imol-1)*n) : (imol*n-1) )
+_imol_atoms(imol, n, indices) = first(indices) .+ (((imol-1)*n):(imol*n-1))
 
 """
     bulk_coordination(
@@ -88,15 +88,15 @@ julia> plot(r, h) # plots `h` as a function of `r`
 """
 function bulk_coordination(
     simulation::Simulation;
-    reference_solute::AbstractVector{PDBTools.Atom}, 
+    reference_solute::AbstractVector{PDBTools.Atom},
     solute::AbstractVector{PDBTools.Atom},
     n_atoms_per_molecule_solute::Int,
-    solvent::AbstractVector{PDBTools.Atom}, 
+    solvent::AbstractVector{PDBTools.Atom},
     n_atoms_per_molecule_solvent::Int,
-    dmax::Real = 5.0,
-    cutoff::Real = 20.0,
-    bin_size::Real = 0.1,
-    show_progress = true,
+    dmax::Real=5.0,
+    cutoff::Real=20.0,
+    bin_size::Real=0.1,
+    show_progress=true,
 )
 
     # Indices of the atoms of each group
@@ -110,23 +110,23 @@ function bulk_coordination(
     uc = unitcell(current_frame(simulation))
     p = positions(current_frame(simulation))
     sys1 = CrossPairs(
-        xpositions = p[solute_indices],
-        ypositions = p[reference_solute_indices],
+        xpositions=p[solute_indices],
+        ypositions=p[reference_solute_indices],
         xn_atoms_per_molecule=n_atoms_per_molecule_solute,
         cutoff=cutoff,
         unitcell=uc,
-    ) 
+    )
     imol_atoms = _imol_atoms(1, n_atoms_per_molecule_solute, solute_indices)
     sys2 = CrossPairs(
-        xpositions = p[solvent_indices],
-        ypositions = p[imol_atoms],
+        xpositions=p[solvent_indices],
+        ypositions=p[imol_atoms],
         xn_atoms_per_molecule=n_atoms_per_molecule_solvent,
         cutoff=dmax,
         unitcell=uc,
     )
 
     # Initialize the histogram
-    histogram = zeros(ceil(Int, cutoff/bin_size) + 1)
+    histogram = zeros(ceil(Int, cutoff / bin_size) + 1)
     nmols_in_bin = copy(histogram)
 
     progress = Progress(length(simulation); enabled=show_progress)
@@ -150,29 +150,29 @@ function bulk_coordination(
             sys2.ypositions .= @view(p[imol_atoms])
             sys2.unitcell = uc
             solvent_distances = minimum_distances!(sys2)
-            bin = max(1, ceil(Int, md.d/bin_size))
+            bin = max(1, ceil(Int, md.d / bin_size))
             nmols_in_bin[bin] += 1
             histogram[bin] += count(x -> x.within_cutoff, solvent_distances)
         end
-
     end
+
     histogram ./= max.(1, nmols_in_bin)
     return 0.0:bin_size:cutoff, histogram
 end
 
 @testitem "bulk_coordination" begin
-    using MolSimToolkit: Testing, bulk_coordination, Simulation 
+    using MolSimToolkit: Testing, bulk_coordination, Simulation
     using PDBTools: select, readPDB
     pdb = readPDB(Testing.namd2_pdb) # protein-tmao-water system
     trajectory = Testing.namd2_traj
-    simulation = Simulation(pdb, trajectory; last = 1)
+    simulation = Simulation(pdb, trajectory; last=1)
     r, h = bulk_coordination(
-           simulation;
-           reference_solute = select(pdb, "protein"),
-           solute = select(pdb, "resname TMAO"),
-           n_atoms_per_molecule_solute = 14,
-           solvent = select(pdb, "water"),
-           n_atoms_per_molecule_solvent = 3,
+        simulation;
+        reference_solute=select(pdb, "protein"),
+        solute=select(pdb, "resname TMAO"),
+        n_atoms_per_molecule_solute=14,
+        solvent=select(pdb, "water"),
+        n_atoms_per_molecule_solvent=3,
     )
     @test r == 0.0:0.1:20.0
     @test length(r) == length(h)
