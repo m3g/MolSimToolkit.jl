@@ -16,6 +16,7 @@ export wrap, wrap_to_first
 export distances
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
+export bulk_coordination
 
 # Testing module
 include("./Testing.jl")
@@ -31,6 +32,7 @@ include("./wrap.jl")
 include("./miscelaneous_functions/distances.jl")
 include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/intermittent_correlation.jl")
+include("./miscelaneous_functions/bulk_coordination.jl")
 
 #  Structural alignment
 include("./procrustes.jl")
