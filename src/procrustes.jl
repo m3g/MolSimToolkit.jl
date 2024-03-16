@@ -169,7 +169,7 @@ function rmsd(x::AbstractVector, y::AbstractVector)
     for i in eachindex(x, y)
         rmsd += sum(abs2, x[i] .- y[i])
     end
-    return sqrt(rmsd) / length(x)
+    return sqrt(rmsd / length(x))
 end
 
 function rmsd(
