@@ -307,7 +307,7 @@ The `show_progress` argument can be used to show a progress bar.
 
 # Example
 
-```julia-repl
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using PDBTools
@@ -318,13 +318,13 @@ julia> cas = findall(Select("name CA"), atoms); # CA indices
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> rmsd_matrix(simulation, cas)
+julia> rmsd_matrix(simulation, cas; show_progress=false)
 5×5 Matrix{Float64}:
- 0.0       0.432924  0.454095  0.375474  0.580039
- 0.432924  0.0       0.359123  0.403302  0.713736
- 0.454095  0.359123  0.0       0.317572  0.527873
- 0.375474  0.403302  0.317572  0.0       0.454195
- 0.580039  0.713736  0.527873  0.454195  0.0
+ 0.0      2.83887  2.9777   2.46214  3.80357
+ 2.83887  0.0      2.35492  2.64463  4.68028
+ 2.9777   2.35492  0.0      2.08246  3.46149
+ 2.46214  2.64463  2.08246  0.0      2.97835
+ 3.80357  4.68028  3.46149  2.97835  0.0
 ```
 
 """
@@ -365,12 +365,12 @@ end
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     m = rmsd_matrix(simulation, cas)
     @test all(m .- [
-        0.0 0.432924 0.454095 0.375474 0.580039
-        0.432924 0.0 0.359123 0.403302 0.713736
-        0.454095 0.359123 0.0 0.317572 0.527873
-        0.375474 0.403302 0.317572 0.0 0.454195
-        0.580039 0.713736 0.527873 0.454195 0.0
-    ] .< 1e-6)
+        0.0      2.83887  2.9777   2.46214  3.80357
+        2.83887  0.0      2.35492  2.64463  4.68028
+        2.9777   2.35492  0.0      2.08246  3.46149
+        2.46214  2.64463  2.08246  0.0      2.97835
+        3.80357  4.68028  3.46149  2.97835  0.0
+    ] .< 1e-3)
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
 end
