@@ -199,7 +199,7 @@ function rmsd(
         p = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
         for (iframe, frame) in enumerate(simulation)
             next!(p)
-            x = positions(frame)[indices]
+            x = @view(positions(frame)[indices])
             align!(x, xref; mass)
             @. xref = (xref * (iframe - 1) + x) / iframe
         end
@@ -216,7 +216,7 @@ function rmsd(
     p = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
     for frame in simulation
         next!(p)
-        x = positions(frame)[indices]
+        x = @view(positions(frame)[indices])
         align!(x, xref; mass)
         push!(rmsds, rmsd(x, xref))
     end
