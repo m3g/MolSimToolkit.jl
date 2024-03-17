@@ -135,7 +135,7 @@ julia> rmsd(ca, ca)
 
 ## Computing the rmsd along a trajectory
 
-```julia-repl
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using PDBTools
@@ -144,23 +144,23 @@ julia> atoms = readPDB(Testing.namd_pdb);
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> cas = findall(Select("name CA"), atoms); # CA indices
+julia> cas = findall(sel"name CA", atoms); # CA indices
 
-julia> rmsd(simulation, cas)
+julia> rmsd(simulation, cas; show_progress=false)
 5-element Vector{Float64}:
  0.0
- 0.43292377121645736
- 0.45409496910014824
- 0.375473504192558
- 0.5800387309029247
+ 2.8388710154609034
+ 2.9776998440690385
+ 2.4621444212469483
+ 3.8035683196100796
 
-julia> rmsd(simulation, cas; reference_frame = :average)
- 5-element Vector{Float64}:
-  0.28968608553561326
-  0.3280586488277726
-  0.22999381749407605
-  0.17767778197790135
-  0.42044452891897865
+julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
+5-element Vector{Float64}:
+ 1.8995986972454748
+ 2.1512244220536973
+ 1.5081703191869376
+ 1.1651111324544219
+ 2.757039151265317
 ```
 
 """
@@ -236,7 +236,7 @@ end
 
     # test RMSD function
     y = x .+ Ref(SVector{3}(1, 1, 1))
-    @test rmsd(x, y) ≈ sqrt(length(x) * 3) / length(x)
+    @test rmsd(x, y) ≈ sqrt(length(x) * 3 / length(x))
 
     # apply a random rotation and translation to x
     y = x .+ Ref(SVector{3}(45.0, -15.0, 31.5))
@@ -269,17 +269,17 @@ end
         rmsd_aligned[iframe] = rmsd(z, xref)
     end
 
-    @test rmsd_notaligned ≈ [0.0, 0.46706833866305225, 0.4863407031218979, 0.45566458412163086, 0.6061811870774306]
-    @test rmsd_aligned ≈ [0.0, 0.43292377121645736, 0.45409496910014824, 0.375473504192558, 0.5800387309029247]
+    @test rmsd_notaligned ≈ [0.0, 3.0627719174308323, 3.1891492625876556, 2.9879924980792314, 3.9749958688486617]
+    @test rmsd_aligned ≈ [0.0, 2.8388710154609034, 2.9776998440690385, 2.4621444212469483, 3.8035683196100796]
     @test all(rmsd_aligned .<= rmsd_notaligned)
 
     cas = findall(Select("name CA"), atoms)
     @test rmsd(simulation, cas) ≈ rmsd_aligned
     @test rmsd(simulation, cas; mass=mass.(atoms[cas])) ≈ rmsd_aligned
-    @test rmsd(simulation, cas; reference_frame=5) ≈ [0.5800387309029247, 0.7137360404149631, 0.5278729524954026, 0.45419475962454703, 1.0330528023032482e-15]
+    @test rmsd(simulation, cas; reference_frame=5) ≈ [3.8035683196100787, 4.680280207599843, 3.4614944346303917, 2.97835421429809, 0.0]
 
     # Average structure
-    @test rmsd(simulation, cas; reference_frame=:average, show_progress=false) ≈ [0.28968608553561326, 0.3280586488277726, 0.22999381749407605, 0.17767778197790135, 0.42044452891897865]
+    @test rmsd(simulation, cas; reference_frame=:average, show_progress=false) ≈  [1.8995986972454748, 2.1512244220536973, 1.5081703191869376, 1.1651111324544219, 2.757039151265317]
 
     # Input errors
     @test_throws ArgumentError rmsd(simulation, cas; reference_frame=6)
