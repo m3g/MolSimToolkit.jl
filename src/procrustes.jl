@@ -42,7 +42,7 @@ function align!(
 
     cmx = center_of_mass(x, mass)
     cmy = center_of_mass(y, mass)
-    for i in eachindex(x,y)
+    for i in eachindex(x, y)
         x[i] -= cmx
         y[i] -= cmy
     end
@@ -184,8 +184,8 @@ function rmsd(
 )
 
     # Auxiliary arrays for the alignment
-    xm=zeros(3, length(indices))
-    xp=zeros(3, length(indices))
+    xm = zeros(3, length(indices))
+    xp = zeros(3, length(indices))
 
     # Define reference of the alignment
     xref = if isnothing(reference_frame)
@@ -289,7 +289,7 @@ end
     @test rmsd(simulation, cas; reference_frame=5) ≈ [3.8035683196100787, 4.680280207599843, 3.4614944346303917, 2.97835421429809, 0.0]
 
     # Average structure
-    @test rmsd(simulation, cas; reference_frame=:average, show_progress=false) ≈  [1.8995986972454748, 2.1512244220536973, 1.5081703191869376, 1.1651111324544219, 2.757039151265317]
+    @test rmsd(simulation, cas; reference_frame=:average, show_progress=false) ≈ [1.8995986972454748, 2.1512244220536973, 1.5081703191869376, 1.1651111324544219, 2.757039151265317]
 
     # Input errors
     @test_throws ArgumentError rmsd(simulation, cas; reference_frame=6)
@@ -378,11 +378,11 @@ end
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     m = rmsd_matrix(simulation, cas)
     @test all(m .- [
-        0.0      2.83887  2.9777   2.46214  3.80357
-        2.83887  0.0      2.35492  2.64463  4.68028
-        2.9777   2.35492  0.0      2.08246  3.46149
-        2.46214  2.64463  2.08246  0.0      2.97835
-        3.80357  4.68028  3.46149  2.97835  0.0
+        0.0 2.83887 2.9777 2.46214 3.80357
+        2.83887 0.0 2.35492 2.64463 4.68028
+        2.9777 2.35492 0.0 2.08246 3.46149
+        2.46214 2.64463 2.08246 0.0 2.97835
+        3.80357 4.68028 3.46149 2.97835 0.0
     ] .< 1e-3)
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
