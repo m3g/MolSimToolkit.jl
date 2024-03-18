@@ -42,8 +42,10 @@ function align!(
 
     cmx = center_of_mass(x, mass)
     cmy = center_of_mass(y, mass)
-    x .= x .- Ref(cmx)
-    y .= y .- Ref(cmy)
+    for i in eachindex(x,y)
+        x[i] -= cmx
+        y[i] -= cmy
+    end
 
     for i in eachindex(x, y)
         xm[1:3, i] .= y[i] .- x[i]
@@ -72,11 +74,9 @@ function align!(
     q = SMatrix(q)
 
     # Computing the eigenvectors 'v' of the q matrix
-
     v = eigvecs(q)
 
     # Compute rotation matrix
-
     u = zeros(MMatrix{3,3,Float64,9})
     u[1, 1] = v[1, 1]^2 + v[2, 1]^2 - v[3, 1]^2 - v[4, 1]^2
     u[1, 2] = 2.0 * (v[2, 1] * v[3, 1] + v[1, 1] * v[4, 1])
@@ -90,11 +90,15 @@ function align!(
     u = SMatrix(u)
 
     # Rotate to align x to y 
-    x .= Ref(u) .* x
+    for i in eachindex(x)
+        x[i] = u * x[i]
+    end
 
     # Move aligned x to the original center of mass of y
-    x .= x .+ Ref(cmy)
-    y .= y .+ Ref(cmy)
+    for i in eachindex(x, y)
+        x[i] += cmy
+        y[i] += cmy
+    end
 
     return x
 end
@@ -178,6 +182,12 @@ function rmsd(
     reference_frame=nothing,
     show_progress=true,
 )
+
+    # Auxiliary arrays for the alignment
+    xm=zeros(3, length(indices))
+    xp=zeros(3, length(indices))
+
+    # Define reference of the alignment
     xref = if isnothing(reference_frame)
         firstframe!(simulation)
         positions(current_frame(simulation))[indices]
@@ -200,7 +210,7 @@ function rmsd(
         for (iframe, frame) in enumerate(simulation)
             next!(p)
             x = @view(positions(frame)[indices])
-            align!(x, xref; mass)
+            align!(x, xref; mass, xm, xp)
             @. xref = (xref * (iframe - 1) + x) / iframe
         end
         xref
@@ -217,7 +227,7 @@ function rmsd(
     for frame in simulation
         next!(p)
         x = @view(positions(frame)[indices])
-        align!(x, xref; mass)
+        align!(x, xref; mass, xm, xp)
         push!(rmsds, rmsd(x, xref))
     end
     return rmsds
@@ -338,6 +348,9 @@ function rmsd_matrix(
     if !isnothing(mass) && (length(indices) != length(mass))
         throw(ArgumentError("indices and mass vectors must have the same length"))
     end
+    # Auxiliary arrays for the alignment
+    xm = zeros(3, length(indices))
+    xp = zeros(3, length(indices))
     # This is very memory inefficient, but it is a simple way to compute the RMSD matrix
     coordinates = [positions(frame)[indices] for frame in simulation]
     n = length(simulation)
@@ -348,7 +361,7 @@ function rmsd_matrix(
         for jframe in iframe+1:n
             next!(p)
             if align
-                align!(coordinates[iframe], coordinates[jframe]; mass)
+                align!(coordinates[iframe], coordinates[jframe]; mass, xm, xp)
             end
             rmsd_matrix[iframe, jframe] = rmsd(coordinates[iframe], coordinates[jframe])
             rmsd_matrix[jframe, iframe] = rmsd_matrix[iframe, jframe]
