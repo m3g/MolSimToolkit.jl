@@ -13,7 +13,7 @@ module MolSimStylePlotting
         :ylabel => "y",
     )
 
-    function _kargs(;kargs...)
+    function _kargs(;kargs)
         custom_parameters = copy(parameters)
         for karg in keys(kargs)
             if haskey(parameters, karg)
@@ -33,5 +33,7 @@ module MolSimStylePlotting
     Plots.contour!(::Type{MolSimStyle}, args...; kargs...) = Plots.contour!(args...; _kargs(;kargs)...)
     Plots.contourf(::Type{MolSimStyle}, args...; kargs...) = Plots.contourf(args...; _kargs(;kargs)...)
     Plots.contourf!(::Type{MolSimStyle}, args...; kargs...) = Plots.contourf!(args...; _kargs(;kargs)...)
+    Plots.heatmap(::Type{MolSimStyle}, args...; kargs...) = Plots.contourf(args...; _kargs(;kargs)...)
+    Plots.heatmap!(::Type{MolSimStyle}, args...; kargs...) = Plots.contourf!(args...; _kargs(;kargs)...)
     Plots.annotate!(::Type{MolSimStyle}, x, y, str; fontsize=12) = Plots.annotate!(x, y, Plots.text(str, "Computer Modern", fontsize))
 end
