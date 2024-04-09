@@ -1,5 +1,3 @@
-module REMDPlotting
-
 using MolSimToolkit: GromacsREMDlog
 import Plots: plot, plot!, annotate!, heatmap, cgrad, text
 
@@ -68,5 +66,3 @@ function heatmap(
     end
     return plt
 end
-
-end # module REMDPlotting

@@ -1,6 +1,3 @@
-module BlockAveragesPlotting
-
-using MolSimToolkit
 using LaTeXStrings
 import Plots: plot, plot!, histogram!, hline!, annotate!, text, histogram
 import Plots.Measures: cm
@@ -147,5 +144,3 @@ function plot(
     )
     return p
 end
-
-end # module BlockAveragesPlotting
