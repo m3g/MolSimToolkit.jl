@@ -17,6 +17,7 @@ export distances
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
+export center_of_mass
 
 # Testing module
 include("./Testing.jl")
