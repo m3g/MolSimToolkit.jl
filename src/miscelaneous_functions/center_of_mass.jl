@@ -1,5 +1,3 @@
-export center_of_mass
-
 """
     center_of_mass(
         indices::AbstractVector{Int};
@@ -36,7 +34,7 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
 ```
 
 """
-function center_of_mass(
+function PDBTools.center_of_mass(
     indices::AbstractVector{Int},
     simulation::Simulation,
     p::FramePositions;
@@ -66,10 +64,3 @@ end
           [-3.7290442807974906, -1.5339226637687564, 1.960640754560446]
 end
 
-center_of_mass(x::AbstractVector{<:AbstractVector}, ::Nothing) = sum(x) / length(x)
-
-center_of_mass(x::AbstractVector{<:AbstractVector}, mass::AbstractVector) =
-    sum(x[i] * mass[i] for i in eachindex(x, mass)) / sum(mass)
-
-center_of_mass(atoms::AbstractVector{<:PDBTools.Atom}) =
-    sum(PDBTools.coor(atom) * atomic_mass(atom) for atom in atoms) / sum(atomic_mass, atoms)

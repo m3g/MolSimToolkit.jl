@@ -1,6 +1,10 @@
 using LinearAlgebra: eigvecs
 using StaticArrays: SVector, MMatrix, SMatrix
 
+_center_of_mass(x::AbstractVector{<:AbstractVector}, ::Nothing) = sum(x) / length(x)
+_center_of_mass(x::AbstractVector{<:AbstractVector}, mass::AbstractVector) =
+    sum(x[i] * mass[i] for i in eachindex(x, mass)) / sum(mass)
+
 """
     align(x, y; mass = nothing)
     align!(x, y; mass = nothing)
@@ -40,8 +44,8 @@ function align!(
     length(x) == length(y) || throw(DimensionMismatch("x and y must have the same length"))
     (length(x[1]) != 3 || length(x[2]) != 3) && throw(DimensionMismatch("x and y must be 3D vectors"))
 
-    cmx = center_of_mass(x, mass)
-    cmy = center_of_mass(y, mass)
+    cmx = _center_of_mass(x, mass)
+    cmy = _center_of_mass(y, mass)
     for i in eachindex(x, y)
         x[i] -= cmx
         y[i] -= cmy
