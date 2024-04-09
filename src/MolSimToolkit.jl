@@ -17,7 +17,11 @@ export distances
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
+
+# New method added to this function, which is reexported
+import PDBTools.center_of_mass
 export center_of_mass
+
 
 # Testing module
 include("./Testing.jl")
