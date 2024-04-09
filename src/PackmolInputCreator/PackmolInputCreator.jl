@@ -1,6 +1,5 @@
 module PackmolInputCreator
 
-using ..MolSimToolkit: center_of_mass
 using PDBTools
 using TestItems
 
