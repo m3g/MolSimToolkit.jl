@@ -46,21 +46,21 @@ julia> i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
  1-element Vector{Int64}:
   171 
 
-julia> sum_of_dist = reweight(simulation, (i,j,d2) -> intermol_perturb(i, j, d2, dist), i1, i2, 25.0)
+julia> sum_of_dist = reweight(simulation, (i,j,d2) -> dist(sqrt(d2)), i1, i2, 25.0)
 -------------
 FRAME WEIGHTS
 -------------
 
-Average probability = 0.047619047619047616
-standard deviation = 0.18914961672164302
+Average weight = 0.047619047619047616
+Standard deviation = 0.18914961672164302
 Mode = 0.005052431023061191
 
 -------------------------------------------------
 FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
 -------------------------------------------------
 
-Average probability = 1.8635690577652066e-7
-standard deviation = 7.402360833222647e-7
+Average weight = 1.8635690577652066e-7
+Standard deviation = 7.402360833222647e-7
 Mode = 1.9772663654246666e-8
 
 ----------------------------------
@@ -68,7 +68,7 @@ COMPUTED ENERGY AFTER PERTURBATION
 ----------------------------------
 
 Average energy = 20.98821266618639
-standard deviation = 6.017748855272267
+Standard deviation = 6.017748855272267
 
 julia> sum_of_dist.energy
 21-element Vector{Float64}:
@@ -97,7 +97,14 @@ julia> sum_of_dist.energy
 This result is the energy difference between the  perturbed frame and the original one. In this case, it is the sum of distances between the reffered atoms
 ```
 """
-function reweight(simulation::Simulation, f_perturbation::Function, group_1::Vector{Int64}, cutoff::Float64, k::Float64 = 1.0, T::Float64 = 1.0)
+function reweight(
+    simulation::Simulation, 
+    f_perturbation::Function, 
+    group_1::Vector{Int64}; 
+    cutoff::Float64 = 12.0, 
+    k::Float64 = 1.0, 
+    T::Float64 = 1.0
+)
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
@@ -111,7 +118,7 @@ function reweight(simulation::Simulation, f_perturbation::Function, group_1::Vec
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, d2), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
@@ -119,7 +126,15 @@ function reweight(simulation::Simulation, f_perturbation::Function, group_1::Vec
     return output
 end
 
-function reweight(simulation::Simulation, f_perturbation::Function, group_1::Vector{Int64}, group_2::Vector{Int64}, cutoff::Float64; k::Float64 = 1.0, T::Float64 = 1.0)
+function reweight(
+    simulation::Simulation, 
+    f_perturbation::Function, 
+    group_1::Vector{Int64}, 
+    group_2::Vector{Int64};     
+    cutoff::Float64 = 12.0, 
+    k::Float64 = 1.0, 
+    T::Float64 = 1.0
+)
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
@@ -135,7 +150,7 @@ function reweight(simulation::Simulation, f_perturbation::Function, group_1::Vec
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, d2), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
