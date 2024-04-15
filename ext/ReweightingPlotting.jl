@@ -1,10 +1,13 @@
 import Plots: plot, plot!
+import Base.count
 
-function plot(
+function reweight_plot(
     perturb_range::Vector{Float64},
     results::Vector{ReweightResults};
     weight_cutoff::Union{Nothing,Vector{<:Real}} = nothing,
-    labels=["perturbation", "frames fraction (%)", " "],
+    xlabel = "perturbation", 
+    ylabel = "frames fraction (%)",
+    title = :none,
     color_palette::Symbol=:okabe_ito,
     dimensions::Vector{Int64}=[7, 10, 10, 5, 2]
     )
@@ -15,19 +18,17 @@ function plot(
             weight_cutoff[cut] = 5*(cut-1)/(100*length(results[1]))
         end
     end
-    plt = plot()
+    plt = plot(MolSimStyle)
     frames_fraction = zeros(length(perturb_range))
     for cut in weight_cutoff
         for i in eachindex(perturb_range, results)
             probs = results[i].probability
-            frames_fraction[i] = count(number_of_frames -> (number_of_frames <= cut), probs) / length(probs)
+            frames_fraction[i] = Base.count(number_of_frames -> (number_of_frames <= cut), probs) / length(probs)
         end
         plot!(plt, perturb_range, frames_fraction * 100, label="$(round(cut*100,sigdigits = 2))%")
     end
-    plot!(plt,
-        xlabel=labels[1],
-        ylabel=labels[2],
-        title=labels[3],
+    plot!(MolSimStyle,plt,
+        xlabel, ylabel, title,
         legendfontsize=dimensions[1],
         titlefontsize=dimensions[2],
         guidefontsize=dimensions[3],
