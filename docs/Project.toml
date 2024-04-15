@@ -1,7 +1,6 @@
 [deps]
 Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 PDBTools = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
