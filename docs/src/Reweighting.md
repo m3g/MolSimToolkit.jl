@@ -3,8 +3,8 @@
 Computes the new weight for a frame of a simulation based on the energy difference between the perturbed and non-perturbed original sampling
 
 This resource is based on the Free Energy Perturbation Theory (FEP) in the Molecular Dynamics context. Most of the time, each frame will contribute equally
-for calculations of some thermodynamic property (e.g. Kirkwood-Buff Integrals). However, we can apply a perturbation on one or multiple types of atomic
-interactions (e.g. making then more repulsive or attractive), making these frames to have different normalized statistical contributions so that we can 
+for calculations of some thermodynamic property, however, we can apply a perturbation on one or multiple types of atomic
+interactions (e.g. making water oxygen and protein carbonyl oxygen interaction more repulsive), making these frames to have different normalized statistical contributions so that we can 
 possibly preview the outcome of a new simulation with these modifications.
 
 ## How to use it
@@ -15,10 +15,7 @@ julia> import Pkg; Pkg.add("MolSimToolkit")
 julia> using MolSimToolkit.Resampling
 ```
 
-## Setting functions
-
-In other to obtain these weights, we have to use three function: the ```reweight``` , which will computate each weight, an ```"ij"``` function to apply the 
-```"perturbation"``` function to each distance between atomic pairs computated in the frame. The last one is responsible for calculate the resulted energy for that distance in that frame, applying the desired perturbation.
+## Setting initial parameters
 
 Firstly, we define the ```simulation``` object and set the atoms that will determine which interactions will be perturbed:
 
@@ -43,42 +40,31 @@ julia> i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
 julia> i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
 ```
 
-Secondly, we define some "perturbation" function (```gaussian decay```):
+## Setting perturbation function
+
+In other to obtain these weights, we have to use two functions: the ```reweight```, which will computate each weight and the ```"perturbation"``` function, responsible for taking each computed distance between atomic pairs computated in every frame and calculate the resulted energy using theses distances in that particular frame and applying the desired perturbation.
+
+So, secondly, we define some "perturbation" function (here we call it ```gaussian decay```) and set up its parameters:
 
 ```julia-repl
-julia> function gaussian_decay(r::Float64, alpha::Float64, beta::Float64, cut::Float64)
-            gaussian = alpha*(r^2 - cut^2)^2*exp(-abs(beta)*r^2)
-            if r > cut
-               gaussian = 0
-            end
-            return gaussian
-       end
+julia> function gaussian_decay(r, α, β) = α*exp(-abs(β)*r^2)
 gaussian_decay (generic function with 1 method)
-```
 
-Then, we also define some "ij" function (```intermol_perturb```):
-
-```julia-repl
-julia> function intermol_perturb(i::Int64, j::Int64, d2::Float64, perturbation::Function)
-           energy = perturbation(sqrt(d2))
-           return energy
-       end
-intermol_perturb (generic function with 1 method)
-```
-
-And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
-
-```julia-repl
-julia> alpha = 2.e-5
+julia> α = 2.e-5
 2.e-5
 
-julia> beta = 5.e-3
+julia> β = 5.e-3
 5.e-3
 
 julia> cut_off = 12.0
 12.0
+```
 
-julia> weights = reweight(simulation, (i,j,d2) -> intermol_perturb(i, j, d2, r -> gaussian_decay(r, alpha, beta, cut_off)), i1, i2, cut_off)
+## Computing the new weights
+
+And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
+
+julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2, cut_off)
 -------------
 FRAME WEIGHTS
 -------------
@@ -105,7 +91,7 @@ standard deviation = 2.219086818369851
 
 The data in ```weights``` structure is organized as it follows:
 
-```julia-repl
+```julia
 struct Resampling_results
     probability::Vector{Float64}
     relative_probability::Vector{Float64}
