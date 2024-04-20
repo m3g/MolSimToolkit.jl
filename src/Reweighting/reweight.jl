@@ -53,7 +53,6 @@ FRAME WEIGHTS
 
 Average weight = 0.047619047619047616
 Standard deviation = 0.18914961672164302
-Mode = 0.005052431023061191
 
 -------------------------------------------------
 FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
@@ -61,7 +60,6 @@ FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
 
 Average weight = 1.8635690577652066e-7
 Standard deviation = 7.402360833222647e-7
-Mode = 1.9772663654246666e-8
 
 ----------------------------------
 COMPUTED ENERGY AFTER PERTURBATION
