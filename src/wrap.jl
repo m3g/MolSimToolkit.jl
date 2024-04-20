@@ -118,6 +118,7 @@ end
 end
 
 @testitem "wrap" begin
+    using MolSimToolkit: wrap
     import Chemfiles
     using StaticArrays
     # Test wrapping of a vector

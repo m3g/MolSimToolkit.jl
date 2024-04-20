@@ -5,6 +5,7 @@ export length
 export raw_length
 export close
 export restart!
+export firstframe! 
 export current_frame
 export nextframe!
 export set_frame_range!
@@ -43,6 +44,7 @@ The Simulation object can also be manipulated by the following functions:
 
 - `close(::Simulation)`: closes the trajectory file
 - `restart!(::Simulation)`: restarts the iteration over the trajectory file
+- `firstframe!(::Simulation)`: restarts the iteration over the trajectory file and places the current frame at the first frame in the trajectory
 - `current_frame(::Simulation)`: returns the current frame in the trajectory
 - `nextframe!(::Simulation)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
 - `set_frame_range!(::Simulation; first, last, step)`: resets the range of frames to be iterated over. 
@@ -266,7 +268,41 @@ end
 Returns the current frame in the trajectory.
 
 """
-current_frame(simulation::Simulation) = simulation.frame
+function current_frame(simulation::Simulation) 
+    if isnothing(frame_index(simulation))
+        throw(ArgumentError("From current_frame: No frame has been read yet."))
+    end
+    return simulation.frame
+end
+
+"""
+    firstframe!(simulation::Simulation)
+
+Restarts the trajectory buffer, and places the current frame at the first frame in the trajectory.
+
+# Example
+
+```julia-repl
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> firstframe!(simulation) 
+Simulation 
+    Atom type: Atom
+    PDB file: structure.pdb
+    Trajectory file: structure.dcd
+    Total number of frames: 5
+    Frame range: 1:1:5
+    Number of frames in range: 5
+    Current frame: 1
+```
+"""
+function firstframe!(simulation::Simulation)
+    restart!(simulation)
+    nextframe!(simulation)
+    return simulation
+end
 
 """
     nextframe!(simulation::Simulation)
@@ -392,6 +428,7 @@ end
     using MolSimToolkit.Testing
     pdb = PDBTools.readPDB(Testing.namd_pdb)
     simulation = Simulation(pdb, Testing.namd_traj)
+    firstframe!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
     @test isnothing(path_pdb(simulation))
 end

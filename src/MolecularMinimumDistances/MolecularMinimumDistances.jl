@@ -21,7 +21,7 @@ The lists of minimum-distances are stored in arrays of type `Vector{MinimumDista
 of this vector corresponds to the index of the molecule in the original array.
 
 `MinimumDistance{T}` is a simple structure that contains four fields: a boolean marker indicating
-if the distance is within the cutoff, the indexes `i` and `j` of the atoms of the 
+if the distance is within the cutoff, the indices `i` and `j` of the atoms of the 
 molecules that are closer to each other, and the distance `d`, with type `T`, which is
 the same as that of the coordinates of the input vectors of coordinates. The best way
 to access the information of a `MinimumDistance` element is through the getter functions

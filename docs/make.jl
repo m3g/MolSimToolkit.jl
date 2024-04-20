@@ -14,9 +14,8 @@ makedocs(
         "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",
-        "Functions" => "functions.md",
-        "Reweighting"  => "Reweighting.md",
         "Developer zone" => "Developer.md",
+        "Plotting style" => "plotting_style.md",
     ],
 )
 deploydocs(

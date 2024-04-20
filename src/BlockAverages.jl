@@ -2,7 +2,7 @@ module BlockAverages
 
 import LinearAlgebra: dot
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
-import Statistics: mean
+import Statistics: mean, std
 import StatsBase: autocor
 import EasyFit: fitexp, upper, lower
 export BlockAverageData, BlockDistribution
