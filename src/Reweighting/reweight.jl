@@ -171,7 +171,6 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
 
     Average probability = $(mean(res.probability))
     standard deviation = $(std(res.probability))
-    Mode = $(mode(res.probability))
 
     -------------------------------------------------
     FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
@@ -179,7 +178,6 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
 
     Average probability = $(mean(res.relative_probability))
     standard deviation = $(std(res.relative_probability))
-    Mode = $(mode(res.relative_probability))
 
     ----------------------------------
     COMPUTED ENERGY AFTER PERTURBATION
