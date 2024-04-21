@@ -3,7 +3,6 @@ struct ReweightResults
     relative_probability::Vector{Float64}
     energy::Vector{Float64}
 end
-
 """
     reweight(simulation, f_perturbation, group_1, cutoff; prob = true)
     reweight(simulation, f_perturbation, group_1, group_2, cutoff; prob = true)
@@ -123,7 +122,6 @@ function reweight(
     output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     return output
 end
-
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 

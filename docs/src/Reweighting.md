@@ -1,5 +1,4 @@
 # Simulation Reweighting
-
 Computes the new weight for a frame of a simulation based on the energy difference between the perturbed and non-perturbed original sampling
 
 This resource is based on the Free Energy Perturbation Theory (FEP) in the Molecular Dynamics context. Most of the time, each frame will contribute equally
@@ -8,7 +7,6 @@ interactions (e.g. making water oxygen and protein carbonyl oxygen interaction m
 possibly preview the outcome of a new simulation with these modifications.
 
 ## How to use it
-
 ```julia-repl
 julia> import Pkg; Pkg.add("MolSimToolkit")
 
@@ -16,7 +14,6 @@ julia> using MolSimToolkit.Resampling
 ```
 
 ## Setting initial parameters
-
 Firstly, we define the ```simulation``` object and set the atoms that will determine which interactions will be perturbed:
 
 ```julia-repl
@@ -41,7 +38,6 @@ julia> i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
 ```
 
 ## Setting perturbation function
-
 In other to obtain these weights, we have to use two functions: the ```reweight```, which will computate each weight and the ```"perturbation"``` function, responsible for taking each computed distance between atomic pairs computated in every frame and calculate the resulted energy using theses distances in that particular frame and applying the desired perturbation.
 
 So, secondly, we define some "perturbation" function (here we call it ```gaussian decay```) and set up its parameters:
@@ -61,7 +57,6 @@ julia> cut_off = 12.0
 ```
 
 ## Computing the new weights
-
 And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
 
 julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2, cut_off)
@@ -126,7 +121,6 @@ julia> weights.probability
 ```
 
 ## Reference functions
-
 ```@autodocs
 Modules = [MolSimToolkit.Reweighting]
 Pages = ["reweight.jl"]
