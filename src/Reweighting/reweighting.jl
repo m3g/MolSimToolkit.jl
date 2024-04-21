@@ -3,7 +3,7 @@ module Reweighting
 using CellListMap.PeriodicSystems
 using ..MolSimToolkit: Simulation, positions, unitcell
 
-export reweight, intermol_perturb, L_J, dist, poly_decay, gaussian_decay
+export reweight, L_J, poly_decay, gaussian_decay
 
 const testdir = "$(@__DIR__)/test"
 
