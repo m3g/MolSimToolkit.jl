@@ -3,7 +3,6 @@ struct ReweightResults
     relative_probability::Vector{Float64}
     energy::Vector{Float64}
 end
-
 """
     reweight(simulation, f_perturbation, group_1, cutoff; prob = true)
     reweight(simulation, f_perturbation, group_1, group_2, cutoff; prob = true)
@@ -95,6 +94,7 @@ julia> sum_of_dist.energy
 This result is the energy difference between the  perturbed frame and the original one. In this case, it is the sum of distances between the reffered atoms
 ```
 """
+
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
@@ -124,97 +124,6 @@ function reweight(
     return output
 end
 
-"""
-    reweight(simulation, f_perturbation, group_1, cutoff; prob = true)
-    reweight(simulation, f_perturbation, group_1, group_2, cutoff; prob = true)
-
-Function that calculates the energy difference when a perturbation between atoms is applied.
-
-It either returns the resulted energy for each one of the frames or their new normalized weights for calculating a system's propriety
-
-The function needs a MolSimToolkit's simulation object, another function to compute the perturbation for each atomic pair i,j and a cut off distance
-
-When prob is selected (it is, by default), the result is frames' new weights and if it is not, the resulted energy
-
-Groups are a vector of atoms indexes, extracted, for example, from a pdb file. 
-
-If you use just one group, the distance between one atom and itself will not be computed!!!
-
-# Example
-
-```julia-repl
-julia> import PDBTools
-
-julia> using MolSimToolkit, MolSimToolkit.Resampling
-
-julia> simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_small_trajectory.xtc")
-Simulation 
-    Atom type: Atom
-    PDB file: /home/lucasv/.julia/dev/MolSimToolkit/src/Reweighting/test/Testing_reweighting.pdb
-    Trajectory file: /home/lucasv/.julia/dev/MolSimToolkit/src/Reweighting/test/Testing_reweighting_small_trajectory.xtc
-    Total number of frames: 21
-    Frame range: 1:1:21
-    Number of frames in range: 21
-    Current frame: nothing
-
-julia> i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
-2-element Vector{Int64}:
-  97
- 106
-
- julia> i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
- 1-element Vector{Int64}:
-  171 
-
-julia> sum_of_dist = reweight(simulation, (i,j,d2) -> dist(sqrt(d2)), i1, i2, 25.0)
--------------
-FRAME WEIGHTS
--------------
-
-Average weight = 0.047619047619047616
-Standard deviation = 0.18914961672164302
-
--------------------------------------------------
-FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
--------------------------------------------------
-
-Average weight = 1.8635690577652066e-7
-Standard deviation = 7.402360833222647e-7
-
-----------------------------------
-COMPUTED ENERGY AFTER PERTURBATION
-----------------------------------
-
-Average energy = 20.98821266618639
-Standard deviation = 6.017748855272267
-
-julia> sum_of_dist.energy
-21-element Vector{Float64}:
- 17.738965476707595
- 15.923698293115915
- 17.16614676290554
- 19.33003841107648
- 16.02329229247863
- 19.639005665480983
- 35.73986006775934
- 21.88798265022823
- 20.66180657974777
- 16.845109623700647
- 20.114166329136705
- 24.68937611002383
- 18.71136654132259
- 20.41427025641757
- 15.815250733848112
- 12.588332736178291
- 36.50414116409441
- 21.58454409077756
- 25.40955804417851
- 25.765519091038563
- 18.200035069696835
-
-This result is the energy difference between the  perturbed frame and the original one. In this case, it is the sum of distances between the reffered atoms
-```
-"""
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
