@@ -23,7 +23,7 @@ end
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 11")
 
-    sum_of_dist = reweight(simulation, (i,j,r) -> r, [i1[239]], i2, 25.0)
+    sum_of_dist = reweight(simulation, (i,j,r) -> r, [i1[239]], i2; cutoff = 25.0)
     @test sum_of_dist.energy ≈ [74.295543]
 end
 
@@ -38,7 +38,7 @@ end
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
 
-    sum_of_dist = reweight(simulation, (i,j,r) -> r, i1, i2, 25.0)
+    sum_of_dist = reweight(simulation, (i,j,r) -> r, i1, i2, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [
         17.738965476707595, 15.923698293115915, 17.16614676290554, 
         19.33003841107648, 16.02329229247863, 19.639005665480983, 
