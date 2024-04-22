@@ -19,7 +19,6 @@ makedocs(
         "Developer zone" => "Developer.md",
         "Plotting style" => "plotting_style.md",
         "Simulation Reweight" => "Reweighting.md",
-
     ],
 )
 deploydocs(

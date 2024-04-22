@@ -10,14 +10,14 @@ possibly preview the outcome of a new simulation with these modifications.
 ```julia-repl
 julia> import Pkg; Pkg.add("MolSimToolkit")
 
-julia> using MolSimToolkit.Resampling
+julia> using MolSimToolkit.Reweighting
 ```
 
 ## Setting initial parameters
 Firstly, we define the ```simulation``` object and set the atoms that will determine which interactions will be perturbed:
 
 ```julia-repl
-julia> using MolSimToolkit, PDBTools, CellListMap.PeriodicSystems
+julia> using MolSimToolkit, PDBTools
 
 julia> testdir = "$(@__DIR__)/test"
 "/home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test"

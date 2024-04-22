@@ -183,6 +183,6 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
 
     Average energy = $(mean(res.energy))
     standard deviation = $(std(res.energy))
-
+    
     """)
 end
