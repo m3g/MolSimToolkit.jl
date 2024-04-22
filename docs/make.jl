@@ -14,8 +14,12 @@ makedocs(
         "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         "Block averages" => "block_averages.md",
         "Replica exchange" => "remd.md",
+        "Structural alignment" => "procrustes.md",
+        "Miscelaneous functions" => "miscelaneous.md",
         "Developer zone" => "Developer.md",
         "Plotting style" => "plotting_style.md",
+        "Simulation Reweight" => "Reweighting.md",
+
     ],
 )
 deploydocs(
