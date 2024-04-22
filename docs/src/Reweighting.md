@@ -59,6 +59,7 @@ julia> cut_off = 12.0
 ## Computing the new weights
 And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
 
+```julia-repl
 julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2, cut_off)
 -------------
 FRAME WEIGHTS
@@ -123,6 +124,6 @@ julia> weights.probability
 ## Reference functions
 ```@autodocs
 Modules = [MolSimToolkit.Reweighting]
-Pages = ["reweight.jl"]
+Pages = ["reweighting.jl"]
 Order = [:function, :type]
 ```
