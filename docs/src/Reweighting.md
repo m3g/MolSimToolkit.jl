@@ -8,8 +8,6 @@ possibly preview the outcome of a new simulation with these modifications.
 
 ## How to use it
 ```julia-repl
-julia> import Pkg; Pkg.add("MolSimToolkit")
-
 julia> using MolSimToolkit.Reweighting
 ```
 
@@ -20,16 +18,16 @@ Firstly, we define the ```simulation``` object and set the atoms that will deter
 julia> using MolSimToolkit, PDBTools
 
 julia> testdir = "$(@__DIR__)/test"
-"/home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test"
+"/home/lucasv/.julia/dev/MolSimToolkit/src/Reweighting/test"
 
-julia> simulation = Simulation("$testdir/Testing_resampling.pdb", "/$testdir/Testing_resampling_small_trajectory.xtc")
+julia> simulation = Simulation("$testdir/Testing_reweighting.pdb", "/$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 Simulation 
     Atom type: PDBTools.Atom
     PDB file: /home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test/Testing_resampling.pdb
-    Trajectory file: /home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test/Testing_resampling_small_trajectory.xtc
-    Total number of frames: 21
-    Frame range: 1:1:21
-    Number of frames in range: 21
+    Trajectory file: /home/lucasv/.julia/dev/MolSimToolkit/src/Resampling/test/Testing_reweighting_10_frames_trajectory.xtc
+    Total number of frames: 10
+    Frame range: 1:1:10
+    Number of frames in range: 10
     Current frame: nothing
 
 julia> i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
@@ -38,19 +36,19 @@ julia> i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
 ```
 
 ## Setting perturbation function
-In other to obtain these weights, we have to use two functions: the ```reweight```, which will computate each weight and the ```"perturbation"``` function, responsible for taking each computed distance between atomic pairs computated in every frame and calculate the resulted energy using theses distances in that particular frame and applying the desired perturbation.
+In other to obtain these weights, we have to use two functions: the ```reweight``` function, which will calculate each weight and the ```perturbation``` function, responsible for taking each computated distance between atomic pairs in every frame and determine the resulted energy using theses distances in that particular frame based on the applied perturbation.
 
 So, secondly, we define some "perturbation" function (here we call it ```gaussian decay```) and set up its parameters:
 
 ```julia-repl
-julia> function gaussian_decay(r, α, β) = α*exp(-abs(β)*r^2)
+julia> gaussian_decay(r, α, β) = α*exp(-abs(β)*r^2)
 gaussian_decay (generic function with 1 method)
 
-julia> α = 2.e-5
-2.e-5
+julia> α = 5.e-3
+0.005
 
 julia> β = 5.e-3
-5.e-3
+0.005
 
 julia> cut_off = 12.0
 12.0
@@ -60,27 +58,27 @@ julia> cut_off = 12.0
 And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
 
 ```julia-repl
-julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2, cut_off)
+julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2; cutoff = cut_off)
 -------------
 FRAME WEIGHTS
 -------------
 
-Average probability = 0.047619047619047616
-standard deviation = 0.07670453223227784
+Average probability = 0.1
+standard deviation = 0.011364584999859616
 
 -------------------------------------------------
-FRAME PROBABILITIES RELATIVE TO THE ORIGINAL ONES
+FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
 -------------------------------------------------
 
-Average probability = 0.0003644497029859351
-standard deviation = 0.0005870538237843036
+Average probability = 0.6001821184861403
+standard deviation = 0.06820820700931557
 
 ----------------------------------
 COMPUTED ENERGY AFTER PERTURBATION
 ----------------------------------
 
-Average energy = 9.439727822732474
-standard deviation = 2.219086818369851
+Average energy = 0.5163045415662408
+standard deviation = 0.11331912115883522
 ```
 
 The data in ```weights``` structure is organized as it follows:
@@ -97,33 +95,15 @@ As an example, if we want the absolute weights computed for our simulation:
 
 ```julia-repl
 julia> weights.probability
-21-element Vector{Float64}:
- 0.0070439494907980245
- 0.00010071690416721846
- 0.009708829320345114
- 0.03599823389430867
- 0.028511157971421924
- 0.013446105873515246
- 0.00024718128817611135
- 0.14415904378968805
- 0.0008117791731669824
- 0.30217604446677
- 0.00046609570679062177
- 0.1505884065155757
- 0.04690650533601024
- 0.008499321313151335
- 0.0011392562627410294
- 0.04458432806281825
- 0.01706069848349761
- 0.006018368435226036
- 0.02730599234002224
- 0.004453135199832921
- 0.15077485017197673
-```
-
-## Reference functions
-```@autodocs
-Modules = [MolSimToolkit.Reweighting]
-Pages = ["reweighting.jl"]
-Order = [:function, :type]
+10-element Vector{Float64}:
+ 0.0946703156089622
+ 0.08132904424357772
+ 0.09869474081686125
+ 0.10655562666294487
+ 0.10022245896670733
+ 0.09564708264572024
+ 0.08975220271835752
+ 0.11576085753347072
+ 0.09825654640701757
+ 0.11911112439638061
 ```
