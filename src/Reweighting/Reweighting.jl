@@ -7,7 +7,7 @@ export reweight, L_J, poly_decay, gaussian_decay
 
 const testdir = "$(@__DIR__)/test"
 
-include("./reweight.jl")
+include("./Reweight.jl")
 include("./r_equations.jl")
 
 end #Module Reweighting
