@@ -84,7 +84,7 @@ standard deviation = 0.11331912115883522
 The data in ```weights``` structure is organized as it follows:
 
 ```julia
-struct Resampling_results
+struct ReweightResults
     probability::Vector{Float64}
     relative_probability::Vector{Float64}
     energy::Vector{Float64}
@@ -108,8 +108,8 @@ julia> weights.probability
  0.11911112439638061
 ```
 
+## Reference Functions
 ```@autodocs
 Modules = [MolSimToolkit.Reweighting]
-Pages = ["reweighting.jl"]
 Order = [:function, :type]
 ```

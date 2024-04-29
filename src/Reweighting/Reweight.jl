@@ -136,7 +136,6 @@ function reweight(
     output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     return output
 end
-
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
