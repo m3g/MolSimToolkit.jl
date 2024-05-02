@@ -330,7 +330,7 @@ This can be used for the identification of connectivity networks, for example, o
 ### System build and update
 
 If the molecular minimum distances will be computed many times for similar systems, it is possible
-to construct the system and update its properties. The use of the interface of `CellListMap.PeriodicSystems`
+to construct the system and update its properties. The use of the interface of `CellListMap`
 is required (requires `CellListMap` version `0.7.24` or greater). 
 
 For example, let us build one system with a protein and water:

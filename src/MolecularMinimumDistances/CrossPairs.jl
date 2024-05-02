@@ -79,7 +79,7 @@ function CrossPairs(;
     parallel::Bool=true
 ) where {T<:Real, F1<:Union{Nothing,Function}}
     xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
-    system = PeriodicSystem(;
+    system = ParticleSystem(;
         xpositions=xpositions,
         ypositions=ypositions,
         cutoff=cutoff,

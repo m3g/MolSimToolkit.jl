@@ -6,7 +6,7 @@ import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import PDBTools: distance
 import StaticArrays: SVector
 import CellListMap: _uround # interal function, used for showing the unitcell
-import CellListMap.PeriodicSystems: PeriodicSystem, map_pairwise, map_pairwise!,
+import CellListMap: ParticleSystem, map_pairwise, map_pairwise!,
     update_cutoff!, update_unitcell!
 
 export MinimumDistance
@@ -206,7 +206,7 @@ end
 init_list(::Type{T}, n::Int) where {T} = fill(zero(MinimumDistance{T}), n)
 
 #
-# Overload of the PeriodicSystems functions that are required for list_threaded
+# Overload of the CellListMap functions that are required for list_threaded
 # computations: copy_output, reset_output!, and reducer.
 #
 # Note that we have two types of output variables here: List, and a tuple of List.
@@ -218,7 +218,7 @@ init_list(::Type{T}, n::Int) where {T} = fill(zero(MinimumDistance{T}), n)
 # For the Tuple of lists, we need to be more explicit, and define appropriate copy_output,
 # reset_output! and reducer functions.
 #
-import CellListMap.PeriodicSystems: copy_output, reset_output!, reducer
+import CellListMap: copy_output, reset_output!, reducer
 reset_output!(md::MinimumDistance{T}) where {T} = zero(MinimumDistance{T})
 reducer(md1::MinimumDistance{T}, md2::MinimumDistance{T}) where {T} = md1.d < md2.d ? md1 : md2
 copy_output(list::ListTuple) = (copy_output(list[1]), copy_output(list[2]))

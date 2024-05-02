@@ -71,7 +71,7 @@ function SelfPairs(;
     parallel::Bool=true,
 ) where {T<:Real, F1<:Union{Nothing,Function}}
     mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)
-    system = PeriodicSystem(;
+    system = ParticleSystem(;
         xpositions=xpositions,
         cutoff=cutoff,
         unitcell=unitcell,
