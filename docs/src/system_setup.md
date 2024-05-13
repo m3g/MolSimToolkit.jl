@@ -67,7 +67,7 @@ will be computed from the atom types in the PDB files, but this may fail if the 
 of some atom type is unknown.
 
 !!! compat
-    Manual setting of molar masses was introduced in version 1.12.11
+    Manual setting of molar masses was introduced in version 1.13.0
 
 !!! tip
     The density table can be converted among different units with the function `convert_density_table!`,
