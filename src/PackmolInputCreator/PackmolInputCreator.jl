@@ -32,12 +32,18 @@ end
         cossolvent_pdbfile::String,
         density_table::Matrix{Float64},
         concentration_units = "x",
+        solute_molar_mass = nothing, # optional
+        solvent_molar_mass = nothing, # optional
+        cossolvent_molar_mass = nothing, # optional
     )
 
 Setup a system composed of a solute (U) a solvent (S) and a cossolvent (C). 
 
 The concentration units of the density table can be provided explicitly and
 are assumed by default to be the molar fraction, `x`, of the cossolvent.
+
+The molar massses of the solute, solvent, and cossolvent can be provided manually. If
+not, they will be computed from the atom types in the PDB file.
 
 """
 function SolutionBoxUSC(;
@@ -46,6 +52,9 @@ function SolutionBoxUSC(;
         cossolvent_pdbfile::String,
         density_table::Matrix{Float64},
         concentration_units::Union{Nothing,String} = nothing,
+        solute_molar_mass::Union{Nothing,Real} = nothing,
+        solvent_molar_mass::Union{Nothing,Real} = nothing,
+        cossolvent_molar_mass::Union{Nothing,Real} = nothing,
     )
     if isnothing(concentration_units)
         concentration_units = "x"
@@ -57,9 +66,15 @@ function SolutionBoxUSC(;
     if concentration_units in ("x", "vv", "mm") && !(density_table[end, 1] == 1.0)
         throw(ArgumentError("Last line of density table must be the density of pure cossolvent, with cossolvent concentration equal to 1.0"))
     end
-    solute_molar_mass = mass(readPDB(solute_pdbfile))
-    solvent_molar_mass = mass(readPDB(solvent_pdbfile))
-    cossolvent_molar_mass = mass(readPDB(cossolvent_pdbfile))
+    if isnothing(solute_molar_mass)
+        solute_molar_mass = mass(readPDB(solute_pdbfile))
+    end
+    if isnothing(solvent_molar_mass)
+        solvent_molar_mass = mass(readPDB(solvent_pdbfile))
+    end
+    if isnothing(cossolvent_molar_mass)
+        cossolvent_molar_mass = mass(readPDB(cossolvent_pdbfile))
+    end
     system = SolutionBoxUSC(
         concentration_units,
         solute_pdbfile,
@@ -481,6 +496,7 @@ function write_packmol_input(
             add_box_sides 1.0
             filetype pdb
             seed -1
+            packall
 
             structure $solute_pdbfile
               number 1

@@ -51,6 +51,9 @@ system = SolutionBoxUSC(
     cossolvent_pdbfile = "$test_dir/data/ethanol.pdb",
     density_table = density_table,
     concentration_units = "x", # molar fraction
+    solute_molar_mass = nothing, # optional
+    solvent_molar_mass = nothing, # optional
+    cossolvent_molar_mass = nothing, # optional
 )
 ```
 
@@ -58,6 +61,13 @@ Here, `SolutionBoxUSC` stands for `Solute (U)`, `Solvent (S)`, and `Cossolvent (
 The concentration units can be one of `"mol/L"` (molarity), `"x"` (molar fraction),
 `"vv"` (volume fraction), and `"mm"` (mass fraction). The density is assumed
 to be in `g/mL`. 
+
+The molar masses of the components can be provided explicitly by the user. If not, they
+will be computed from the atom types in the PDB files, but this may fail if the mass
+of some atom type is unknown.
+
+!!! compat
+    Manual setting of molar masses was introduced in version 1.12.11
 
 !!! tip
     The density table can be converted among different units with the function `convert_density_table!`,
