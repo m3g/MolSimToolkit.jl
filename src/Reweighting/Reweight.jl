@@ -8,41 +8,39 @@ Structure that contains the result of the reweighting analysis of the sequence.
 `energy` is a vector that contains the energy difference for each frame in the simulation after applying some perturbation.
 """
 struct ReweightResults
-    probability::Vector{Float64}
-    relative_probability::Vector{Float64}
-    energy::Vector{Float64}
+    probability::Vector{Real}
+    relative_probability::Vector{Real}
+    energy::Vector{Real}
 end
 
 """
     reweight(
         simulation::Simulation, 
         f_perturbation::Function, 
-        group_1::Vector{Int64}; 
-        cutoff::Float64 = 12.0, 
-        k::Float64 = 1.0, 
-        T::Float64 = 1.0
+        group_1::AbstractVector{<:Integer}; 
+        cutoff::Real = 12.0, 
+        k::Real = 1.0, 
+        T::Real = 1.0
     )
     reweight(
         simulation::Simulation, 
         f_perturbation::Function, 
-        group_1::Vector{Int64}, 
-        group_2::Vector{Int64};     
-        cutoff::Float64 = 12.0, 
-        k::Float64 = 1.0, 
-        T::Float64 = 1.0
+        group_1::AbstractVector{<:Integer}, 
+        group_2::AbstractVector{<:Integer};     
+        cutoff::Real = 12.0, 
+        k::Real = 1.0, 
+        T::Real = 1.0
     )
 
-Function that calculates the energy difference when a perturbation between atoms is applied.
+Function that calculates the energy difference when a perturbation is applied on the system.
 
-It either returns the resulted energy for each one of the frames or their new normalized weights for calculating a system's propriety
+It returns "ReweightResults" structure that contains three results: `probability`, `relative_probability` and `energy` vectors.
 
-The function needs a MolSimToolkit's simulation object, another function to compute the perturbation for each atomic pair i,j and a cut off distance
+The function needs a MolSimToolkit's simulation object, another function to compute the perturbation and one or two types of atoms.
 
-When prob is selected (it is, by default), the result is frames' new weights and if it is not, the resulted energy
+Additionally, you can also define a cutoff distance, the constant "k" (in some cases, it will be Boltzmann constant) and the temperature, T, of the system.
 
-Groups are a vector of atoms indexes, extracted, for example, from a pdb file. 
-
-If you use just one group, the distance between one atom and itself will not be computed!!!
+Group_1 (and group_2) is a vector of atoms indexes, extracted, for example, from a pdb file. 
 
 # Example
 
@@ -62,12 +60,12 @@ Simulation
     Current frame: nothing
 
 julia> i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
-2-element Vector{Int64}:
+2-element AbstractVector{<:Integer}:
   97
  106
 
 julia> i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
-1-element Vector{Int64}:
+1-element AbstractVector{<:Integer}:
  171
 
 julia> sum_of_dist = reweight(simulation, (i,j,d2) -> d2, i1, i2; cutoff = 25.0)
@@ -93,7 +91,7 @@ Average energy = 0.5163045415662408
 standard deviation = 0.11331912115883522
 
 julia> sum_of_dist.energy
-10-element Vector{Float64}:
+10-element Vector{Real}:
  17.738965476707595
  15.923698293115915
  17.16614676290554
@@ -111,10 +109,10 @@ This result is the energy difference between the  perturbed frame and the origin
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
-    group_1::Vector{Int64}; 
-    cutoff::Float64 = 12.0, 
-    k::Float64 = 1.0, 
-    T::Float64 = 1.0
+    group_1::AbstractVector{<:Integer}; 
+    cutoff::Real = 12.0, 
+    k::Real = 1.0, 
+    T::Real = 1.0
 )
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
@@ -129,7 +127,7 @@ function reweight(
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2/10)), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
@@ -139,11 +137,11 @@ end
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
-    group_1::Vector{Int64}, 
-    group_2::Vector{Int64};     
-    cutoff::Float64 = 12.0, 
-    k::Float64 = 1.0, 
-    T::Float64 = 1.0
+    group_1::AbstractVector{<:Integer}, 
+    group_2::AbstractVector{<:Integer};     
+    cutoff::Real = 12.0, 
+    k::Real = 1.0, 
+    T::Real = 1.0
 )
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
@@ -160,7 +158,7 @@ function reweight(
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2/10)), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
