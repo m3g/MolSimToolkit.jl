@@ -24,7 +24,7 @@ end #Module Reweighting
     i2 = PDBTools.selindex(atoms(simulation), "residue 11")
 
     sum_of_dist = reweight(simulation, (i,j,r) -> r, [i1[239]], i2; cutoff = 25.0)
-    @test sum_of_dist.energy ≈ [74.295543]
+    @test sum_of_dist.energy ≈ [7.4295543149]
 end
 
 @testitem "Reweighting small trajectory" begin
@@ -40,9 +40,9 @@ end
 
     sum_of_dist = reweight(simulation, (i,j,r) -> r, i1, i2, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [
-        17.73896547670759, 15.923698293115915, 17.16614676290554, 
-        19.33003841107648, 16.02329229247863, 19.639005665480983, 
-        35.73986006775934, 21.88798265022823, 20.66180657974777, 
-        16.845109623700647
+        1.773896547670759, 1.5923698293115915, 1.716614676290554, 
+        1.933003841107648, 1.602329229247863, 1.9639005665480983, 
+        3.573986006775934, 2.188798265022823, 2.066180657974777, 
+        1.6845109623700647
     ]
 end

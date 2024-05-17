@@ -8,9 +8,9 @@ Structure that contains the result of the reweighting analysis of the sequence.
 `energy` is a vector that contains the energy difference for each frame in the simulation after applying some perturbation.
 """
 struct ReweightResults
-    probability::Vector{Real}
-    relative_probability::Vector{Real}
-    energy::Vector{Real}
+    probability::Vector{<:Real}
+    relative_probability::Vector{<:Real}
+    energy::Vector{<:Real}
 end
 
 """
@@ -127,7 +127,7 @@ function reweight(
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2/10)), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
@@ -158,7 +158,7 @@ function reweight(
             output = 0.0,
             output_name = :total_energy
         )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2/10)), system)
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
