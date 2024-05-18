@@ -1,6 +1,6 @@
 module Reweighting
 
-using CellListMap.PeriodicSystems
+using CellListMap: ParticleSystem, map_pairwise, map_pairwise!
 using ..MolSimToolkit: Simulation, positions, unitcell
 
 export reweight, lennard_jones_perturbation, poly_decay_perturbation, gaussian_decay_perturbation
