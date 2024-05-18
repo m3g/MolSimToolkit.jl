@@ -38,7 +38,7 @@ julia> i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
 ## Setting perturbation function
 In other to obtain these weights, we have to use two functions: the ```reweight``` function, which will calculate each weight and the ```perturbation``` function, responsible for taking each computated distance between atomic pairs in every frame and determine the resulted energy using theses distances in that particular frame based on the applied perturbation.
 
-So, secondly, we define some "perturbation" function (here we call it ```gaussian decay```) and set up its parameters:
+So, secondly, we define some "perturbation" function (here we call it ```gaussian decay```) and set up its parameters. Please, take a look at the interface:
 
 ```julia-repl
 julia> gaussian_decay(r, α, β) = α*exp(-abs(β)*r^2)
@@ -49,16 +49,23 @@ julia> α = 5.e-3
 
 julia> β = 5.e-3
 0.005
-
-julia> cut_off = 12.0
-12.0
 ```
 
+As it can be seen, the function has to receive two parameters: `r` which corresponds to the distance between two selected atoms and some parameter to account a modification and change its magnitude, here, we inserted two of them in the same function `α` to change the maximum value of the gaussian curve and `β` to adjust its decay behaviour with a given value of `r`.
+
 ## Computing the new weights
-And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input:
+And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input. Again, watch the interface:
 
 ```julia-repl
+julia> cut_off = 12.0
+12.0
+
 julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2; cutoff = cut_off)
+```
+
+`i and j`: if you selected two atom types, `i` will be the index for either the first, the second, the third and so on up to the last atom of the first group and `j` will be same, but now for the second one. With these two parameters, it is possible to determine every combination of two atoms, each one coming from one group, and compute the associated dsitance `r`, so that we are taking into account all interactions between these two atom types to our perturbation. However, if we are dealing with just one group, both of them are indexes for all the atoms of the selected group. Bear this is mind because *it is possible to compute repeated combinations* (like `i,j = 1,2 or 2,1`), so your `perturbation function` ought to be able to avoid this!
+
+```julia-repl
 -------------
 FRAME WEIGHTS
 -------------
