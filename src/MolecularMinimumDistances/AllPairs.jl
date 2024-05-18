@@ -90,7 +90,7 @@ function AllPairs(;
 ) where {T<:Real, F1<:Union{Nothing,Function}, F2<:Union{Nothing,Function}}
     xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
     ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
-    system = PeriodicSystem(;
+    system = ParticleSystem(;
         xpositions=xpositions,
         ypositions=ypositions,
         cutoff=cutoff,
