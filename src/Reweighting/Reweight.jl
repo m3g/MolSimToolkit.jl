@@ -120,7 +120,7 @@ function reweight(
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
-        system = PeriodicSystem(
+        system = ParticleSystem(
             xpositions = first_coors,
             unitcell = unitcell(frame),
             cutoff = cutoff,
@@ -150,7 +150,7 @@ function reweight(
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
         second_coors = coordinates[group_2]
-        system = PeriodicSystem(
+        system = ParticleSystem(
             xpositions = first_coors,
             ypositions = second_coors,
             unitcell = unitcell(frame),
