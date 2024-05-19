@@ -51,10 +51,10 @@ julia> β = 5.e-3
 0.005
 ```
 
-As it can be seen, the function has to receive two parameters: `r` which corresponds to the distance between two selected atoms and some parameter to account a modification and change its magnitude, here, we inserted two of them in the same function `α` to change the maximum value of the gaussian curve and `β` to adjust its decay behaviour with a given value of `r`.
+As it can be seen, the function has to receive two parameters: `r` which corresponds to the distance between two selected atoms and some parameter to account a modification and change its magnitude, here, we inserted two of them in the same function, `α`, to change the maximum value of the gaussian curve and `β`, to adjust its decay behaviour with a given value of `r`.
 
 ## Computing the new weights
-And finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input. Again, watch the interface:
+Finally, using the ```reweight``` function, we pass both the ```simulation``` and the last function anonymously in the input. Again, watch the interface:
 
 ```julia-repl
 julia> cut_off = 12.0
@@ -65,10 +65,11 @@ julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, 
 
 `i and j`: if you selected two atom types, `i` will be the index for either the first, the second, the third and so on up to the last atom of the first group and `j` will be same, but now for the second one. With these two parameters, it is possible to determine every combination of two atoms, each one coming from one group, and compute the associated dsitance `r`, so that we are taking into account all interactions between these two atom types to our perturbation. However, if we are dealing with just one group, both of them are indexes for all the atoms of the selected group. Bear this is mind because *it is possible to compute repeated combinations* (like `i,j = 1,2 or 2,1`), so your `perturbation function` ought to be able to avoid this!
 
-`r`: the distance between the twos atoms with indexes `i` and `j` in the selected groups
+`r`: the distance between the twos atoms with indexes `i` and `j` in the selected groups.
 
-`cutoff`: the maximum distance that will be computed between two atoms. The default value is `12.0` Angstrom
+`cutoff`: the maximum distance that will be computed between two atoms. The default value is `12.0` Angstrom.
 
+Once the calculations are finished, the resulted interface is shown, like the example below:
 ```julia-repl
 -------------
 FRAME WEIGHTS
@@ -77,9 +78,9 @@ FRAME WEIGHTS
 Average probability = 0.1
 standard deviation = 0.011364584999859616
 
--------------------------------------------------
+-------------------------------------------
 FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
--------------------------------------------------
+-------------------------------------------
 
 Average probability = 0.6001821184861403
 standard deviation = 0.06820820700931557

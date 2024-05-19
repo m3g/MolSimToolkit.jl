@@ -76,9 +76,9 @@ FRAME WEIGHTS
 Average probability = 0.1
 standard deviation = 0.011364584999859616
 
--------------------------------------------------
+-------------------------------------------
 FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
--------------------------------------------------
+-------------------------------------------
 
 Average probability = 0.6001821184861403
 standard deviation = 0.06820820700931557
@@ -180,9 +180,9 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
     Average probability = $(Statistics.mean(res.probability))
     standard deviation = $(Statistics.std(res.probability))
 
-    -------------------------------------------------
+    -------------------------------------------
     FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
-    -------------------------------------------------
+    -------------------------------------------
 
     Average probability = $(Statistics.mean(res.relative_probability))
     standard deviation = $(Statistics.std(res.relative_probability))
