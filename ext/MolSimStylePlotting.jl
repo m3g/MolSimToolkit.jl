@@ -12,12 +12,13 @@ const parameters = Dict{Symbol,Any}(
     :ylabel => "y",
 )
 
+#
+# overwrite default parameters or add parameters if other kargs where passed
+#
 function _kargs(; kargs)
     custom_parameters = copy(parameters)
     for karg in keys(kargs)
-        if haskey(parameters, karg)
-            custom_parameters[karg] = kargs[karg]
-        end
+        custom_parameters[karg] = kargs[karg]
     end
     return custom_parameters
 end
