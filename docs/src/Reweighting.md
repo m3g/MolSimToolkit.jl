@@ -63,7 +63,7 @@ julia> cut_off = 12.0
 julia> weights = reweight(simulation, (i,j,r) -> gaussian_decay(r, α, β), i1, i2; cutoff = cut_off)
 ```
 
-`i and j`: if you selected two atom types, `i` will be the index for either the first, the second, the third and so on up to the last atom of the first group and `j` will be same, but now for the second one. With these two parameters, it is possible to determine every combination of two atoms, each one coming from one group, and compute the associated dsitance `r`, so that we are taking into account all interactions between these two atom types to our perturbation. However, if we are dealing with just one group, both of them are indexes for all the atoms of the selected group. Bear in mind that repeated combinations (like `i,j = 1,2 or 2,1`) will no be computed, since the `reweight` function calls the `map_pairwise!` function, from [cell-list](https://github.com/m3g/CellListMap.jl) that is able to avoid this problem.
+`i and j`: if you selected two atom types, `i` will be the index for either the first, the second, the third and so on up to the last atom of the first group and `j` will be same, but now for the second one. With these two parameters, it is possible to determine every combination of two atoms, each one coming from one group, and compute the associated dsitance `r`, so that we are taking into account all interactions between these two atom types to our perturbation. However, if we are dealing with just one group, both of them are indexes for all the atoms of the selected group. Bear in mind that repeated combinations (like `i,j = 1,2 or 2,1`) will no be computed, since the `reweight` function calls the `map_pairwise!` function, from [CellListMap.jl](https://github.com/m3g/CellListMap.jl) that is able to avoid this problem.
 
 `r`: the distance between the twos atoms with indexes `i` and `j` in the selected groups.
 
@@ -75,22 +75,22 @@ Once the calculations are finished, the resulted interface is shown, like the ex
 FRAME WEIGHTS
 -------------
 
-Average probability = 0.1
-standard deviation = 0.011364584999859616
+Average probability = 0.09999999999999999
+standard deviation = 0.01734935311311546
 
 -------------------------------------------
 FRAME WEIGHTS RELATIVE TO THE ORIGINAL ONES
 -------------------------------------------
 
-Average probability = 0.6001821184861403
-standard deviation = 0.06820820700931557
+Average probability = 0.45655722352062866
+standard deviation = 0.0792097248720297
 
 ----------------------------------
 COMPUTED ENERGY AFTER PERTURBATION
 ----------------------------------
 
-Average energy = 0.5163045415662408
-standard deviation = 0.11331912115883522
+Average energy = 0.7973733879299723
+standard deviation = 0.17177116838361012
 ```
 
 The data in ```weights``` structure is organized as it follows:
@@ -108,16 +108,16 @@ As an example, if we want the absolute weights computed for our simulation:
 ```julia-repl
 julia> weights.probability
 10-element Vector{Float64}:
- 0.0946703156089622
- 0.08132904424357772
- 0.09869474081686125
- 0.10655562666294487
- 0.10022245896670733
- 0.09564708264572024
- 0.08975220271835752
- 0.11576085753347072
- 0.09825654640701757
- 0.11911112439638061
+ 0.08987791339898044
+ 0.07326337222373071
+ 0.0973116226496827
+ 0.10965810145525891
+ 0.09829891590498603
+ 0.0916792371461855
+ 0.08548699059703141
+ 0.12480704633057726
+ 0.09973413264337352
+ 0.12988266765019355
 ```
 
 ## Reference Functions

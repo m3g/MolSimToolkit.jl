@@ -46,3 +46,35 @@ end
         1.6845109623700647
     ]
 end
+
+@testitem "Reweighting small trajectory probs" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
+
+    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+
+    i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
+
+    α = 5.e-3
+
+    β = 5.e-3
+
+    cut_off = 12.0
+
+    probs_test = reweight(simulation, (i,j,r) -> gaussian_decay_perturbation(r, α, β), i1, i2; cutoff = cut_off)
+    @test probs_test.probability ≈ [
+        0.08987791339898044
+        0.07326337222373071
+        0.0973116226496827
+        0.10965810145525891
+        0.09829891590498603
+        0.0916792371461855
+        0.08548699059703141
+        0.12480704633057726
+        0.09973413264337352
+        0.12988266765019355
+    ]
+end
