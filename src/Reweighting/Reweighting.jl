@@ -8,7 +8,7 @@ export reweight, lennard_jones_perturbation, poly_decay_perturbation, gaussian_d
 const testdir = "$(@__DIR__)/test"
 
 include("./Reweight.jl")
-include("./r_equations.jl")
+include("./perturbation_examples.jl")
 
 end #Module Reweighting
 

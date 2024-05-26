@@ -7,10 +7,10 @@ Structure that contains the result of the reweighting analysis of the sequence.
 
 `energy` is a vector that contains the energy difference for each frame in the simulation after applying some perturbation.
 """
-struct ReweightResults
-    probability::Vector{<:Real}
-    relative_probability::Vector{<:Real}
-    energy::Vector{<:Real}
+struct ReweightResults{T<:Real}
+    probability::Vector{T}
+    relative_probability::Vector{T}
+    energy::Vector{T}
 end
 
 """
