@@ -8,7 +8,7 @@ possibly preview the outcome of a new simulation with these modifications.
 
 ## How to use it
 ```julia-repl
-julia> using MolSimToolkit.Reweighting
+julia> using MolSimToolkit
 ```
 
 ## Setting initial parameters
