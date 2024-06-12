@@ -18,10 +18,14 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 
-# Secondary structures along simulations
-using ProteinSecondaryStructures
-export is_anyhelix
-export ss_map, ss_frame, ss_class_content
+# For secondary structure calculations
+using ProteinSecondaryStructures: ss_code_to_number, 
+    stride_run, dssp_run, class, ss_classes
+# Reexported
+using ProteinSecondaryStructures: dssp_run, stride_run
+export dssp_run, stride_run
+# SS trajectory functions
+export ss_map, ss_class_mean
 
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass

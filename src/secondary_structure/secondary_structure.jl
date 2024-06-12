@@ -68,36 +68,67 @@ end
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 842
     # With DSSP
-    ssmap = ss_map(PDBTools.readPDB(pdbfile, "protein"), trajectory; method=dssp_run)
+    ssmap = ss_map(simulation; method=dssp_run)
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 1006
 end
 
 """
-    ss_class_content(ss_class, ssmap::AbstractMatrix{<:Integer})
+    ss_class_mean(ss_class, ssmap::AbstractMatrix{<:Integer}; dims=1)
 
-Calculates the content, en each frame of a trajectory, of a specific class
-of secondary structure. 
+Calculates the mean secondary structure class content of the trajectory, given the secondary structure map.
 
-Here, `ss_class` is the secondary structure class, as a string, character or integer,
-and `ssmap` is the secondary structure map of the trajectory, as returned by the `ss_map` 
-function.
+The mean can be calculated along the residues (default) or along the frames, by setting the `dims` keyword argument.
+Using `dims=1` calculates the mean along the residues, and `dims=2` calculates the mean along the frames.  
+
+`ss_class` can be either a string, a character, or an integer, setting the class of secondary structure
+to be consdiered. For example, for `alpha helix`, use "H".  
 
 The classes can be found in the ProteinSecondaryStructures.jl package documentation, at:
 
 https://m3g.github.io/ProteinSecondaryStructures.jl/stable/explanation/#Secondary-structure-classes
 
+## Example
+
+```jldoctest 
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
+
+julia> ss_class_mean("H", ssmap; dims=1)[35:39] # mean helipticity per residue
+5-element Vector{Float64}:
+ 1.0
+ 1.0
+ 0.4
+ 0.0
+ 0.0 
+
+julia> ss_class_mean("H", ssmap; dims=2) # mean helipticity per frame
+1
+
+```
+
 """
-function ss_class_content(
-    ss_class::Union{String,Char,Integer},
-    ssmap::AbstractMatrix{Int},
+function ss_class_mean(
+    ss_class::Union{AbstractString,AbstractChar,Integer},
+    ssmap::AbstractMatrix{Int};
+    dims::Int=1
 )
     ss_class = ss_class isa Integer ? ss_class : ss_code_to_number(ss_class)
-    ss_class_content = zeros(Float64, size(ssmap, 2))
-    for (iframe, ss_frame) in enumerate(eachcol(ssmap))
-        ss_class_content[iframe] = count(==(ss_class), ss_frame) / max(1, length(ss_frame))
+    if dims == 1
+        ss_class_mean = zeros(Float64, size(ssmap, 1))
+        for (ires, res) in enumerate(eachrow(ssmap))
+            ss_class_mean[ires] = count(==(ss_class), res) / max(1, length(res))
+        end
+    elseif dims == 2
+        ss_class_mean = zeros(Float64, size(ssmap, 2))
+        for (iframe, ss_frame) in enumerate(eachcol(ssmap))
+            ss_class_mean[iframe] = count(==(ss_class), ss_frame) / max(1, length(ss_frame))
+        end
     end
-    return ss_class_content
+    return ss_class_mean
 end
 
 """
@@ -118,18 +149,23 @@ function ss_frame(ssmap::AbstractMatrix{Int}, iframe::Int)
     return ssmap_frame
 end
 
-@testitem "ss_content/ss_composition" begin
+@testitem "secondary structure" begin
+    using MolSimToolkit
     using MolSimToolkit.Testing
-    using PDBTools: readPDB
-    using Chemfiles: Trajectory
-    pdbfile = joinpath(Testing.data_dir, "Gromacs", "system.pdb")
-    trajectory = Trajectory(joinpath(Testing.data_dir, "Gromacs", "trajectory.xtc"))
+    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     # With stride
-    helical_content = ss_content(is_anyhelix, readPDB(pdbfile, "protein"), trajectory; method=stride_run, show_progress=false)
-    @test length(helical_content) == 26
-    @test sum(helical_content) / length(helical_content) ≈ 0.2181174089068826
+    ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
+    @test size(ssmap) == (43, 5)
+    @test sum(ssmap) == 842
+    helical_content = ss_class_content("H", ssmap)
+    @test length(helical_content) == 5
+    @test sum(helical_content) / length(helical_content) ≈ 0.6093023255813954
+    @test ss_frame(ssmap, 3) == Dict("310 helix" => 0, "bend" => 0, "turn" => 10, "beta bridge" => 0, "kappa helix" => 0, "pi helix" => 0, "beta strand" => 0, "alpha helix" => 25, "loop" => 0, "coil" => 8)
     # With DSSP
-    helical_content = ss_content(is_anyhelix, readPDB(pdbfile, "protein"), trajectory; method=dssp_run, show_progress=false)
+    ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
+    @test size(ssmap) == (43, 5)
+    @test sum(ssmap) == 1006
+    helical_content = ss_class_content("B", ssmap)
     @test length(helical_content) == 26
     @test sum(helical_content) / length(helical_content) ≈ 0.21204453441295545
     # With non-contiguous indexing
@@ -137,11 +173,4 @@ end
     helical_content = ss_content(is_anyhelix, atoms, trajectory; method=stride_run, show_progress=false)
     @test length(helical_content) == 26
     @test sum(helical_content) / length(helical_content) ≈ 0.20288461538461539
-    # From the map
-    ssmap = ss_map(readPDB(pdbfile, "protein"), trajectory; method=stride_run, show_progress=false)
-    helical_content = ss_content(is_anyhelix, ssmap)
-    @test length(helical_content) == 26
-    @test sum(helical_content) / length(helical_content) ≈ 0.2181174089068826
-    # Test ss_composition function
-    @test ss_composition(ssmap, 5) == Dict("310 helix" => 6, "bend" => 0, "turn" => 17, "kappa helix" => 0, "beta strand" => 25, "beta bridge" => 2, "alpha helix" => 12, "pi helix" => 0, "loop" => 0, "coil" => 14)
 end
