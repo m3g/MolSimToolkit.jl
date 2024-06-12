@@ -18,6 +18,10 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 
+# Secondary structures along simulations
+@reexport using ProteinSecondaryStructures
+export ss_map, ss_content, ss_composition
+
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass
 export center_of_mass
