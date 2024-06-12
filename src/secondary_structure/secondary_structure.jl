@@ -8,11 +8,11 @@ function _ss_frame!(
     ss_method::F=stride_run
 ) where {F<:Function}
     coordinates = positions(frame)
-    for at in atoms
+    for (iat, at) in pairs(atoms)
         iatom = PDBTools.index(at)
-        atoms[iatom].x = coordinates[iatom].x
-        atoms[iatom].y = coordinates[iatom].y
-        atoms[iatom].z = coordinates[iatom].z
+        atoms[iat].x = coordinates[iatom].x
+        atoms[iat].y = coordinates[iatom].y
+        atoms[iat].z = coordinates[iatom].z
     end
     return ss_method(atoms)
 end
@@ -37,6 +37,24 @@ which can be either `stride_run` or `dssp_run`. The default is `stride_run`.
 The `show_progress` keyword argument controls whether a progress bar is shown.
 
 For the classes, refer to the ProteinSecondaryStructures.jl package documentation.
+
+## Example
+
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", show_progress=false)
+6×5 Matrix{Int64}:
+ 5  9  5  5  5
+ 5  9  5  5  5
+ 5  1  5  5  5
+ 5  1  5  5  5
+ 5  1  5  5  5
+ 9  9  9  9  9
+
+```
 
 """
 function ss_map(
@@ -67,6 +85,8 @@ end
     ssmap = ss_map(simulation; ss_method=stride_run)
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 842
+    ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35")
+    @test sum(ssmap) == 166
     # With DSSP
     ssmap = ss_map(simulation; method=dssp_run)
     @test size(ssmap) == (43, 5)
@@ -74,12 +94,15 @@ end
 end
 
 """
-    ss_class_mean(ss_class, ssmap::AbstractMatrix{<:Integer}; dims=1)
+    ss_class_mean(ss_class, ssmap::AbstractMatrix{<:Integer}; dims=nothing)
 
 Calculates the mean secondary structure class content of the trajectory, given the secondary structure map.
 
 The mean can be calculated along the residues (default) or along the frames, by setting the `dims` keyword argument.
-Using `dims=1` calculates the mean along the residues, and `dims=2` calculates the mean along the frames.  
+
+- `dims=nothing` (default) calculates the mean occurence of `ss_class` of the whole matrix.
+- `dims=1` calculates the mean occurence of `ss_class` along the frames, for each residue.
+- `dims=2` calculates the mean occurence of `ss_class` along the residues, for each frame.
 
 `ss_class` can be either a string, a character, or an integer, setting the class of secondary structure
 to be consdiered. For example, for `alpha helix`, use "H".  
@@ -95,18 +118,30 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
+julia> ssmap = ss_map(simulation; # 5 frames 
+                   selection="residue >= 30 and residue <= 35", # 6 residues
+                   show_progress=false
+               );
 
-julia> ss_class_mean("H", ssmap; dims=1)[35:39] # mean helipticity per residue
-5-element Vector{Float64}:
- 1.0
- 1.0
- 0.4
+julia> ss_class_mean("C", ssmap)
+0.23333333333333334
+
+julia> ss_class_mean("C", ssmap; dims=1) # mean coil content per residue
+6-element Vector{Float64}:
+ 0.2
+ 0.2
  0.0
- 0.0 
+ 0.0
+ 0.0
+ 1.0 
 
-julia> ss_class_mean("H", ssmap; dims=2) # mean helipticity per frame
-1
+julia> ss_class_mean("C", ssmap; dims=2) # mean coil content per frame
+5-element Vector{Float64}:
+ 0.16666666666666666
+ 0.5
+ 0.16666666666666666
+ 0.16666666666666666
+ 0.16666666666666666
 
 ```
 
@@ -114,7 +149,7 @@ julia> ss_class_mean("H", ssmap; dims=2) # mean helipticity per frame
 function ss_class_mean(
     ss_class::Union{AbstractString,AbstractChar,Integer},
     ssmap::AbstractMatrix{Int};
-    dims::Int=1
+    dims::Union{Nothing,Int}=nothing,
 )
     ss_class = ss_class isa Integer ? ss_class : ss_code_to_number(ss_class)
     if dims == 1
@@ -127,26 +162,10 @@ function ss_class_mean(
         for (iframe, ss_frame) in enumerate(eachcol(ssmap))
             ss_class_mean[iframe] = count(==(ss_class), ss_frame) / max(1, length(ss_frame))
         end
+    elseif isnothing(dims)
+        ss_class_mean = count(==(ss_class), ssmap) / max(1, length(ssmap))
     end
     return ss_class_mean
-end
-
-"""
-    ssmap_frame(ssmap::AbstractMatrix{Int}, iframe::Int}
-
-Calculates the secondary structure composition of a frame of the simulation,
-given the secondary structure map. 
-
-Returns a dictionary of the secondary structure types and their counts, for the chosen frame.
-
-"""
-function ss_frame(ssmap::AbstractMatrix{Int}, iframe::Int)
-    ssmap_frame= Dict{String,Int}()
-    sscodes = @view(ssmap[:, iframe])
-    for sscode in ss_code_to_number.(keys(ss_classes))
-        ssmap_frame[class(sscode)] = count(==(sscode), sscodes)
-    end
-    return ssmap_frame
 end
 
 @testitem "secondary structure" begin
