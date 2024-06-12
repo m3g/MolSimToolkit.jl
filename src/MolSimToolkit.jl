@@ -19,8 +19,9 @@ export intermittent_correlation
 export bulk_coordination
 
 # Secondary structures along simulations
-@reexport using ProteinSecondaryStructures
-export ss_map, ss_content, ss_composition
+using ProteinSecondaryStructures
+export is_anyhelix
+export ss_map, ss_frame, ss_class_content
 
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass
@@ -28,7 +29,7 @@ export center_of_mass
 
 
 # Testing module
-include("./Testing.jl")
+include("../test/Testing.jl")
 
 # Data structures
 include("./datastructures/Simulation.jl")
@@ -52,6 +53,7 @@ include("./BlockAverages.jl")
 include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
 @reexport using .MolecularMinimumDistances
 include("./gromacs/remd.jl")
+include("./secondary_structure/secondary_structure.jl")
 
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
