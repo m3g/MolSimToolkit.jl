@@ -54,6 +54,8 @@ julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", s
  5  1  5  5  5
  9  9  9  9  9
 
+julia> ss_name.(ssmap)
+
 ```
 
 """
