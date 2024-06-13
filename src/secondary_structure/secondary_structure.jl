@@ -94,9 +94,15 @@ end
 end
 
 """
-    ss_class_mean(ss_class, ssmap::AbstractMatrix{<:Integer}; dims=nothing)
+    ss_mean(ssmap::AbstractMatrix{<:Integer}; class, dims=nothing)
 
 Calculates the mean secondary structure class content of the trajectory, given the secondary structure map.
+
+The secondary structure class to be considered must be defined by the `class` keyword argument.
+
+`class` can be either a string, a character, or an integer, or a set of values, setting the class(es) 
+of secondary structure to be consdiered. For example, for `alpha helix`, use "H". It can also be a vector of classes, 
+such as `class=["H", "E"]`.
 
 The mean can be calculated along the residues (default) or along the frames, by setting the `dims` keyword argument.
 
@@ -104,16 +110,13 @@ The mean can be calculated along the residues (default) or along the frames, by 
 - `dims=1` calculates the mean occurence of `ss_class` along the frames, for each residue.
 - `dims=2` calculates the mean occurence of `ss_class` along the residues, for each frame.
 
-`ss_class` can be either a string, a character, or an integer, setting the class of secondary structure
-to be consdiered. For example, for `alpha helix`, use "H".  
-
 The classes can be found in the ProteinSecondaryStructures.jl package documentation, at:
 
 https://m3g.github.io/ProteinSecondaryStructures.jl/stable/explanation/#Secondary-structure-classes
 
 ## Example
 
-```jldoctest 
+```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
@@ -123,70 +126,77 @@ julia> ssmap = ss_map(simulation; # 5 frames
                    show_progress=false
                );
 
-julia> ss_class_mean("C", ssmap)
+julia> ss_mean(ssmap; class="C")
 0.23333333333333334
 
-julia> ss_class_mean("C", ssmap; dims=1) # mean coil content per residue
+julia> ss_mean(ssmap; class="C", dims=1) # mean coil content per residue
+5-element Vector{Float64}:
+ 0.16666666666666666
+ 0.5
+ 0.16666666666666666
+ 0.16666666666666666
+ 0.16666666666666666 
+
+julia> ss_mean(ssmap; class="C", dims=2) # mean coil content per frame
 6-element Vector{Float64}:
  0.2
  0.2
  0.0
  0.0
  0.0
- 1.0 
+ 1.0
 
-julia> ss_class_mean("C", ssmap; dims=2) # mean coil content per frame
-5-element Vector{Float64}:
- 0.16666666666666666
- 0.5
- 0.16666666666666666
- 0.16666666666666666
- 0.16666666666666666
+julia> ss_mean(ssmap; class=["C", "T"]) # mean coil or turn
+0.9
 
 ```
 
 """
-function ss_class_mean(
-    ss_class::Union{AbstractString,AbstractChar,Integer},
+function ss_mean(
     ssmap::AbstractMatrix{Int};
+    class,
     dims::Union{Nothing,Int}=nothing,
 )
-    ss_class = ss_class isa Integer ? ss_class : ss_code_to_number(ss_class)
-    if dims == 1
-        ss_class_mean = zeros(Float64, size(ssmap, 1))
-        for (ires, res) in enumerate(eachrow(ssmap))
-            ss_class_mean[ires] = count(==(ss_class), res) / max(1, length(res))
-        end
-    elseif dims == 2
-        ss_class_mean = zeros(Float64, size(ssmap, 2))
-        for (iframe, ss_frame) in enumerate(eachcol(ssmap))
-            ss_class_mean[iframe] = count(==(ss_class), ss_frame) / max(1, length(ss_frame))
-        end
-    elseif isnothing(dims)
-        ss_class_mean = count(==(ss_class), ssmap) / max(1, length(ssmap))
+    if first(class) isa Union{AbstractChar,AbstractString}
+        class = ss_code_to_number.(class)
     end
-    return ss_class_mean
+    ss_mean = if isnothing(dims)
+        mean(in(class), ssmap)
+    else
+        vec(mean(in(class), ssmap; dims))
+    end
+    return ss_mean
 end
 
 @testitem "secondary structure" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
+    using Statistics: mean
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 842
-    helical_content = ss_class_content("H", ssmap)
-    @test length(helical_content) == 5
-    @test sum(helical_content) / length(helical_content) ≈ 0.6093023255813954
-    @test ss_frame(ssmap, 3) == Dict("310 helix" => 0, "bend" => 0, "turn" => 10, "beta bridge" => 0, "kappa helix" => 0, "pi helix" => 0, "beta strand" => 0, "alpha helix" => 25, "loop" => 0, "coil" => 8)
+    helical_content = ss_mean(ssmap; class="H")
+    @test helical_content ≈ 0.6093023255813954
+    h_per_frame = ss_mean(ssmap; class="H", dims=1)
+    @test length(h_per_frame) == 5
+    @test mean(h_per_frame) ≈ helical_content
+    h_per_residue = ss_mean(ssmap; class="H", dims=2)
+    @test length(h_per_residue) == 43
+    @test mean(h_per_residue) ≈ helical_content
     # With DSSP
     ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 1006
-    helical_content = ss_class_content("B", ssmap)
-    @test length(helical_content) == 26
-    @test sum(helical_content) / length(helical_content) ≈ 0.21204453441295545
+    helical_content = ss_mean(ssmap; class="H")
+    @test helical_content ≈ 0.5813953488372093
+    h_per_frame = ss_mean(ssmap; class="H", dims=1)
+    @test length(h_per_frame) == 5
+    @test mean(h_per_frame) ≈ helical_content
+    h_per_residue = ss_mean(ssmap; class="H", dims=2)
+    @test length(h_per_residue) == 43
+    @test mean(h_per_residue) ≈ helical_content
     # With non-contiguous indexing
     atoms = readPDB(pdbfile, only=at -> (10 <= at.residue < 30) | (40 <= at.residue < 60))
     helical_content = ss_content(is_anyhelix, atoms, trajectory; method=stride_run, show_progress=false)

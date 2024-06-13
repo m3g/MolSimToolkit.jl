@@ -11,6 +11,7 @@ using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm
 using Reexport: @reexport
 using ProgressMeter: Progress, next!
+using Statistics: mean
 
 export wrap, wrap_to_first
 export distances
@@ -22,10 +23,11 @@ export bulk_coordination
 using ProteinSecondaryStructures: ss_code_to_number, 
     stride_run, dssp_run, class, ss_classes
 # Reexported
-using ProteinSecondaryStructures: dssp_run, stride_run
-export dssp_run, stride_run
+using ProteinSecondaryStructures: dssp_run, stride_run, 
+    ss_code_to_number, ss_number_to_code, ss_name
+export dssp_run, stride_run, ss_name
 # SS trajectory functions
-export ss_map, ss_class_mean
+export ss_map, ss_mean
 
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass
