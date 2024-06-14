@@ -14,6 +14,8 @@ function _ss_frame!(
         atoms[iat].y = coordinates[iatom].y
         atoms[iat].z = coordinates[iatom].z
     end
+    # This is very bad: we are writting temporary files twice for each frame
+    # one here, one in the ss_method function, to adjust the PDB header
     tmpfile = tempname()*".pdb"
     PDBTools.writePDB(atoms, tmpfile)
     return ss_method(tmpfile; adjust_pdb=true)
