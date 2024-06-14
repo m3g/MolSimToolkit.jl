@@ -2,6 +2,15 @@
 # Computes the secondary structure in a single frame
 # This is an internal function.
 #
+const replace_aa_code = Dict{String,String}(
+    "HSD" => "HIS",
+    "HSP" => "HIS",
+    "HSE" => "HIS",
+    "HID" => "HIS",
+    "HIP" => "HIS",
+    "GLUP" => "GLU",
+    "ASPP" => "ASP",
+)
 function _ss_frame!(
     atoms::AbstractVector{<:PDBTools.Atom},
     frame::Chemfiles.Frame;
@@ -79,6 +88,11 @@ function ss_map(
     show_progress=true
 ) where {F<:Function}
     sel = PDBTools.select(atoms(simulation), selection)
+    for iat in eachindex(sel)
+        if haskey(replace_aa_code, PDBTools.resname(sel[iat]))
+            sel[iat].resname = replace_aa_code[sel[iat].resname]
+        end
+    end
     ss_map = zeros(Int, length(PDBTools.eachresidue(sel)), length(simulation))
     p = Progress(length(simulation); enabled=show_progress)
     for (iframe, frame) in enumerate(simulation)
