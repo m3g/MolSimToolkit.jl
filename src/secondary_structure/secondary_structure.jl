@@ -14,7 +14,9 @@ function _ss_frame!(
         atoms[iat].y = coordinates[iatom].y
         atoms[iat].z = coordinates[iatom].z
     end
-    return ss_method(atoms)
+    tmpfile = tempname()*".pdb"
+    PDBTools.writePDB(atoms, tmpfile)
+    return ss_method(tmpfile; adjust_pdb=true)
 end
 
 """
@@ -101,7 +103,7 @@ end
     # With DSSP
     ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
     @test size(ssmap) == (43, 5)
-    @test sum(ssmap) == 993
+    @test sum(ssmap) == 943
 end
 
 """
@@ -198,7 +200,7 @@ end
     # With DSSP
     ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
     @test size(ssmap) == (43, 5)
-    @test sum(ssmap) == 993
+    @test sum(ssmap) == 943
     helical_content = ss_mean(ssmap; class="H")
     @test helical_content ≈ 0.5813953488372093
     h_per_frame = ss_mean(ssmap; class="H", dims=1)
@@ -211,7 +213,7 @@ end
     sel(at) = isprotein(at) && (10 <= at.residue < 30) | (40 <= at.residue < 60)
     ssmap = ss_map(simulation; selection=sel, show_progress=false)
     helical_content = ss_mean(ssmap; class="H")
-    @test helical_content ≈ 0.78
+    @test helical_content ≈ 0.78333333333333
     h_per_frame = ss_mean(ssmap; class="H", dims=1)
     @test length(h_per_frame) == 5
     @test mean(h_per_frame) ≈ helical_content
