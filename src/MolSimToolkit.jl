@@ -19,13 +19,10 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 
-# For secondary structure calculations
-using ProteinSecondaryStructures: ss_code_to_number, 
-    stride_run, dssp_run, class, ss_classes
-# Reexported
+# Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
-    ss_code_to_number, ss_number_to_code, ss_name
-export dssp_run, stride_run, ss_name
+    ss_code, ss_number, ss_name
+export dssp_run, stride_run, ss_code, ss_number, ss_name
 # SS trajectory functions
 export ss_map, ss_mean
 

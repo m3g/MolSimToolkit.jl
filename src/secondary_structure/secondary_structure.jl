@@ -29,10 +29,12 @@ Calculates the secondary structure map of the trajectory.
 Returns a matrix of secondary structure codes, where each row is a residue and each column is a frame.
 
 By default, all protein atoms are considered. The `selection` keyword argument can be used to choose a different
-selection, for example, `selection="protein and chain A"`.
+selection. The `PDBTools` selection syntax can be used, for example `selection="protein and chain A"`, 
+or general Julia functions, like `selection=at -> chain(at) in ('A', 'B')`.
 
 The `ss_method` keyword argument can be used to choose the secondary structure prediction method,
-which can be either `stride_run` or `dssp_run`. The default is `stride_run`.
+which can be either `stride_run` or `dssp_run`. The default is `stride_run`. STRIDE is a faster
+algorithm, while DSSP is the default one in PDB database.
 
 The `show_progress` keyword argument controls whether a progress bar is shown.
 
@@ -55,6 +57,13 @@ julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", s
  9  9  9  9  9
 
 julia> ss_name.(ssmap)
+6×5 Matrix{String}:
+ "turn"  "coil"       "turn"  "turn"  "turn"
+ "turn"  "coil"       "turn"  "turn"  "turn"
+ "turn"  "310 helix"  "turn"  "turn"  "turn"
+ "turn"  "310 helix"  "turn"  "turn"  "turn"
+ "turn"  "310 helix"  "turn"  "turn"  "turn"
+ "coil"  "coil"       "coil"  "coil"  "coil"
 
 ```
 
@@ -71,7 +80,7 @@ function ss_map(
     for (iframe, frame) in enumerate(simulation)
         ss = _ss_frame!(sel, frame; ss_method)
         for (i, ssdata) in pairs(ss)
-            ss_map[i, iframe] = ss_code_to_number(ssdata.sscode)
+            ss_map[i, iframe] = ss_number(ssdata)
         end
         next!(p)
     end
@@ -84,15 +93,15 @@ end
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     # With stride
-    ssmap = ss_map(simulation; ss_method=stride_run)
+    ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
     @test sum(ssmap) == 842
     ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35")
     @test sum(ssmap) == 166
     # With DSSP
-    ssmap = ss_map(simulation; method=dssp_run)
+    ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
     @test size(ssmap) == (43, 5)
-    @test sum(ssmap) == 1006
+    @test sum(ssmap) == 993
 end
 
 """
@@ -112,9 +121,7 @@ The mean can be calculated along the residues (default) or along the frames, by 
 - `dims=1` calculates the mean occurence of `ss_class` along the frames, for each residue.
 - `dims=2` calculates the mean occurence of `ss_class` along the residues, for each frame.
 
-The classes can be found in the ProteinSecondaryStructures.jl package documentation, at:
-
-https://m3g.github.io/ProteinSecondaryStructures.jl/stable/explanation/#Secondary-structure-classes
+The classes can be found in the ProteinSecondaryStructures.jl package documentation.
 
 ## Example
 
@@ -160,7 +167,7 @@ function ss_mean(
     dims::Union{Nothing,Int}=nothing,
 )
     if first(class) isa Union{AbstractChar,AbstractString}
-        class = ss_code_to_number.(class)
+        class = ss_number.(class)
     end
     ss_mean = if isnothing(dims)
         mean(in(class), ssmap)
@@ -174,6 +181,7 @@ end
     using MolSimToolkit
     using MolSimToolkit.Testing
     using Statistics: mean
+    using PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
@@ -190,7 +198,7 @@ end
     # With DSSP
     ssmap = ss_map(simulation; ss_method=dssp_run, show_progress=false)
     @test size(ssmap) == (43, 5)
-    @test sum(ssmap) == 1006
+    @test sum(ssmap) == 993
     helical_content = ss_mean(ssmap; class="H")
     @test helical_content ≈ 0.5813953488372093
     h_per_frame = ss_mean(ssmap; class="H", dims=1)
@@ -200,8 +208,14 @@ end
     @test length(h_per_residue) == 43
     @test mean(h_per_residue) ≈ helical_content
     # With non-contiguous indexing
-    atoms = readPDB(pdbfile, only=at -> (10 <= at.residue < 30) | (40 <= at.residue < 60))
-    helical_content = ss_content(is_anyhelix, atoms, trajectory; method=stride_run, show_progress=false)
-    @test length(helical_content) == 26
-    @test sum(helical_content) / length(helical_content) ≈ 0.20288461538461539
+    sel(at) = isprotein(at) && (10 <= at.residue < 30) | (40 <= at.residue < 60)
+    ssmap = ss_map(simulation; selection=sel, show_progress=false)
+    helical_content = ss_mean(ssmap; class="H")
+    @test helical_content ≈ 0.78
+    h_per_frame = ss_mean(ssmap; class="H", dims=1)
+    @test length(h_per_frame) == 5
+    @test mean(h_per_frame) ≈ helical_content
+    h_per_residue = ss_mean(ssmap; class="H", dims=2)
+    @test length(h_per_residue) == 24
+    @test mean(h_per_residue) ≈ helical_content
 end
