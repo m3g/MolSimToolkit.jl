@@ -195,6 +195,14 @@ function ss_mean(
     return ss_mean
 end
 
+function ss_heatmap(args...; kargs...) 
+    throw(ArgumentError("""
+
+        The ss_heatmap function requires loading the Plots package.
+
+    """))
+end
+
 @testitem "secondary structure" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
