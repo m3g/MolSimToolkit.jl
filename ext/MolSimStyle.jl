@@ -1,7 +1,7 @@
 import Plots
 using MolSimToolkit: MolSimStyle
 
-const parameters = Dict{Symbol,Any}(
+const MolSimStyle_parameters = Dict{Symbol,Any}(
     :linewidth => 2,
     :framestyle => :box,
     :label => :none,
@@ -15,7 +15,7 @@ const parameters = Dict{Symbol,Any}(
 #
 # overwrite default parameters or add parameters if other kargs where passed
 #
-function _kargs(; kargs)
+function _kargs(parameters = MolSimStyle_parameters; kargs)
     custom_parameters = copy(parameters)
     for karg in keys(kargs)
         custom_parameters[karg] = kargs[karg]

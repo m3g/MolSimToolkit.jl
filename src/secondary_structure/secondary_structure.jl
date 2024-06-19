@@ -195,10 +195,20 @@ function ss_mean(
     return ss_mean
 end
 
-function ss_heatmap(args...; kargs...) 
-    throw(ArgumentError("""
+"""
+    ss_heatmap(ssmap::Matrix{<:Real}, selection::AbstractString)
 
-        The ss_heatmap function requires loading the Plots package.
+
+"""
+function ss_heatmap(args...; kargs...) 
+    throw(ArgumentError("""\n
+
+        Could not execute ss_heatmap. This can have two reasons: 
+        - The Plots package is not loaded.
+        - The function was called with the wrong arguments.
+
+        See the help entry for more information, with: `?ss_heatmap`.
+
 
     """))
 end

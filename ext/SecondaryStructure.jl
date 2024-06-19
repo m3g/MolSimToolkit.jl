@@ -1,15 +1,12 @@
 import Plots: heatmap
 
-function ss_heatmap(
-    ssmap,
-    selection,
-)
-    selection = at -> PDBTools.isprotein(at) && Select(selection)(at)
-    plt = heatmap(ssmap,
+function MolSimToolkit.ss_heatmap(ssmap::AbstractMatrix{<:Integer})
+    plt = heatmap(MolSimStyle,ssmap,
         xlabel="frame",
         ylabel="residue",
         framestyle=:box,
-        color=palette(:tab20c,10)
+        color=Plots.palette(:tab20c,10),
+        clims=(0.5,10.5),
     )
     return plt
 end

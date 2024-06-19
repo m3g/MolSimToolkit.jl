@@ -24,7 +24,7 @@ using ProteinSecondaryStructures: dssp_run, stride_run,
     ss_code, ss_number, ss_name
 export dssp_run, stride_run, ss_code, ss_number, ss_name
 # SS trajectory functions
-export ss_map, ss_mean
+export ss_map, ss_mean, ss_heatmap
 
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass
