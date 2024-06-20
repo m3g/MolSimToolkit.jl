@@ -195,24 +195,6 @@ function ss_mean(
     return ss_mean
 end
 
-"""
-    ss_heatmap(ssmap::Matrix{<:Real}, selection::AbstractString)
-
-
-"""
-function ss_heatmap(args...; kargs...) 
-    throw(ArgumentError("""\n
-
-        Could not execute ss_heatmap. This can have two reasons: 
-        - The Plots package is not loaded.
-        - The function was called with the wrong arguments.
-
-        See the help entry for more information, with: `?ss_heatmap`.
-
-
-    """))
-end
-
 @testitem "secondary structure" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
@@ -254,4 +236,38 @@ end
     h_per_residue = ss_mean(ssmap; class="H", dims=2)
     @test length(h_per_residue) == 24
     @test mean(h_per_residue) ≈ helical_content
+end
+
+#
+# Plotting extension
+#
+
+"""
+    ss_heatmap(ssmap::Matrix{<:Real}; scalex=1.0, kargs...)
+
+Plots a heatmap of the secondary structure map.
+
+The `scalex` keyword argument can be used to scale the x-axis, which usually has
+the meaning of time in a simulation. By default, it is 1.0 and the x-axis is the frame number.
+
+The `kargs` keyword arguments are passed to the `heatmap` function of the Plots package,
+to modify proteries of the plot. In particular, the residue ticks can be set with `yticks`,
+and can be set to residue specific labels with the `residue_ticks` function of PDBTools:
+
+```julia-repl
+
+```
+
+"""
+function ss_heatmap(args...; kargs...) 
+    throw(ArgumentError("""\n
+
+        Could not execute ss_heatmap. This can have two reasons: 
+        - The Plots package is not loaded.
+        - The function was called with the wrong arguments.
+
+        See the help entry for more information, with: `?ss_heatmap`.
+
+
+    """))
 end
