@@ -16,7 +16,7 @@ end
 
 @testitem "ss_heatmap" begin
     using Plots
-    using MolSimToolkit
+    using MolSimToolkit, MolSimToolkit.Testing
     using PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
