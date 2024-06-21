@@ -11,6 +11,7 @@ using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm
 using Reexport: @reexport
 using ProgressMeter: Progress, next!
+using Statistics: mean
 
 export wrap, wrap_to_first
 export distances
@@ -18,13 +19,20 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 
+# Reexported from ProteinSecondaryStructures for convenience
+using ProteinSecondaryStructures: dssp_run, stride_run, 
+    ss_code, ss_number, ss_name
+export dssp_run, stride_run, ss_code, ss_number, ss_name
+# SS trajectory functions
+export ss_map, ss_mean, ss_heatmap
+
 # New method added to this function, which is reexported
 import PDBTools.center_of_mass
 export center_of_mass
 
 
 # Testing module
-include("./Testing.jl")
+include("../test/Testing.jl")
 
 # Data structures
 include("./datastructures/Simulation.jl")
@@ -50,6 +58,7 @@ include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
 include("./gromacs/remd.jl")
 include("./Reweighting/Reweighting.jl")
 @reexport using .Reweighting
+include("./secondary_structure/secondary_structure.jl")
 
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
