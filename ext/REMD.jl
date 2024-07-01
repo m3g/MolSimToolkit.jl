@@ -82,7 +82,7 @@ end
     using Plots
     data = remd_data(MolSimToolkit.gmx2019_4_log)
     plt = heatmap(data; probability_type=:relative)
-    tmp = tempname()
+    tmp = tempname()*".png"
     savefig(plt, tmp)
     @test isfile(tmp)
     plt = heatmap(data; probability_type=:absolute)
@@ -90,7 +90,6 @@ end
     @test isfile(tmp)
     data = remd_data(MolSimToolkit.gmx5_0_4_log)
     plt = heatmap(data; probability_type=:relative)
-    tmp = tempname()
     savefig(plt, tmp)
     @test isfile(tmp)
     plt = heatmap(data; probability_type=:absolute)
