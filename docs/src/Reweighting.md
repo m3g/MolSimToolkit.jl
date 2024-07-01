@@ -1,3 +1,7 @@
+!!! warning
+    This is an experimental feature. Breaking changes may occur without 
+    a breaking package release.
+
 # Simulation Reweighting
 Computes the new weight for a frame of a simulation based on the energy difference between the perturbed and non-perturbed original sampling
 
