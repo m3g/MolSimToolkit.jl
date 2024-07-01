@@ -38,31 +38,62 @@ function heatmap(
 )
     nreplicas = size(data.probability_matrix, 1)
     if probability_type == :relative
-        normalization = 1 / nreplicas
+        m = data.probability_matrix ./ (1 / nreplicas)
         digits = 1
         isnothing(colorbar_title) && (colorbar_title = "probability ÷ (1/$nreplicas)")
+        clims = (0.5, 1.5)
+        colorscale=:bwr
     elseif probability_type == :absolute
-        normalization = 1
+        m = data.probability_matrix
         digits = 2
         isnothing(colorbar_title) && (colorbar_title = "probability - (ideal = $(round(1/nreplicas; digits=3)))")
+        clims=(0, maximum(m))
+        colorscale=:tempo
     else
         throw(ArgumentError("Invalid probability type."))
     end
-    m = data.probability_matrix ./ normalization
+
     plt = heatmap(
         transpose(m);
         xlabel, ylabel, colorbar_title, fontfamily,
-        clims=(0, maximum(m)),
-        color=cgrad(:tempo),
+        clims=clims,
+        color=cgrad(colorscale),
         xticks=(1:nreplicas, 0:nreplicas-1),
         yticks=(1:nreplicas, 0:nreplicas-1),
         framestyle=:box,
+        levels=12,
     )
     for i in axes(m, 2), j in axes(m, 1)
-        color = m[j, i] > 0.6 * maximum(m) ? :white : :black
+        color = if probability_type == :relative
+            color = 1.2*clims[1] < m[j, i] < 0.8*clims[2] ? :black : :white
+            color = :black
+        elseif probability_type == :absolute
+            color = m[j, i] > 0.6 * clims[2] ? :white : :black
+        end
         annotate!(plt, j, i,
             text("$(round(m[j, i]; digits))", :center, color, 7, "Computer Modern")
         )
     end
     return plt
+end
+
+@testitem "REMD" begin
+    using MolSimToolkit
+    using Plots
+    data = remd_data(MolSimToolkit.gmx2019_4_log)
+    plt = heatmap(data; probability_type=:relative)
+    tmp = tempname()
+    savefig(plt, tmp)
+    @test isfile(tmp)
+    plt = heatmap(data; probability_type=:absolute)
+    savefig(plt, tmp)
+    @test isfile(tmp)
+    data = remd_data(MolSimToolkit.gmx5_0_4_log)
+    plt = heatmap(data; probability_type=:relative)
+    tmp = tempname()
+    savefig(plt, tmp)
+    @test isfile(tmp)
+    plt = heatmap(data; probability_type=:absolute)
+    savefig(plt, tmp)
+    @test isfile(tmp)
 end
