@@ -91,17 +91,41 @@ end
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 7")
 
-    sum_of_dist = reweight(simulation, (r) -> r, i1, i2; min_dist = true, n_atoms_per_molecule = 7, cutoff = 10.0)
+    sum_of_dist = reweight(simulation, (r) -> r, i1, i2; min_dist = true, n_atoms_per_molecule = 1, cutoff = 10.0)
     @test sum_of_dist.energy ≈ [
-    62.492586115838314, 
-    74.1608164984956, 
-    74.7700517897278, 
-    50.851563012130356, 
-    62.994684516904, 
-    67.27903007182715, 
-    81.47993128439455, 
-    52.87729020037196, 
-    63.76631345255868, 
-    55.55921195504992
+        81.63048517945049, 
+        81.75153397197373, 
+        83.4725848687559, 
+        50.851563012130356, 
+        70.51272314980994, 
+        67.27903007182715, 
+        81.47993128439455, 
+        71.87915113998032, 
+        72.327486822439, 
+        55.55921195504992
+    ]
+end
+
+@testitem "Reweighting small trajectory using minimum distances with one set" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
+
+    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+
+    sum_of_dist = reweight(simulation, (r) -> r, i1; min_dist = true, n_atoms_per_molecule = 1, cutoff = 10.0)
+    @test sum_of_dist.energy ≈ [
+        1461.0357719672927, 
+        1441.135120247483, 
+        1459.9465255299242, 
+        1475.6216777213508, 
+        1474.9315243351775, 
+        1474.7965527585634, 
+        1452.6348409088291, 
+        1478.65551753013, 
+        1452.50720582719, 
+        1507.8298874600328
     ]
 end

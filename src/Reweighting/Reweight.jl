@@ -109,7 +109,9 @@ This result is the energy difference between the  perturbed frame and the origin
 function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
-    group_1::AbstractVector{<:Integer}; 
+    group_1::AbstractVector{<:Integer};
+    min_dist::Bool = false,
+    n_atoms_per_molecule::Real = 0, 
     cutoff::Real = 12.0, 
     k::Real = 1.0, 
     T::Real = 1.0
@@ -120,14 +122,29 @@ function reweight(
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
-        system = ParticleSystem(
-            xpositions = first_coors,
-            unitcell = unitcell(frame),
-            cutoff = cutoff,
-            output = 0.0,
-            output_name = :total_energy
-        )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
+        if min_dist
+            minimum_dists = SelfPairs(
+                xpositions = first_coors,
+                cutoff = cutoff,
+                unitcell = unitcell(frame),
+                xn_atoms_per_molecule = n_atoms_per_molecule
+            )
+            for mindist in minimum_distances!(minimum_dists)
+                if mindist.within_cutoff
+                    dist = mindist.d 
+                    energy_vec[iframe] += f_perturbation(dist)
+                end
+            end
+        else
+            system = ParticleSystem(
+                xpositions = first_coors,
+                unitcell = unitcell(frame),
+                cutoff = cutoff,
+                output = 0.0,
+                output_name = :total_energy
+            )
+            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
+        end
     end
     @. prob_rel_vec = exp(-(energy_vec)/k*T)
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
@@ -156,10 +173,10 @@ function reweight(
             minimum_dists = minimum_distances(
                 xpositions = first_coors, 
                 ypositions = second_coors,
-                unitcell=unitcell(frame), 
+                unitcell = unitcell(frame), 
                 cutoff = cutoff, 
-                xn_atoms_per_molecule=n_atoms_per_molecule,
-            )
+                xn_atoms_per_molecule = n_atoms_per_molecule,
+            ) 
             for mindist in minimum_dists
                 if mindist.within_cutoff
                     dist = mindist.d 
