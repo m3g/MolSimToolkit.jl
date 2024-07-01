@@ -140,7 +140,7 @@ function reweight(
     group_1::AbstractVector{<:Integer}, 
     group_2::AbstractVector{<:Integer};
     min_dist::Bool = false,
-    n_atoms_per_molecule::AbstractVector{<:Integer} = [0,0],     
+    n_atoms_per_molecule::Real = 0,     
     cutoff::Real = 12.0, 
     k::Real = 1.0, 
     T::Real = 1.0
@@ -152,19 +152,19 @@ function reweight(
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
         second_coors = coordinates[group_2]
-        system = nothing
         if min_dist
-            system = minimum_distances(
-                xpositions = coordinates[group_1], 
-                ypositions = coordinates[group_2],
+            minimum_dists = minimum_distances(
+                xpositions = first_coors, 
+                ypositions = second_coors,
                 unitcell=unitcell(frame), 
-                cutoff = 0.1, 
-                xn_atoms_per_molecule=n_atoms_per_molecule[1],
-                yn_atoms_per_molecule=n_atoms_per_molecule[2]
+                cutoff = cutoff, 
+                xn_atoms_per_molecule=n_atoms_per_molecule,
             )
-            for mindist in system
-                dist = mindist.d 
-                energy_vec[iframe] += dist -> f_perturbation(dist)
+            for mindist in minimum_dists
+                if mindist.within_cutoff
+                    dist = mindist.d 
+                    energy_vec[iframe] += f_perturbation(dist)
+                end
             end
         else
             system = ParticleSystem(
