@@ -51,7 +51,7 @@ Statistics = "1.9"
 StatsBase = "0.34"
 Test = "1.9"
 TestItemRunner = "0.2.1"
-TestItems = "0.1.1"
+TestItems = "0.1.1, 1"
 julia = "1.9"
 
 [extras]
