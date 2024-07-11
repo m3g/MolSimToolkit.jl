@@ -1,7 +1,7 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
-version = "1.15.1-DEV"
+version = "1.15.1"
 
 [deps]
 AtomsBase = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
@@ -51,7 +51,7 @@ Statistics = "1.9"
 StatsBase = "0.34"
 Test = "1.9"
 TestItemRunner = "0.2.1"
-TestItems = "0.1.1"
+TestItems = "0.1.1, 1"
 julia = "1.9"
 
 [extras]
