@@ -68,7 +68,7 @@ julia> i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
 1-element AbstractVector{<:Integer}:
  171
 
-julia> sum_of_dist = reweight(simulation, (i,j,d2) -> d2, i1, i2; cutoff = 25.0)
+julia> sum_of_dist = reweight(simulation, r -> r, i1, i2; cutoff = 25.0)
 -------------
 FRAME WEIGHTS
 -------------
@@ -110,8 +110,6 @@ function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
     group_1::AbstractVector{<:Integer};
-    min_dist::Bool = false,
-    n_atoms_per_molecule::Real = 0, 
     cutoff::Real = 12.0, 
     k::Real = 1.0, 
     T::Real = 1.0
@@ -122,31 +120,16 @@ function reweight(
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
-        if min_dist
-            minimum_dists = SelfPairs(
-                xpositions = first_coors,
-                cutoff = cutoff,
-                unitcell = unitcell(frame),
-                xn_atoms_per_molecule = n_atoms_per_molecule
-            )
-            for mindist in minimum_distances!(minimum_dists)
-                if mindist.within_cutoff
-                    dist = mindist.d 
-                    energy_vec[iframe] += f_perturbation(dist)
-                end
-            end
-        else
-            system = ParticleSystem(
-                xpositions = first_coors,
-                unitcell = unitcell(frame),
-                cutoff = cutoff,
-                output = 0.0,
-                output_name = :total_energy
-            )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
-        end
+        system = ParticleSystem(
+            xpositions = first_coors,
+            unitcell = unitcell(frame),
+            cutoff = cutoff,
+            output = 0.0,
+            output_name = :total_energy
+        )
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
     end
-    @. prob_rel_vec = exp(-(energy_vec)/k*T)
+    @. prob_rel_vec = exp(-energy_vec/(k*T))
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
     output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     return output
@@ -155,11 +138,9 @@ function reweight(
     simulation::Simulation, 
     f_perturbation::Function, 
     group_1::AbstractVector{<:Integer}, 
-    group_2::AbstractVector{<:Integer};
-    min_dist::Bool = false,
-    n_atoms_per_molecule::Real = 0,     
+    group_2::AbstractVector{<:Integer};    
     cutoff::Real = 12.0, 
-    k::Real = 1.0, 
+    k::Real = 1.0,
     T::Real = 1.0
 )
     prob_vec = zeros(length(simulation))
@@ -169,33 +150,17 @@ function reweight(
         coordinates = positions(frame)
         first_coors = coordinates[group_1]
         second_coors = coordinates[group_2]
-        if min_dist
-            minimum_dists = minimum_distances(
-                xpositions = first_coors, 
-                ypositions = second_coors,
-                unitcell = unitcell(frame), 
-                cutoff = cutoff, 
-                xn_atoms_per_molecule = n_atoms_per_molecule,
-            ) 
-            for mindist in minimum_dists
-                if mindist.within_cutoff
-                    dist = mindist.d 
-                    energy_vec[iframe] += f_perturbation(dist)
-                end
-            end
-        else
-            system = ParticleSystem(
-                xpositions = first_coors,
-                ypositions = second_coors,
-                unitcell = unitcell(frame),
-                cutoff = cutoff,
-                output = 0.0,
-                output_name = :total_energy
-            )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
-        end
+        system = ParticleSystem(
+            xpositions = first_coors,
+            ypositions = second_coors,
+            unitcell = unitcell(frame),
+            cutoff = cutoff,
+            output = 0.0,
+            output_name = :total_energy
+        )
+        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
     end
-    @. prob_rel_vec = exp(-(energy_vec)/k*T)
+    @. prob_rel_vec = exp(-energy_vec/(k*T))
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
     output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     return output
