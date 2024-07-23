@@ -51,14 +51,13 @@ Which will produce a plot of the following form:
 
 ![](./images/REMD/remd_heatmap.png)
 
-The number of replicas here is 16, thus the expected ideal probabilty of finding each replica
-in each level is $1/16$. The probabilities are divided by $1/16$, such that $1.0$ implies 
+The number of replicas here is 10 (0-9), thus the expected ideal probability of finding each replica
+in each level is $1/10$. The probabilities are divided by $1/10$, such that $1.0$ implies 
 an optimal exchange at that replica and level. 
 
-Here, we see that replicas 1, 3, and 12 got trapped in levels 13, 14, 15, and display roughly
-30% probability of being at the top temperatures. Thus, these replicas didn't exchange well
-with the rest of the replica system. The other replicas show colors that are close to zero,
-which mean a proper interchange of replicas among the levels from 0 to 12. 
+The example displays a reasonably good replica exchange pattern. However,
+replica 2 sampled level 0 about 30% more than expected, and replica 8 sampled 
+level 0 about 30% less than expected, as indicated by the 1.3 and 0.7 annotations. 
 
 To produce a similar heatmap, but with the absolute (not normalized) probabilities of 
 observing each replica at each level, use `heatmap(data; probability_type=:absolute)`. 

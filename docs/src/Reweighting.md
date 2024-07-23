@@ -1,4 +1,9 @@
-# Simulation Reweighting
+# [Simulation Reweighting](@id simulation_reweighting)
+
+!!! warning
+    This is an experimental feature. Breaking changes may occur without 
+    a breaking package release.
+
 Computes the new weight for a frame of a simulation based on the energy difference between the perturbed and non-perturbed original sampling
 
 This resource is based on the Free Energy Perturbation Theory (FEP) in the Molecular Dynamics context. Most of the time, each frame will contribute equally
