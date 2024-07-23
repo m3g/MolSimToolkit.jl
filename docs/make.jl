@@ -19,7 +19,7 @@ makedocs(
         "Miscelaneous functions" => "miscelaneous.md",
         "Developer zone" => "Developer.md",
         "Plotting style" => "plotting_style.md",
-        "Simulation Reweight" => "Reweighting.md"
+        "Simulation Reweighting" => "Reweighting.md"
     ],
 )
 deploydocs(
