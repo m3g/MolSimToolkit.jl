@@ -76,7 +76,7 @@ julia> weights = reweight(simulation, r -> gaussian_decay(r, α, cut), i1, i2; c
 
 `cutoff`: the maximum distance that will be computed between two atoms. The default value is `12.0 Å`.
 
-!!!warning
+!!! warning
     It is highly recommended to set the same value of `cutoff` for both `perturbation` and `reweight` functions.
     With this in mind, calculations will be done more quickly and you do not need to worry about your input function
     behaviour above the `cutoff` value, since distances out of the perturbation range will not be computed.
@@ -132,10 +132,10 @@ julia> weights.probability
  0.12988266765019355
 ```
 
-!!!tip
+!!! tip
     Note that these values (and, consequently, calculations that use them) are functions of `r`, 
     so in other to avoid mathematical complications, a good piece of advice is to create functions that 
-    are continous in the closed interval from zero to the cutoff value.
+    are continous in the closed interval from zero to the cutoff value.  
 
 ## Reference Functions
 ```@autodocs
