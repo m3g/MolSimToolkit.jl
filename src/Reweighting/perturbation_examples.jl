@@ -22,7 +22,7 @@ function lennard_jones_perturbation(r, σ1, ϵ1, σ2, ϵ2; α = 0.0, β = 0.0, s
     else
         V_pert =  V_pert - (lennard_jones(cut, σ_pert,  ϵ_pert) - lennard_jones(cut,  σ_orig, ϵ_orig))
     end
-    return V_perturbed
+    return V_pert
 end
 
 #Applying a polynomial decay pertubation
