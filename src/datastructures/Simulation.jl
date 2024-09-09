@@ -91,10 +91,11 @@ julia> for (i, frame) in enumerate(simulation)
 
 ```
 """
-mutable struct Simulation{
+@kwdef mutable struct Simulation{
     AtomType,
     V<:Vector{<:AtomType},
     R<:AbstractRange,
+    P<:Union{Nothing,SMatrix{3,3,Float64,9}},
     F<:Chemfiles.Frame,
     T<:Chemfiles.Trajectory,
     L<:ReentrantLock
@@ -102,6 +103,7 @@ mutable struct Simulation{
     pdb_file::Union{Nothing,String}
     atoms::V
     frame_range::R
+    pbc::P,
     frame::F
     frame_index::Union{Nothing,Int}
     trajectory::T
@@ -152,13 +154,28 @@ function Simulation(
     pdb_file::Union{Nothing,String},
     atoms::AbstractVector{AtomType},
     trajectory::Chemfiles.Trajectory,
-    first, last, step
+    first, last, step,
+    pbc=nothing,
 ) where {AtomType}
     frame_range = _set_range(trajectory, first, last, step)
     frame = Chemfiles.read(trajectory)
     read_lock = ReentrantLock()
     frame_index = nothing
-    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
+    if isnothing(pbc)
+        pscale = maximum(Chemfiles.positions(frame))
+        uc = unitcell(f)
+        if sum(uc) < 1e-10 * pscale
+            @warn """"
+            
+                Unit cell read from trajectory is zero. Assuming no periodic boundary conditions. 
+                To manually set the PBCs, use the `pbc` keyword argument of `Simulation`.
+                
+            """
+        end
+    else
+        pbc = SMatrix{3,3,Float64,9}(pbc)
+    end
+    simulation = Simulation(;pdb_file, atoms, frame_range, pbc, frame, frame_index, trajectory, read_lock)
     restart!(simulation)
     return simulation
 end
@@ -171,13 +188,13 @@ Simulation will iterate over all frames in the file. This is the default constru
 to be used.
 
 =#
-function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
+function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1, pbc=nothing)
     atoms = PDBTools.readPDB(pdb_file)
-    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
+    return Simulation(;pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), pbc, first, last, step)
 end
 
-function Simulation(atoms::AbstractVector{AtomType}, trajectory_file::String; first=1, last=nothing, step=1) where {AtomType}
-    return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
+function Simulation(atoms::AbstractVector{AtomType}, trajectory_file::String; first=1, last=nothing, step=1, pbc=nothing) where {AtomType}
+    return Simulation(;pdb_file=nothing, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step, pbc)
 end
 
 """
