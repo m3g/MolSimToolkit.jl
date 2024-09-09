@@ -3,14 +3,14 @@ export most_representative_structure
 #
 # Computes the average structure given the coordinates in a vector of frames.
 #
-function _average_structure!(simulation, reference, indices)
+function _average_structure(simulation, reference, indices)
     avg_struct = zero(reference)
     for frame in simulation
         p = positions(frame)[indices]
         align!(p, reference)
         avg_struct .+= p
     end
-    avg_struct /= length(simulation)
+    avg_struct ./= length(simulation)
 end
 
 """
@@ -67,19 +67,20 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
     self_consistent = false
     firstframe!(simulation)
     reference = positions(current_frame(simulation))[indices]
-    avg_structure = _average_structure!(simulation, reference, indices) 
+    avg_structure = _average_structure(simulation, reference, indices) 
     rmsdmin, imin = findmin(
-        frame -> rmsd(positions(frame)[indices], avg_structure), 
+        frame -> rmsd(align!(positions(frame)[indices], avg_structure), avg_structure), 
         frame for frame in simulation
     )
+
     if imin == 1
         self_consistent = true 
     end
     while !self_consistent
-        reference = avg_structure
-        avg_structure = _average_structure!(simulation, reference, indices) 
+        reference .= avg_structure
+        avg_structure = _average_structure(simulation, reference, indices) 
         new_rmsdmin, new_imin = findmin(
-            frame -> rmsd(positions(frame)[indices], avg_structure), 
+            frame -> rmsd(align!(positions(frame)[indices], avg_structure), avg_structure), 
             frame for frame in simulation
         )
         @show imin, new_imin, rmsdmin, new_rmsdmin
@@ -98,10 +99,10 @@ end
     calphas = select(atoms(simulation), "name CA")
     imin, rmsdmin = most_representative_structure(simulation; atoms = calphas)
     @test imin == 4
-    @test isapprox(rmsdmin, 1.1681526249035976)
+    @test rmsdmin ≈ 1.1681514813293536
     imin, rmsdmin = most_representative_structure(simulation; atoms = PDBTools.index.(calphas))
     @test imin == 4
-    @test isapprox(rmsdmin, 1.1681526249035976)
+    @test rmsdmin ≈ 1.1681514813293536
     @test_throws ArgumentError most_representative_structure(simulation; atoms = 1)
     @test_throws ArgumentError most_representative_structure(simulation; atoms = Int[])
 end
