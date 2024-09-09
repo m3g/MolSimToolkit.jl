@@ -26,7 +26,7 @@ The reference structure is updated until the most representative structure found
 - `simulation::Simulation`: Simulation object.
 - `atoms::Union{Nothing, AbstractVector{<:PDBTools.Atom}, AbstractVector{Int}}`: Atoms to consider in the calculation.
 
-If `atoms` is `nothing`, the function will consider all alpha carbons in proteins ("protein and name CA").
+If `atoms` is `nothing`, the function will consider all alpha-carbons in proteins (`"protein and name CA"`).
 
 # Returns
 
