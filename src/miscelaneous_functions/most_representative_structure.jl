@@ -18,8 +18,9 @@ end
 
 Find the most representative structure in a simulation. 
 The most representative structure is the one that minimizes the RMSD with respect to the average structure of the simulation. 
-The average structure is calculated by aligning all frames to a reference structure and averaging the aligned structures. 
-The reference structure is updated until the most representative structure found is consistent with the previous one.
+The average structure is defined iteratively, first by aligning all frames to the first frame, and then by averaging the aligned structures.
+The structure most similar to the average is then identified and used as the reference structure for the next iteration.
+The process is repeated until the structure most similar to the average is the same as the previous iteration.
 
 # Arguments
 
@@ -83,7 +84,6 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
             frame -> rmsd(align!(positions(frame)[indices], avg_structure), avg_structure), 
             frame for frame in simulation
         )
-        @show imin, new_imin, rmsdmin, new_rmsdmin
         if new_imin == imin
             self_consistent = true
         end
