@@ -414,6 +414,7 @@ function get_frame(simulation::Simulation, iframe::Int)
         i = frame_index(simulation)
     end
     p = positions(current_frame(simulation))
+    restart!(simulation)
     ats = atoms(simulation)
     for iat in eachindex(ats, p)
         ats[iat].x = p[iat].x
@@ -460,5 +461,16 @@ end
     firstframe!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
     @test isnothing(path_pdb(simulation))
+end
+
+@testitem "get_frame" begin
+    using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    frames = [ copy(positions(frame)) for frame in sim ]
+    @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
+    ats = readPDB(Testing.namd_pdb)
+    sim = Simulation(ats, Testing.namd_traj)
+    @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
+    @test_throws ArgumentError get_frame(sim, 100)
 end
 
