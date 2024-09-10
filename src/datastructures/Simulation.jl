@@ -13,6 +13,7 @@ export atoms
 export unitcell
 export path_pdb
 export path_trajectory
+export get_frame
 
 """
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
@@ -392,6 +393,34 @@ function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
     end
     simulation.frame_range = frame_range
     restart!(simulation)
+end
+
+"""
+    get_frame(simulation::Simulation, iframe::Int)
+
+Returns the frame at the given index in the trajectory. 
+
+## Example
+
+"""
+function get_frame(simulation::Simulation, iframe::Int)
+    if !(iframe in frame_range(simulation))
+        throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
+    end
+    firstframe!(simulation)
+    i = frame_index(simulation)
+    while i != iframe
+        nextframe!(simulation)
+        i = frame_index(simulation)
+    end
+    p = positions(current_frame(simulation))
+    ats = atoms(simulation)
+    for iat in eachindex(ats, p)
+        ats[iat].x = p[iat].x
+        ats[iat].y = p[iat].y
+        ats[iat].z = p[iat].z
+    end
+    return ats
 end
 
 @testitem "Simulation" begin
