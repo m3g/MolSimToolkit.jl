@@ -15,11 +15,6 @@ export path_pdb
 export path_trajectory
 export get_frame
 
-# Legacy (to be removed in 2.0)
-const nextframe! = next_frame!
-const firstframe! = first_frame!
-export nextframe!, firstframe!
-
 
 """
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
@@ -428,19 +423,25 @@ julia> frame4 = get_frame(sim, 4)
 julia> writePDB(frame4, "frame4.pdb")
 ```
 
+!!! note
+    The `get_frame` function will read the frames in the trajectory until the desired frame is reached. 
+    This can be slow for large trajectories. If the required frame is before the current frame of the 
+    simulation, the simulation will be restarted. The simulation object is returned positioned in the
+    required frame. 
+
 """
 function get_frame(simulation::Simulation, iframe::Int)
     if !(iframe in frame_range(simulation))
         throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
     end
-    first_frame!(simulation)
-    i = frame_index(simulation)
-    while i != iframe
+    i_current_frame = frame_index(simulation)
+    if isnothing(i_current_frame) || (iframe < i_current_frame)
+        first_frame!(simulation)
+    end
+    while frame_index(simulation) != iframe
         next_frame!(simulation)
-        i = frame_index(simulation)
     end
     p = positions(current_frame(simulation))
-    restart!(simulation)
     ats = atoms(simulation)
     for iat in eachindex(ats, p)
         ats[iat].x = p[iat].x
@@ -494,9 +495,18 @@ end
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
     frames = [ copy(positions(frame)) for frame in sim ]
     @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
+    @test coor(get_frame(sim, 5)) ≈ frames[5]
+    @test coor(get_frame(sim, 1)) ≈ frames[1]
+    @test coor(get_frame(sim, 2)) ≈ frames[2]
     ats = readPDB(Testing.namd_pdb)
     sim = Simulation(ats, Testing.namd_traj)
     @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
     @test_throws ArgumentError get_frame(sim, 100)
 end
 
+#
+# Legacy interface (to be removed in 2.0)
+#
+const nextframe! = next_frame!
+const firstframe! = first_frame!
+export nextframe!, firstframe!
