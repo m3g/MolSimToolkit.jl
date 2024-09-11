@@ -66,7 +66,7 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
         throw(ArgumentError("No atoms selected."))
     end
     self_consistent = false
-    firstframe!(simulation)
+    first_frame!(simulation)
     reference = positions(current_frame(simulation))[indices]
     avg_structure = _average_structure(simulation, reference, indices) 
     rmsdmin, imin = findmin(

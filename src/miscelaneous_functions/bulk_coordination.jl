@@ -111,7 +111,7 @@ function bulk_coordination(
 
     # Initialize the systems for the minimum distances, to avoid creating
     # the systems at every frame
-    firstframe!(simulation)
+    first_frame!(simulation)
     uc = unitcell(current_frame(simulation))
     p = positions(current_frame(simulation))
     sys1 = CrossPairs(

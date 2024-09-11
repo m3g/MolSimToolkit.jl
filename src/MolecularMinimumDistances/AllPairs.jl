@@ -138,7 +138,7 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    firstframe!(simulation)
+    first_frame!(simulation)
     coor = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
     xsolvent = zeros(eltype(coor), length(popc))

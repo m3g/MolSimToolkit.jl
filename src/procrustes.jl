@@ -193,7 +193,7 @@ function rmsd(
 
     # Define reference of the alignment
     xref = if isnothing(reference_frame)
-        firstframe!(simulation)
+        first_frame!(simulation)
         positions(current_frame(simulation))[indices]
     elseif reference_frame isa Integer
         if !(reference_frame in frame_range(simulation))
@@ -205,7 +205,7 @@ function rmsd(
         end
         restart!(simulation)
         for _ in 1:reference_frame
-            nextframe!(simulation)
+            next_frame!(simulation)
         end
         positions(current_frame(simulation))[indices]
     elseif reference_frame == :average
@@ -261,7 +261,7 @@ end
 
     # same test, but with coordinates obtained from a simulation frame
     simulation = Simulation(namd_pdb, namd_traj)
-    firstframe!(simulation)
+    first_frame!(simulation)
     cas = findall(Select("name CA"), atoms)
     x = positions(current_frame(simulation))[cas]
     y = x .+ Ref(SVector{3}(45.0, -15.0, 31.5))
@@ -272,7 +272,7 @@ end
 
     rmsd_aligned = zeros(length(simulation))
     rmsd_notaligned = zeros(length(simulation))
-    firstframe!(simulation)
+    first_frame!(simulation)
     x = positions(current_frame(simulation))[cas]
     xref = copy(x)
     for (iframe, frame) in enumerate(simulation)

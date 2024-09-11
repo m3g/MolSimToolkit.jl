@@ -22,7 +22,7 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> protein_indices = findall(sel"protein", atoms(simulation));
 
-julia> firstframe!(simulation); # move simulation to the first frame
+julia> first_frame!(simulation); # move simulation to the first frame
 
 julia> coor = positions(current_frame(simulation));
 
@@ -57,7 +57,7 @@ end
     using MolSimToolkit.Testing
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    firstframe!(simulation)
+    first_frame!(simulation)
     protein_indices = PDBTools.selindex(atoms(simulation), "protein")
     coor = positions(current_frame(simulation))
     @test center_of_mass(protein_indices, simulation, coor) ≈

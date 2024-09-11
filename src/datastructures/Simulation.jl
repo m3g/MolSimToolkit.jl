@@ -5,15 +5,21 @@ export length
 export raw_length
 export close
 export restart!
-export firstframe! 
+export first_frame! 
 export current_frame
-export nextframe!
+export next_frame!
 export set_frame_range!
 export atoms
 export unitcell
 export path_pdb
 export path_trajectory
 export get_frame
+
+# Legacy (to be removed in 2.0)
+const nextframe! = next_frame!
+const firstframe! = first_frame!
+export nextframe!, firstframe!
+
 
 """
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
@@ -45,10 +51,11 @@ The Simulation object can also be manipulated by the following functions:
 
 - `close(::Simulation)`: closes the trajectory file
 - `restart!(::Simulation)`: restarts the iteration over the trajectory file
-- `firstframe!(::Simulation)`: restarts the iteration over the trajectory file and places the current frame at the first frame in the trajectory
+- `first_frame!(::Simulation)`: restarts the iteration over the trajectory file and places the current frame at the first frame in the trajectory
 - `current_frame(::Simulation)`: returns the current frame in the trajectory
-- `nextframe!(::Simulation)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
+- `next_frame!(::Simulation)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
 - `set_frame_range!(::Simulation; first, last, step)`: resets the range of frames to be iterated over. 
+- `get_frame(::Simulation, iframe)`: returns the frame at the given index in the trajectory.
 
 One important feature of the `Simulation` object is that it can be iterated over, frame by frame. 
 
@@ -277,7 +284,7 @@ function current_frame(simulation::Simulation)
 end
 
 """
-    firstframe!(simulation::Simulation)
+    first_frame!(simulation::Simulation)
 
 Restarts the trajectory buffer, and places the current frame at the first frame in the trajectory.
 
@@ -288,7 +295,7 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> firstframe!(simulation) 
+julia> first_frame!(simulation) 
 Simulation 
     Atom type: Atom
     PDB file: structure.pdb
@@ -299,20 +306,20 @@ Simulation
     Current frame: 1
 ```
 """
-function firstframe!(simulation::Simulation)
+function first_frame!(simulation::Simulation)
     restart!(simulation)
-    nextframe!(simulation)
+    next_frame!(simulation)
     return simulation
 end
 
 """
-    nextframe!(simulation::Simulation)
+    next_frame!(simulation::Simulation)
 
 Reads the next frame in the trajectory file and returns it. Moves the current
 frame to the next one in the range to be considered (given by `frame_range(simulation)`).
 
 """
-function nextframe!(simulation::Simulation)
+function next_frame!(simulation::Simulation)
     lock(simulation) do
         if frame_index(simulation) == last(frame_range(simulation))
             error("End of trajectory.")
@@ -374,7 +381,7 @@ function iterate(simulation::Simulation, iframe=nothing)
     if isnothing(iframe)
         restart!(simulation)
     end
-    nextframe!(simulation)
+    next_frame!(simulation)
     return (current_frame(simulation), frame_index(simulation))
 end
 
@@ -426,10 +433,10 @@ function get_frame(simulation::Simulation, iframe::Int)
     if !(iframe in frame_range(simulation))
         throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
     end
-    firstframe!(simulation)
+    first_frame!(simulation)
     i = frame_index(simulation)
     while i != iframe
-        nextframe!(simulation)
+        next_frame!(simulation)
         i = frame_index(simulation)
     end
     p = positions(current_frame(simulation))
@@ -477,7 +484,7 @@ end
     using MolSimToolkit.Testing
     pdb = PDBTools.readPDB(Testing.namd_pdb)
     simulation = Simulation(pdb, Testing.namd_traj)
-    firstframe!(simulation)
+    first_frame!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
     @test isnothing(path_pdb(simulation))
 end
