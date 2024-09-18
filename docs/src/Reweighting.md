@@ -59,7 +59,6 @@ julia> cut = 10.0
 10.0
 ```
 
-
 As it can be seen, the function has to receive three parameters: `r` which corresponds to the distance between two selected atoms and some parameter to account a modification and change its magnitude, here, we inserted two of them in the same function, `α`, to change the maximum value of the curve (at r = 1) and `cut`, the distance `r` where the function equals zero. In the image below, we can see the curve and how it changes with different values of `α` and `cut`:
 
 !!! INSERT FIGURE
