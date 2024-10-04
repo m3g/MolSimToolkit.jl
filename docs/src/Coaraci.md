@@ -1,4 +1,8 @@
-# Cluster submission management
+# [Cluster submission management](@id Coaraci)
+
+!!! warning
+    This is an experimental feature. Breaking changes may occur without 
+    a breaking package release.
 
 The `Coaraci` module of `MolSimToolkit` manages the submission of multiple independent tasks in a single job of a cluster, where the job requested multiple nodes.
 For example, a job requests 20 nodes from a SLURM computer cluster, and the goal is to run independent simulations on each of the nodes.

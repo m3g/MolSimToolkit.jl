@@ -6,4 +6,5 @@ semantic version of the package is not compromised to the changes of these
 features. 
 
 - [Simulation reweighting](@ref simulation_reweighting)
+- [Cluster submission management](@ref Coaraci)
 
