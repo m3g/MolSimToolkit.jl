@@ -56,7 +56,7 @@ end
 # the simulation data
 Coaraci.task_run(s::SimulationData) = "/home/ander/run_script/run_single_simulation.sh $(s.dir) $(s.cosolvent)"
 
-# Define a function `task_finished` that recognizes if a simulation is finished:
+# Define a function `task_finished` that recognizes if a simulation was already run.
 Coaraci.task_finished(s::SimulationData) = isfile(joinpath(s.dir,s.finish_file))
 
 # Define a function `title` that sets the title of the run:
@@ -77,7 +77,7 @@ for conc in concentrations, rep in replicas
         title="$conc/$rep",
         dir=joinpath(base_dir,conc,rep),
         cosolvent="tmao",
-        finish_file="finished.txt"
+        finish_file="production.gro",
     )
     push!(simulation_list, sim)
 end
@@ -99,15 +99,14 @@ node should request only half of the CPUs of the node, for maximal efficiency. B
 ### The script that runs a simulation inside a node
 
 The following script receives 2 arguments, which are provided by the definition of `task_run`,
-in the script above. At the end of all simulations, a `finished.txt` file is generated, which 
-is then identified as the marker of a finished run.  
+in the script above. At the end of all simulations, the `production.gro` file is generated, which 
+is then identified as the marker of a finished run. A finished run will not be run again.
 
 And, finally, the script that submit the actual simulations, **from within the node**, and
 using, here 48 cores (in a single node), is, for example:
 
 ```bash
 #!/bin/bash
-
 simulation_dir=$1 # first argument of script
 
 # second argument of script: in this case, the cosolvent: can be used
@@ -124,11 +123,8 @@ module load gcc-runtime/12.2.0-gcc-12.2.0-lbbfl34
 module load gcc-runtime/12.2.0-gcc-12.2.0-sqqkkcb
 module load gromacs/2023-gcc-12.2.0-zktp5lx
 
-# Go into simulation dir
+# Important: go into simulation dir
 cd $simulation_dir
-
-host=`hostname`
-echo $host > running_in_hostname.txt # Just write to a file the current hostname, for checking
 
 # Run simulations: gromacs here
 /home/users/apereira/softwares/packmol-20.15.1/packmol < box.inp > box.log
@@ -143,12 +139,4 @@ mpirun -np $n gmx_mpi mdrun -v -deffnm npt -ntomp 1 > /dev/null
 
 gmx_mpi grompp -f prod.mdp -c npt.gro -r npt.gro -p processed.top -o prod.tpr -maxwarn 3 > /dev/null
 mpirun -np $n gmx_mpi mdrun -v -deffnm prod -ntomp 1 > /dev/null
-
-# Run analyzes
-julia -t $n mddf_water.jl
-julia -t $n mddf_${cossolvent}.jl
-
-\rm -f running_in_hostname.txt
-# Create the file that indicates that the simulation is finished
-echo "finished simulation in node $host" > finished.txt
 ```
