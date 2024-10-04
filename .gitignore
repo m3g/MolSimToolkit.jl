@@ -4,3 +4,4 @@ docs/Manifest.toml
 docs/build*
 ext/Manifest.toml
 box.inp
+coaraci.log
