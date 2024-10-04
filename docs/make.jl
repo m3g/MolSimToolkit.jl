@@ -21,6 +21,7 @@ makedocs(
         "Plotting style" => "plotting_style.md",
         "Experimental" => "Experimental.md",
         " ∘ Simulation Reweighting" => "Reweighting.md",
+        " ∘ Cluster submission management" => "Coaraci.md",
     ],
 )
 deploydocs(

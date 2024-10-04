@@ -64,6 +64,9 @@ include("./secondary_structure/secondary_structure.jl")
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
 
+# Cluster managemeng
+include("./Coaraci/Coaraci.jl")
+
 # Structure for plotting styles
 struct MolSimStyle end
 export MolSimStyle
