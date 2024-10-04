@@ -7,6 +7,9 @@ to the cluster.
 
 Currently fully supports the SLURM cluster manager. Partial support for PBS is available.
 
+!!! compat
+    The `Coaraci` module was introduced in MolSimToolkit v1.20.0
+
 ## SLURM/Gromacs example
 
 ### The submission script
