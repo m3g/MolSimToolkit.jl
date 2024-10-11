@@ -136,13 +136,14 @@ function simulate(
             # Update list of nodes currently in use
             @lock lock_nodes begin
                 inode = findfirst(n -> n.running_tasks < ntasks_per_node, nodelist)
-                if !isnothing(inode)
-                    node = nodelist[inode]
-                    if node.running_tasks == 0
-                        push!(nodes_currently_in_use, node)
-                    end
-                    node.running_tasks += 1
+                if isnothing(inode)
+                    error("Could not find a node with available tasks.")
                 end
+                node = nodelist[inode]
+                if node.running_tasks == 0
+                    push!(nodes_currently_in_use, node)
+                end
+                node.running_tasks += 1
             end
             print_flush(log, "$irun: running $(task_title(task)) in node $(name(node)) ($(node.running_tasks) in this node)")
             # Launch process that executes the task in the available node
