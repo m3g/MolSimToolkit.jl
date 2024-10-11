@@ -144,3 +144,56 @@ mpirun -np $n gmx_mpi mdrun -v -deffnm npt -ntomp 1 > /dev/null
 gmx_mpi grompp -f prod.mdp -c npt.gro -r npt.gro -p processed.top -o prod.tpr -maxwarn 3 > /dev/null
 mpirun -np $n gmx_mpi mdrun -v -deffnm prod -ntomp 1 > /dev/null
 ```
+
+## PBS example
+
+The following script submits a job the `parexp` queue of a PBS cluster:
+
+```bash
+#PBS -N meuteste
+#PBS -q parexp
+#PBS -l nodes=2:ppn=48
+#PBS -m abe
+#PBS -e erros
+#PBS -o saida
+
+cd $PBS_O_WORKDIR
+julia --project submission.jl
+```
+
+Where `submission.jl` is the following script, which sets up two very simple tasks that just wait some `delay`
+seconds to finish:
+
+```julia
+using MolSimToolkit: Coaraci
+@kwdef struct TestTask 
+    title::String
+    delay::Int
+    output_file::String
+end
+dir="/home/lovelace/proj/proj864/user/test/"
+Coaraci.task_finished(t::TestTask) = isfile(t.output_file)
+Coaraci.task_title(t::TestTask) = t.title
+Coaraci.task_run(t::TestTask) = "$dir/run.sh $dir $(t.title) $(t.delay) $(t.output_file)"
+task_list = [ 
+    TestTask(title="A", delay=30, output_file="end1.txt"), 
+    TestTask(title="B", delay= 2, output_file="end2.txt"),
+]
+rm.(getfield.(task_list,:output_file); force=true)
+Coaraci.simulate(task_list; ntasks_per_node=1)
+```
+
+and the `run.sh` script being executed is:
+
+```bash
+#!/bin/bash
+cd $1 # running dir
+sleep $3 # delay
+hname=`hostname`
+echo "running! $2 in $hname" > $4 # title and output_file name
+```
+
+Note that the delay is passed as the third argument of the execution. The script will run a 30s 
+long task on the first node, and a 2s task on the second node. When the second task finishes, the
+second node is released. Note: PBS does not allow releasing the primary node, thus it will be kept
+even if no task is running on it.
