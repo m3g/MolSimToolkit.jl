@@ -20,12 +20,15 @@ function get_nodelist(::Type{PBS})
 end
 
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
-function update_job!(::Type{PBS}, nodelist)
-    pbs_nodes = join(split(read(`cat $(ENV("PBS_NODEFILE"))`, String))," ")
+function update_job!(::Type{PBS}, nodelist::AbstractVector{String})
+    pbs_nodes = unique!(split(read(`cat $(ENV["PBS_NODEFILE"])`, String)))
     nodes_to_release = filter(!in(nodelist), pbs_nodes)
-    run(`pbs_release_nodes -j $(get_jobid(PBS)) $(join(nodes_to_release, " "))`)
-    pbs_nodes = join(split(read(`cat $(ENV("PBS_NODEFILE"))`, String))," ")
-    print_flush(log, "Nodes released. Keeping nodes: $pbs_nodes")
+    # PBS does not allow releasing the primary node
+    filter!(!=(first(pbs_nodes)), nodes_to_release)
+    if length(nodes_to_release) > 0
+        run(`pbs_release_nodes -j $(get_jobid(PBS)) $(join(nodes_to_release, " "))`)
+        pbs_nodes = unique!(split(read(`cat $(ENV["PBS_NODEFILE"])`, String)))
+    end
     return nothing
 end
 

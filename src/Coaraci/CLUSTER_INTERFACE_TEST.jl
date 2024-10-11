@@ -18,7 +18,7 @@ end
 
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
 # The nodelist is a list of strings with node names of nodes that ir in use.
-function update_job!(::Type{CLUSTER_INTERFACE_TEST}, nodelist)
+function update_job!(::Type{CLUSTER_INTERFACE_TEST}, nodelist::AbstractVector{String})
     return nothing
 end
 

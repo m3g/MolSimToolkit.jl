@@ -20,7 +20,7 @@ function get_nodelist(::Type{SLURM})
 end
 
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
-function update_job!(::Type{SLURM}, nodelist)
+function update_job!(::Type{SLURM}, nodelist::AbstractVector{String})
     hostlist = read(pipeline(`scontrol show hostlist "$(join(nodelist,","))"`), String)
     run(`scontrol update JobId=$(ENV["SLURM_JOB_ID"]) NodeList=$hostlist`)
     ENV["SLURM_JOB_NODELIST"] = hostlist

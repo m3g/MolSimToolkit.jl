@@ -24,7 +24,7 @@ mutable struct Node
     running_tasks::Int
 end
 name(node::Node) = node.name
-import Base: == 
+import Base: ==
 ==(a::Node, b::Node) = a.name == b.name
 
 # Internal Options
@@ -159,7 +159,7 @@ function simulate(
                 @lock lock_nodes begin
                     node.running_tasks -= 1
                     if node.running_tasks == 0
-                        filter!(!==(node), nodes_currently_in_use) 
+                        filter!(!=(node), nodes_currently_in_use) 
                     end
                 end
                 # Release available task
@@ -171,7 +171,7 @@ function simulate(
         # slurm to release the free nodes and keep only the nodes currently in use.
         while any(!istaskdone, julia_tasks)
             @lock lock_nodes begin 
-                if length(nodes_currently_in_use) < length(nodelist)
+                if length(nodes_currently_in_use) < length(nodelist) 
                     n_released_nodes = length(nodelist) - length(nodes_currently_in_use)
                     resize!(nodelist, length(nodes_currently_in_use)) 
                     nodelist .= nodes_currently_in_use
