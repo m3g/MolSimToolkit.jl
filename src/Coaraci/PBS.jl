@@ -21,14 +21,11 @@ end
 
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
 function update_job!(::Type{PBS}, nodelist)
-    if length(nodes_currently_in_use) < length(nodelist)
-        nodes_to_release = filter(!in(nodes_currently_in_use), nodelist)
-        resize!(nodelist, length(nodes_currently_in_use)) 
-        nodelist .= nodes_currently_in_use
-        run(`pbs_release_nodes -j $(get_jobid(PBS)) $(join(nodes_to_release, " "))`)
-        pbs_nodes = join(split(read(`cat $(ENV("PBS_NODEFILE"))`, String))," ")
-        print_flush(log, "Nodes released. Keeping nodes: $pbs_nodes")
-    end
+    pbs_nodes = join(split(read(`cat $(ENV("PBS_NODEFILE"))`, String))," ")
+    nodes_to_release = filter(!in(nodelist), pbs_nodes)
+    run(`pbs_release_nodes -j $(get_jobid(PBS)) $(join(nodes_to_release, " "))`)
+    pbs_nodes = join(split(read(`cat $(ENV("PBS_NODEFILE"))`, String))," ")
+    print_flush(log, "Nodes released. Keeping nodes: $pbs_nodes")
     return nothing
 end
 
