@@ -158,7 +158,7 @@ The following script submits a job the `parexp` queue of a PBS cluster:
 #PBS -o saida
 
 cd $PBS_O_WORKDIR
-julia --project submission.jl
+julia submission.jl
 ```
 
 Where `submission.jl` is the following script, which sets up two very simple tasks that just wait some `delay`
@@ -179,7 +179,6 @@ task_list = [
     TestTask(title="A", delay=30, output_file="end1.txt"), 
     TestTask(title="B", delay= 2, output_file="end2.txt"),
 ]
-rm.(getfield.(task_list,:output_file); force=true)
 Coaraci.simulate(task_list; ntasks_per_node=1)
 ```
 
@@ -197,3 +196,33 @@ Note that the delay is passed as the third argument of the execution. The script
 long task on the first node, and a 2s task on the second node. When the second task finishes, the
 second node is released. Note: PBS does not allow releasing the primary node, thus it will be kept
 even if no task is running on it.
+
+## Example log file
+
+A typical log file will look like:
+
+```bash
+=============================================================
+Starting Coaraci managed submissions: 2024-10-11 10:48:54
+=============================================================
+Cluster type: MolSimToolkit.Coaraci.PBS
+JOB ID: 144830.ada
+Nodes: adano62, adano72
+Number of tasks per node: 1
+-------------------------------------------------------------
+Number of tasks to run: 2
+-------------------------------------------------------------
+1: running A in node adano62 (1 in this node)
+2: running B in node adano72 (1 in this node)
+2: B in node adano72 finished successfully after 2 seconds, 507 milliseconds.
+> 1 nodes released. Keeping nodes: adano62
+1: A in node adano62 finished successfully after 30 seconds, 480 milliseconds.
+-------------------------------------------------------------
+finished all tasks:
+ - tasks finished successfully: 2
+ - tasks finished with errors: 0
+=============================================================
+End Coaraci managed submissions: 2024-10-11 10:49:24
+Total running time: 30 seconds, 762 milliseconds
+=============================================================
+```
