@@ -37,6 +37,9 @@ import Base: ==
 end
 const options = Options()
 
+# Type to name tasks available
+struct AvailableTask end
+
 # Custom printing that does not buffer
 function print_flush(io, val) 
     println(io, val); flush(io)
@@ -98,10 +101,10 @@ function simulate(
     julia_tasks = Task[]
 
     # Channels with available execution tasks (nodes * ntasks_per_node 
-    available_tasks = Channel{Bool}(length(nodelist) * ntasks_per_node)
+    available_tasks = Channel{AvailableTask}(length(nodelist) * ntasks_per_node)
     for _ in nodelist
         for _ in 1:ntasks_per_node
-            put!(available_tasks, true)
+            put!(available_tasks, AvailableTask())
         end
     end
 
@@ -137,7 +140,7 @@ function simulate(
             local node
             local inode = nothing
             # Take an available channel task (will be blocked if no task is available)
-            take!(available_tasks)
+            used_task = take!(available_tasks)
             # Update list of nodes currently in use
             @lock lock_nodes begin
                 inode = findfirst(n -> n.running_tasks < ntasks_per_node, nodelist)
@@ -169,7 +172,7 @@ function simulate(
                     end
                 end
                 # Release available task
-                put!(available_tasks, true)
+                put!(available_tasks, used_task)
             end
             push!(julia_tasks, t)
         end
