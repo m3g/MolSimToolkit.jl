@@ -29,7 +29,10 @@ import Base: ==
 
 # Internal Options
 @kwdef mutable struct Options
+    # print, or not, to stdout
     stdout::Bool = false
+    # sleep before checking again for finished tasks (s)
+    sleep::Float64 = 0.5
 end
 const options = Options()
 
@@ -181,7 +184,7 @@ function simulate(
                     print_flush(log, "> $(n_released_nodes) nodes released. Keeping nodes: $(join(nodelist_names, ", "))")
                 end
             end
-            sleep(0.5)
+            sleep(options.sleep)
         end
 
         # Report final
