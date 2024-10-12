@@ -1,5 +1,6 @@
 module Coaraci
 
+import ..MolSimToolkit: version
 import Dates: now, format, canonicalize
 using Base.Threads: @spawn, nthreads
 
@@ -108,6 +109,7 @@ function simulate(
     open(logfile, "w") do log # open log file to write
         init_time = now()
         print_flush(log, "=============================================================")
+        print_flush(log, "MolSimToolkit version: $version")
         print_flush(log, "Starting Coaraci managed submissions: $(format(init_time, "yyyy-mm-dd HH:MM:SS"))")
         print_flush(log, "=============================================================")
         print_flush(log, "Cluster type: $cluster_type")

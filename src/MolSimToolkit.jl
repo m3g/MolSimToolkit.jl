@@ -30,6 +30,8 @@ export ss_map, ss_mean, ss_heatmap
 import PDBTools.center_of_mass
 export center_of_mass
 
+# Version of the package: used for printing in some places
+const version = pkgversion(@__MODULE__)
 
 # Testing module
 include("../test/Testing.jl")
