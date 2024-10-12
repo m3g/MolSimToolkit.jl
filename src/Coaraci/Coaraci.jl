@@ -99,8 +99,8 @@ function simulate(
 
     # Channels with available execution tasks (nodes * ntasks_per_node 
     available_tasks = Channel{Bool}(length(nodelist) * ntasks_per_node)
-    for node in nodelist
-        for i in 1:ntasks_per_node
+    for _ in nodelist
+        for _ in 1:ntasks_per_node
             put!(available_tasks, true)
         end
     end
