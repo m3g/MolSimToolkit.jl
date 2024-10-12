@@ -3,9 +3,6 @@
     # Print to stdout
     Coaraci.options.stdout = true
     Coaraci.options.sleep = 0.05
-    if haskey(ENV, "CLUSTER_INTERFACE_TEST")
-        pop!(ENV, "CLUSTER_INTERFACE_TEST")
-    end
     @kwdef struct TestTask 
         title::String
         delay::Float64
@@ -28,6 +25,9 @@
 end
 
 @testitem "Argument errors" setup=[CoaraciTests] begin
+    if haskey(ENV, "CLUSTER_INTERFACE_TEST")
+        pop!(ENV, "CLUSTER_INTERFACE_TEST")
+    end
     task_list = [ TestTask("A", 0.1, tempname()), TestTask("B", 0.2, tempname()) ]
     @test_throws ArgumentError Coaraci.simulate(task_list; task_finished, task_title, task_run)
     ENV["CLUSTER_INTERFACE_TEST"] = "true"
