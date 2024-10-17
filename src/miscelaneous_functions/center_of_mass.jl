@@ -34,6 +34,9 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
   1.960640754560446
 ```
 
+!!! compat 
+    The `iref=nothing` option was added in version 1.22.0.
+
 """
 function PDBTools.center_of_mass(
     indices::AbstractVector{Int},
