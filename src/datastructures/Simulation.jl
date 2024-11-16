@@ -140,7 +140,7 @@ end
 #=
     Simulation(
         pdb_file::String,
-        atoms::AbstractVector{PDBTools.Atom},
+        atoms::AbstractVector{AtomType},
         trajectory::Chemfiles.Trajectory, frame_range::AbstractRange)
     )
 
