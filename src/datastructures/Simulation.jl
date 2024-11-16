@@ -398,7 +398,7 @@ function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
 end
 
 """
-    get_frame(simulation::Simulation, iframe::Int)
+    get_frame(simulation::Simulation, iframe::Integer)
 
 Returns the frame at the given index in the trajectory. 
 
@@ -430,7 +430,7 @@ julia> writePDB(frame4, "frame4.pdb")
     required frame. 
 
 """
-function get_frame(simulation::Simulation, iframe::Int)
+function get_frame(simulation::Simulation, iframe::Integer)
     if !(iframe in frame_range(simulation))
         throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
     end

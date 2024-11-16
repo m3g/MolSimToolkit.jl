@@ -52,7 +52,7 @@ julia> most_representative_structure(simulation; atoms = "protein and name CA") 
 
 julia> calphas = select(atoms(simulation), "name CA");
 
-julia> most_representative_structure(simulation; atoms = calphas) # atoms is an AbstractVector{PDBTools.Atom}
+julia> most_representative_structure(simulation; atoms = calphas) # atoms is an Vector{PDBTools.Atom}
 (4, 1.1681526249035976)
 
 julia> ica = PDBTools.index.(calphas)
@@ -70,9 +70,9 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
     else
         if atoms isa AbstractVector{<:PDBTools.Atom}
             indices = PDBTools.index.(atoms)
-        elseif atoms isa AbstractVector{Int}
+        elseif atoms isa AbstractVector{<:Integer}
             indices = atoms
-        elseif atoms isa String
+        elseif atoms isa AbstractString
             indices = PDBTools.index.(
                 PDBTools.select(MolSimToolkit.atoms(simulation), atoms)
             )

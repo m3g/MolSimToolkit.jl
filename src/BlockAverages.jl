@@ -117,9 +117,9 @@ end
     block_average(
         x::AbstractVector{T};
         by = mean,
-        min_block_size::Int = 1,
-        max_block_size::Int = length(x),
-        lags::Union{Nothing,AbstractVector{Int}} = nothing,
+        min_block_size::Integer = 1,
+        max_block_size::Integer = length(x),
+        lags::Union{Nothing,AbstractVector{<:Integer}} = nothing,
     ) where {T<:Real}
 
 This function peforms some convergence analysis for a property computed from a series of data, typically a time-series. 
@@ -177,9 +177,9 @@ julia> plot(b) # creates a plot with the results
 function block_average(
     x_input::AbstractVector{T};
     by=mean,
-    min_block_size::Int=1,
-    max_block_size::Int=length(x_input),
-    lags::Union{Nothing,AbstractVector{Int}}=nothing
+    min_block_size::Integer=1,
+    max_block_size::Integer=length(x_input),
+    lags::Union{Nothing,AbstractVector{<:Integer}}=nothing
 ) where {T<:Real}
 
     x = adjust_xinput(x_input, max_block_size)
@@ -276,9 +276,9 @@ function Base.show(io::IO, ::MIME"text/plain", m::BlockDistribution)
 end
 
 """
-    block_distribution(x_input::AbstractVector; block_size::Int) = 
-        block_distribution(mean, x_input, block_size::Int)
-    block_distribution(by::Function, x_input::AbstractVector, block_size::Int)
+    block_distribution(x_input::AbstractVector; block_size::Integer) = 
+        block_distribution(mean, x_input, block_size::Integer)
+    block_distribution(by::Function, x_input::AbstractVector, block_size::Integer)
 
 Given the data and the block size, computes the distribution of estimates of the 
 properties for each block. Returns a `BlockDistribution{NBLOCKS}` object. The
@@ -311,7 +311,7 @@ julia> histogram(d)
 ```
 
 """
-function block_distribution(by::Function, x_input::AbstractVector, block_size::Int)
+function block_distribution(by::Function, x_input::AbstractVector, block_size::Integer)
     if block_size < 1
         throw(ArgumentError((
             "block_size not properly defined. Use, for example: block_distribution(x; block_size=10^5)"
@@ -328,7 +328,7 @@ function block_distribution(by::Function, x_input::AbstractVector, block_size::I
     end
     return BlockDistribution{nblocks}(mean(x), std(block_mean), block_mean, std(block_mean) / sqrt(nblocks))
 end
-block_distribution(x_input::AbstractVector; block_size::Int=0) = block_distribution(mean, x_input, block_size)
+block_distribution(x_input::AbstractVector; block_size::Integer=0) = block_distribution(mean, x_input, block_size)
 
 # Range of indices for block i of size block_size
 function brange(i, block_size)

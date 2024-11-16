@@ -20,7 +20,7 @@ end
         xpositions::AbstractVector{<:AbstractVector{T}},
         cutoff::T,
         unitcell::AbstractVecOrMat,
-        xn_atoms_per_molecule::Int,
+        xn_atoms_per_molecule::Integer,
         parallel::Bool=true
     ) where T<:Real
 
@@ -66,7 +66,7 @@ function SelfPairs(;
     xpositions::AbstractVector{<:AbstractVector{T}},
     cutoff::T,
     unitcell::AbstractVecOrMat,
-    xn_atoms_per_molecule::Union{Nothing,Int}=nothing,
+    xn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     mol_indices::F1=nothing,
     parallel::Bool=true,
 ) where {T<:Real, F1<:Union{Nothing,Function}}

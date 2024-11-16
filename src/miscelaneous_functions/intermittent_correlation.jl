@@ -15,7 +15,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 # Arguments
 
 - `data::AbstractVector`: The time series to be analyzed. 
-- `maxdelta::Int`: The maximum delta-step to be considered. Defaults to 
+- `maxdelta::Integer`: The maximum delta-step to be considered. Defaults to 
   `length(data) ÷ 10`.
 - `types` (optional): A function that returns `true` for the types of data
    that should be considered. Defaults to all data, i. e. `x -> true`. For 

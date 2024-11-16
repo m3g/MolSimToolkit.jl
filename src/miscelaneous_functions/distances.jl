@@ -1,6 +1,6 @@
 """
-    distances(simulation, indices1::AbstractVector{Int}, indices2::AbstractVector{Int})
-    distances(simulation, selection1::AbstractVector{PDBTools.Atom}, selection2::AbstractVector{PDBTools.Atom})
+    distances(simulation, indices1::AbstractVector{<:Integer}, indices2::AbstractVector{<:Integer})
+    distances(simulation, selection1::AbstractVector{<:PDBTools.Atom}, selection2::AbstractVector{<:PDBTools.Atom})
 
 Function that calculates the distance between the centers of mass of two selections in a simulation.
 
@@ -48,8 +48,8 @@ julia> distances(sim,
 """
 function distances(
     simulation::Simulation,
-    indices1::AbstractVector{Int},
-    indices2::AbstractVector{Int};
+    indices1::AbstractVector{<:Integer},
+    indices2::AbstractVector{<:Integer};
     silent::Bool = false,
 )
     distances = zeros(length(simulation))

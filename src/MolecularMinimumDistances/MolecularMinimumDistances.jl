@@ -148,7 +148,7 @@ molecules. `x` must be provided so that the type of variable of the coordinates 
 propagated to the distances, and `mol_indices` is the function that given an atomic index `i`
 returns the index of the molecule.
 
-    init_list(::Type{T}, number_of_molecules::Int) 
+    init_list(::Type{T}, number_of_molecules::Integer) 
 
 Given the type of the coordinates of the vector of atomic coordinates and the number of molecules,
 returns the initialized array of minimum distances. 
@@ -203,7 +203,7 @@ function init_list(x::AbstractVector{<:AbstractVector}, mol_indices::F) where {F
     end
     return init_list(T, number_of_molecules)
 end
-init_list(::Type{T}, n::Int) where {T} = fill(zero(MinimumDistance{T}), n)
+init_list(::Type{T}, n::Integer) where {T} = fill(zero(MinimumDistance{T}), n)
 
 #
 # Overload of the CellListMap functions that are required for list_threaded
@@ -412,8 +412,8 @@ function minimum_distances(;
     mol_indices=nothing,
     xmol_indices=nothing,
     ymol_indices=nothing,
-    xn_atoms_per_molecule::Union{Nothing,Int}=nothing,
-    yn_atoms_per_molecule::Union{Nothing,Int}=nothing,
+    xn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
+    yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     parallel::Bool=true,
 )
     # SelfPairs

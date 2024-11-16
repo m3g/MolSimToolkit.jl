@@ -39,10 +39,10 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
 
 """
 function PDBTools.center_of_mass(
-    indices::AbstractVector{Int},
+    indices::AbstractVector{<:Integer},
     simulation::Simulation,
     p::FramePositions;
-    iref::Union{Nothing,Int}=max(1, div(length(indices), 2)),
+    iref::Union{Nothing,<:Integer}=max(1, div(length(indices), 2)),
 )
     xref = isnothing(iref) ? nothing : p[iref] 
     uc = unitcell(current_frame(simulation))

@@ -104,12 +104,12 @@ function remd_data(log::String)
 end
 
 """
-    remd_replica_path(data::GromacsREMDlog, replica::Int; stride::Int = 1)
+    remd_replica_path(data::GromacsREMDlog, replica::Integer; stride::Integer = 1)
 
 Function to obtain the path of a replica in the exchange matrix.
 
 """
-remd_replica_path(data::GromacsREMDlog, replica::Int; stride::Int=1) =
+remd_replica_path(data::GromacsREMDlog, replica::Integer; stride::Integer=1) =
     [findfirst(==(replica), data.exchange_matrix[i, :]) - 1 for i in 1:stride:size(data.exchange_matrix, 1)];
 
 @testitem "REMD" begin
