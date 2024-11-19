@@ -84,11 +84,11 @@ FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T,Point3D{T},typ
 FramePositions(f::Chemfiles.Frame) = positions(Chemfiles.positions(f))
 FramePositions(x::FramePositions{T,P}) where {T,P} = FramePositions{T,P,typeof(x.positions)}(x.positions)
 
-Base.getindex(x::FramePositions, i::Int) = Point3D(@view(x.positions[:, i]))
+Base.getindex(x::FramePositions, i::Integer) = Point3D(@view(x.positions[:, i]))
 Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:, r])
 Base.getindex(x::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(x.positions[:, ivec])
 
-Base.setindex!(x::FramePositions, value::AbstractVector, i::Int) = x.positions[:, i] .= value
+Base.setindex!(x::FramePositions, value::AbstractVector, i::Integer) = x.positions[:, i] .= value
 
 Base.length(x::FramePositions) = size(x.positions, 2)
 Base.size(x::FramePositions) = (length(x),)

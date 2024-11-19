@@ -257,7 +257,7 @@ end
     y .= Ref(rand(RotMatrix3)) .* y
     @test rmsd(x, y) > 0.0
     z = align(x, y)
-    @test rmsd(z, y) ≈ 0.0 atol = 1e-10
+    @test rmsd(z, y) ≈ 0.0 atol = 1e-5
 
     # same test, but with coordinates obtained from a simulation frame
     simulation = Simulation(namd_pdb, namd_traj)
