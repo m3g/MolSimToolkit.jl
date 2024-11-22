@@ -22,8 +22,10 @@ export get_frame
 
 Creates a new `Simulation` object. 
 
-The first constructor creates a `Simulation` object from a PDB file and a trajectory file. It will use the
+The first constructor creates a `Simulation` object from a PDB or mmCIF file and a trajectory file. It will use the
 `PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
+Currently, other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
+for the atom type.
 
 With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
 are provided by a different source than the PDB file. 
