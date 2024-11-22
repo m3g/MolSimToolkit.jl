@@ -26,14 +26,13 @@ The first constructor creates a `Simulation` object from a PDB file and a trajec
 `PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
 
 With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
-are provided by a different source than the PDB file. If the `AtomType` of the `atoms` vector conforms
-the `AtomsBase` interface, most functions in the `MolSimToolkit` will work with the `Simulation` object.
+are provided by a different source than the PDB file. 
 
 If `first`, `last`, and `step` are not specified, the `Simulation` will iterate over all frames in the file. 
 
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
-that contains the following data, that can be retrived by the corresponding
+that contains the following data, that can be retrieved by the corresponding
 functions:
 
 - `frame_range(::Simulation)`: the range of frames to be iterated over

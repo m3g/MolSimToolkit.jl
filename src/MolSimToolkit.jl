@@ -6,7 +6,6 @@ import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
 using TestItems: @testitem
-using AtomsBase: atomic_mass
 using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm
 using Reexport: @reexport
