@@ -6,7 +6,6 @@ import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
 using TestItems: @testitem
-using AtomsBase: atomic_mass
 using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm
 using Reexport: @reexport
@@ -32,6 +31,9 @@ export center_of_mass
 
 # Version of the package: used for printing in some places
 const version = pkgversion(@__MODULE__)
+
+# Minimal AtomType interface
+atomic_mass(atom::PDBTools.Atom) = PDBTools.mass(atom)
 
 # Testing module
 include("../test/Testing.jl")
