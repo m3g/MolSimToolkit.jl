@@ -22,18 +22,19 @@ export get_frame
 
 Creates a new `Simulation` object. 
 
-The first constructor creates a `Simulation` object from a PDB file and a trajectory file. It will use the
+The first constructor creates a `Simulation` object from a PDB or mmCIF file and a trajectory file. It will use the
 `PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
+Currently, other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
+for the atom type.
 
 With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
-are provided by a different source than the PDB file. If the `AtomType` of the `atoms` vector conforms
-the `AtomsBase` interface, most functions in the `MolSimToolkit` will work with the `Simulation` object.
+are provided by a different source than the PDB file. 
 
 If `first`, `last`, and `step` are not specified, the `Simulation` will iterate over all frames in the file. 
 
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
-that contains the following data, that can be retrived by the corresponding
+that contains the following data, that can be retrieved by the corresponding
 functions:
 
 - `frame_range(::Simulation)`: the range of frames to be iterated over
@@ -140,7 +141,7 @@ end
 #=
     Simulation(
         pdb_file::String,
-        atoms::AbstractVector{PDBTools.Atom},
+        atoms::AbstractVector{AtomType},
         trajectory::Chemfiles.Trajectory, frame_range::AbstractRange)
     )
 
@@ -398,7 +399,7 @@ function set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
 end
 
 """
-    get_frame(simulation::Simulation, iframe::Int)
+    get_frame(simulation::Simulation, iframe::Integer)
 
 Returns the frame at the given index in the trajectory. 
 
@@ -430,7 +431,7 @@ julia> writePDB(frame4, "frame4.pdb")
     required frame. 
 
 """
-function get_frame(simulation::Simulation, iframe::Int)
+function get_frame(simulation::Simulation, iframe::Integer)
     if !(iframe in frame_range(simulation))
         throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
     end

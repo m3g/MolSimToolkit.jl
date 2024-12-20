@@ -5,11 +5,11 @@
 import CellListMap: Box, wrap_relative_to
 
 # For a single set of molecules
-function naive_md(x, xn_atoms_per_molecule::Int, unitcell::AbstractVecOrMat, cutoff::Real)
+function naive_md(x, xn_atoms_per_molecule::Integer, unitcell::AbstractVecOrMat, cutoff::Real)
     box = Box(unitcell, cutoff)
     naive_md(x, xn_atoms_per_molecule, box)
 end
-function naive_md(x, xn_atoms_per_molecule::Int, box::Box)
+function naive_md(x, xn_atoms_per_molecule::Integer, box::Box)
     x_list = init_list(x, i -> _mol_indices(i, xn_atoms_per_molecule))
     for i in 1:length(x)-1
         vx = x[i]
@@ -37,7 +37,7 @@ function naive_md(x, xn_atoms_per_molecule::Int, box::Box)
 end
 
 # For disjoint sets, returning only one list
-function naive_md(x, y, xn_atoms_per_molecule::Int, unitcell::AbstractVecOrMat, cutoff::Real)
+function naive_md(x, y, xn_atoms_per_molecule::Integer, unitcell::AbstractVecOrMat, cutoff::Real)
     box = Box(unitcell, cutoff)
     naive_md(x, y, xn_atoms_per_molecule, box)
 end
@@ -60,7 +60,7 @@ function naive_md(x, y, xn_atoms_per_molecule, box)
 end
 
 # For disjoint sets, returning both lists
-function naive_md(x, y, xn_atoms_per_molecule::Int, yn_atoms_per_molecule::Int, unitcell::AbstractVecOrMat, cutoff::Real)
+function naive_md(x, y, xn_atoms_per_molecule::Integer, yn_atoms_per_molecule::Integer, unitcell::AbstractVecOrMat, cutoff::Real)
     box = Box(unitcell, cutoff)
     naive_md(x, y, xn_atoms_per_molecule, yn_atoms_per_molecule, box)
 end
@@ -144,7 +144,7 @@ end
 function plot_mol!(
     p,
     x,
-    n_atoms_per_molecule::Int;
+    n_atoms_per_molecule::Integer;
     cycle=false,
     markercolor=nothing
 )
@@ -165,9 +165,9 @@ end
 function plot_md!(
     p,
     x,
-    xn_atoms_per_molecule::Int,
+    xn_atoms_per_molecule::Integer,
     y,
-    yn_atoms_per_molecule::Int,
+    yn_atoms_per_molecule::Integer,
     md::List;
     x_cycle=false,
     y_cycle=false
