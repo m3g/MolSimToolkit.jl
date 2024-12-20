@@ -10,6 +10,7 @@ const MolSimStyle_parameters = Dict{Symbol,Any}(
     :grid => false,
     :xlabel => "x",
     :ylabel => "y",
+    :adjust_latex_font => true,
 )
 
 #
@@ -19,6 +20,15 @@ function _kargs(parameters = MolSimStyle_parameters; kargs)
     custom_parameters = copy(parameters)
     for karg in keys(kargs)
         custom_parameters[karg] = kargs[karg]
+    end
+    font_family = custom_parameters[:fontfamily]
+    if font_family in ("Sans Serif", "Serif", "Arial") && custom_parameters[:adjust_latex_font]
+        for key in keys(custom_parameters)
+            value = custom_parameters[key]
+            if value isa LaTeXString
+                custom_parameters[key] = LaTeXStrings.latexstring("\\mathsf{$(String(value)[2:end-1])}")
+            end
+        end
     end
     return custom_parameters
 end
