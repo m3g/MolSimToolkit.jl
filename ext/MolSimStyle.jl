@@ -16,8 +16,8 @@ const MolSimStyle_parameters = Dict{Symbol,Any}(
 #
 # overwrite default parameters or add parameters if other kargs where passed
 #
-function _kargs(parameters = MolSimStyle_parameters; kargs)
-    custom_parameters = copy(parameters)
+function _kargs(default=MolSimStyle_parameters; kargs)
+    custom_parameters = deepcopy(default)
     for karg in keys(kargs)
         custom_parameters[karg] = kargs[karg]
     end
