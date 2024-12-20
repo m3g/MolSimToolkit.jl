@@ -21,8 +21,8 @@ function _kargs(parameters = MolSimStyle_parameters; kargs)
     for karg in keys(kargs)
         custom_parameters[karg] = kargs[karg]
     end
-    font_family = custom_parameters[:fontfamily]
-    if font_family in ("Sans Serif", "Serif", "Arial") && custom_parameters[:adjust_latex_font]
+    fontfamily = custom_parameters[:fontfamily]
+    if fontfamily in ("Sans Serif", "Serif", "Arial") && custom_parameters[:adjust_latex_font]
         for key in keys(custom_parameters)
             value = custom_parameters[key]
             if value isa LaTeXString
