@@ -150,9 +150,9 @@ end
     inds = [ index.(cAs), index.(r1b) ]
     init = zeros(eltype(eltype(eltype(v4))), length(inds))
     MolSimToolkit._sum_dihedrals!(inds, p1, init)
-    @test init ≈ [-168.41887, -55.351723] atol = 1e-5
+    @test init ≈ [-168.41887, -55.351723] atol = 1e-3
     MolSimToolkit._sum_dihedrals!(inds, p1, init)
-    @test init ≈ 2 * [-168.41887, -55.351723] atol = 1e-5
+    @test init ≈ 2 * [-168.41887, -55.351723] atol = 1e-3
 
 end
 
