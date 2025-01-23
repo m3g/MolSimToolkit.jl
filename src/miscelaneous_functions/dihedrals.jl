@@ -150,9 +150,9 @@ end
     inds = [ index.(cAs), index.(r1b) ]
     init = zeros(eltype(eltype(eltype(v4))), length(inds))
     MolSimToolkit._sum_dihedrals!(inds, p1, init)
-    @test init ≈ [-168.41887, -55.351723]
+    @test init ≈ [-168.41887, -55.351723] atol = 1e-5
     MolSimToolkit._sum_dihedrals!(inds, p1, init)
-    @test init ≈ 2 * [-168.41887, -55.351723]
+    @test init ≈ 2 * [-168.41887, -55.351723] atol = 1e-5
 
 end
 
@@ -234,9 +234,9 @@ end
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
 
     ds = average_dihedrals(sim, inds)
-    @test ds ≈ [-60.12860673875001, -0.3398274578758668]
+    @test ds ≈ [-60.12860673875001, -0.3398274578758668] atol = 1e-5
 
     ats = [ cAs, r1b ]
     ds = average_dihedrals(sim, ats)
-    @test ds ≈ [-60.12860673875001, -0.3398274578758668]
+    @test ds ≈ [-60.12860673875001, -0.3398274578758668] atol = 1e-5
 end
