@@ -7,13 +7,14 @@ import LaTeXStrings # only because Aqua complains: used in the Plotting extensio
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
-using LinearAlgebra: norm
+using LinearAlgebra: norm, cross, dot
 using Reexport: @reexport
 using ProgressMeter: Progress, next!
 using Statistics: mean
 
 export wrap, wrap_to_first
 export distances
+export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
@@ -47,6 +48,7 @@ include("./wrap.jl")
 
 # Miscelaneous functions
 include("./miscelaneous_functions/distances.jl")
+include("./miscelaneous_functions/dihedrals.jl")
 include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/intermittent_correlation.jl")
 include("./miscelaneous_functions/bulk_coordination.jl")
