@@ -20,6 +20,7 @@ makedocs(
         "Developer zone" => "Developer.md",
         "Plotting style" => "plotting_style.md",
         "Experimental" => "Experimental.md",
+        " ∘ Dihedral angle analysis" => "Dihedrals.md",
         " ∘ Simulation Reweighting" => "Reweighting.md",
         " ∘ Cluster submission management" => "Coaraci.md",
     ],

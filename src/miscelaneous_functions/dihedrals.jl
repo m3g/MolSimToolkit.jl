@@ -2,10 +2,10 @@
     dihedral(v1, v2, v3, v4; degrees=true)
     dihedral(v::AbstractVector; degrees=true)
 
-Computes the dihedral angle between the planes formed by the vectors v1-v2 and v2-v3, and v2-v3 and v3-v4.
+Computes the dihedral angle between the planes formed by the vectors `v1-v2` and `v2-v3`, and `v2-v3` and `v3-v4`.
 The input vectors must have 3 elements. The function returns the dihedral angle in radians or degrees.
 If the input is a vector with 4 vectors, the function computes the dihedral angle between the planes 
-formed by the vectors v[1]-v[2] and v[2]-v[3], and v[2]-v[3] and v[3]-v[4].
+formed by the vectors `v[1]-v[2]` and `v[2]-v[3]`, and `v[2]-v[3]` and `v[3]-v[4]`.
 
 The optional argument `degrees` specifies whether the output is in degrees (default) or radians.
 
@@ -91,11 +91,11 @@ element is a vector with 4 vectors. The function returns a vector with the dihed
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
-julia> atoms = read_pdb(Testing.namd2_pdb)
+julia> atoms = read_pdb(Testing.namd2_pdb);
 
-julia> cAs = select(atoms, "name CA and residue < 5")
+julia> cAs = select(atoms, "name CA and residue < 5");
 
-julia> r1b = select(atoms, "residue 1 and backbone")
+julia> r1b = select(atoms, "residue 1 and backbone");
 
 julia> ds = dihedrals([ coor(cAs), coor(r1b) ])
 2-element Vector{Float32}:
@@ -158,10 +158,12 @@ end
 
 """
     average_dihedrals(sim::Simulation, v::AbstractVector{<:AbstractVector{<:Integer}}; degrees=true)
+    average_dihedrals(sim::Simulation, v::AbstractVector{<:AbstractVector{<:PDBTools.Atom}}; degrees=true)
 
 Computes the average dihedral angles for many sets of 4 vectors from a trajectory. The input is a vector of vectors, 
-containing the indices of the atoms forming the dihedral angles. The function returns a vector with the average dihedral 
-angles in radians or degrees.
+containing the indices of the atoms forming the dihedral angles, or the `PDBTools.Atom` objects. 
+
+The function returns a vector with the average dihedral angles in radians or degrees.
 
 ## Example
 
@@ -177,6 +179,13 @@ julia> r1b = select(atoms, "residue 1 and backbone"); # 4 atoms
 julia> inds = [ index.(cAs), index.(r1b) ]; List of vector of indices
 
 julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+
+julia> ds = average_dihedrals(sim, inds)
+2-element Vector{Float64}:
+ -60.12860673875001
+  -0.3398274578758668
+
+julia> ats = [ cAs, r1b ]; # List of vectors of PDBTools.Atom
 
 julia> ds = average_dihedrals(sim, inds)
 2-element Vector{Float64}:
@@ -204,6 +213,15 @@ function average_dihedrals(
     return init
 end
 
+function average_dihedrals(
+    sim::Simulation,
+    v::AbstractVector{<:AbstractVector{<:PDBTools.Atom}};
+    degrees=true
+)
+    inds = [ PDBTools.index.(v) for v in v ]
+    return average_dihedrals(sim, inds; degrees)
+end
+
 @testitem "average_dihedrals" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
@@ -216,5 +234,9 @@ end
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
 
     ds = average_dihedrals(sim, inds)
+    @test ds ≈ [-60.12860673875001, -0.3398274578758668]
+
+    ats = [ cAs, r1b ]
+    ds = average_dihedrals(sim, ats)
     @test ds ≈ [-60.12860673875001, -0.3398274578758668]
 end
