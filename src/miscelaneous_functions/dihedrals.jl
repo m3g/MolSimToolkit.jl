@@ -88,7 +88,7 @@ element is a vector with 4 vectors. The function returns a vector with the dihed
 
 ## Example
 
-```jldoctest
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
 julia> atoms = read_pdb(Testing.namd2_pdb);
@@ -167,7 +167,7 @@ The function returns a vector with the average dihedral angles in radians or deg
 
 ## Example
 
-```jldoctest
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
 julia> atoms = read_pdb(Testing.namd2_pdb);
@@ -187,7 +187,7 @@ julia> ds = average_dihedrals(sim, inds)
 
 julia> ats = [ cAs, r1b ]; # List of vectors of PDBTools.Atom
 
-julia> ds = average_dihedrals(sim, inds)
+julia> ds = average_dihedrals(sim, ats)
 2-element Vector{Float64}:
  -60.12860673875001
   -0.3398274578758668
