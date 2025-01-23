@@ -176,7 +176,7 @@ julia> cAs = select(atoms, "name CA and residue < 5"); # 4 atoms
 
 julia> r1b = select(atoms, "residue 1 and backbone"); # 4 atoms
 
-julia> inds = [ index.(cAs), index.(r1b) ]; List of vector of indices
+julia> inds = [ index.(cAs), index.(r1b) ]; # List of vector of indices
 
 julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
 
