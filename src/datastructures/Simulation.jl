@@ -181,12 +181,18 @@ Simulation will iterate over all frames in the file. This is the default constru
 to be used.
 
 =#
-function Simulation(pdb_file::String, trajectory_file::String; frames=nothing, first=1, last=nothing, step=1)
+function Simulation(
+    pdb_file::String, trajectory_file::String; 
+    frames=nothing, first=1, last=nothing, step=1
+)
     atoms = PDBTools.readPDB(pdb_file)
     return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
 end
 
-function Simulation(atoms::AbstractVector{AtomType}, trajectory_file::String; first=1, last=nothing, step=1) where {AtomType}
+function Simulation(
+    atoms::AbstractVector{AtomType}, trajectory_file::String; 
+    frames=nothing, first=1, last=nothing, step=1
+) where {AtomType}
     return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
 end
 
