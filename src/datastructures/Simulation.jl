@@ -33,6 +33,7 @@ With the second constructor, the `atoms` vector is passed as an argument. This i
 are provided by a different source than the PDB file. 
 
 The `frames` or `first`, `last`, and `step` arguments can be used to specify the frames to be iterated over:
+
     - `frames` can be a vector of frame indices, e. g., `frames=[1,2,3,5]` or `frames=9:2:20`.
     - `first`, `last`, and `step` are Integers that specify the frames to be iterated over. 
       If `last` is not specified, the last frame in the trajectory will be used.
