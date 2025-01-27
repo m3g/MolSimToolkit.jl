@@ -73,7 +73,8 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(
            Testing.namd_pdb, Testing.namd_traj; 
-           first = 2, step = 2, last = 4
+           first = 2, step = 2, last = 4,
+           # or frames = [2,4]
        );
 
 julia> for frame in simulation 
