@@ -17,6 +17,8 @@ export get_frame
 
 
 """
+    Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5])
+    Simulation(pdb_file::String, trajectory_file::String; frames=9:2:20)
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
     Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1) 
 
@@ -30,7 +32,7 @@ for the atom type.
 With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
 are provided by a different source than the PDB file. 
 
-If `first`, `last`, and `step` are not specified, the `Simulation` will iterate over all frames in the file. 
+If `frames`, or `first`, `last`, and `step` are not specified, the `Simulation` will iterate over all frames in the file. 
 
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
@@ -98,7 +100,7 @@ julia> for (i, frame) in enumerate(simulation)
 mutable struct Simulation{
     AtomType,
     V<:Vector{<:AtomType},
-    R<:AbstractRange,
+    R<:Union{AbstractRange,AbstractVector{<:Integer}},
     F<:Chemfiles.Frame,
     T<:Chemfiles.Trajectory,
     L<:ReentrantLock
@@ -129,11 +131,15 @@ end
 import Base: lock
 lock(f::F, simulation::Simulation) where {F<:Function} = lock(f, simulation.read_lock)
 
-function _set_range(trajectory, first, last, step)
-    if isnothing(last)
-        frame_range = first:step:Int(Chemfiles.length(trajectory))
+function _set_range(trajectory, frames, first, last, step)
+    if isnothing(frames)
+        if isnothing(last)
+            frame_range = first:step:Int(Chemfiles.length(trajectory))
+        else
+            frame_range = first:step:last
+        end
     else
-        frame_range = first:step:last
+        frame_range = frames
     end
     return frame_range
 end
@@ -156,9 +162,9 @@ function Simulation(
     pdb_file::Union{Nothing,String},
     atoms::AbstractVector{AtomType},
     trajectory::Chemfiles.Trajectory,
-    first, last, step
+    frames, first, last, step
 ) where {AtomType}
-    frame_range = _set_range(trajectory, first, last, step)
+    frame_range = _set_range(trajectory, frames, first, last, step)
     frame = Chemfiles.read(trajectory)
     read_lock = ReentrantLock()
     frame_index = nothing
@@ -175,13 +181,13 @@ Simulation will iterate over all frames in the file. This is the default constru
 to be used.
 
 =#
-function Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
+function Simulation(pdb_file::String, trajectory_file::String; frames=nothing, first=1, last=nothing, step=1)
     atoms = PDBTools.readPDB(pdb_file)
-    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
+    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
 end
 
 function Simulation(atoms::AbstractVector{AtomType}, trajectory_file::String; first=1, last=nothing, step=1) where {AtomType}
-    return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), first, last, step)
+    return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
 end
 
 """
@@ -503,6 +509,11 @@ end
     sim = Simulation(ats, Testing.namd_traj)
     @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
     @test_throws ArgumentError get_frame(sim, 100)
+    sim2 = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[1,2,5])
+    @test coor(get_frame(sim2, 1)) ≈ frames[1]
+    @test coor(get_frame(sim2, 2)) ≈ frames[2]
+    @test coor(get_frame(sim2, 5)) ≈ frames[5]
+    @test_throws ArgumentError get_frame(sim2, 4)
 end
 
 #
