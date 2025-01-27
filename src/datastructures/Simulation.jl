@@ -139,7 +139,7 @@ function _set_range(trajectory, frames, first, last, step)
             frame_range = first:step:last
         end
     else
-        frame_range = frames
+        frame_range = sort(frames)
     end
     return frame_range
 end
@@ -320,6 +320,14 @@ function first_frame!(simulation::Simulation)
     return simulation
 end
 
+function _end_of_trajectory_err(iframe, frame_range) 
+    throw(ArgumentError("""\n
+            End of trajectory.
+            Next frame, $iframe, is out of range: $frame_range.
+            
+    """))
+end
+
 """
     next_frame!(simulation::Simulation)
 
@@ -328,26 +336,21 @@ frame to the next one in the range to be considered (given by `frame_range(simul
 
 """
 function next_frame!(simulation::Simulation)
+    if isnothing(frame_index(simulation)) 
+        lframe = 0
+        iframe = first(frame_range(simulation))
+    else
+        irange = searchsortedfirst(frame_range(simulation), frame_index(simulation))
+        irange == length(frame_range(simulation)) && _end_of_trajectory_err(frame_index(simulation)+1, frame_range(simulation))
+        lframe = frame_range(simulation)[irange]
+        iframe = frame_range(simulation)[irange + 1]
+    end
     lock(simulation) do
-        if frame_index(simulation) == last(frame_range(simulation))
-            error("End of trajectory.")
+        for _ in lframe+1:iframe
+            Chemfiles.read!(simulation.trajectory, simulation.frame)
         end
-        Chemfiles.read!(simulation.trajectory, simulation.frame)
-        if isnothing(frame_index(simulation))
-            iframe = first(frame_range(simulation))
-        else
-            iframe = frame_index(simulation) + 1
-        end
-        while iframe ∉ frame_range(simulation) && iframe < last(frame_range(simulation))
-            Chemfiles.read!(simulation.trajectory, current_frame(simulation))
-            iframe += 1
-        end
-        # If the last frame was reached, check if it is in the frame range
-        if iframe ∉ frame_range(simulation)
-            error("End of trajectory.")
-        end
-        simulation.frame_index = iframe
-    end # release lock
+    end
+    simulation.frame_index = iframe
     return current_frame(simulation)
 end
 
@@ -520,6 +523,13 @@ end
     @test coor(get_frame(sim2, 2)) ≈ frames[2]
     @test coor(get_frame(sim2, 5)) ≈ frames[5]
     @test_throws ArgumentError get_frame(sim2, 4)
+    first_frame!(sim2)
+    @test frame_index(sim2) == 1
+    next_frame!(sim2)
+    @test frame_index(sim2) == 2
+    next_frame!(sim2)
+    @test frame_index(sim2) == 5
+    @test_throws ArgumentError next_frame!(sim2)
 end
 
 #
