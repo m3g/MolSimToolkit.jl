@@ -18,6 +18,7 @@ export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
+export msd
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -53,6 +54,7 @@ include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/intermittent_correlation.jl")
 include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/most_representative_structure.jl")
+include("./miscelaneous_functions/unwrap.jl")
 
 #  Structural alignment
 include("./procrustes.jl")
