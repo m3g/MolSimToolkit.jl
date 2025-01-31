@@ -81,6 +81,11 @@ julia> count(x -> x.within_cutoff, list)
 
 Thus, 33 TMAO molecules are within the cutoff distance from the protein, and the distances can be used to study the solvation of the protein.
 
+!!! tip
+    The `coordination_number` function of this package essentially performs the above calculation iteratively 
+    along a trajectory. The source of of such function is simple and can be used to further understand the utility
+    and usage of the minimum-distance calculations.
+
 ## Performance
 
 This package exists because this computation is fast. For example, let us choose the water molecules instead, and benchmark the time required to compute this set of distances:
