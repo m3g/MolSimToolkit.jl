@@ -8,6 +8,7 @@ CollapsedDocStrings = true
 Modules = [ MolSimToolkit ]
 Pages = [ 
     "bulk_coordination.jl",
+    "coordination_number.jl", 
     "intermittent_correlation.jl",
     "distances.jl", 
     "center_of_mass.jl",

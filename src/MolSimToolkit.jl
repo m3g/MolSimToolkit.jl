@@ -9,7 +9,7 @@ using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm, cross, dot
 using Reexport: @reexport
-using ProgressMeter: Progress, next!
+using ProgressMeter: Progress, next!, @showprogress
 using Statistics: mean
 
 export wrap, wrap_to_first
@@ -18,6 +18,7 @@ export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
+export coordination_number
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -53,6 +54,7 @@ include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/intermittent_correlation.jl")
 include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/most_representative_structure.jl")
+include("./miscelaneous_functions/coordination_number.jl")
 
 #  Structural alignment
 include("./procrustes.jl")
