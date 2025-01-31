@@ -38,12 +38,12 @@ julia> protein = select(atoms(sim), "protein");
 julia> tmao = select(atoms(sim), "resname TMAO");
 
 julia> coordination_number(sim, protein, tmao; solvent_natomspermol=14, cutoff=3.0, show_progress=false)
-20-element Vector{Int64}:
-  7
-  3
-  4
-  5
-  6
+5-element Vector{Int64}:
+ 7
+ 3
+ 4
+ 5
+ 6
 
 ```
 
