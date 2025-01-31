@@ -24,7 +24,7 @@ Calculate the coordination number of the solute atoms with the solvent atoms.
 
 # Returns
 
-- `cn::Vector{Float64}`: Vector with the coordination number of the solute atoms with the solvent atoms, at each frame.
+- `cn::Vector{Int}`: Vector with the coordination number of the solute atoms with the solvent atoms, at each frame.
 
 # Example
 
