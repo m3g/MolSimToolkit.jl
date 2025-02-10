@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Block averages · MolSimToolkit.jl</title><meta name="title" content="Block averages · MolSimToolkit.jl"/><meta property="og:title" content="Block averages · MolSimToolkit.jl"/><meta property="twitter:title" content="Block averages · MolSimToolkit.jl"/><meta name="description" content="Documentation for MolSimToolkit.jl."/><meta property="og:description" content="Documentation for MolSimToolkit.jl."/><meta property="twitter:description" content="Documentation for MolSimToolkit.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="MolSimToolkit.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">MolSimToolkit.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../system_setup/">System setup</a></li><li><a class="tocitem" href="../molecular_minimum_distances/">Molecular Minimum Distances</a></li><li class="is-active"><a class="tocitem" href>Block averages</a><ul class="internal"><li><a class="tocitem" href="#Data-that-is-not-time-correlated"><span>Data that is not time-correlated</span></a></li><li><a class="tocitem" href="#Data-that-is-time-correlated"><span>Data that is time-correlated</span></a></li><li><a class="tocitem" href="#Visualizing-the-distribution-of-the-mean"><span>Visualizing the distribution of the mean</span></a></li><li><a class="tocitem" href="#Reference-functions"><span>Reference functions</span></a></li></ul></li><li><a class="tocitem" href="../remd/">Replica exchange</a></li><li><a class="tocitem" href="../procrustes/">Structural alignment</a></li><li><a class="tocitem" href="../secondary_structures/">Secondary structure</a></li><li><a class="tocitem" href="../miscelaneous/">Miscelaneous functions</a></li><li><a class="tocitem" href="../Developer/">Developer zone</a></li><li><a class="tocitem" href="../plotting_style/">Plotting style</a></li><li><a class="tocitem" href="../Experimental/">Experimental</a></li><li><a class="tocitem" href="../Dihedrals/">∘ Dihedral angle analysis</a></li><li><a class="tocitem" href="../Reweighting/">∘ Simulation Reweighting</a></li><li><a class="tocitem" href="../Coaraci/">∘ Cluster submission management</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Block averages</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Block averages</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl/blob/main/docs/src/block_averages.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Block-averages"><a class="docs-heading-anchor" href="#Block-averages">Block averages</a><a id="Block-averages-1"></a><a class="docs-heading-anchor-permalink" href="#Block-averages" title="Permalink"></a></h1><p>Performs an analysis of the convergence of some property (usually the mean) in a time-series. </p><p>Computes the block average of time-dependent data, to compute the standard error of the mean and, to detect sampling problems. A didactical explanation of block averaging is available <a href="http://sachinashanbhag.blogspot.com/2013/08/block-averaging-estimating-uncertainty.html">here</a>.  </p><p>The package also outputs the autocorrelation function of the property, and the characteristic time of the correlation decay. </p><h2 id="Data-that-is-not-time-correlated"><a class="docs-heading-anchor" href="#Data-that-is-not-time-correlated">Data that is not time-correlated</a><a id="Data-that-is-not-time-correlated-1"></a><a class="docs-heading-anchor-permalink" href="#Data-that-is-not-time-correlated" title="Permalink"></a></h2><h3 id="Compute-the-average-of-a-random-variable-x:"><a class="docs-heading-anchor" href="#Compute-the-average-of-a-random-variable-x:">Compute the average of a random variable <code>x</code>:</a><a id="Compute-the-average-of-a-random-variable-x:-1"></a><a class="docs-heading-anchor-permalink" href="#Compute-the-average-of-a-random-variable-x:" title="Permalink"></a></h3><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit 
+
+julia&gt; x = rand(10_000);
+
+julia&gt; b = block_average(x)
+-------------------------------------------------------------------
+BlockAverageData{Float64}
+-------------------------------------------------------------------
+Estimated value (mean by default) = 0.4977014924716461
+Length of data series: 10000
+
+Block size ranges: (1, 10000)
+
+Maximum standard error (error, block size): (0.005790454921861948, 5000)
+
+Deviations in last 3 blocks:
+         percentual: [2.8893559885598195, -1.1634393325014705, 0.0]  
+           absolute: [0.014380367877881106, -0.005790454921861976, 0.0]  
+
+Autocorrelation is first zero with lag: 2
+Characteristic time of autocorrelation decay: 
+        as fraction of series length: 2.0182708552030272e-5
+                            absolute: 0.2018270855203027
+-------------------------------------------------------------------
+
+julia&gt; using Plots
+
+julia&gt; plot(b, title=&quot;Uncorrelated data&quot;)</code></pre><p>Results in:</p><p><img src="../images/block_averages/random.png" alt="random.png"/></p><p>Thus, the worst block estimate converges very rapidly to the true mean, the standard error of the mean is very small, and the autocorrelation decays very quickly. Since the data is not correlated along the series, the characteristic time may not be meaningful. </p><h2 id="Data-that-is-time-correlated"><a class="docs-heading-anchor" href="#Data-that-is-time-correlated">Data that is time-correlated</a><a id="Data-that-is-time-correlated-1"></a><a class="docs-heading-anchor-permalink" href="#Data-that-is-time-correlated" title="Permalink"></a></h2><h3 id="Poorly-sampled-data"><a class="docs-heading-anchor" href="#Poorly-sampled-data">Poorly-sampled data</a><a id="Poorly-sampled-data-1"></a><a class="docs-heading-anchor-permalink" href="#Poorly-sampled-data" title="Permalink"></a></h3><p>The data above is not correlated in the input <code>x</code> vector. If the data is correlated, one can observe that in the dependence of the estimates of the average and error from the data. One can generate a test data (sort of a monte-carlo simulation of a particle in an harmonic well) using:</p><pre><code class="language-julia-repl hljs">julia&gt; x = BlockAverages.test_data(1_000);</code></pre><p>Which in this run produced:</p><pre><code class="language-julia-repl hljs">julia&gt; plot(x; xlabel=&quot;time&quot;, ylabel=&quot;value&quot;, label=nothing)</code></pre><p><img src="../images/block_averages/bad_sampling.png" alt="bad_sampling.png"/></p><p>The error of the estimate of the mean is, now, dependent on the block size, and we cannot see any convergence of the error, indicating that the sampling is not enough to obtain a reliable estimate of the mean value of <code>x</code>:  </p><pre><code class="language-julia-repl hljs">julia&gt; b = block_average(x, lags=1:500)
+-------------------------------------------------------------------
+BlockAverageData{Float64}
+-------------------------------------------------------------------
+Estimated value (mean by default) = -0.5616539552467762
+Length of data series: 1000
+
+Block size ranges: (1, 1000)
+
+Maximum standard error (error, block size): (0.24081057091463817, 500)
+
+Deviations in last 3 blocks:
+         percentual: [80.94415878065803, 42.87525595877488, -0.0]  
+           absolute: [-0.4546260693327965, -0.2408105709146382, 0.0]  
+
+Autocorrelation is first zero with lag: 194
+Characteristic time of autocorrelation decay: 
+        as fraction of series length: 0.06981859583876429
+                            absolute: 69.8185958387643
+-------------------------------------------------------------------</code></pre><p>Note that we have adjusted the range of <code>lags</code> of the autocorrelation function in this case.</p><p>Several characteristics of the output indicate the poor convergence of the series: 1) The mean should be <code>0.</code> for this property; 2) the maximum standard error occurs with a block size which is half the length of the series (there is no plateau); 3) the standard error of the mean is of the order of the mean value; 4) The autocorrelation is first zero at ~20% of the length of the data set. </p><p>The corresponding plot is obtained with:</p><pre><code class="language-julia-repl hljs">julia&gt; using Plots
+
+julia&gt; plot(b, title=&quot;Bad sampling&quot;)</code></pre><p><img src="../images/block_averages/bad_sampling_result.png" alt="bad_sampling_result.png"/></p><h3 id="Properly-sampled-data"><a class="docs-heading-anchor" href="#Properly-sampled-data">Properly sampled data</a><a id="Properly-sampled-data-1"></a><a class="docs-heading-anchor-permalink" href="#Properly-sampled-data" title="Permalink"></a></h3><p>If we increase the sampling by generating longer simulation:</p><pre><code class="language-julia-repl hljs">julia&gt; x = BlockAverages.test_data(10^6);</code></pre><p>The obtained set is now much better sampled,</p><p><img src="../images/block_averages/good_sampling.png" alt="good_sampling.png"/></p><p>The convergence analysis of the series produces:</p><pre><code class="language-julia-repl hljs">julia&gt; b = block_average(x, lags=1:100:10^5, max_block_size=10^5)
+-------------------------------------------------------------------
+BlockAverageData{Float64}
+-------------------------------------------------------------------
+Estimated value (mean by default) = -0.05498853009368246
+Length of data series: 1000000
+
+Block sizes: [1, 2, ..., 62500, 100000]
+
+Maximum standard error (error, block size): (0.18706372724807982, 31250)
+
+Deviations in last 3 blocks:
+         percentual: [-2805.4693758538297, -2600.14341058853, -1393.4253407524507]  
+           absolute: [1.5426863720104287, 1.4297806418103753, 0.7662241128326587]  
+
+Autocorrelation is first zero with lag: 14701
+Characteristic time of autocorrelation decay: 
+        as fraction of series length: 0.0036203287638847167
+                            absolute: 3620.328763884717
+-------------------------------------------------------------------</code></pre><p>Note that the average value of <code>x</code> here is closer to zero, and that the maximum standard error of the mean is consistent the true value being around zero. The correlation decays fast relative to the length of the data series.</p><p>The corresponding plots are:</p><pre><code class="language-julia-repl hljs">julia&gt; using Plots
+
+julia&gt; plot(b, title=&quot;Good sampling&quot;)</code></pre><p><img src="../images/block_averages/good_sampling_result.png" alt="good_sampling_result.png"/></p><p>The plateau of standard errors (second plot) in intermediate values of block sizes is typical of a properly sampled data set, and can be used as an the uncertainty in the property estimate. </p><p>For example, for an ever better sampled data, there is a very clear plateau of standard errors, which are smaller than those of the above example:</p><pre><code class="language-julia-repl hljs">julia&gt; x = BlockAverages.test_data(10^7)
+
+julia&gt; b = block_average(x, max_block_size=10^5, lags=1:100:10^5);
+
+julia&gt; plot(b)</code></pre><p><img src="../images/block_averages/best_sampling.png" alt="best_sampling.png"/></p><p>(here we have computed the statistics only up to blocks of size <code>10^5</code>)</p><h2 id="Visualizing-the-distribution-of-the-mean"><a class="docs-heading-anchor" href="#Visualizing-the-distribution-of-the-mean">Visualizing the distribution of the mean</a><a id="Visualizing-the-distribution-of-the-mean-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-the-distribution-of-the-mean" title="Permalink"></a></h2><p>Once the overall correlation is understood from the time-series block analysis, one can  visualize the distribution of the computed value (the mean in general) for a given block size. A relatively good fit to a gaussian distribution is expected. For instance, let us choose a block size of <code>25_000</code>, from a set similar to the one above:</p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, Plots
+
+julia&gt; x = BlockAverages.test_data(10^7) 
+
+julia&gt; d = block_distribution(x; block_size = 25_000)
+-------------------------------------------------------------------
+MeanDistribution{400}
+-------------------------------------------------------------------
+Number of blocks: 400
+Estimated value: = 0.06462623778329132
+Standard error of the mean: 0.05641314321229929
+Standard deviation of the mean: 1.1282628642459858
+&gt; block_mean contains the mean computed for each block.
+-------------------------------------------------------------------
+
+julia&gt; histogram(d)</code></pre><p>The last command will produce a plot similar to the following, in which the histogram of values is shown side by side with the gaussian function that corresponds to the  observed standard deviation and mean.</p><p><img src="../images/block_averages/mean_distribution.svg" alt="best_sampling.png"/></p><p>The optimal block size should be that for which the distribution is closer to a gaussian.</p><h2 id="Reference-functions"><a class="docs-heading-anchor" href="#Reference-functions">Reference functions</a><a id="Reference-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Reference-functions" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.BlockAverages.block_average-Union{Tuple{AbstractVector{T}}, Tuple{T}} where T&lt;:Real" href="#MolSimToolkit.BlockAverages.block_average-Union{Tuple{AbstractVector{T}}, Tuple{T}} where T&lt;:Real"><code>MolSimToolkit.BlockAverages.block_average</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">block_average(
+    x::AbstractVector{T};
+    by = mean,
+    min_block_size::Integer = 1,
+    max_block_size::Integer = length(x),
+    lags::Union{Nothing,AbstractVector{&lt;:Integer}} = nothing,
+) where {T&lt;:Real}</code></pre><p>This function peforms some convergence analysis for a property computed from a series of data, typically a time-series.  The data is given in vector <code>x</code>, and <code>by</code> defines the property to be estimated, typically, and by default, the mean value.</p><p>Two analyses are performed: a block averaging, in which the data is split in to blocks, and the mean value (or <code>by</code> value) in each block is computed idependently. The output will contain the worst estimate obtained for all blocks, and the standard error of the estimates, as a function of the block size. </p><p>Finally, the autocorrelation function of the data is computed, and a single exponential is fitted, to obtain the characteristic time of the decay of the correlation. </p><p>The output will be a structure of type <code>BlockAverageData{T}</code>. See the corresponding help entry for more information.</p><p>All results can be plot with a convenience function <code>BlockAverage.plot</code></p><p>The <code>lags</code> keyword can be tuned to define the range of intervals and length of the autocorrelation calculation, with important implications to the exponential fit and correlation curve shape. See the <code>StatsBase.autocor</code> help for  further information.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit
+
+julia&gt; x = BlockAverages.test_data(10^6); # example data generator
+
+julia&gt; b = block_average(x, lags=0:100:10^5)
+-------------------------------------------------------------------
+BlockAverageData{Float64}
+-------------------------------------------------------------------
+Estimated value (mean by default) = -0.13673023261452855
+Length of data series: 1000000
+
+Block sizes: [1, 2, ..., 500000, 1000000]
+
+Maximum standard error (error, block size): (0.23264202379194165, 500000)
+
+Deviations in last 3 blocks:
+         percentual: [-349.5348293165444, -170.1467329817311, -0.0]  
+           absolute: [0.47791978519330647, 0.23264202379194168, 0.0]  
+
+Autocorrelation is first zero with lag: 16400
+Characteristic time of autocorrelation decay: 
+        as fraction of series length: 0.0037856443348888848
+                            absolute: 3785.6443348888847
+-------------------------------------------------------------------
+
+julia&gt; using Plots
+
+julia&gt; plot(b) # creates a plot with the results
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/d240ca7b360a64f7f2317ef4c9f6d1656c360d4d/src/BlockAverages.jl#L116-L176">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.BlockAverages.block_distribution-Tuple{Function, AbstractVector, Integer}" href="#MolSimToolkit.BlockAverages.block_distribution-Tuple{Function, AbstractVector, Integer}"><code>MolSimToolkit.BlockAverages.block_distribution</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">block_distribution(x_input::AbstractVector; block_size::Integer) = 
+    block_distribution(mean, x_input, block_size::Integer)
+block_distribution(by::Function, x_input::AbstractVector, block_size::Integer)</code></pre><p>Given the data and the block size, computes the distribution of estimates of the  properties for each block. Returns a <code>BlockDistribution{NBLOCKS}</code> object. The block size must be an integer.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit
+
+julia&gt; x = BlockAverages.test_data(10^7);
+
+julia&gt; d = block_distribution(x; block_size = 25*10^3)
+-------------------------------------------------------------------
+BlockDistribution{400}
+-------------------------------------------------------------------
+Number of blocks: 400
+Estimated value: = 0.025151622077551537
+Standard error of the mean: 0.05596145099711976
+Standard deviation of the mean: 1.119229019942395
+&gt; block_mean contains the mean computed for each block.
+-------------------------------------------------------------------</code></pre><p>The distribution is stored in the <code>d.block_mean</code> vector, and can be plotted with:</p><pre><code class="language-julia-repl hljs">julia&gt; using Plots
+
+julia&gt; histogram(d)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/d240ca7b360a64f7f2317ef4c9f6d1656c360d4d/src/BlockAverages.jl#L278-L313">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.BlockAverages.BlockAverageData" href="#MolSimToolkit.BlockAverages.BlockAverageData"><code>MolSimToolkit.BlockAverages.BlockAverageData</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">struct BlockAverageData{T}</code></pre><p>Structure that contains the result of the block-average analysis of the sequence. </p><p><code>x</code> is the original data set. </p><p><code>xmean</code> is the property value computed for all data (usually the mean, but not necessarily)</p><p><code>blocksize</code> is an array of block sizes, in which the data was split.  By default it goes from <code>1</code> to <code>length(x)</code>, with a number of points corresponding to the number of integer divisions of <code>length(x)</code>.</p><p><code>xmean_maxerr</code>: The property is computed for each block, and the maximum error (difference between the property in the block and the average property) is stored in this array, for each blocks size. </p><p><code>xmean_stderr</code>: The standard error of the estimates of the property, meaning the standar  deviation of the estimates divided by the square root of the number of blocks. </p><p><code>autocor</code>: Is the autocorrelation function of the data, as a function of the lag. </p><p><code>lags</code>: Is the set of &quot;time&quot; lags for which the autocorrelation will be computed. Defined by the <code>lags</code> parameter of the <code>block_average</code> function, as a range. </p><p><code>tau</code>: The characteristic decay time of the autocorrelation function, as obtained by fitting of a single exponential, of the form <code>exp(-t/tau)</code> to the data. </p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/d240ca7b360a64f7f2317ef4c9f6d1656c360d4d/src/BlockAverages.jl#L11-L40">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.BlockAverages.BlockDistribution" href="#MolSimToolkit.BlockAverages.BlockDistribution"><code>MolSimToolkit.BlockAverages.BlockDistribution</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">struct BlockDistribution{N}</code></pre><ul><li><p><code>mean::Float64</code></p></li><li><p><code>std_of_the_mean::Float64</code></p></li><li><p><code>block_mean::Vector{Float64}</code></p></li><li><p><code>std_err_of_the_mean::Float64</code></p></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/d240ca7b360a64f7f2317ef4c9f6d1656c360d4d/src/BlockAverages.jl#L248-L254">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../molecular_minimum_distances/">« Molecular Minimum Distances</a><a class="docs-footer-nextpage" href="../remd/">Replica exchange »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Monday 10 February 2025 20:46">Monday 10 February 2025</span>. Using Julia version 1.10.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
