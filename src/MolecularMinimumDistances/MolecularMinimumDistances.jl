@@ -53,9 +53,10 @@ struct MinimumDistance{T}
     j::Int
     d::T
 end
-import Base: zero, copy
+import Base: zero, copy, convert
 zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
 copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
+convert(::Type{MinimumDistance{T}}, md::MinimumDistance) where {T} = MinimumDistance(md.within_cutoff, md.i, md.j, convert(T, md.d))
 
 #
 # useful getter functions
