@@ -4,7 +4,7 @@ struct SelfPairs{T,F<:Function} <: SystemPairs
 end
 
 import Base.show
-function Base.show(io::IO, mime::MIME"text/plain", sys::SelfPairs)
+function Base.show(io::IO, ::MIME"text/plain", sys::SelfPairs)
     print(io,chomp("""
     SelfPairs system with:
 
@@ -17,8 +17,8 @@ end
 
 """
     SelfPairs(;
-        xpositions::AbstractVector{<:AbstractVector{T}},
-        cutoff::T,
+        xpositions::AbstractVector{<:AbstractVector{<:Real}},
+        cutoff::Real,
         unitcell::AbstractVecOrMat,
         xn_atoms_per_molecule::Integer,
         parallel::Bool=true
