@@ -52,6 +52,7 @@ include("./miscelaneous_functions/distances.jl")
 include("./miscelaneous_functions/dihedrals.jl")
 include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/most_representative_structure.jl")
+include("./miscelaneous_functions/contacts.jl")
 include("./secondary_structure/secondary_structure.jl")
 
 # Time-dependent properties

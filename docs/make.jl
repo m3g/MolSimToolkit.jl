@@ -15,6 +15,7 @@ makedocs(
             "Dihedral angle analysis" => "Dihedrals.md",
             "Secondary structure" => "secondary_structures.md",
             "Structural alignment" => "procrustes.md",
+            "Contacts" => "contacts.md",
         ],
         "Simulation statistics" => Any[ 
             " Block averages" => "block_averages.md",
