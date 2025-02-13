@@ -47,13 +47,18 @@ include("./datastructures/Positions.jl")
 # Coordinate PBC wrapping functions
 include("./wrap.jl")
 
-# Miscelaneous functions
+# Structural properties
 include("./miscelaneous_functions/distances.jl")
 include("./miscelaneous_functions/dihedrals.jl")
 include("./miscelaneous_functions/center_of_mass.jl")
-include("./miscelaneous_functions/intermittent_correlation.jl")
-include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/most_representative_structure.jl")
+include("./secondary_structure/secondary_structure.jl")
+
+# Time-dependent properties
+include("./miscelaneous_functions/intermittent_correlation.jl")
+
+# Solvation and interactions
+include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/coordination_number.jl")
 
 #  Structural alignment
@@ -67,7 +72,6 @@ include("./MolecularMinimumDistances/MolecularMinimumDistances.jl")
 include("./gromacs/remd.jl")
 include("./Reweighting/Reweighting.jl")
 @reexport using .Reweighting
-include("./secondary_structure/secondary_structure.jl")
 
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")

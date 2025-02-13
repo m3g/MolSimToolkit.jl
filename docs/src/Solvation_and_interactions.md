@@ -1,11 +1,15 @@
+# Solvation and interactions
+
 ```@meta
 CollapsedDocStrings = true
 ```
-# [Dihedral angle analysis](@id dihedrals)
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
 Pages = [ 
-    "dihedrals.jl",
+    "bulk_coordination.jl",
+    "coordination_number.jl", 
 ]
 ```
+
+

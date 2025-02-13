@@ -10,19 +10,30 @@ makedocs(
     doctest=false,
     pages=[
         "Home" => "index.md",
+        "Structural analyses" => Any[
+            "Distances and misc." => "Structural_properties.md",
+            "Dihedral angle analysis" => "Dihedrals.md",
+            "Secondary structure" => "secondary_structures.md",
+            "Structural alignment" => "procrustes.md",
+        ],
+        "Simulation statistics" => Any[ 
+            " Block averages" => "block_averages.md",
+            " Replica exchange" => "remd.md",
+        ],
+        "Interactions" => Any[
+            "Coordination numbers" => "Solvation_and_interactions.md",
+            "Molecular Minimum Distances" => "molecular_minimum_distances.md",
+        ],
+        "Time-dependent properties" => Any[
+            "Intermittent correlation" => "intermittent_correlation.md",
+        ],
         "System setup" => "system_setup.md",
-        "Molecular Minimum Distances" => "molecular_minimum_distances.md",
-        "Block averages" => "block_averages.md",
-        "Replica exchange" => "remd.md",
-        "Structural alignment" => "procrustes.md",
-        "Secondary structure" => "secondary_structures.md",
-        "Miscelaneous functions" => "miscelaneous.md",
-        "Developer zone" => "Developer.md",
         "Plotting style" => "plotting_style.md",
-        "Experimental" => "Experimental.md",
-        " ∘ Dihedral angle analysis" => "Dihedrals.md",
-        " ∘ Simulation Reweighting" => "Reweighting.md",
-        " ∘ Cluster submission management" => "Coaraci.md",
+        "Developer zone" => "Developer.md",
+        "Experimental" => Any[
+            "Simulation Reweighting" => "Reweighting.md",
+            "Cluster submission management" => "Coaraci.md",
+        ], 
     ],
 )
 deploydocs(
