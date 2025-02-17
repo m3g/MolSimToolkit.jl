@@ -5,6 +5,17 @@ import PDBTools
 import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
+# Names, shared between different packages
+import MolSimToolkitShared: center_of_mass, 
+                            distances,
+                            coordination_number,
+                            bulk_coordination,
+                            wrap,
+                            wrap_to_first,
+                            align, 
+                            align!, 
+                            rmsd, 
+
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm, cross, dot
@@ -19,6 +30,7 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 export coordination_number
+export center_of_mass
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -62,7 +74,7 @@ include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/coordination_number.jl")
 
 #  Structural alignment
-include("./procrustes.jl")
+include("./structural_alignment.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")
