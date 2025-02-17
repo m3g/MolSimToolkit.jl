@@ -262,6 +262,3 @@ end
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
 end
-
-
-
