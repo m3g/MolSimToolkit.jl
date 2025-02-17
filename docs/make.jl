@@ -4,8 +4,9 @@ using Documenter
 push!(LOAD_PATH, "../")
 push!(LOAD_PATH, "../src/")
 using MolSimToolkit
+using MolSimToolkitShared
 makedocs(
-    modules=[MolSimToolkit],
+    modules=[MolSimToolkit, MolSimToolkitShared],
     sitename="MolSimToolkit.jl",
     doctest=false,
     pages=[
@@ -14,7 +15,7 @@ makedocs(
             "Distances and misc." => "Structural_properties.md",
             "Dihedral angle analysis" => "Dihedrals.md",
             "Secondary structure" => "secondary_structures.md",
-            "Structural alignment" => "procrustes.md",
+            "Structural alignment" => "structural_alignment.md",
         ],
         "Simulation statistics" => Any[ 
             " Block averages" => "block_averages.md",
