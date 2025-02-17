@@ -14,7 +14,7 @@ import MolSimToolkitShared: center_of_mass,
                             wrap_to_first,
                             align, 
                             align!, 
-                            rmsd, 
+                            rmsd 
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
@@ -39,10 +39,6 @@ export dssp_run, stride_run, ss_code, ss_number, ss_name
 # SS trajectory functions
 export ss_map, ss_mean, ss_heatmap
 
-# New method added to this function, which is reexported
-import PDBTools.center_of_mass
-export center_of_mass
-
 # Version of the package: used for printing in some places
 const version = pkgversion(@__MODULE__)
 
@@ -55,9 +51,6 @@ include("../test/Testing.jl")
 # Data structures
 include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
-
-# Coordinate PBC wrapping functions
-include("./wrap.jl")
 
 # Structural properties
 include("./miscelaneous_functions/distances.jl")
