@@ -31,7 +31,7 @@ Filter = (f) -> (nameof(f) === :unitcell)
 ## Wrap coordinates
 
 ```@autodocs
-Modules = [ MolSimToolkit ]
+Modules = [ MolSimToolkitShared ]
 Pages = [ "wrap.jl" ]
 ```
 
