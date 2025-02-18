@@ -38,7 +38,7 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
     The `iref=nothing` option was added in version 1.22.0.
 
 """
-function PDBTools.center_of_mass(
+function center_of_mass(
     indices::AbstractVector{<:Integer},
     simulation::Simulation,
     p::FramePositions;
@@ -61,7 +61,7 @@ function PDBTools.center_of_mass(
     return Point3D(cm /= totmass)
 end
 
-@testitem "centerofmass" begin
+@testitem "center_of_mass" begin
     using MolSimToolkit.Testing
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
