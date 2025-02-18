@@ -5,6 +5,17 @@ import PDBTools
 import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
+# Names, shared between different packages
+import MolSimToolkitShared: center_of_mass, 
+                            distances,
+                            coordination_number,
+                            bulk_coordination,
+                            wrap,
+                            wrap_to_first,
+                            align, 
+                            align!, 
+                            rmsd 
+
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
 using LinearAlgebra: norm, cross, dot
@@ -19,6 +30,7 @@ export align, align!, rmsd, rmsd_matrix
 export intermittent_correlation
 export bulk_coordination
 export coordination_number
+export center_of_mass
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -26,10 +38,6 @@ using ProteinSecondaryStructures: dssp_run, stride_run,
 export dssp_run, stride_run, ss_code, ss_number, ss_name
 # SS trajectory functions
 export ss_map, ss_mean, ss_heatmap
-
-# New method added to this function, which is reexported
-import PDBTools.center_of_mass
-export center_of_mass
 
 # Version of the package: used for printing in some places
 const version = pkgversion(@__MODULE__)
@@ -43,9 +51,6 @@ include("../test/Testing.jl")
 # Data structures
 include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
-
-# Coordinate PBC wrapping functions
-include("./wrap.jl")
 
 # Structural properties
 include("./miscelaneous_functions/distances.jl")
@@ -63,7 +68,7 @@ include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/coordination_number.jl")
 
 #  Structural alignment
-include("./procrustes.jl")
+include("./structural_alignment.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")
