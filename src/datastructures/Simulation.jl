@@ -359,25 +359,24 @@ frame to the next one in the range to be considered (given by `frame_range(simul
 
 """
 function next_frame!(simulation::Simulation)
-    i_frame_in_range = if isnothing(frame_index(simulation)) 
-            0
-    else
-        searchsortedfirst(frame_range(simulation), frame_index(simulation))
-    end
-    if i_frame_in_range + 1 > length(frame_range(simulation))
-        throw(ArgumentError("""\n
-            Next frame out of range.
-            Current frame: $(frame_index(simulation)) is the last in selected frames $(_print_frame_range(simulation)).
-            
-        """))
-    end
-    i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
     lock(simulation) do
-        # This seems redundant, but it is necessary because the read_step! does not places
-        # the trajectory object in the corresponding frame.
-        Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
+        i_frame_in_range = if isnothing(frame_index(simulation)) 
+                0
+        else
+            searchsortedfirst(frame_range(simulation), frame_index(simulation))
+        end
+        if i_frame_in_range + 1 > length(frame_range(simulation))
+            throw(ArgumentError("""\n
+                Next frame out of range.
+                Current frame: $(frame_index(simulation)) is the last in selected frames $(_print_frame_range(simulation)).
+                
+            """))
+        end
+        i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
+            Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
+        end
+        simulation.frame_index = i_next_frame
     end
-    simulation.frame_index = i_next_frame
     return current_frame(simulation)
 end
 
