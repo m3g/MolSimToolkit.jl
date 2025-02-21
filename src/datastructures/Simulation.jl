@@ -373,8 +373,7 @@ function next_frame!(simulation::Simulation)
             """))
         end
         i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
-            Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
-        end
+        Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
         simulation.frame_index = i_next_frame
     end
     return current_frame(simulation)
