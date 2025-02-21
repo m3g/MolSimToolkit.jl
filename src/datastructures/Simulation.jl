@@ -359,28 +359,25 @@ frame to the next one in the range to be considered (given by `frame_range(simul
 
 """
 function next_frame!(simulation::Simulation)
-    if isnothing(frame_index(simulation)) 
-        lframe = 0
-        iframe = first(frame_range(simulation))
+    i_frame_in_range = if isnothing(frame_index(simulation)) 
+            0
     else
-        irange = searchsortedfirst(frame_range(simulation), frame_index(simulation))
-        if irange == length(frame_range(simulation)) 
-            throw(ArgumentError("""\n
-                End of trajectory. 
-                Current frame: $(frame_index(simulation)).
-                Next frame is out of frame range: $(_print_frame_range(simulation)).
-                
-            """))
-        end
-        lframe = frame_range(simulation)[irange]
-        iframe = frame_range(simulation)[irange + 1]
+        searchsortedfirst(frame_range(simulation), frame_index(simulation))
     end
+    if i_frame_in_range + 1 > length(frame_range(simulation))
+        throw(ArgumentError("""\n
+            Next frame out of range.
+            Current frame: $(frame_index(simulation)) is the last in selected frames $(_print_frame_range(simulation)).
+            
+        """))
+    end
+    i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
     lock(simulation) do
-        for _ in lframe+1:iframe
-            Chemfiles.read!(simulation.trajectory, simulation.frame)
-        end
+        # This seems redundant, but it is necessary because the read_step! does not places
+        # the trajectory object in the corresponding frame.
+        Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
     end
-    simulation.frame_index = iframe
+    simulation.frame_index = i_next_frame
     return current_frame(simulation)
 end
 
@@ -461,7 +458,7 @@ julia> writePDB(frame4, "frame4.pdb")
 """
 function get_frame(simulation::Simulation, iframe::Integer)
     if !(iframe in frame_range(simulation))
-        throw(ArgumentError("get_frame: Index $iframe out of simulation range: $(frame_range(simulation))."))
+        throw(ArgumentError("get_frame: Index $iframe selected frames: $(frame_range(simulation))."))
     end
     i_current_frame = frame_index(simulation)
     if isnothing(i_current_frame) || (iframe < i_current_frame)
