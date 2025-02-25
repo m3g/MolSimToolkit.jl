@@ -40,14 +40,12 @@ One way to visualize the exchange it to produce a heatmap of expected probabilit
 can be done with the auxiliary `heatmap` function that is provided for the output
 of `remd_data`: 
 
-```julia
+```@example
 using MolSimToolkit
 using Plots
-data = remd_data("./gromacs_log.dat")
+data = remd_data(MolSimToolkit.remd_production_log)
 heatmap(data)
 ```
-
-Which will produce a plot of the following form:
 
 ![](./images/REMD/remd_heatmap.png)
 
