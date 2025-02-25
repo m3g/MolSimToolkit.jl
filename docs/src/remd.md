@@ -1,3 +1,7 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # Replica exchange analysis
 
 The `remd_data` function reads the output of a Gromacs-generated 
@@ -21,9 +25,9 @@ First, read the data from the Gromacs simulation log file:
 ```julia-repl
 julia> using MolSimToolkit
 
-julia> data = remd_data(MolSimToolkit.remd_production_log)
+julia> data = remd_data("gromacs.log")
 ```
-where `MolSimToolkit.hremd_production_log` is an example `log` file produced by Gromacs.
+where "gromacs.log" would be a `log` file produced by Gromacs.
 
 This will result in a data structure with three fields:
 
@@ -40,27 +44,24 @@ One way to visualize the exchange it to produce a heatmap of expected probabilit
 can be done with the auxiliary `heatmap` function that is provided for the output
 of `remd_data`: 
 
-```julia
+```@example
 using MolSimToolkit
 using Plots
-data = remd_data("./gromacs_log.dat")
+data = remd_data(MolSimToolkit.gmx5_0_4_log)
 heatmap(data)
 ```
 
-Which will produce a plot of the following form:
-
-![](./images/REMD/remd_heatmap.png)
-
-The number of replicas here is 10 (0-9), thus the expected ideal probability of finding each replica
-in each level is $1/10$. The probabilities are divided by $1/10$, such that $1.0$ implies 
+The number of replicas here is 16 (0-15), thus the expected ideal probability of finding each replica
+in each level is $1/16$. The probabilities are divided by $1/16$, such that $1.0$ implies 
 an optimal exchange at that replica and level. 
-
-The example displays a reasonably good replica exchange pattern. However,
-replica 2 sampled level 0 about 30% more than expected, and replica 8 sampled 
-level 0 about 30% less than expected, as indicated by the 1.3 and 0.7 annotations. 
 
 To produce a similar heatmap, but with the absolute (not normalized) probabilities of 
 observing each replica at each level, use `heatmap(data; probability_type=:absolute)`. 
+
+In the above example, replica 1 got trapped in the first 5 levels, 
+while a block is noticeable for replicas 10-12, which display high 
+probabilities to be found at levels 13 to 15. Thus, this is an example
+of a inadequate exchange between the levels.
 
 !!! compat
     The `probability_type` option of `heatmap` was introduced in version 1.7.0.
@@ -72,54 +73,49 @@ This can be obtained with the `remd_replica_path` function. For example, to obta
 of the replicas of number 0 and 1. Replica 0 appeares to have visited reasonably well 
 all levels from 0 to 12, and replica 1 appears to be trapped in leves 13 to 15.
 
-```julia
+```@example
+using MolSimToolkit
+using Plots
+data = remd_data(MolSimToolkit.gmx5_0_4_log)
+
 # Obtain the paths
-path0 = remd_replica_path(data, 0; stride = 500)
-path1 = remd_replica_path(data, 1; stride = 500)
+path0 = remd_replica_path(data, 0; stride = 1)
+path10 = remd_replica_path(data, 10; stride = 1)
 
 # Plot the path
-default(fontfamily="Computer Modern")
-plot(
-  [path0  path1],
-  xlabel="step",
-  ylabel="replica level",
-  label=[ "Replica 0" "Replica 1" ],
-  framestyle=:box
-)
+plt = plot(MolSimStyle, xlabel="step", ylabel="replica level")
+plot!(plt, path0, label="replica 0", linewidth=2)
+plot!(plt, path10, label="replica 10", linewidth=2)
 ```
 
-Producing the following plot:
-
-![](./images/REMD/replica_path.png)
-
-The plot confirms that the replica starting at position 0 sampled properly all states from 0 to 12,
-while the replica starting at position 1 was trapped in the high energy states.
+The plot confirms that the replica starting at position 0 sampled preferentially the 
+first 5 states, while replica 10 was trapped temporarily in the high level states,
+in this sample run.
 
 ## Probability data
 
 An alternative visualization of the exchange process is
 given by the probability matrix:
 
-```julia-repl
-julia> scatter(
-           data.probability_matrix,
-           labels= Ref("Replica ") .* string.((0:9)'),
-           framestyle=:box,
-           linewidth=2,
-           ylims=(0,0.12), xlims=(0.7, 10.3),
-           xlabel="Level", xticks=(1:10, 0:9),
-           ylabel="Probability",
-           alpha=0.5,
-           margin=0.5Plots.Measures.cm,
-       )
+```@example
+using MolSimToolkit
+using Plots
+data = remd_data(MolSimToolkit.gmx5_0_4_log)
+scatter(MolSimStyle,
+    data.probability_matrix,
+    labels= Ref("Replica ") .* string.((0:15)'),
+    linewidth=2,
+    ylims=(0,0.12), xlims=(0.7, 16.3),
+    xlabel="Level", xticks=(1:16, 0:15),
+    ylabel="Probability",
+    alpha=0.5,
+    margin=0.5Plots.Measures.cm,
+    legend=:outertopright,
+)
 ```
 
-Which produces:
-
-![hremd2.svg](./images/REMD/hremd2.svg)
-
-Ideally, the probability of each replica populaing each level should be the inverse of the number of replicas (here $1/10$). In this case, the simulation does not provide a proper sampling
-of exchanges, becuse it is a short extract of a longer simulation. 
+Ideally, the probability of each replica populaing each level should be the inverse of the number of replicas (here $$1/16 == 0.0625$$). In this case, the simulation does not provide a proper sampling
+of exchanges, as it is a short extract of a longer simulation. 
 
 ## Reference functions
 

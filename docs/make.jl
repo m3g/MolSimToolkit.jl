@@ -1,6 +1,7 @@
 import Pkg
 Pkg.add("Documenter")
 using Documenter
+using Plots
 push!(LOAD_PATH, "../")
 push!(LOAD_PATH, "../src/")
 using MolSimToolkit
