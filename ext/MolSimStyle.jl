@@ -8,8 +8,8 @@ const MolSimStyle_parameters = Dict{Symbol,Any}(
     :fontfamily => "Computer Modern",
     :margin => 0.5Plots.Measures.cm,
     :grid => false,
-    :xlabel => "x",
-    :ylabel => "y",
+#    :xlabel => "x",
+#    :ylabel => "y",
     :adjust_latex_font => true,
 )
 
