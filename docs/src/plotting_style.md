@@ -45,6 +45,10 @@ julia> plot(MolSimStyle, x, y)
 All other normal parameters of `Plots` function can be used to change the plot labels,
 titles, legends, font sizes, etc.
 
+!!! tip 
+    In v1.21.3, if if setting `fontfamily="Serif"`, LaTeXStrings will be converted to `\mathsf`
+    to match the overall plot fonts. This behavior can be disabled with `adjust_latex_font=false`. 
+
 ## Available plotting functions
 
 The `Plots` functions that are overloaded are:

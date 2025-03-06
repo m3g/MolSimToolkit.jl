@@ -4,7 +4,7 @@ import Plots: plot, plot!, annotate!, heatmap, cgrad, text
 """
     heatmap(data::GromacsREMDlog;
         xlabel="replica",
-        ylabel="level",
+        ylabel="initial replica level",
         fontfamily="Computer Modern",
         probability_type::Symbol=:relative,
         kargs...
@@ -29,7 +29,7 @@ julia> heatmap(data)
 """
 function heatmap(
     data::GromacsREMDlog;
-    xlabel="replica",
+    xlabel="initial replica level",
     ylabel="level",
     fontfamily="Computer Modern",
     probability_type::Symbol=:relative,

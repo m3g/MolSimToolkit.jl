@@ -5,7 +5,7 @@ struct AllPairs{T,F1<:Function,F2<:Function} <: SystemPairs
 end
 
 import Base.show
-function Base.show(io::IO, mime::MIME"text/plain", sys::AllPairs)
+function Base.show(io::IO, ::MIME"text/plain", sys::AllPairs)
     print(io,chomp("""
     AllPairs system with:
 
@@ -22,14 +22,14 @@ end
 
 """
     AllPairs(;
-        xpositions::AbstractVector{<:AbstractVector{T}},
-        ypositions::AbstractVector{<:AbstractVector{T}},
-        cutoff::T,
+        xpositions::AbstractVector{<:AbstractVector{<:Real}},
+        ypositions::AbstractVector{<:AbstractVector{<:Real}},
+        cutoff::Real,
         unitcell::AbstractVecOrMat,
-        xn_atoms_per_molecule::Int,
-        yn_atoms_per_molecule::Int,
+        xn_atoms_per_molecule::Integer,
+        yn_atoms_per_molecule::Integer,
         parallel::Bool=true
-    ) where T<:Real
+    ) 
 
 Initializes a particle system for the calculation of minimum distances
 between one molecule and a set of other molecules. Returns a list 
@@ -78,16 +78,16 @@ julia> minimum_distances!(sys)[1]
 
 """
 function AllPairs(;
-    xpositions::AbstractVector{<:AbstractVector{T}},
-    ypositions::AbstractVector{<:AbstractVector{T}},
-    cutoff::T,
+    xpositions::AbstractVector{<:AbstractVector{<:Real}},
+    ypositions::AbstractVector{<:AbstractVector{<:Real}},
+    cutoff::Real,
     unitcell::AbstractVecOrMat,
-    xn_atoms_per_molecule::Union{Nothing,Int}=nothing,
-    yn_atoms_per_molecule::Union{Nothing,Int}=nothing,
+    xn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
+    yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     xmol_indices::F1=nothing,
     ymol_indices::F2=nothing,
     parallel::Bool=true
-) where {T<:Real, F1<:Union{Nothing,Function}, F2<:Union{Nothing,Function}}
+) where {F1<:Union{Nothing,Function}, F2<:Union{Nothing,Function}}
     xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
     ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
     system = ParticleSystem(;
@@ -138,7 +138,7 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    firstframe!(simulation)
+    first_frame!(simulation)
     coor = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
     xsolvent = zeros(eltype(coor), length(popc))

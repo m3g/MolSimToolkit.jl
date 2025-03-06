@@ -4,7 +4,7 @@ struct SelfPairs{T,F<:Function} <: SystemPairs
 end
 
 import Base.show
-function Base.show(io::IO, mime::MIME"text/plain", sys::SelfPairs)
+function Base.show(io::IO, ::MIME"text/plain", sys::SelfPairs)
     print(io,chomp("""
     SelfPairs system with:
 
@@ -17,10 +17,10 @@ end
 
 """
     SelfPairs(;
-        xpositions::AbstractVector{<:AbstractVector{T}},
-        cutoff::T,
+        xpositions::AbstractVector{<:AbstractVector{<:Real}},
+        cutoff::Real,
         unitcell::AbstractVecOrMat,
-        xn_atoms_per_molecule::Int,
+        xn_atoms_per_molecule::Integer,
         parallel::Bool=true
     ) where T<:Real
 
@@ -66,7 +66,7 @@ function SelfPairs(;
     xpositions::AbstractVector{<:AbstractVector{T}},
     cutoff::T,
     unitcell::AbstractVecOrMat,
-    xn_atoms_per_molecule::Union{Nothing,Int}=nothing,
+    xn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     mol_indices::F1=nothing,
     parallel::Bool=true,
 ) where {T<:Real, F1<:Union{Nothing,Function}}
@@ -109,7 +109,7 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    firstframe!(simulation)
+    first_frame!(simulation)
     coor = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
     xsolvent = zeros(eltype(coor), length(popc))

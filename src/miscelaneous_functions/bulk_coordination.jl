@@ -13,11 +13,11 @@ _imol_atoms(imol, n, indices) = first(indices) .+ (((imol-1)*n):(imol*n-1))
 """
     bulk_coordination(
         simulation::Simulation;
-        reference_solute::AbstractVector{PDBTools.Atom}, 
-        solute::AbstractVector{PDBTools.Atom},
-        n_atoms_per_molecule_solute::Int,
-        solvent::AbstractVector{PDBTools.Atom}, 
-        n_atoms_per_molecule_solvent::Int,
+        reference_solute::AbstractVector{<:PDBTools.Atom}, 
+        solute::AbstractVector{<:PDBTools.Atom},
+        n_atoms_per_molecule_solute::Integer,
+        solvent::AbstractVector{<:PDBTools.Atom}, 
+        n_atoms_per_molecule_solvent::Integer,
         dmax::Real = 5.0,
         cutoff::Real = 20.0,
         bin_size::Real = 0.1,
@@ -44,9 +44,9 @@ the distance.
 - `reference_solute::AbstractVector{PDBTools.Atom}`: The atoms of the reference solute molecule
    (the protein in the example above).
 - `solute::AbstractVector{PDBTools.Atom}`: The atoms of the solute molecule (the TMAO in the example above).
-- `n_atoms_per_molecule_solute::Int`: The number of atoms per molecule of the solute.
+- `n_atoms_per_molecule_solute::Integer`: The number of atoms per molecule of the solute.
 - `solvent::AbstractVector{PDBTools.Atom}`: The atoms of the solvent molecule (the water in the example above).
-- `n_atoms_per_molecule_solvent::Int`: The number of atoms per molecule of the solvent.
+- `n_atoms_per_molecule_solvent::Integer`: The number of atoms per molecule of the solvent.
 - `dmax::Real = 5.0`: The maximum distance to the solute to consider a solvent molecule as coordinated.
 - `cutoff::Real = 20.0`: The maximum distance to the reference molecule for computing the histogram.
 - `bin_size::Real = 0.1`: The size of the bins for the histogram.
@@ -93,11 +93,11 @@ julia> plot(r, h, # plots `h` as a function of `r`
 """
 function bulk_coordination(
     simulation::Simulation;
-    reference_solute::AbstractVector{PDBTools.Atom},
-    solute::AbstractVector{PDBTools.Atom},
-    n_atoms_per_molecule_solute::Int,
-    solvent::AbstractVector{PDBTools.Atom},
-    n_atoms_per_molecule_solvent::Int,
+    reference_solute::AbstractVector{<:PDBTools.Atom},
+    solute::AbstractVector{<:PDBTools.Atom},
+    n_atoms_per_molecule_solute::Integer,
+    solvent::AbstractVector{<:PDBTools.Atom},
+    n_atoms_per_molecule_solvent::Integer,
     dmax::Real=5.0,
     cutoff::Real=20.0,
     bin_size::Real=0.1,
@@ -111,7 +111,7 @@ function bulk_coordination(
 
     # Initialize the systems for the minimum distances, to avoid creating
     # the systems at every frame
-    firstframe!(simulation)
+    first_frame!(simulation)
     uc = unitcell(current_frame(simulation))
     p = positions(current_frame(simulation))
     sys1 = CrossPairs(

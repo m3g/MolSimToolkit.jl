@@ -9,6 +9,8 @@ function MolSimToolkit.ss_heatmap(
         :clims => (0.5,10.5),
         :xlabel => "frame",
         :ylabel => "residue",
+        :fontfamily => "Computer Modern",
+        :adjust_latex_font => true,
     )
     plt = Plots.heatmap(MolSimStyle, scalex*(1:size(ssmap,2)), 1:size(ssmap,1), ssmap; _kargs(default; kargs)...)
     return plt

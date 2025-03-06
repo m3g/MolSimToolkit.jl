@@ -8,5 +8,9 @@ CollapsedDocStrings = true
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "procrustes.jl" ]
+Pages = [ "structural_alignment.jl" ]
+```
+```@autodocs
+Modules = [ MolSimToolkitShared ]
+Pages = [ "structural_alignment.jl" ]
 ```

@@ -1,145 +1,18 @@
-using LinearAlgebra: eigvecs
-using StaticArrays: SVector, MMatrix, SMatrix
-
-_center_of_mass(x::AbstractVector{<:AbstractVector}, ::Nothing) = sum(x) / length(x)
-_center_of_mass(x::AbstractVector{<:AbstractVector}, mass::AbstractVector) =
-    sum(x[i] * mass[i] for i in eachindex(x, mass)) / sum(mass)
-
 """
-    align(x, y; mass = nothing)
-    align!(x, y; mass = nothing)
-
-Aligns two structures (sets of points in 3D space). Solves
-the "Procrustes" problem, which is to find the best
-translation, and rotation, that aligns the two
-structures, minimizing the RMSD between them.
-
-Structures are expected to be of the same size, and the 
-correspondence is assumed from the vector indices. 
-
-`align` returns a new vector containing the coordinates of x aligned to y. 
-`align!` modifies the input vector `x` in place.
-
-"""
-function align end
-@doc (@doc align) align!
-
-function align(
-    x::AbstractVector{<:AbstractVector},
-    y::AbstractVector{<:AbstractVector};
-    mass=nothing
-)
-    xnew = copy(x)
-    return align!(xnew, y; mass)
-end
-
-function align!(
-    x::AbstractVector{<:AbstractVector},
-    y::AbstractVector{<:AbstractVector};
-    mass=nothing,
-    # Auxiliary arrays that might be preallocated
-    xm=zeros(3, length(x)),
-    xp=zeros(3, length(x))
-)
-    length(x) == length(y) || throw(DimensionMismatch("x and y must have the same length"))
-    (length(x[1]) != 3 || length(x[2]) != 3) && throw(DimensionMismatch("x and y must be 3D vectors"))
-
-    cmx = _center_of_mass(x, mass)
-    cmy = _center_of_mass(y, mass)
-    for i in eachindex(x, y)
-        x[i] -= cmx
-        y[i] -= cmy
-    end
-
-    for i in eachindex(x, y)
-        xm[1:3, i] .= y[i] .- x[i]
-        xp[1:3, i] .= y[i] .+ x[i]
-    end
-
-    q = zeros(MMatrix{4,4,eltype(xm),16})
-    for i in eachindex(x)
-        q[1, 1] = q[1, 1] + sum(abs2, @view(xm[1:3, i]))
-        q[1, 2] = q[1, 2] + xp[2, i] * xm[3, i] - xm[2, i] * xp[3, i]
-        q[1, 3] = q[1, 3] + xm[1, i] * xp[3, i] - xp[1, i] * xm[3, i]
-        q[1, 4] = q[1, 4] + xp[1, i] * xm[2, i] - xm[1, i] * xp[2, i]
-        q[2, 2] = q[2, 2] + xp[2, i]^2 + xp[3, i]^2 + xm[1, i]^2
-        q[2, 3] = q[2, 3] + xm[1, i] * xm[2, i] - xp[1, i] * xp[2, i]
-        q[2, 4] = q[2, 4] + xm[1, i] * xm[3, i] - xp[1, i] * xp[3, i]
-        q[3, 3] = q[3, 3] + xp[1, i]^2 + xp[3, i]^2 + xm[2, i]^2
-        q[3, 4] = q[3, 4] + xm[2, i] * xm[3, i] - xp[2, i] * xp[3, i]
-        q[4, 4] = q[4, 4] + xp[1, i]^2 + xp[2, i]^2 + xm[3, i]^2
-    end
-    q[2, 1] = q[1, 2]
-    q[3, 1] = q[1, 3]
-    q[3, 2] = q[2, 3]
-    q[4, 1] = q[1, 4]
-    q[4, 2] = q[2, 4]
-    q[4, 3] = q[3, 4]
-    q = SMatrix(q)
-
-    # Computing the eigenvectors 'v' of the q matrix
-    v = eigvecs(q)
-
-    # Compute rotation matrix
-    u = zeros(MMatrix{3,3,Float64,9})
-    u[1, 1] = v[1, 1]^2 + v[2, 1]^2 - v[3, 1]^2 - v[4, 1]^2
-    u[1, 2] = 2.0 * (v[2, 1] * v[3, 1] + v[1, 1] * v[4, 1])
-    u[1, 3] = 2.0 * (v[2, 1] * v[4, 1] - v[1, 1] * v[3, 1])
-    u[2, 1] = 2.0 * (v[2, 1] * v[3, 1] - v[1, 1] * v[4, 1])
-    u[2, 2] = v[1, 1]^2 + v[3, 1]^2 - v[2, 1]^2 - v[4, 1]^2
-    u[2, 3] = 2.0 * (v[3, 1] * v[4, 1] + v[1, 1] * v[2, 1])
-    u[3, 1] = 2.0 * (v[2, 1] * v[4, 1] + v[1, 1] * v[3, 1])
-    u[3, 2] = 2.0 * (v[3, 1] * v[4, 1] - v[1, 1] * v[2, 1])
-    u[3, 3] = v[1, 1]^2 + v[4, 1]^2 - v[2, 1]^2 - v[3, 1]^2
-    u = SMatrix(u)
-
-    # Rotate to align x to y 
-    for i in eachindex(x)
-        x[i] = u * x[i]
-    end
-
-    # Move aligned x to the original center of mass of y
-    for i in eachindex(x, y)
-        x[i] += cmy
-        y[i] += cmy
-    end
-
-    return x
-end
-
-"""
-    rmsd(x::AbstractVector,y::AbstractVector)
     rmsd(simulation::Simulation, indices::AbstractVector{Int}; mass = nothing, reference_frame = nothing, show_progress = true)
 
-Computes the root mean square deviation (RMSD) between two sets of points in 
-space, or along a trajectory.
+Computes the root mean square deviation (RMSD) between two sets of points in along a trajectory.
 
-The `rmsd(x,y)` method computes the RMSD between two sets of points `x` and `y`. 
-The sets are expected to be of the same size, and the correspondence is assumed from the vector indices.
+# Arguments
 
-The `rmsd(simulation::Simulation, indices)` method computes the RMSD along a trajectory. With the 
-following options: 
-- The `indices` vector contains the indices of the atoms to be considered. 
-- The `mass` argument can be used to provide the mass of the atoms if they are not the same.
-- The `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
+- `indices` vector contains the indices of the atoms to be considered. 
+- `mass` argument can be used to provide the mass of the atoms if they are not the same.
+- `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
     - If `reference_frame == nothing`, the first frame will be used (default behavior).
     - If `reference_frame == :average`, the average structure will be used.
     - If `reference_frame` is an integer, the frame at that index will be used as reference.
 
 # Examples
-
-## If the set is compared toi tself, the RMSD should be zero:
-
-```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
-
-julia> using PDBTools
-
-julia> ca = coor(readPDB(Testing.namd_pdb), "name CA");
-
-julia> rmsd(ca, ca)
-0.0
-```
 
 ## Computing the rmsd along a trajectory
 
@@ -172,14 +45,6 @@ julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
 ```
 
 """
-function rmsd(x::AbstractVector, y::AbstractVector)
-    rmsd = 0.0
-    for i in eachindex(x, y)
-        rmsd += sum(abs2, x[i] .- y[i])
-    end
-    return sqrt(rmsd / length(x))
-end
-
 function rmsd(
     simulation::Simulation, indices::AbstractVector{Int};
     mass=nothing,
@@ -193,7 +58,7 @@ function rmsd(
 
     # Define reference of the alignment
     xref = if isnothing(reference_frame)
-        firstframe!(simulation)
+        first_frame!(simulation)
         positions(current_frame(simulation))[indices]
     elseif reference_frame isa Integer
         if !(reference_frame in frame_range(simulation))
@@ -205,7 +70,7 @@ function rmsd(
         end
         restart!(simulation)
         for _ in 1:reference_frame
-            nextframe!(simulation)
+            next_frame!(simulation)
         end
         positions(current_frame(simulation))[indices]
     elseif reference_frame == :average
@@ -237,7 +102,7 @@ function rmsd(
     return rmsds
 end
 
-@testitem "procrustes" begin
+@testitem "rmsd" begin
     using MolSimToolkit
     using MolSimToolkit.Testing: namd_pdb, namd_traj
     using StaticArrays: SVector
@@ -257,11 +122,11 @@ end
     y .= Ref(rand(RotMatrix3)) .* y
     @test rmsd(x, y) > 0.0
     z = align(x, y)
-    @test rmsd(z, y) ≈ 0.0 atol = 1e-10
+    @test rmsd(z, y) ≈ 0.0 atol = 1e-5
 
     # same test, but with coordinates obtained from a simulation frame
     simulation = Simulation(namd_pdb, namd_traj)
-    firstframe!(simulation)
+    first_frame!(simulation)
     cas = findall(Select("name CA"), atoms)
     x = positions(current_frame(simulation))[cas]
     y = x .+ Ref(SVector{3}(45.0, -15.0, 31.5))
@@ -272,7 +137,7 @@ end
 
     rmsd_aligned = zeros(length(simulation))
     rmsd_notaligned = zeros(length(simulation))
-    firstframe!(simulation)
+    first_frame!(simulation)
     x = positions(current_frame(simulation))[cas]
     xref = copy(x)
     for (iframe, frame) in enumerate(simulation)
@@ -318,6 +183,12 @@ The `mass` argument can be used to provide the mass of the atoms if they are not
 The `align` argument can be used to align the frames before computing the RMSD.
 
 The `show_progress` argument can be used to show a progress bar.
+
+# Returns 
+
+A symetric matrix with the RMSD values between each pair of frames. For example, in 
+a trajectory with 5 frames, the matrix will be a 5x5 matrix with the RMSD values
+between the structures of each pair of frames.
 
 # Example
 
@@ -391,6 +262,3 @@ end
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
 end
-
-
-

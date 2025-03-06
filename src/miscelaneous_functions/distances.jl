@@ -1,6 +1,6 @@
 """
-    distances(simulation, indices1::AbstractVector{Int}, indices2::AbstractVector{Int})
-    distances(simulation, selection1::AbstractVector{PDBTools.Atom}, selection2::AbstractVector{PDBTools.Atom})
+    distances(simulation, indices1::AbstractVector{<:Integer}, indices2::AbstractVector{<:Integer})
+    distances(simulation, selection1::AbstractVector{<:PDBTools.Atom}, selection2::AbstractVector{<:PDBTools.Atom})
 
 Function that calculates the distance between the centers of mass of two selections in a simulation.
 
@@ -48,8 +48,8 @@ julia> distances(sim,
 """
 function distances(
     simulation::Simulation,
-    indices1::AbstractVector{Int},
-    indices2::AbstractVector{Int};
+    indices1::AbstractVector{<:Integer},
+    indices2::AbstractVector{<:Integer};
     silent::Bool = false,
 )
     distances = zeros(length(simulation))
@@ -81,14 +81,21 @@ end
 @testitem "distances" begin
     using PDBTools
     using MolSimToolkit.Testing
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    i1 = findall(sel"protein and residue 1", atoms(simulation))
-    i2 = findall(sel"protein and residue 15", atoms(simulation))
-    @test distances(simulation, i1, i2; silent=true) ≈
-          [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
-    s1 = filter(sel"protein and residue 1", atoms(simulation))
-    s2 = filter(sel"protein and residue 15", atoms(simulation))
-    @test distances(simulation, s1, s2; silent=true) ≈
-          [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    i1 = findall(sel"protein and residue 1", atoms(sim))
+    i2 = findall(sel"protein and residue 15", atoms(sim))
+    proof = [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
+    @test distances(sim, i1, i2; silent=true) ≈ proof
+    s1 = filter(sel"protein and residue 1", atoms(sim))
+    s2 = filter(sel"protein and residue 15", atoms(sim))
+    @test distances(sim, s1, s2; silent=true) ≈ proof
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=2, last=4)
+    @test distances(sim, s1, s2; silent=true) ≈ proof[2:2:4]
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=1, last=5)
+    @test distances(sim, s1, s2; silent=true) ≈ proof[2:5]
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[3,5])
+    @test distances(sim, s1, s2; silent=true) ≈ [proof[3], proof[5]]
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[5,3])
+    @test distances(sim, s1, s2; silent=true) ≈ [proof[3], proof[5]]
 end
 
