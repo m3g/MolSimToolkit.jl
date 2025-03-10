@@ -69,7 +69,7 @@ end
 
     β = 5.e-3
 
-    probs_test = reweight(simulation, distance, i1, 1, i2, 1; all_dist = true, cutoff = 12.0)
+    probs_test = reweight(simulation, r -> gaussian_decay_perturbation(r/10, α, β), i1, 1, i2, 1; all_dist = true, cutoff = 12.0)
     @test probs_test.probability ≈ [
         0.08987791339898044
         0.07326337222373071
