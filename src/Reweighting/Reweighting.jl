@@ -24,7 +24,7 @@ end #Module Reweighting
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 11")
 
-    sum_of_dist = reweight(simulation, r -> r/10, [i1[239]], i2; cutoff = 25.0)
+    sum_of_dist = reweight(simulation, r -> r/10, [i1[239]], 1, i2, 10; all_dist = true, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [7.4295543149]
 end
 
@@ -39,7 +39,7 @@ end
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
 
-    sum_of_dist = reweight(simulation, r -> r/10, i1, i2, cutoff = 25.0)
+    sum_of_dist = reweight(simulation, r -> r/10, i1, 2, i2, 1, all_dist = true, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [
         1.773896547670759, 
         1.5923698293115915, 
@@ -69,7 +69,7 @@ end
 
     β = 5.e-3
 
-    probs_test = reweight(simulation, r -> gaussian_decay_perturbation(r/10, α, β), i1, i2; cutoff = 12.0)
+    probs_test = reweight(simulation, distance, i1, 1, i2, 1; all_dist = true, cutoff = 12.0)
     @test probs_test.probability ≈ [
         0.08987791339898044
         0.07326337222373071
@@ -81,5 +81,31 @@ end
         0.12480704633057726
         0.09973413264337352
         0.12988266765019355
+    ]
+end
+
+@testitem "Reweighting small trajectory min dist" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
+
+    i1 = PDBTools.selindex(atoms(simulation), "resname TFE")
+
+    i2 = PDBTools.selindex(atoms(simulation), "protein")
+
+    probs_test = reweight(simulation, r -> r, i1, 9, i2, 174; cutoff = 12.0)
+    @test probs_test.energy ≈ [
+        477.47530500203885
+        459.8720850333111
+        471.09562927166274
+        484.763923006718
+        436.1279250800145
+        441.9556126997521
+        759.6642496372428
+        492.2758540693646
+        361.8844625464858
+        371.2874949349868
     ]
 end
