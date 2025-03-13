@@ -26,7 +26,7 @@ Output:
 function _write_temporary_trajectory(simulation::Simulation, maxframes)
     if isnothing(maxframes) 
         if length(simulation) > 100 
-            @warn """
+            @warn """\n
                 Running map_fractions depends on writting a temporary trajectory file with the selected frames.
     
                 Since `maxframes` was not set, the number of frames considered will be 100.
@@ -45,7 +45,7 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
     else
         if maxframes > length(simulation)
             throw(ArgumentError("""\n
-                `maxframes` is greater than the number of frames in the simulation: $(length(simulation)).
+                maxframes=$maxframes is greater than the number of frames in the simulation: $(length(simulation)).
     
                 To consider all frames, set `maxframes=length(simulation)`.
     
@@ -339,6 +339,67 @@ function mdlovofit(
     return MDLovoFitResult(fraction, iframes, rmsd_low, rmsd_high, rmsd_all, rmsf, rmsf_file, rmsd_file, output_pdb)
 end
 
-@testitem "mdlovofit" begin
+@testitem "map_fractions" begin
+    using ShowMethodTesting
+    using MolSimToolkit, MolSimToolkit.Testing 
 
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    mf = map_fractions(sim)
+    @test length(mf.iframes) == 100
+    @test sum(mf.iframes) == 7074
+    @test sum(mf.rmsd_all) ≈ 65.12515215300002
+    @test_throws ArgumentError map_fractions(sim; maxframes=200)
+    mf = map_fractions(sim; maxframes=121)
+    @test length(mf.iframes) == 121
+    @test sum(mf.iframes) == 7620
+    mf = map_fractions(sim; maxframes=50)
+    @test length(mf.iframes) == 50
+    @test last(mf.iframes) == 122
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:70)
+    mf = map_fractions(sim)
+    @test length(mf.iframes) == 70
+    @test sum(mf.rmsd_all) ≈ 66.11294932099999
+
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    mf = map_fractions(sim; maxframes=50)
+    @test parse_show(mf) ≈ """
+    -------------------------------------------------------------------
+    MapFractionsResult: Simulation(structure.pdb, trajectory.dcd)
+    
+    -------------------------------------------------------------------
+    Fields: 
+    - fraction: fraction of atoms considered in the alignment.
+    - iframes: the frame index of each frame considered.
+    - rmsd_low: RMSD of the fraction of the structure with the lowest RMSD.
+    - rmsd_high: RMSD of the fraction not considered for the alignment.
+    - rmsd_all: RMSD of the whole structure.
+    
+    Greatest fraction for which the RMSD-low is smaller than 1.0: 0.99
+                                                             2.0: 0.99
+                                                             3.0: 0.99
+    -------------------------------------------------------------------
+    """
+end
+
+@testitem "mdlovofit" begin
+    using ShowMethodTesting
+    using MolSimToolkit, MolSimToolkit.Testing 
+
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    @test_throws UndefKeywordError mdlovofit(sim)
+
+    fit = mdlovofit(sim; fraction=0.50)
+    @test isfile("mdlovofit_aligned.pdb")
+    @test isfile("mdlovofit_rmsf.dat")
+    @test isfile("mdlovofit_rmsd.dat")
+    @test length(fit.iframes) == 100
+    @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
+
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
+    fit = mdlovofit(sim; fraction=0.50, output_name="mdlovofit_50")
+    @test isfile("mdlovofit_50_aligned.pdb")
+    @test isfile("mdlovofit_50_rmsf.dat")
+    @test isfile("mdlovofit_50_rmsd.dat")
+    @test length(fit.iframes) == 50
+    @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 end
