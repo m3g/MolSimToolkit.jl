@@ -37,7 +37,7 @@ function Plots.plot(
     plt = plot(MolSimStyle, layout=(2, 1))
     plot!(
         plt,
-        md.iframes,
+        md.frame_indices,
         [md.rmsd_low, md.rmsd_high, md.rmsd_all];
         label=[ "best"  "worse"  "all" ],
         lw=2,
