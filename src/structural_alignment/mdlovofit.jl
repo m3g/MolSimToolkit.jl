@@ -20,38 +20,38 @@ Input:
 
 Output:
 - tmp_trajectory_file: name of the temporary PDB file with the selected frames.
-- iframes: the frame index of each frame considered.
+- frame_indices: the frame index of each frame considered.
 
 =#
 function _write_temporary_trajectory(simulation::Simulation, maxframes)
-    if isnothing(maxframes) 
-        if length(simulation) > 100 
+    if isnothing(maxframes)
+        if length(simulation) > 100
             @warn """\n
                 Running map_fractions depends on writting a temporary trajectory file with the selected frames.
-    
+
                 Since `maxframes` was not set, the number of frames considered will be 100.
-    
+
                 The considered frames will be sampled equally spaced from the simulation, as possible. The indices frames
-                considered will be stored in the `iframes` field of the output data structure.
-    
+                considered will be stored in the `frame_indices` field of the output data structure.
+
                 To avoid this warning, set the `maxframes` parameter to the desired number of frames to be considered.
                 Use `maxframes=length(simulation)` to consider all frames.
-    
-            """ _file = nothing _line = nothing 
-            iframes = first.(chunks(frame_range(simulation); n=100))
+
+            """ _file = nothing _line = nothing
+            frame_indices = first.(chunks(frame_range(simulation); n=100))
         else
-            iframes = frame_range(simulation)
+            frame_indices = frame_range(simulation)
         end
     else
         if maxframes > length(simulation)
             throw(ArgumentError("""\n
                 maxframes=$maxframes is greater than the number of frames in the simulation: $(length(simulation)).
-    
+
                 To consider all frames, set `maxframes=length(simulation)`.
-    
+
             """))
         end
-        iframes = first.(chunks(frame_range(simulation); n=maxframes))
+        frame_indices = first.(chunks(frame_range(simulation); n=maxframes))
     end
 
     #
@@ -60,9 +60,9 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
     # Atoms to be considered (could be generalized with the -atomsfile option of mdlovofit)
     cA = filter(at -> PDBTools.isprotein(at) && PDBTools.name(at) == "CA", atoms(simulation))
     cA_inds = PDBTools.index.(cA)
-    tmp_trajectory_file = tempname()*"_mdlovofit_trajectory.pdb"
+    tmp_trajectory_file = tempname() * "_mdlovofit_trajectory.pdb"
     for (iframe, frame) in enumerate(simulation)
-        if iframe in iframes
+        if iframe in frame_indices
             p = positions(frame)[cA_inds]
             for (iat, at) in enumerate(cA)
                 at.x = p[iat].x
@@ -73,7 +73,7 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
         end
     end
 
-    return tmp_trajectory_file, iframes 
+    return tmp_trajectory_file, frame_indices
 end
 
 """
@@ -83,6 +83,8 @@ Data structure to store the output of the `map_fractions` function.
 
 Fields:
 
+- `simulation` is a Simulation object with the trajectory of the system and the atom data.
+- `frame_indices` contains the frame index of each frame considered.
 - `fraction` contains the fraction of atoms considered in the alignment.
 - `rmsd_low` contains the RMSD of the fraction of the structure with the lowest RMSD.
 - `rmsd_high` contains the RMSD of the fraction not considered for the alignment.
@@ -91,7 +93,7 @@ Fields:
 """
 struct MapFractionsResult
     simulation::Simulation
-    iframes::Vector{Int}
+    frame_indices::Vector{Int}
     fraction::Vector{Float64}
     rmsd_low::Vector{Float64}
     rmsd_high::Vector{Float64}
@@ -108,7 +110,7 @@ function Base.show(io::IO, mf::MapFractionsResult)
     -------------------------------------------------------------------
     Fields: 
     - fraction: fraction of atoms considered in the alignment.
-    - iframes: the frame index of each frame considered.
+    - frame_indices: the frame index of each frame considered.
     - rmsd_low: RMSD of the fraction of the structure with the lowest RMSD.
     - rmsd_high: RMSD of the fraction not considered for the alignment.
     - rmsd_all: RMSD of the whole structure.
@@ -116,61 +118,6 @@ function Base.show(io::IO, mf::MapFractionsResult)
     Greatest fraction for which the RMSD-low is smaller than 1.0: $(round(mf.fraction[findlast(<(1.0), mf.rmsd_low)],digits=2))
                                                              2.0: $(round(mf.fraction[findlast(<(2.0), mf.rmsd_low)],digits=2))
                                                              3.0: $(round(mf.fraction[findlast(<(3.0), mf.rmsd_low)],digits=2))
-    -------------------------------------------------------------------
-    """))
-end
-
-"""
-    MDLovoFitResult
-
-Data structure to store the output of the `mdlovofit` function.
-
-Fields: 
-
-- `iframes` vector with the frame index of each frame.
-- `rmsd_low` is the RMSD of the fraction of the structure with the lowest RMSD.
-- `rmsd_high` is the RMSD of the fraction of the structure with the highest RMSD.
-- `rmsd_all` is the RMSD of the whole structure.
-- `rmsf` is the RMSF as a function of the residue or atom index. 
-- `aligned_pdb` is the name of the PDB file with the aligned structure.
-
-"""
-struct MDLovoFitResult
-    fraction::Float64
-    iframes::Vector{Int}
-    rmsd_low::Vector{Float64}
-    rmsd_high::Vector{Float64}
-    rmsd_all::Vector{Float64}
-    rmsf::Vector{Float64}
-    rmsf_file::String
-    rmsd_file::String
-    aligned_pdb::String
-end
-
-function Base.show(io::IO, result::MDLovoFitResult)
-    plow = round(100*result.fraction,digits=1)
-    phigh = round(100*(1-result.fraction),digits=1)
-    av_low = round((mean(result.rmsd_low)), digits=2)
-    av_high = round((mean(result.rmsd_high)), digits=2)
-    av_all = round((mean(result.rmsd_all)), digits=2)
-    print(io, chomp("""
-    -------------------------------------------------------------------
-    MDLovoFitResult
-    -------------------------------------------------------------------
-
-    Aligned pdb file: $(result.aligned_pdb)
-    RMSF data file: $(result.rmsf_file)
-    RMSD data file: $(result.rmsd_file)
-
-    Number of frames considered: $(length(result.iframes))
-    Average RMSD of all atoms: $av_all
-    Average RMSD of the $plow% atoms of lowest RMSD: $av_low
-    Average RMSD of the $phigh% atoms of highest RMSD: $av_high
-
-    Frame indices availabe in result.iframe
-    RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
-
-    RMSF data availabe in result.rmsf (Number of atoms: $(length(result.rmsf)))
     -------------------------------------------------------------------
     """))
 end
@@ -206,7 +153,7 @@ MapFractionsResult: Simulation(structure.pdb, trajectory.dcd)
 -------------------------------------------------------------------
 Fields: 
 - fraction: fraction of atoms considered in the alignment.
-- iframes: the frame index of each frame considered.
+- frame_indices: the frame index of each frame considered.
 - rmsd_low: RMSD of the fraction of the structure with the lowest RMSD.
 - rmsd_high: RMSD of the fraction not considered for the alignment.
 - rmsd_all: RMSD of the whole structure.
@@ -223,19 +170,81 @@ function map_fractions(
     maxframes=nothing,
 )
     # write temporary trajectory file
-    tmp_trajectory_file, iframes = _write_temporary_trajectory(simulation, maxframes)
+    tmp_trajectory_file, frame_indices = _write_temporary_trajectory(simulation, maxframes)
     # Run mdlovofit
-    mapfrac_file = tempname() *"_mapfrac.dat"
+    mapfrac_file = tempname() * "_mapfrac.dat"
     MDLovoFit_jll.mdlovofit() do exe
         run(pipeline(`$exe -mapfrac $tmp_trajectory_file`; stdout=mapfrac_file))
     end
     data = readdlm(mapfrac_file, comments=true, comment_char='#')
-    range = 1:findlast(<(1), data[:,1])
-    fraction = data[range,1]
-    rmsd_low = data[range,2]
-    rmsd_high = data[range,3]
-    rmsd_all = data[range,4]
-    return MapFractionsResult(simulation, iframes, fraction, rmsd_low, rmsd_high, rmsd_all)
+    range = 1:findlast(<(1), data[:, 1])
+    fraction = data[range, 1]
+    rmsd_low = data[range, 2]
+    rmsd_high = data[range, 3]
+    rmsd_all = data[range, 4]
+    return MapFractionsResult(simulation, frame_indices, fraction, rmsd_low, rmsd_high, rmsd_all)
+end
+
+"""
+    MDLovoFitResult
+
+Data structure to store the output of the `mdlovofit` function.
+
+Fields: 
+
+- `simulation`: Simulation object with the trajectory of the system and the atom data. 
+- `frame_indices`: vector with the frame index of each frame.
+- `rmsd_low`: RMSD of the fraction of the structure with the lowest RMSD.
+- `rmsd_high`: RMSD of the fraction of the structure with the highest RMSD.
+- `rmsd_all`: RMSD of the whole structure.
+- `rmsf`: RMSF as a function of the residue or atom index. 
+- `rmsf_file`: name of the file with the RMSF data.
+- `rmsd_file`: name of the file with the RMSD data.
+- `aligned_pdb`: name of the PDB file with the aligned structure.
+
+"""
+struct MDLovoFitResult
+    simulation::Simulation
+    fraction::Float64
+    iframes::Vector{Int}
+    rmsd_low::Vector{Float64}
+    rmsd_high::Vector{Float64}
+    rmsd_all::Vector{Float64}
+    rmsf::Vector{Float64}
+    rmsf_file::String
+    rmsd_file::String
+    aligned_pdb::String
+end
+
+function Base.show(io::IO, result::MDLovoFitResult)
+    plow = round(100 * result.fraction, digits=1)
+    phigh = round(100 * (1 - result.fraction), digits=1)
+    av_low = round((mean(result.rmsd_low)), digits=2)
+    av_high = round((mean(result.rmsd_high)), digits=2)
+    av_all = round((mean(result.rmsd_all)), digits=2)
+    print(io, chomp("""
+    -------------------------------------------------------------------
+    MDLovoFitResult: 
+    """))
+    show(IOContext(io, :compact => true), result.simulation)
+    print(io, chomp("""\n
+    -------------------------------------------------------------------
+
+    Aligned pdb file: $(result.aligned_pdb)
+    RMSF data file: $(result.rmsf_file)
+    RMSD data file: $(result.rmsd_file)
+
+    Number of frames considered: $(length(result.iframes))
+    Average RMSD of all atoms: $av_all
+    Average RMSD of the $plow% atoms of lowest RMSD: $av_low
+    Average RMSD of the $phigh% atoms of highest RMSD: $av_high
+
+    Frame indices availabe in result.iframe
+    RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
+
+    RMSF data availabe in result.rmsf (Number of atoms: $(length(result.rmsf)))
+    -------------------------------------------------------------------
+    """))
 end
 
 """
@@ -278,9 +287,10 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
 
-julia> result = mdlovofit(sim, fraction=0.5, output_name="mdlovofit_50")
+julia> md = mdlovofit(sim, fraction=0.7, output_name="mdlovofit_50")
 -------------------------------------------------------------------
-MDLovoFitResult
+MDLovoFitResult: Simulation(structure.pdb, trajectory.dcd)
+
 -------------------------------------------------------------------
 
 Aligned pdb file: mdlovofit_50_aligned.pdb
@@ -288,9 +298,9 @@ RMSF data file: mdlovofit_50_rmsf.dat
 RMSD data file: mdlovofit_50_rmsd.dat
 
 Number of frames considered: 5
-Average RMSD of all atoms: 1.89
-Average RMSD of the 50.0% atoms of lowest RMSD: 0.0
-Average RMSD of the 50.0% atoms of highest RMSD: 3.7
+Average RMSD of all atoms: 1.79
+Average RMSD of the 70.0% atoms of lowest RMSD: 0.53
+Average RMSD of the 30.0% atoms of highest RMSD: 4.71
 
 Frame indices availabe in result.iframe
 RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
@@ -303,26 +313,29 @@ RMSF data availabe in result.rmsf (Number of atoms: 43)
 function mdlovofit(
     simulation::Simulation;
     fraction::AbstractFloat,
-    output_name::Union{String,Nothing} = nothing,
-    reference_frame::Int = 1,
+    output_name::Union{String,Nothing}=nothing,
+    reference_frame::Int=1,
     maxframes=nothing,
 )
     # write temporary trajectory file
     tmp_trajectory_file, iframes = _write_temporary_trajectory(simulation, maxframes)
     # Run MDLovoFit
-    rmsf_file, rmsd_file, output_pdb = if isnothing(output_name) 
+    rmsf_file, rmsd_file, output_pdb = if isnothing(output_name)
         @warn """\n
             `output_name` was not provided. Default names will be used.
 
         """ _file = nothing _line = nothing
         tmpfile = "mdlovofit"
-        tmpfile*"_rmsf.dat", tmpfile*"_rmsd.dat", tmpfile*"_aligned.pdb"
+        tmpfile * "_rmsf.dat", tmpfile * "_rmsd.dat", tmpfile * "_aligned.pdb"
     else
-        output_name*"_rmsf.dat", output_name*"_rmsd.dat", output_name*"_aligned.pdb"
+        output_name * "_rmsf.dat", output_name * "_rmsd.dat", output_name * "_aligned.pdb"
     end
     try
         MDLovoFit_jll.mdlovofit() do exe
-            run(pipeline(`$exe -f $fraction -iref $reference_frame -rmsf $rmsf_file -t $output_pdb $tmp_trajectory_file`; stdout=rmsd_file))
+            run(pipeline(
+                `$exe -f $fraction -iref $reference_frame -rmsf $rmsf_file -t $output_pdb $tmp_trajectory_file`;
+                stdout=rmsd_file
+            ))
         end
     catch
         "ERROR in MDLovoFit execution"
@@ -331,17 +344,17 @@ function mdlovofit(
 
     # Read RMSD file
     rmsd_data = readdlm(rmsd_file; comments=true, comment_char='#')
-    rmsd_low = rmsd_data[:,2]
-    rmsd_high = rmsd_data[:,3]
-    rmsd_all = rmsd_data[:,4]
+    rmsd_low = rmsd_data[:, 2]
+    rmsd_high = rmsd_data[:, 3]
+    rmsd_all = rmsd_data[:, 4]
     # Read RMSF file
-    rmsf = readdlm(rmsf_file; comments=true, comment_char='#')[:,2]
-    return MDLovoFitResult(fraction, iframes, rmsd_low, rmsd_high, rmsd_all, rmsf, rmsf_file, rmsd_file, output_pdb)
+    rmsf = readdlm(rmsf_file; comments=true, comment_char='#')[:, 2]
+    return MDLovoFitResult(simulation, fraction, iframes, rmsd_low, rmsd_high, rmsd_all, rmsf, rmsf_file, rmsd_file, output_pdb)
 end
 
 @testitem "map_fractions" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing 
+    using MolSimToolkit, MolSimToolkit.Testing
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     mf = map_fractions(sim)
@@ -365,7 +378,7 @@ end
     @test parse_show(mf) ≈ """
     -------------------------------------------------------------------
     MapFractionsResult: Simulation(structure.pdb, trajectory.dcd)
-    
+
     -------------------------------------------------------------------
     Fields: 
     - fraction: fraction of atoms considered in the alignment.
@@ -373,7 +386,7 @@ end
     - rmsd_low: RMSD of the fraction of the structure with the lowest RMSD.
     - rmsd_high: RMSD of the fraction not considered for the alignment.
     - rmsd_all: RMSD of the whole structure.
-    
+
     Greatest fraction for which the RMSD-low is smaller than 1.0: 0.99
                                                              2.0: 0.99
                                                              3.0: 0.99
@@ -383,7 +396,7 @@ end
 
 @testitem "mdlovofit" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing 
+    using MolSimToolkit, MolSimToolkit.Testing
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     @test_throws UndefKeywordError mdlovofit(sim)
