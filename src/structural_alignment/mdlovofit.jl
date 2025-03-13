@@ -415,4 +415,28 @@ end
     @test isfile("mdlovofit_50_rmsd.dat")
     @test length(fit.iframes) == 50
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
+
+    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
+    fit = mdlovofit(sim; fraction=0.50, output_name="mdlovofit_50")
+    @test parse_show(fit) ≈ """
+     -------------------------------------------------------------------
+     MDLovoFitResult: Simulation(structure.pdb, trajectory.dcd)
+     
+     -------------------------------------------------------------------
+     
+     Aligned pdb file: mdlovofit_50_aligned.pdb
+     RMSF data file: mdlovofit_50_rmsf.dat
+     RMSD data file: mdlovofit_50_rmsd.dat
+     
+     Number of frames considered: 50
+     Average RMSD of all atoms: 0.94
+     Average RMSD of the 50.0% atoms of lowest RMSD: 0.32
+     Average RMSD of the 50.0% atoms of highest RMSD: 1.49
+     
+     Frame indices availabe in result.iframe
+     RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
+     
+     RMSF data availabe in result.rmsf (Number of atoms: 19)
+     -------------------------------------------------------------------
+    """
 end
