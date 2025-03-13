@@ -556,7 +556,9 @@ end
     using PDBTools
     using ShowMethodTesting: parse_show
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    @test parse_show(sim; repl=Dict("MolSimToolkit." => "")) ≈ """
+    # replacement to avoid errors associated to type names
+    repl = Dict("MolSimToolkit." => "", "PDBTools." => "")
+    @test parse_show(sim; repl=repl) ≈ """
     Simulation 
     Atom type: Atom{Nothing}
     PDB file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/structure.pdb
@@ -566,7 +568,7 @@ end
     Number of frames to consider: 5
     Current frame: nothing
     """
-    @test parse_show(repr(sim; context= :compact => true), repl=Dict("MolSimToolkit." => "")) ≈ "Simulation(structure.pdb, trajectory.dcd)"
+    @test parse_show(repr(sim; context= :compact => true), repl=repl) ≈ "Simulation(structure.pdb, trajectory.dcd)"
 end
 
 #
