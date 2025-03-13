@@ -127,17 +127,23 @@ end
 end
 
 import Base: show
-function show(io::IO, simulation::Simulation)
-    print(io, chomp("""
-    Simulation 
-        Atom type: $(eltype(simulation.atoms))
-        PDB file: $(isnothing(simulation.pdb_file) ? "-" : path_pdb(simulation))
-        Trajectory file: $(path_trajectory(simulation))
-        Total number of frames: $(raw_length(simulation))
-        Frames to consider: $(_print_frame_range(simulation))
-        Number of frames to consider: $(length(simulation))
-        Current frame: $(frame_index(simulation))
-    """))
+function show(io::IO, sim::Simulation)
+    compact = get(io, :compact, false)::Bool
+    if compact
+        isnothing(path_pdb(sim)) ? pdb = "-" : pdb = basename(path_pdb(sim))
+        print(io, "Simulation($pdb, $(basename(path_trajectory(sim))))")
+    else
+        print(io, chomp("""
+        Simulation 
+            Atom type: $(eltype(sim.atoms))
+            PDB file: $(isnothing(sim.pdb_file) ? "-" : path_pdb(sim))
+            Trajectory file: $(path_trajectory(sim))
+            Total number of frames: $(raw_length(sim))
+            Frames to consider: $(_print_frame_range(sim))
+            Number of frames to consider: $(length(sim))
+            Current frame: $(frame_index(sim))
+        """))
+    end
 end
 
 import Base: lock
@@ -542,6 +548,25 @@ end
     @test frame_range(sim2) == [1,2,3]
     set_frame_range!(sim2; first=2, last=4)
     @test frame_range(sim2) == [2,3,4]
+end
+
+@testitem "Simulation - show" begin
+    using MolSimToolkit
+    using MolSimToolkit.Testing
+    using PDBTools
+    using ShowMethodTesting: parse_show
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    @test parse_show(sim; repl=Dict("MolSimToolkit." => "")) ≈ """
+    Simulation 
+    Atom type: Atom{Nothing}
+    PDB file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/structure.pdb
+    Trajectory file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/trajectory.dcd
+    Total number of frames: 5
+    Frames to consider: 1, 2, 3, 4, 5
+    Number of frames to consider: 5
+    Current frame: nothing
+    """
+    @test parse_show(repr(sim; context= :compact => true), repl=Dict("MolSimToolkit." => "")) ≈ "Simulation(structure.pdb, trajectory.dcd)"
 end
 
 #
