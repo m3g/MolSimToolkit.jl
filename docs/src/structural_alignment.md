@@ -15,6 +15,8 @@ flexibile regions.
 
 ## Conventional rigid-body alignment
 
+Conventional rigid-body aligments routines are:
+
 ```@docs
 rmsd
 rmsd_matrix
@@ -31,11 +33,11 @@ For example, it is possible to automatically identifiy a stable region of a prot
 
 The software provides, as output, the Root-Mean-Square Deviations of the conserved structures, and of the divergent structures. A trajectory PDB file is output for the visualization of the results. 
 
-The execution of the MDLovoFit procedure typically has two steps:
+The execution of the MDLovoFit procedure typically has three steps:
 
-1. Identify the length of the structure that can be aligned with a precision lower than a threshold. This is done with the `map_fractions` function.
-2. Align the trajectory for the fraction of atoms desired, with the `mdlovofit` function.
-3. Visualize the aligned trajectory and aligned atoms.
+- [Step1:](@ref mdlovofit1) Identify the length of the structure that can be aligned with a precision lower than a threshold. This is done with the `map_fractions` function.
+- [Step 2:](@ref mdlovofit2) Align the trajectory for the fraction of atoms desired, with the `mdlovofit` function.
+- [Step 3:](@ref mdlovofit3) Visualize the aligned trajectory and aligned atoms.
 
 !!! note
     Please cite the following references if these functions were useful:
@@ -48,7 +50,7 @@ The execution of the MDLovoFit procedure typically has two steps:
 
     It is possible to use `mdlovofit` as a standalone program by downloading it [here](https://m3g.github.io/mdlovofit/).
 
-### Step 1: Map fractions of aligned atoms and overlap precision
+### [Step 1: Map fractions of aligned atoms and overlap precision](@id mdlovofit1)
 
 ```@docs
 map_fractions
@@ -90,7 +92,7 @@ conserved structural core of the protein, and proceed with the next analysis, wh
 we will ask `mdlovofit` to obtain the best alignment of 80% of the atoms, of each
 frame relative to the first frame.
 
-### Step 2: Align the trajectory for a given fraction of atoms
+### [Step 2: Align the trajectory for a given fraction of atoms](@id mdlovofit2)
 
 ```@docs
 mdlovofit
@@ -122,7 +124,7 @@ And we can see that, in this short (5-frame) trajectory, the N-terminal region o
 protein is the one responsible for the structural deviations, while there is a 
 rigid structural core between residues I221 and K249.
 
-### Visualization of the aligned trajectory
+### [Step 3: Visualization of the aligned trajectory](@id mdlovofit3)
 
 The PDB file created by `mdlovofit` contains the frames aligned to the reference frame,
 according to the robust alignment based on the least mobile substructure (determined
