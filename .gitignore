@@ -5,3 +5,13 @@ docs/build*
 ext/Manifest.toml
 box.inp
 coaraci.log
+test_mdlovofit_aligned.pdb
+test_mdlovofit_rmsd.dat
+test_mdlovofit_rmsf.dat
+mdlovofit_aligned.pdb
+.gitignore
+mdlovofit_rmsd.dat
+mdlovofit_rmsf.dat
+mdlovofit_50_aligned.pdb
+mdlovofit_50_rmsd.dat
+mdlovofit_50_rmsf.dat
