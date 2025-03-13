@@ -206,7 +206,7 @@ Fields:
 struct MDLovoFitResult
     simulation::Simulation
     fraction::Float64
-    iframes::Vector{Int}
+    frame_indices::Vector{Int}
     rmsd_low::Vector{Float64}
     rmsd_high::Vector{Float64}
     rmsd_all::Vector{Float64}
@@ -234,15 +234,15 @@ function Base.show(io::IO, result::MDLovoFitResult)
     RMSF data file: $(result.rmsf_file)
     RMSD data file: $(result.rmsd_file)
 
-    Number of frames considered: $(length(result.iframes))
+    Number of frames considered: $(length(result.frame_indices))
     Average RMSD of all atoms: $av_all
     Average RMSD of the $plow% atoms of lowest RMSD: $av_low
     Average RMSD of the $phigh% atoms of highest RMSD: $av_high
 
-    Frame indices availabe in result.iframe
-    RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
+    Frame indices availabe in field: frame_indices
+    RMSD data availabe in fields: rmsd_low, rmsd_high, and rmsd_all
 
-    RMSF data availabe in result.rmsf (Number of atoms: $(length(result.rmsf)))
+    RMSF data availabe in field: rmsf (Number of atoms: $(length(result.rmsf)))
     -------------------------------------------------------------------
     """))
 end
@@ -302,10 +302,10 @@ Average RMSD of all atoms: 1.79
 Average RMSD of the 70.0% atoms of lowest RMSD: 0.53
 Average RMSD of the 30.0% atoms of highest RMSD: 4.71
 
-Frame indices availabe in result.iframe
-RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
+Frame indices availabe in field: frame_indices
+RMSD data availabe in fields: rmsd_low, rmsd_high, and rmsd_all
 
-RMSF data availabe in result.rmsf (Number of atoms: 43)
+RMSF data availabe in field: rmsf (Number of atoms: 43)
 -------------------------------------------------------------------
 ```
 
@@ -318,7 +318,7 @@ function mdlovofit(
     maxframes=nothing,
 )
     # write temporary trajectory file
-    tmp_trajectory_file, iframes = _write_temporary_trajectory(simulation, maxframes)
+    tmp_trajectory_file, frame_indices = _write_temporary_trajectory(simulation, maxframes)
     # Run MDLovoFit
     rmsf_file, rmsd_file, output_pdb = if isnothing(output_name)
         @warn """\n
@@ -349,7 +349,18 @@ function mdlovofit(
     rmsd_all = rmsd_data[:, 4]
     # Read RMSF file
     rmsf = readdlm(rmsf_file; comments=true, comment_char='#')[:, 2]
-    return MDLovoFitResult(simulation, fraction, iframes, rmsd_low, rmsd_high, rmsd_all, rmsf, rmsf_file, rmsd_file, output_pdb)
+    return MDLovoFitResult(
+        simulation, 
+        fraction, 
+        frame_indices, 
+        rmsd_low, 
+        rmsd_high, 
+        rmsd_all, 
+        rmsf, 
+        rmsf_file, 
+        rmsd_file, 
+        output_pdb
+    )
 end
 
 @testitem "map_fractions" begin
@@ -358,19 +369,19 @@ end
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     mf = map_fractions(sim)
-    @test length(mf.iframes) == 100
-    @test sum(mf.iframes) == 7074
+    @test length(mf.frame_indices) == 100
+    @test sum(mf.frame_indices) == 7074
     @test sum(mf.rmsd_all) ≈ 65.12515215300002
     @test_throws ArgumentError map_fractions(sim; maxframes=200)
     mf = map_fractions(sim; maxframes=121)
-    @test length(mf.iframes) == 121
-    @test sum(mf.iframes) == 7620
+    @test length(mf.frame_indices) == 121
+    @test sum(mf.frame_indices) == 7620
     mf = map_fractions(sim; maxframes=50)
-    @test length(mf.iframes) == 50
-    @test last(mf.iframes) == 122
+    @test length(mf.frame_indices) == 50
+    @test last(mf.frame_indices) == 122
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:70)
     mf = map_fractions(sim)
-    @test length(mf.iframes) == 70
+    @test length(mf.frame_indices) == 70
     @test sum(mf.rmsd_all) ≈ 66.11294932099999
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
@@ -382,7 +393,7 @@ end
     -------------------------------------------------------------------
     Fields: 
     - fraction: fraction of atoms considered in the alignment.
-    - iframes: the frame index of each frame considered.
+    - frame_indices: the frame index of each frame considered.
     - rmsd_low: RMSD of the fraction of the structure with the lowest RMSD.
     - rmsd_high: RMSD of the fraction not considered for the alignment.
     - rmsd_all: RMSD of the whole structure.
@@ -405,7 +416,7 @@ end
     @test isfile("mdlovofit_aligned.pdb")
     @test isfile("mdlovofit_rmsf.dat")
     @test isfile("mdlovofit_rmsd.dat")
-    @test length(fit.iframes) == 100
+    @test length(fit.frame_indices) == 100
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
@@ -413,7 +424,7 @@ end
     @test isfile("mdlovofit_50_aligned.pdb")
     @test isfile("mdlovofit_50_rmsf.dat")
     @test isfile("mdlovofit_50_rmsd.dat")
-    @test length(fit.iframes) == 50
+    @test length(fit.frame_indices) == 50
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
@@ -433,10 +444,10 @@ end
      Average RMSD of the 50.0% atoms of lowest RMSD: 0.32
      Average RMSD of the 50.0% atoms of highest RMSD: 1.49
      
-     Frame indices availabe in result.iframe
-     RMSD data availabe in rmsd_low, rmsd_high, and rmsd_all
+     Frame indices availabe in field: frame_indices
+     RMSD data availabe in fields: rmsd_low, rmsd_high, and rmsd_all
      
-     RMSF data availabe in result.rmsf (Number of atoms: 19)
+     RMSF data availabe in field: rmsf (Number of atoms: 19)
      -------------------------------------------------------------------
     """
 end
