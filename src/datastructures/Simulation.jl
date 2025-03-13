@@ -560,8 +560,8 @@ end
     repl = Dict(
         "MolSimToolkit." => "", 
         "PDBTools." => "",
-        r"(PDB file: )(/[^ \n]+)" => s"\1",
-        r"(Trajectory file: )(/[^ \n]+)" => s"\1",
+        r"(PDB file:).*" => s"\1",
+        r"(Trajectory file:).*" => s"\1",
     )
     @test parse_show(sim; repl=repl) ≈ """
     Simulation 
