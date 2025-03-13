@@ -144,7 +144,7 @@ Keyword arguments:
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> mf = map_fractions(sim)
 -------------------------------------------------------------------
@@ -285,7 +285,7 @@ and the output files:
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> md = mdlovofit(sim, fraction=0.7, output_name="mdlovofit_50")
 -------------------------------------------------------------------
