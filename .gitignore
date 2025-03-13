@@ -15,3 +15,6 @@ mdlovofit_rmsf.dat
 mdlovofit_50_aligned.pdb
 mdlovofit_50_rmsd.dat
 mdlovofit_50_rmsf.dat
+aligned_aligned.pdb
+aligned_rmsd.dat
+aligned_rmsf.dat
