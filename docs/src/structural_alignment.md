@@ -46,6 +46,8 @@ The execution of the MDLovoFit procedure typically has two steps:
     L. Martínez. R. Andreani, J. M. Martínez. **Convergent Algorithms for Protein Structural Alignment.** BMC Bioinformatics, 8, 306, 2007.
     [Full text](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-306).
 
+    It is possible to use `mdlovofit` as a standalone program by downloading it [here](https://m3g.github.io/mdlovofit/).
+
 ### Step 1: Map fractions of aligned atoms and overlap precision
 
 ```@docs
