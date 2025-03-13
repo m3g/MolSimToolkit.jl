@@ -557,12 +557,17 @@ end
     using ShowMethodTesting: parse_show
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
     # replacement to avoid errors associated to type names
-    repl = Dict("MolSimToolkit." => "", "PDBTools." => "")
+    repl = Dict(
+        "MolSimToolkit." => "", 
+        "PDBTools." => "",
+        r"(PDB file: )(/[^ \n]+)" => s"\1",
+        r"(Trajectory file: )(/[^ \n]+)" => s"\1",
+    )
     @test parse_show(sim; repl=repl) ≈ """
     Simulation 
     Atom type: Atom{Nothing}
-    PDB file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/structure.pdb
-    Trajectory file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/trajectory.dcd
+    PDB file:
+    Trajectory file:
     Total number of frames: 5
     Frames to consider: 1, 2, 3, 4, 5
     Number of frames to consider: 5
