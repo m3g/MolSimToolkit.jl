@@ -67,7 +67,8 @@ include("./miscelaneous_functions/bulk_coordination.jl")
 include("./miscelaneous_functions/coordination_number.jl")
 
 #  Structural alignment
-include("./structural_alignment.jl")
+include("./structural_alignment/standard.jl")
+include("./structural_alignment/mdlovofit.jl")
 
 # Analysis functions and modules
 include("./BlockAverages.jl")

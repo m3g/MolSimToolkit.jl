@@ -137,6 +137,15 @@ function _get_mol_indices(mol_indices, n_atoms_per_molecule; flag::String="")
     return mol_indices
 end
 
+function _check_nmols(natoms, n_atoms_per_molecule)
+    if natoms % n_atoms_per_molecule != 0
+        throw(ArgumentError("""\n
+            The number of atoms ($natoms) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
+
+        """))
+    end
+end
+
 # Simplify signature of arrays of MinimumDistance and its tuples.
 List{T} = Vector{<:MinimumDistance{T}}
 ListTuple{T} = Tuple{Vector{<:MinimumDistance{T}},Vector{<:MinimumDistance{T}}}
@@ -417,6 +426,7 @@ function minimum_distances(;
     yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     parallel::Bool=true,
 )
+    _check_nmols(length(xpositions), xn_atoms_per_molecule)
     # SelfPairs
     if isnothing(ypositions)
         mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)
@@ -444,6 +454,7 @@ function minimum_distances(;
     end
     # AllPairs
     if !isnothing(xpositions) && (!isnothing(yn_atoms_per_molecule) || !isnothing(ymol_indices))
+        _check_nmols(ypositions, yn_atoms_per_molecule)
         xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
         ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
         system = AllPairs(;
