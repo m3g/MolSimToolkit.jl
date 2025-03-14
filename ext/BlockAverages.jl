@@ -11,11 +11,11 @@ with the `block_distribution` function.
 # Example
 
 ```julia-repl
-julia> using MolSimToolKit, Plots
+julia> using MolSimToolkit, Plots
 
-julia> x = BlockAverage.test_data(10^6);
+julia> x = BlockAverages.test_data(10^6);
 
-julia> md = block_distribution(x; nblocks=1000);
+julia> md = block_distribution(x; block_size=10^5);
 
 julia> histogram(md)
 ```
@@ -51,9 +51,9 @@ Function that creates a plot of output data from `block_average`. The optional
 ## Example
 
 ```julia-repl
-julia> using MolSimToolKit, Plots
+julia> using MolSimToolkit, Plots
 
-julia> x = BlockAverage.test_data(10^6);
+julia> x = BlockAverages.test_data(10^6);
 
 julia> b = block_average(x, lags=0:100:10^5);
 
@@ -143,4 +143,18 @@ function plot(
         rightmargin=0.5cm,
     )
     return p
+end
+
+@testitem "blockaverages plotting" begin
+    using MolSimToolkit, Plots
+    x = BlockAverages.test_data(10^6);
+    md = block_distribution(x; block_size=10^5);
+    tempfile = tempname()*".png"
+    plt = histogram(md)
+    savefig(plt, tempfile)
+    @test isfile(tempfile)
+    b = block_average(x, lags=0:100:10^5)
+    plt = plot(b)
+    savefig(plt, tempfile)
+    @test isfile(tempfile)
 end

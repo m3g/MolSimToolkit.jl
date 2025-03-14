@@ -55,6 +55,7 @@ The execution of the MDLovoFit procedure typically has three steps:
 ```@docs
 map_fractions
 MapFractionsResult
+plot(::MapFractionsResult)
 ```
 
 The `map_fractions` function scans the trajectory and tries to align the C$$\alpha$$ atoms of the protein
@@ -97,6 +98,7 @@ frame relative to the first frame.
 ```@docs
 mdlovofit
 MDLovoFitResult
+plot(::MDLovoFitResult)
 ```
 
 Continuing with the above example, now we will call the `mdlovofit` function, to obtain

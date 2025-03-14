@@ -53,10 +53,15 @@ struct MinimumDistance{T}
     j::Int
     d::T
 end
-import Base: zero, copy, convert
-zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
-copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
-convert(::Type{MinimumDistance{T}}, md::MinimumDistance) where {T} = MinimumDistance(md.within_cutoff, md.i, md.j, convert(T, md.d))
+Base.zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
+Base.copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
+Base.convert(::Type{MinimumDistance{T}}, md::MinimumDistance) where {T} = MinimumDistance(md.within_cutoff, md.i, md.j, convert(T, md.d))
+function Base.isapprox(md1::MinimumDistance, md2::MinimumDistance; kargs...)  
+    md1.within_cutoff == md2.within_cutoff || return false
+    md1.i == md2.i || return false
+    md1.j == md2.j || return false
+    return isapprox(md1.d, md2.d; kargs...)
+end
 
 #
 # useful getter functions
@@ -137,10 +142,13 @@ function _get_mol_indices(mol_indices, n_atoms_per_molecule; flag::String="")
     return mol_indices
 end
 
-function _check_nmols(natoms, n_atoms_per_molecule)
-    if natoms % n_atoms_per_molecule != 0
+# Check if the number of atoms per molecule is compatible with the length of 
+# the array of atomic positions
+function _check_nmols(ats::AbstractVector, n_atoms_per_molecule::Union{Nothing,Integer})
+    isnothing(n_atoms_per_molecule) && return nothing
+    if length(ats) % n_atoms_per_molecule != 0
         throw(ArgumentError("""\n
-            The number of atoms ($natoms) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
+            The number of atoms ($(length(ats))) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
 
         """))
     end
@@ -426,7 +434,6 @@ function minimum_distances(;
     yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     parallel::Bool=true,
 )
-    _check_nmols(length(xpositions), xn_atoms_per_molecule)
     # SelfPairs
     if isnothing(ypositions)
         mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)
@@ -454,7 +461,6 @@ function minimum_distances(;
     end
     # AllPairs
     if !isnothing(xpositions) && (!isnothing(yn_atoms_per_molecule) || !isnothing(ymol_indices))
-        _check_nmols(ypositions, yn_atoms_per_molecule)
         xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
         ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
         system = AllPairs(;
@@ -512,10 +518,5 @@ include("./CrossPairs.jl")
 # between two disjoint sets of molecules
 #
 include("./AllPairs.jl")
-
-#
-# Testing routines
-#
-include("./testing.jl")
 
 end # MolecularMinimumDistances
