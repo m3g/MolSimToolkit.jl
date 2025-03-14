@@ -154,4 +154,20 @@ end
         unitcell = uc, 
         xn_atoms_per_molecule = 133,
     )
+    # Test conversion if float types have different precision
+    mdf32 = minimum_distances(
+        xpositions = [ Point3D{Float32}(v) for v in xsolvent ],
+        ypositions = [ Point3D{Float32}(v) for v in xsolute ],
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 134,
+    )
+    mdf64 = minimum_distances(
+        xpositions = xsolvent,
+        ypositions = xsolute,
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 134,
+    )
+    @test all(mdf32 .≈ mdf64)
 end
