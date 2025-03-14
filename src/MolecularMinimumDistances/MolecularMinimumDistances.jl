@@ -137,11 +137,13 @@ function _get_mol_indices(mol_indices, n_atoms_per_molecule; flag::String="")
     return mol_indices
 end
 
-function _check_nmols(natoms, n_atoms_per_molecule)
+# Check if the number of atoms per molecule is compatible with the length of 
+# the array of atomic positions
+function _check_nmols(ats::AbstractVector, n_atoms_per_molecule::Union{Nothing,Integer})
     isnothing(n_atoms_per_molecule) && return nothing
-    if natoms % n_atoms_per_molecule != 0
+    if length(ats) % n_atoms_per_molecule != 0
         throw(ArgumentError("""\n
-            The number of atoms ($natoms) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
+            The number of atoms ($(length(ats))) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
 
         """))
     end
@@ -427,7 +429,7 @@ function minimum_distances(;
     yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     parallel::Bool=true,
 )
-    _check_nmols(length(xpositions), xn_atoms_per_molecule)
+    _check_nmols(xpositions, xn_atoms_per_molecule)
     # SelfPairs
     if isnothing(ypositions)
         mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)

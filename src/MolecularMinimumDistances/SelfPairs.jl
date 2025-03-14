@@ -70,6 +70,7 @@ function SelfPairs(;
     mol_indices::F1=nothing,
     parallel::Bool=true,
 ) where {T<:Real, F1<:Union{Nothing,Function}}
+    _check_nmols(xpositions, xn_atoms_per_molecule)
     mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)
     system = ParticleSystem(;
         xpositions=xpositions,
@@ -128,4 +129,11 @@ end
         md_min[iframe] = minimum(p -> p.d, md)
     end
     @test md_min ≈ [1.7787845332699295, 1.8000887689403775, 1.7751687089934818, 1.8329921680458754, 1.6533482891665536]
+
+    @test_throws ArgumentError SelfPairs(
+        xpositions = xsolvent,
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 133,
+    )
 end

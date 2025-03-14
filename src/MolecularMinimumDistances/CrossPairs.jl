@@ -78,6 +78,7 @@ function CrossPairs(;
     xmol_indices::F1=nothing,
     parallel::Bool=true
 ) where {F1<:Union{Nothing,Function}}
+    _check_nmols(xpositions, xn_atoms_per_molecule)
     xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
     system = ParticleSystem(;
         xpositions=xpositions,
@@ -135,4 +136,11 @@ end
         md_count[iframe] = count(p -> p.within_cutoff, md)
     end
     @test md_count == [23, 24, 24, 25, 24]
+    @test_throws ArgumentError CrossPairs(
+        xpositions = xsolvent,
+        ypositions = xsolute,
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 133,
+    )
 end
