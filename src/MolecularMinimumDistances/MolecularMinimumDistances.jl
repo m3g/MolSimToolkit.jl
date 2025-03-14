@@ -53,10 +53,15 @@ struct MinimumDistance{T}
     j::Int
     d::T
 end
-import Base: zero, copy, convert
-zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
-copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
-convert(::Type{MinimumDistance{T}}, md::MinimumDistance) where {T} = MinimumDistance(md.within_cutoff, md.i, md.j, convert(T, md.d))
+Base.zero(::Type{MinimumDistance{T}}) where {T} = MinimumDistance(false, 0, 0, typemax(T))
+Base.copy(md::MinimumDistance) = MinimumDistance(md.within_cutoff, md.i, md.j, md.d)
+Base.convert(::Type{MinimumDistance{T}}, md::MinimumDistance) where {T} = MinimumDistance(md.within_cutoff, md.i, md.j, convert(T, md.d))
+function Base.isapprox(md1::MinimumDistance, md2::MinimumDistance; kargs...)  
+    md1.within_cutoff == md2.within_cutoff || return false
+    md1.i == md2.i || return false
+    md1.j == md2.j || return false
+    return isapprox(md1.d, md2.d; kargs...)
+end
 
 #
 # useful getter functions
@@ -429,7 +434,6 @@ function minimum_distances(;
     yn_atoms_per_molecule::Union{Nothing,Integer}=nothing,
     parallel::Bool=true,
 )
-    _check_nmols(xpositions, xn_atoms_per_molecule)
     # SelfPairs
     if isnothing(ypositions)
         mol_indices = _get_mol_indices(mol_indices, xn_atoms_per_molecule)
@@ -457,7 +461,6 @@ function minimum_distances(;
     end
     # AllPairs
     if !isnothing(xpositions) && (!isnothing(yn_atoms_per_molecule) || !isnothing(ymol_indices))
-        _check_nmols(ypositions, yn_atoms_per_molecule)
         xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
         ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
         system = AllPairs(;

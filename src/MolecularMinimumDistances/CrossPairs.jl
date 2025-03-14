@@ -107,18 +107,18 @@ end
 
 @testitem "MD - CrossPairs" begin
     using PDBTools
-    atoms = readPDB(MolSimToolkit.Testing.namd_pdb)
-    popc = selindex(atoms, "resname POPC")
-    protein = selindex(atoms, "protein")
+    ats = readPDB(MolSimToolkit.Testing.namd_pdb)
+    popc = selindex(ats, "resname POPC")
+    protein = selindex(ats, "protein")
     simulation = Simulation(
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
     first_frame!(simulation)
-    coor = positions(current_frame(simulation))
+    p = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(coor), length(popc))
-    xsolute = zeros(eltype(coor), length(protein))
+    xsolvent = zeros(eltype(p), length(popc))
+    xsolute = zeros(eltype(p), length(protein))
     sys = CrossPairs(
         xpositions = xsolvent,
         ypositions = xsolute,
@@ -134,6 +134,17 @@ end
         sys.unitcell = unitcell(frame)
         md = minimum_distances!(sys)
         md_count[iframe] = count(p -> p.within_cutoff, md)
+        # Test direct (out-of-place) call
+        if iframe == 1
+            md_out = minimum_distances(
+                xpositions = sys.xpositions,
+                ypositions = sys.ypositions,
+                xn_atoms_per_molecule = 134,
+                cutoff = 6.0,
+                unitcell = sys.unitcell
+            )
+            @test all(md_out .≈ md)
+        end
     end
     @test md_count == [23, 24, 24, 25, 24]
     @test_throws ArgumentError CrossPairs(

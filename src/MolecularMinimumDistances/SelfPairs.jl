@@ -104,16 +104,16 @@ end
 
 @testitem "MD - SelfPairs" begin
     using PDBTools
-    atoms = readPDB(MolSimToolkit.Testing.namd_pdb)
-    popc = selindex(atoms, "resname POPC")
+    ats = readPDB(MolSimToolkit.Testing.namd_pdb)
+    popc = selindex(ats, "resname POPC")
     simulation = Simulation(
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
     first_frame!(simulation)
-    coor = positions(current_frame(simulation))
+    p = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(coor), length(popc))
+    xsolvent = zeros(eltype(p), length(popc))
     sys = SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
@@ -127,9 +127,18 @@ end
         sys.unitcell = unitcell(frame)
         md = minimum_distances!(sys)
         md_min[iframe] = minimum(p -> p.d, md)
+        # Test direct (out-of-place) call
+        if iframe == 1
+            md_out = minimum_distances(
+                xpositions = sys.xpositions,
+                xn_atoms_per_molecule = 134,
+                cutoff = 6.0,
+                unitcell = sys.unitcell
+            )
+            @test all(md_out .≈ md)
+        end
     end
     @test md_min ≈ [1.7787845332699295, 1.8000887689403775, 1.7751687089934818, 1.8329921680458754, 1.6533482891665536]
-
     @test_throws ArgumentError SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,

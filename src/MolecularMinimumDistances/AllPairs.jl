@@ -163,6 +163,19 @@ end
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])
+        # Test direct (out-of-place) call
+        if iframe == 1
+            md_out = minimum_distances(
+                xpositions = sys.xpositions,
+                ypositions = sys.ypositions,
+                xn_atoms_per_molecule = 134,
+                yn_atoms_per_molecule = length(protein),
+                cutoff = 6.0,
+                unitcell = sys.unitcell
+            )
+            @test all(md_out[1] .≈ md[1])
+            @test all(md_out[2] .≈ md[2])
+        end
     end
     @test xmd_min ≈ [1.9533253817007286, 1.6489800900283895, 1.6469793433779658, 1.5597538784005365, 1.5163768980822412] 
     @test ymd_indices ≈ [378, 597, 597, 577, 576]
@@ -184,5 +197,4 @@ end
         xn_atoms_per_molecule = 134,
         yn_atoms_per_molecule = length(protein) + 1,
     )
-
 end
