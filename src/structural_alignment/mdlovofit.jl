@@ -62,7 +62,8 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
     cA_inds = PDBTools.index.(cA)
     tmp_trajectory_file = tempname() * "_mdlovofit_trajectory.pdb"
     for (iframe, frame) in enumerate(simulation)
-        if iframe in frame_indices
+        iframe_in_range = frame_range(simulation)[iframe]
+        if iframe_in_range in frame_indices
             p = positions(frame)[cA_inds]
             for (iat, at) in enumerate(cA)
                 at.x = p[iat].x
@@ -384,6 +385,12 @@ end
     @test length(mf.frame_indices) == 70
     @test sum(mf.rmsd_all) ≈ 66.11294932099999
 
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2,5])
+    mf = map_fractions(sim)
+    @test mf.frame_indices == [2, 5]
+    @test sum(mf.rmsd_low) ≈ 75.73356675900001 
+    @test sum(mf.rmsd_high) ≈ 769.6762035190002
+
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     mf = map_fractions(sim; maxframes=50)
     @test parse_show(mf) ≈ """
@@ -408,6 +415,7 @@ end
 @testitem "mdlovofit" begin
     using ShowMethodTesting
     using MolSimToolkit, MolSimToolkit.Testing
+    using PDBTools 
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     @test_throws UndefKeywordError mdlovofit(sim)
@@ -426,6 +434,13 @@ end
     @test isfile("mdlovofit_50_rmsd.dat")
     @test length(fit.frame_indices) == 50
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
+
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2,5])
+    md = mdlovofit(sim; fraction = 0.7)
+    pdb = read_pdb(md.aligned_pdb)
+    @test length(eachmodel(pdb)) == 2
+    @test md.frame_indices == [2, 5]
+    @test md.rmsd_low ≈ [0.0, 0.540949029]
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
     fit = mdlovofit(sim; fraction=0.50, output_name="mdlovofit_50")
