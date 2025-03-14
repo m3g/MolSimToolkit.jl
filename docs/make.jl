@@ -7,7 +7,10 @@ push!(LOAD_PATH, "../src/")
 using MolSimToolkit
 using MolSimToolkitShared
 makedocs(
-    modules=[MolSimToolkit, MolSimToolkitShared],
+    modules = [
+        MolSimToolkit, MolSimToolkitShared,
+        isdefined(Base, :get_extension) ? Base.get_extension(MolSimToolkit, :Plotting) : MolSimToolkit.Plotting
+    ],
     sitename="MolSimToolkit.jl",
     doctest=false,
     pages=[

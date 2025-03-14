@@ -125,6 +125,10 @@ Pages = ["gromacs/remd.jl"]
 Order = [:function, :type]
 ```
 
+```@docs
+heatmap(::MolSimToolkit.GromacsREMDlog)
+```
+
 
 
 
