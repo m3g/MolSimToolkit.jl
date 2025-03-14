@@ -138,6 +138,7 @@ function _get_mol_indices(mol_indices, n_atoms_per_molecule; flag::String="")
 end
 
 function _check_nmols(natoms, n_atoms_per_molecule)
+    isnothing(n_atoms_per_molecule) && return nothing
     if natoms % n_atoms_per_molecule != 0
         throw(ArgumentError("""\n
             The number of atoms ($natoms) is not a multiple of the number of atoms per molecule ($n_atoms_per_molecule).
@@ -512,10 +513,5 @@ include("./CrossPairs.jl")
 # between two disjoint sets of molecules
 #
 include("./AllPairs.jl")
-
-#
-# Testing routines
-#
-include("./testing.jl")
 
 end # MolecularMinimumDistances
