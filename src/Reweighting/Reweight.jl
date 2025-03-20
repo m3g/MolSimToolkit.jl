@@ -154,7 +154,13 @@ function reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
+            if isequal(ind_contrib, gp) == false
+                if system[d_i].i in (ind_contrib) && system[d_i].j in (ind_contrib)
+                    energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
+                end
+            else
+                energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
+            end
         else
             for mol_ind in 1:(length(gp_1_coord) ÷ n_atoms_per_molecule)
                 gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_atoms_per_molecule + 1 : mol_ind * n_atoms_per_molecule]
@@ -231,7 +237,13 @@ function reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
+            if isequal(ind_contrib_1, gp_1) == false && isequal(ind_contrib_2, gp_2) == false
+                if system[d_i].i in (ind_contrib_1) && system[d_i].j in (ind_contrib_2)
+                    energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
+                end
+            else
+                energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
+            end
         else
             for mol_ind in 1:n_mol_gp_1
                 gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_atoms_per_molecule_gp_1 + 1 : mol_ind * n_atoms_per_molecule_gp_1]
