@@ -6,4 +6,5 @@ module Plotting
     include("./BlockAverages.jl")
     include("./REMD.jl")
     include("./SecondaryStructure.jl")
+    include("./MDLovoFit.jl")
 end

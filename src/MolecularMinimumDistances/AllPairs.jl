@@ -88,6 +88,8 @@ function AllPairs(;
     ymol_indices::F2=nothing,
     parallel::Bool=true
 ) where {F1<:Union{Nothing,Function}, F2<:Union{Nothing,Function}}
+    _check_nmols(xpositions, xn_atoms_per_molecule)
+    _check_nmols(ypositions, yn_atoms_per_molecule)
     xmol_indices = _get_mol_indices(xmol_indices, xn_atoms_per_molecule; flag="x")
     ymol_indices = _get_mol_indices(ymol_indices, yn_atoms_per_molecule; flag="y")
     system = ParticleSystem(;
@@ -131,18 +133,18 @@ end
 
 @testitem "MD - AllPairs" begin
     using PDBTools
-    atoms = readPDB(MolSimToolkit.Testing.namd_pdb)
-    popc = selindex(atoms, "resname POPC")
-    protein = selindex(atoms, "protein")
+    ats = readPDB(MolSimToolkit.Testing.namd_pdb)
+    popc = selindex(ats, "resname POPC")
+    protein = selindex(ats, "protein")
     simulation = Simulation(
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
     first_frame!(simulation)
-    coor = positions(current_frame(simulation))
+    p = positions(current_frame(simulation))
     uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(coor), length(popc))
-    xsolute = zeros(eltype(coor), length(protein))
+    xsolvent = zeros(eltype(p), length(popc))
+    xsolute = zeros(eltype(p), length(protein))
     sys = AllPairs(
         xpositions = xsolvent,
         ypositions = xsolute,
@@ -161,9 +163,38 @@ end
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])
+        # Test direct (out-of-place) call
+        if iframe == 1
+            md_out = minimum_distances(
+                xpositions = sys.xpositions,
+                ypositions = sys.ypositions,
+                xn_atoms_per_molecule = 134,
+                yn_atoms_per_molecule = length(protein),
+                cutoff = 6.0,
+                unitcell = sys.unitcell
+            )
+            @test all(md_out[1] .≈ md[1])
+            @test all(md_out[2] .≈ md[2])
+        end
     end
     @test xmd_min ≈ [1.9533253817007286, 1.6489800900283895, 1.6469793433779658, 1.5597538784005365, 1.5163768980822412] 
     @test ymd_indices ≈ [378, 597, 597, 577, 576]
+
+    @test_throws ArgumentError AllPairs(
+        xpositions = xsolvent,
+        ypositions = xsolute,
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 124,
+        yn_atoms_per_molecule = length(protein),
+    )
+
+    @test_throws ArgumentError AllPairs(
+        xpositions = xsolvent,
+        ypositions = xsolute,
+        cutoff = 6.0,
+        unitcell = uc, 
+        xn_atoms_per_molecule = 134,
+        yn_atoms_per_molecule = length(protein) + 1,
+    )
 end
-
-

@@ -50,7 +50,10 @@ function heatmap(
         clims=(0, maximum(m))
         colorscale=:tempo
     else
-        throw(ArgumentError("Invalid probability type."))
+        throw(ArgumentError("""\n
+            Invalid probability type.
+            Use `probability_type=:relative` or `probability_type=:absolute`.
+        """))
     end
 
     plt = heatmap(
@@ -97,4 +100,5 @@ end
     plt = heatmap(data; probability_type=:absolute)
     savefig(plt, tmp)
     @test isfile(tmp)
+    @test_throws ArgumentError heatmap(data; probability_type=:wrong)
 end

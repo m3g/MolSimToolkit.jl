@@ -1,3 +1,6 @@
+```@meta
+CollapsedDocStrings = true
+```
 # Block averages
 
 Performs an analysis of the convergence of some property (usually the mean) in a time-series. 
@@ -208,4 +211,8 @@ Pages = ["BlockAverages.jl"]
 Order = [:function, :type]
 ```
 
+```@docs
+plot(::BlockAverageData)
+histogram(::BlockDistribution)
+```
 
