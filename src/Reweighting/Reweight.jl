@@ -315,7 +315,7 @@ function check_n_mol(simulation::Simulation, atom_vec_group::AbstractVector{<:In
         return "Number of molecules in the system seems to be correct for $name"
     elseif division != 1 && quotient == 0
         return @warn("""
-            Number of molecules in the system seems to be a multiple of your input for $name.
+            Number of molecules in the system ($check) seems to be a multiple of your input for $name.
             """)
     elseif quotient != 0
         return @warn("""
