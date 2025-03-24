@@ -237,7 +237,7 @@ function reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            if isequal(ind_contrib_1, gp_1) == false && isequal(ind_contrib_2, gp_2) == false
+            if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
                 if system[d_i].i in (ind_contrib_1) && system[d_i].j in (ind_contrib_2)
                     energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
                 end
@@ -257,7 +257,7 @@ function reweight(
                 )
                 for d_i in eachindex(gp_2_list)
                     if gp_2_list[d_i].within_cutoff && gp_2_list[d_i].d != 0
-                        if isequal(ind_contrib_1, gp_1) == false && isequal(ind_contrib_2, gp_2) == false
+                        if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
                             if gp_2_list[d_i].i in (ind_contrib_2) && gp_2_list[d_i].j in (ind_contrib_1)
                                 energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
                             end
