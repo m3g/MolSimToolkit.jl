@@ -21,11 +21,11 @@ end #Module Reweighting
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_one_frame.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+    i1 = at -> at.resname == "TFE" && (at.resnum == 239 && at.name == "O")
 
-    i2 = PDBTools.selindex(atoms(simulation), "residue 11")
+    i2 = "protein and residue 11"
 
-    sum_of_dist = reweight(simulation, r -> r/10, [i1[239]], 1, i2, 1; all_dist = true, cutoff = 25.0)
+    sum_of_dist = reweight(simulation, r -> r/10, i1, 1, i2, 1; all_dist = true, cutoff = 25.0)
 
     @test sum_of_dist.energy ≈ [7.4295543149]
 end
@@ -37,9 +37,9 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
+    i1 = "index 97 or index 106"
 
-    i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
+    i2 = "residue 15 and name HB3"
 
     sum_of_dist = reweight(simulation, r -> r/10, i1, 1, i2, 1, all_dist = true, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [
@@ -63,15 +63,15 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+    i1 = "resname TFE and name O"
 
-    i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
+    i2 = "protein and name O"
 
     α = 5.e-3
 
     β = 5.e-3
 
-    probs_test = reweight(simulation, r -> gaussian_decay_perturbation(r/10, α, β), i1, 1, i2, 1; all_dist = true)
+    probs_test = reweight(simulation, r -> gaussian_decay_perturbation(r/10, α, β), i1, 1, i2, 14; all_dist = true)
     @test probs_test.probability ≈ [
         0.08987791339898044
         0.07326337222373071
@@ -93,11 +93,11 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE")
+    i1 = "resname TFE"
 
-    i2 = PDBTools.selindex(atoms(simulation), "protein")
+    i2 = "protein"
 
-    probs_test = reweight(simulation, r -> r, i1, 289, i2, 1)
+    probs_test = reweight(simulation, r -> r, i1, 9, i2, 174)
     @test probs_test.energy ≈ [
         477.47530500203885
         459.8720850333111
@@ -119,11 +119,11 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE")
+    i1 = "resname TFE"
 
-    i2 = PDBTools.selindex(atoms(simulation), "protein")
+    i2 = "protein"
 
-    probs_test = reweight(simulation, r -> r, i1, 289, i2, 1; mol_1_contrib = at -> at.resname  == "TFE", mol_2_contrib = at -> PDBTools.isprotein(at))
+    probs_test = reweight(simulation, r -> r, i1, 9, i2, 174; mol_1_contrib = at -> at.resname  == "TFE", mol_2_contrib = at -> PDBTools.isprotein(at))
     @test probs_test.energy ≈ [
         477.47530500203885
         459.8720850333111
@@ -145,15 +145,15 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE")
+    i1 = "resname TFE"
 
-    i2 = PDBTools.selindex(atoms(simulation), "protein")
+    i2 = "protein"
 
     c1 = at -> at.resname == "TFE" && at.name == "H"
 
     c2 = at -> PDBTools.isprotein(at) && at.name == "O"
 
-    probs_test = reweight(simulation, r -> r, i1, 289, i2, 1; mol_1_contrib = c1, mol_2_contrib = c2)
+    probs_test = reweight(simulation, r -> r, i1, 9, i2, 174; mol_1_contrib = c1, mol_2_contrib = c2)
     @test probs_test.energy ≈ [
         0.0
         0.0
@@ -175,15 +175,15 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE")
+    i1 = "resname TFE"
 
-    i2 = PDBTools.selindex(atoms(simulation), "resname SOL")
+    i2 = "resname SOL"
 
     c1 = at -> at.name == "H"
 
     c2 = at -> at.name in ["HW1", "HW2"]
 
-    probs_test = reweight(simulation, r -> r, i1, 289, i2, 4703; mol_1_contrib = c1, mol_2_contrib = c2)
+    probs_test = reweight(simulation, r -> r, i1, 9, i2, 4; mol_1_contrib = c1, mol_2_contrib = c2)
     @test probs_test.energy ≈ [
         111083.78832237754
         111435.30788677695

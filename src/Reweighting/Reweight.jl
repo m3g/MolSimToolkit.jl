@@ -122,7 +122,7 @@ function reweight(
     gp::AbstractVector{<:Integer}, #Group atoms
     n_mol_gp::Int; #Number of molecules of the group
     all_dist::Bool = false, #Compute every possible distance option
-    mol_contrib::Union{String, Function, Nothing} = nothing, #Which atoms of the group we are interested?
+    mol_contrib::Union{String, Function} = at -> at = true, #Which atoms of the group we are interested?
     cutoff::Real = 12.0, 
     k::Real = 1.0, 
     T::Real = 1.0
@@ -195,13 +195,13 @@ end
 function reweight(
     simulation::Simulation, #MolSimToolkit simulation object
     perturb_func::Function, #Perturbation function
-    gp_1::AbstractVector{<:Integer}, #Group 1 atoms
-    n_mol_gp_1::Int, #Number of molecules of group 1
-    gp_2::AbstractVector{<:Integer},  #Group 2 atoms
-    n_mol_gp_2::Int; #Number of molecules of group 2
+    gp_1::Union{String, Function}, #Group 1 atoms
+    n_at_per_mol_gp_1::Int, #Number of atoms per molecule of group 1
+    gp_2::Union{String, Function},  #Group 2 atoms
+    n_at_per_mol_gp_2::Int; #Number of atoms per molecule molecules of group 2
     all_dist::Bool = false, #Compute every possible distance option
-    mol_1_contrib::Union{String, Function, Nothing} = nothing, #Which atoms of group 1 we are interested?
-    mol_2_contrib::Union{String, Function, Nothing} = nothing, #Which atoms of group 2 we are interested?
+    mol_1_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 1 we are interested?
+    mol_2_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 2 we are interested?
     cutoff::Real = 12.0,  #Cutoff distance for calculations
     k::Real = 1.0, #Boltzmann constat value
     T::Real = 1.0 #temperature of the system
@@ -210,24 +210,34 @@ function reweight(
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
+
+    #Defining molecules indexes
+    gp1 = PDBTools.selindex(simulation.atoms, gp_1)
+    gp2 = PDBTools.selindex(simulation.atoms, gp_2)
+
+    #Retrieving atoms from the contributions
+    ind_contrib_1 = findall(i -> i in PDBTools.select(simulation.atoms, mol_1_contrib), simulation.atoms[gp1])
+    ind_contrib_2 = findall(i -> i in PDBTools.select(simulation.atoms, mol_2_contrib), simulation.atoms[gp2])
     
     #Number of atoms per molecule
-    n_atoms_per_molecule_gp_1 = length(gp_1) ÷ n_mol_gp_1
-    n_atoms_per_molecule_gp_2 = length(gp_2) ÷ n_mol_gp_2
+    n_molecules_gp_1 = length(gp1) ÷ n_at_per_mol_gp_1
+    n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
     
     #Checking if PDB file and input match
-    check_n_mol(simulation, gp_1, n_mol_gp_1, "group 1")
-    check_n_mol(simulation, gp_2, n_mol_gp_2, "group 2")
-    
-    #Retrieving atoms from the contributions
-    ind_contrib_1 = retrieve_contrib_indexes(simulation, mol_1_contrib, gp_1)
-    ind_contrib_2 = retrieve_contrib_indexes(simulation, mol_2_contrib, gp_2)
+    check_n_mol(simulation, gp_1, n_molecules_gp_1, "group 1")
+    check_n_mol(simulation, gp_2, n_molecules_gp_2, "group 2")
+
+    #Determining if we want to computate contributions
+    contributions = false
+    if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
+        contributions = true
+    end 
     
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
-        gp_1_coord = coordinates[gp_1]
-        gp_2_coord = coordinates[gp_2]
+        gp_1_coord = coordinates[gp1]
+        gp_2_coord = coordinates[gp2]
         if all_dist
             system = ParticleSystem(
                 xpositions = gp_1_coord,
@@ -237,27 +247,21 @@ function reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
-                if system[d_i].i in (ind_contrib_1) && system[d_i].j in (ind_contrib_2)
-                    energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
-                end
-            else
-                energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
-            end
+            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
         else
-            for mol_ind in 1:n_mol_gp_1
-                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_atoms_per_molecule_gp_1 + 1 : mol_ind * n_atoms_per_molecule_gp_1]
+            for mol_ind in 1:n_molecules_gp_1
+                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_at_per_mol_gp_1 + 1 : mol_ind * n_at_per_mol_gp_1]
                 gp_1_list, gp_2_list = minimum_distances(
                     xpositions = gp_1_coord_ref,
                     ypositions = gp_2_coord,
-                    xn_atoms_per_molecule = n_atoms_per_molecule_gp_1,
-                    yn_atoms_per_molecule = n_atoms_per_molecule_gp_2,
+                    xn_atoms_per_molecule = n_at_per_mol_gp_1,
+                    yn_atoms_per_molecule = n_at_per_mol_gp_2,
                     unitcell = unitcell(frame),
                     cutoff = cutoff
                 )
                 for d_i in eachindex(gp_2_list)
-                    if gp_2_list[d_i].within_cutoff && gp_2_list[d_i].d != 0
-                        if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
+                    if gp_2_list[d_i].within_cutoff
+                        if contributions
                             if gp_2_list[d_i].i in (ind_contrib_2) && gp_2_list[d_i].j in (ind_contrib_1)
                                 energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
                             end
@@ -307,11 +311,11 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
 end
 
 #Checking if PDB file and input match
-function check_n_mol(simulation::Simulation, atom_vec_group::AbstractVector{<:Integer}, n_mol_per_group::Int, name::String)
-    check = length(unique(PDBTools.residue.(simulation.atoms[atom_vec_group]))) #check number of residues (number of molecules) in PDB
+function check_n_mol(simulation::Simulation, atom_group::Union{String, Function}, n_mol_per_group::Int, name::String)
+    check = length(unique(PDBTools.residue.(PDBTools.select(simulation.atoms, atom_group)))) #check number of residues (number of molecules) in PDB
     division = check ÷ n_mol_per_group
     quotient = mod(check, n_mol_per_group)
-    if division == 1 && quotient == 0
+    if (division == 1 && quotient == 0) || n_mol_per_group == 1
         return "Number of molecules in the system seems to be correct for $name"
     elseif division != 1 && quotient == 0
         return @warn("""
@@ -321,14 +325,5 @@ function check_n_mol(simulation::Simulation, atom_vec_group::AbstractVector{<:In
         return @warn("""
             The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input   
             """)
-    end
-end
-
-#Retrieving atoms from the contributions
-function retrieve_contrib_indexes(simulation::Simulation, contrib_gp::Union{String, Function, Nothing}, gp::AbstractVector{<:Integer})
-    if isnothing(contrib_gp)
-        return gp
-    else
-        return findall(i -> i in PDBTools.select(simulation.atoms, contrib_gp), simulation.atoms[gp])
     end
 end
