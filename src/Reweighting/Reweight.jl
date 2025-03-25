@@ -195,7 +195,8 @@ function reweight(
     mol_2_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 2 we are interested?
     cutoff::Real = 12.0,  #Cutoff distance for calculations
     k::Real = 1.0, #Boltzmann constat value
-    T::Real = 1.0 #temperature of the system
+    T::Real = 1.0, #temperature of the system
+    debug::Bool = false
 )
     #Defining results vector
     prob_vec = zeros(length(simulation))
@@ -215,8 +216,8 @@ function reweight(
     n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
     
     #Checking if PDB file and input match
-    check_n_mol(simulation, gp_1, n_molecules_gp_1, "group 1")
-    check_n_mol(simulation, gp_2, n_molecules_gp_2, "group 2")
+    check_n_mol(simulation, gp_1, n_molecules_gp_1, "group 1", debug)
+    check_n_mol(simulation, gp_2, n_molecules_gp_2, "group 2", debug)
     
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
@@ -290,20 +291,22 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
 end
 
 #Checking if PDB file and input match
-function check_n_mol(simulation::Simulation, atom_group::Union{String, Function}, n_mol_per_group::Int, name::String)
+function check_n_mol(simulation::Simulation, atom_group::Union{String, Function}, n_mol_per_group::Int, name::String, debug::Bool)
     check = length(unique(PDBTools.residue.(PDBTools.select(simulation.atoms, atom_group)))) #check number of residues (number of molecules) in PDB
     division = check ÷ n_mol_per_group
     quotient = mod(check, n_mol_per_group)
-    if (division == 1 && quotient == 0) || n_mol_per_group == 1
-        println("Number of molecules in the system seems to be correct for $name ($n_mol_per_group)")
-    elseif division != 1 && quotient == 0
-        return @warn("""
-            Number of molecules in the system ($check) seems to be a multiple of your input for $name ($n_mol_per_group).
-            """)
-    elseif quotient != 0
-        return @warn("""
-            The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input ($n_mol_per_group) 
-            """)
+    if debug
+        if ((division == 1 && quotient == 0) || n_mol_per_group == 1)
+            println("Number of molecules in the system seems to be correct for $name ($n_mol_per_group)")
+        elseif division != 1 && quotient == 0
+            return @warn("""
+                Number of molecules in the system ($check) seems to be a multiple of your input for $name ($n_mol_per_group).
+                """)
+        elseif quotient != 0
+            return @warn("""
+                The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input ($n_mol_per_group) 
+                """)
+        end
     end
 end
 
