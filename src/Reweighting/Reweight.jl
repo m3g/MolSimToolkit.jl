@@ -295,14 +295,14 @@ function check_n_mol(simulation::Simulation, atom_group::Union{String, Function}
     division = check ÷ n_mol_per_group
     quotient = mod(check, n_mol_per_group)
     if (division == 1 && quotient == 0) || n_mol_per_group == 1
-        return "Number of molecules in the system seems to be correct for $name"
+        println("Number of molecules in the system seems to be correct for $name ($n_mol_per_group)")
     elseif division != 1 && quotient == 0
         return @warn("""
-            Number of molecules in the system ($check) seems to be a multiple of your input for $name.
+            Number of molecules in the system ($check) seems to be a multiple of your input for $name ($n_mol_per_group).
             """)
     elseif quotient != 0
         return @warn("""
-            The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input   
+            The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input ($n_mol_per_group) 
             """)
     end
 end
