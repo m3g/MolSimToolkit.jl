@@ -197,3 +197,85 @@ end
         114197.60245988662                 
     ]
 end
+
+@testitem "Reweighting small trajectory min dist with contributions 4" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory_2.xtc")
+
+    i1 = "residue 4981 and name F12"
+
+    i2 = at -> at.residue == 4981 && at.name in ["H", "H21", "H22"]
+
+    probs_test = reweight(simulation, r -> r, i1, 1, i2, 1)
+    @test probs_test.energy ≈ [
+        9.79988,
+        8.608059,
+        8.791174,
+        9.190261999999999,
+        9.154655,
+        9.511442,
+        9.502004,
+        9.15598,
+        9.294438,
+        9.424879,   
+    ] atol = 1.e-4
+end
+
+@testitem "Reweighting small trajectory min dist with contributions 5" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory_2.xtc")
+
+    i1 = "residue 4981 and name F12"
+
+    i2 = at -> at.residue == 4981 && at.name in ["H", "H21", "H22"]
+
+    c2 = at -> at.name == "H"
+
+    probs_test = reweight(simulation, r -> r, i1, 1, i2, 1; mol_2_contrib = c2)
+    @test probs_test.energy ≈ [
+        4.348989,
+        2.590000,
+        2.735364,
+        3.264019,
+        4.087230,
+        3.694575,
+        4.272202,
+        3.773232,
+        3.166674,
+        3.212258 
+    ] atol = 1.e-4
+end
+
+@testitem "Reweighting small trajectory min dist with contributions 5" begin
+    import PDBTools
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory_2.xtc")
+
+    i1 = "residue 4981 and name F12"
+
+    i2 = at -> at.residue == 4981 && at.name in ["H", "H21", "H22"]
+
+    c2 = at -> at.name in ["H21", "H22"]
+
+    probs_test = reweight(simulation, r -> r, i1, 1, i2, 1; mol_2_contrib = c2)
+    @test probs_test.energy ≈ [
+        5.450897,
+        6.018059,
+        6.05581,
+        5.9262429999999995,
+        5.067425,
+        5.816867,
+        5.229801999999999,
+        5.382747999999999,
+        6.127764,
+        6.212621      
+    ] atol = 1.e-4
+end

@@ -117,29 +117,32 @@ This result is the energy difference between the  perturbed frame and the origin
 ```
 """
 function reweight(
-    simulation::Simulation, 
-    f_perturbation::Function, 
-    gp::AbstractVector{<:Integer}, #Group atoms
-    n_mol_gp::Int; #Number of molecules of the group
+    simulation::Simulation, #MolSimToolkit simulation object
+    perturb_func::Function, #Perturbation function
+    gp_1::Union{String, Function}, #Group 1 atoms
+    n_at_per_mol_gp::Int, #Number of atoms per molecule of group 1
     all_dist::Bool = false, #Compute every possible distance option
-    mol_contrib::Union{String, Function} = at -> at = true, #Which atoms of the group we are interested?
-    cutoff::Real = 12.0, 
-    k::Real = 1.0, 
-    T::Real = 1.0
+    mol_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 1 we are interested?
+    cutoff::Real = 12.0,  #Cutoff distance for calculations
+    k::Real = 1.0, #Boltzmann constat value
+    T::Real = 1.0 #temperature of the system
 )
     #Defining results vector
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
     
-    #Number of atoms per molecule
-    n_atoms_per_molecule_gp = length(gp) ÷ n_mol_gp
+    #Defining molecules indexes
+    gp1 = PDBTools.selindex(simulation.atoms, gp_1)
 
-    #Checking if PDB file and input match
-    check_n_mol(simulation, gp_1, n_mol_gp_1, "group")
-    
     #Retrieving atoms from the contributions
-    ind_contrib = retrieve_contrib_indexes(simulation, mol_contrib, gp)
+    ind_contrib = findall(i -> i in PDBTools.select(simulation.atoms, mol_contrib), simulation.atoms[gp1])
+
+    #Number of atoms per molecule
+    n_molecules_gp_1 = length(gp1) ÷ n_at_per_mol_gp
+    
+    #Checking if PDB file and input match
+    check_n_mol(simulation, gp_1, n_molecules_gp_1, "group")
 
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
@@ -154,16 +157,10 @@ function reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            if isequal(ind_contrib, gp) == false
-                if system[d_i].i in (ind_contrib) && system[d_i].j in (ind_contrib)
-                    energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
-                end
-            else
-                energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
-            end
+            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(sqrt(d2)), system)
         else
-            for mol_ind in 1:(length(gp_1_coord) ÷ n_atoms_per_molecule)
-                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_atoms_per_molecule + 1 : mol_ind * n_atoms_per_molecule]
+            for mol_ind in 1:n_molecules_gp_1
+                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_at_per_mol_gp + 1 : mol_ind * n_at_per_mol_gp]
                 gp_1_ref_list, gp_1_list = minimum_distances(
                     xpositions = gp_1_coord_ref,
                     ypositions = gp_1_coord,
@@ -173,14 +170,8 @@ function reweight(
                     cutoff = cutoff
                 )
                 for d_i in eachindex(gp_1_list)
-                    if gp_1_list[d_i].within_cutoff && gp_1_list[d_i].d != 0
-                        if isequal(ind_contrib, gp) == false
-                            if gp_1_list[d_i].i in (ind_contrib) && gp_1_list[d_i].j in (ind_contrib)
-                                energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
-                            end
-                        else
-                            energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
-                        end
+                    if gp_1_list[d_i].within_cutoff && gp_1_list[d_i].d != 0 && is_in(ind_contrib, gp_1_list[d_i].i) && is_in(ind_contrib, gp_1_list[d_i].j)
+                        energy_vec[iframe] += perturb_func(gp_1_list[d_i].d)
                     end
                 end
             end
@@ -218,7 +209,7 @@ function reweight(
     #Retrieving atoms from the contributions
     ind_contrib_1 = findall(i -> i in PDBTools.select(simulation.atoms, mol_1_contrib), simulation.atoms[gp1])
     ind_contrib_2 = findall(i -> i in PDBTools.select(simulation.atoms, mol_2_contrib), simulation.atoms[gp2])
-    
+
     #Number of atoms per molecule
     n_molecules_gp_1 = length(gp1) ÷ n_at_per_mol_gp_1
     n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
@@ -226,12 +217,6 @@ function reweight(
     #Checking if PDB file and input match
     check_n_mol(simulation, gp_1, n_molecules_gp_1, "group 1")
     check_n_mol(simulation, gp_2, n_molecules_gp_2, "group 2")
-
-    #Determining if we want to computate contributions
-    contributions = false
-    if isequal(ind_contrib_1, gp_1) == false || isequal(ind_contrib_2, gp_2) == false
-        contributions = true
-    end 
     
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
@@ -260,14 +245,8 @@ function reweight(
                     cutoff = cutoff
                 )
                 for d_i in eachindex(gp_2_list)
-                    if gp_2_list[d_i].within_cutoff
-                        if contributions
-                            if gp_2_list[d_i].i in (ind_contrib_2) && gp_2_list[d_i].j in (ind_contrib_1)
-                                energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
-                            end
-                        else
-                            energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
-                        end
+                    if gp_2_list[d_i].within_cutoff && is_in(ind_contrib_2, gp_2_list[d_i].i) && is_in(ind_contrib_1, gp_2_list[d_i].j)
+                        energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
                     end
                 end
             end
@@ -325,5 +304,15 @@ function check_n_mol(simulation::Simulation, atom_group::Union{String, Function}
         return @warn("""
             The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input   
             """)
+    end
+end
+
+function is_in(x, i)
+    j = searchsortedfirst(x, i)
+    j > length(x) && return false
+    if x[j] == i
+        return true
+    else
+        return false
     end
 end
