@@ -196,7 +196,7 @@ function reweight(
     cutoff::Real = 12.0,  #Cutoff distance for calculations
     k::Real = 1.0, #Boltzmann constat value
     T::Real = 1.0, #temperature of the system
-    debug::Bool = false
+    debug::Bool = true
 )
     #Defining results vector
     prob_vec = zeros(length(simulation))
