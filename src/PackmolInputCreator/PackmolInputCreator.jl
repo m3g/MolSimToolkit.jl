@@ -453,7 +453,7 @@ function write_packmol_input(
         Box volume = $vbox Å³
         Solution volume = $vs Å³   
         Solute extrema = [ $(join(-0.5*solute_extrema, ", ")), $(join(0.5*solute_extrema, ", ")) ] Å
-        Box sides = [ $(join( -1.0*l, ", ")), $(join( l, ", ")) ] Å 
+        Periodic box = [ $(join( -1.0*l, ", ")), $(join( l, ", ")) ] Å 
 
         Density of solution = $ρ g/mL
         Solute molar mass = $Mp g/mol
@@ -497,6 +497,7 @@ function write_packmol_input(
             filetype pdb
             seed -1
             packall
+            pbc $(join( -1.0*l, " ")), $(join( l, " "))
 
             structure $solute_pdbfile
               number 1
@@ -506,7 +507,6 @@ function write_packmol_input(
 
             structure $solvent_pdbfile
               number $nw
-              inside box $(join( -1.0*l, " ")), $(join( l, " "))  
             end structure
             """)
         if nc > 0
@@ -514,7 +514,6 @@ function write_packmol_input(
                 """
                 structure $cossolvent_pdbfile
                   number $nc
-                  inside box $(join( -1.0*l, " ")), $(join( l, " "))  
                 end structure
                 """)
         end

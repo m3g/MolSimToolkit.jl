@@ -109,7 +109,7 @@ run_packmol("./box.inp")
 ```
 If everything runs correctly, the output file `system.pdb` will be generated.
 
-## Help entries
+## Reference help entries
 
 ```@autodocs
 Modules = [MolSimToolkit.PackmolInputCreator]
