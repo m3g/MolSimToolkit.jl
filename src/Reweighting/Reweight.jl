@@ -148,12 +148,13 @@ function reweight(
     energy_vec = zeros(length(simulation))
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
+        uc = unitcell(frame)
         first_coors = coordinates[group_1]
         second_coors = coordinates[group_2]
         system = ParticleSystem(
             xpositions = first_coors,
             ypositions = second_coors,
-            unitcell = unitcell(frame),
+            unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
             cutoff = cutoff,
             output = 0.0,
             output_name = :total_energy

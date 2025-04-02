@@ -18,10 +18,11 @@ import MolSimToolkitShared: center_of_mass,
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
-using LinearAlgebra: norm, cross, dot
+using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
 using Statistics: mean
+using Printf: @sprintf
 
 export wrap, wrap_to_first
 export distances

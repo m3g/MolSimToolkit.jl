@@ -67,19 +67,21 @@ function coordination_number(
     cn = zeros(Int, length(sim))
     first_frame!(sim)
     p = positions(current_frame(sim))
+    uc = unitcell(current_frame(sim))
     sys = CrossPairs(
         xpositions=p[inds_solvent],
         ypositions=p[inds_solute],
         xn_atoms_per_molecule=solvent_natomspermol,
         cutoff=cutoff,
-        unitcell=unitcell(current_frame(sim)),
+        unitcell= uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
     )
     prg = Progress(length(sim); enabled=show_progress)
     for (iframe, frame) in enumerate(sim)
         p = positions(frame)
+        uc = unitcell(current_frame(sim))
         sys.xpositions .= @view(p[inds_solvent])
         sys.ypositions .= @view(p[inds_solute])
-        sys.unitcell = unitcell(frame)
+        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md_list = minimum_distances!(sys)
         cn[iframe] = count(md -> md.within_cutoff, md_list)
         next!(prg)

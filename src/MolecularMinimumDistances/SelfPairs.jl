@@ -104,6 +104,7 @@ end
 
 @testitem "MD - SelfPairs" begin
     using PDBTools
+    using LinearAlgebra: diag
     ats = readPDB(MolSimToolkit.Testing.namd_pdb)
     popc = selindex(ats, "resname POPC")
     simulation = Simulation(
@@ -117,14 +118,15 @@ end
     sys = SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 134,
     )
     md_min = zeros(length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
+        uc = unitcell(frame)
         sys.xpositions .= @view(pos[popc])
-        sys.unitcell = unitcell(frame)
+        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         md_min[iframe] = minimum(p -> p.d, md)
         # Test direct (out-of-place) call
@@ -142,7 +144,7 @@ end
     @test_throws ArgumentError SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 133,
     )
 end

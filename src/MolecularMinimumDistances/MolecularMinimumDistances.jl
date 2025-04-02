@@ -3,6 +3,7 @@ module MolecularMinimumDistances
 import TestItems: @testitem
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
+import LinearAlgebra: diag
 import PDBTools: distance
 import StaticArrays: SVector
 import CellListMap: _uround # interal function, used for showing the unitcell
