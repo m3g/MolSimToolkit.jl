@@ -1,4 +1,5 @@
 export Simulation
+export UnitCell
 export frame_range
 export frame_index
 export length
@@ -414,6 +415,19 @@ function wrap(y, x, uc::UnitCell)
     wrap(y, x, uc.matrix)
 end
 
+@testitem "UnitCell - show" begin
+    using ShowMethodTesting
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    first_frame!(sim)
+    uc = unitcell(current_frame(sim))
+    @test parse_show(uc; repl = ["MolSimToolkit." => ""] ) ≈ """
+        UnitCell{Float64} - Orthorhombic: true
+            47.411    0.000    0.000
+            0.000   47.411    0.000
+            0.000    0.000   87.798
+    """
+end
+
 """
     unitcell(frame::Chemfiles.Frame)
 
@@ -436,7 +450,6 @@ function unitcell(f::Chemfiles.Frame)
     orthorhombic = all(mat[i,j] < scale && mat[j,i] < scale for i in 1:3 for j in i+1:3)
     return UnitCell(mat, valid, orthorhombic)
 end
-_unitcell(f::Chemfiles.Frame) = unitcell(Chemfiles.UnitCell(f))
 unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
 
 @testitem "unitcell" begin
