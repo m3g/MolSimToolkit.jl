@@ -442,7 +442,7 @@ function unitcell(f::Chemfiles.Frame)
             Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
             Wrapping of coordinates will be disabled for current frame.
             
-        """
+        """ _file = nothing _line = nothing
         valid = false
     else
         valid = true
