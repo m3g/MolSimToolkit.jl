@@ -417,6 +417,7 @@ end
 
 @testitem "UnitCell - show" begin
     using ShowMethodTesting
+    using MolSimToolkit: Testing
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
     first_frame!(sim)
     uc = unitcell(current_frame(sim))
