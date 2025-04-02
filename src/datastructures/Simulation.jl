@@ -447,7 +447,16 @@ unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.mat
     traj = Chemfiles.Trajectory(Testing.namd_traj)
     frame = Chemfiles.read(traj)
     uc = unitcell(frame)
+    @test uc.valid == true
+    @test uc.orthorhombic == true
     @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
+    sim = Simulation(Testing.short_nopbc_pdb, Testing.short_nopbc_traj)
+    first_frame!(sim)
+    f = current_frame(sim)
+    uc = unitcell(f)
+    @test all(==(0), uc.matrix)
+    @test uc.valid == false
+    @test uc.orthorhombic == false
 end
 
 import Base: firstindex, lastindex
