@@ -107,6 +107,7 @@ end
 
 @testitem "MD - CrossPairs" begin
     using PDBTools
+    using LinearAlgebra: diag
     ats = readPDB(MolSimToolkit.Testing.namd_pdb)
     popc = selindex(ats, "resname POPC")
     protein = selindex(ats, "protein")
@@ -123,15 +124,16 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 134,
     )
     md_count = zeros(Int, length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
+        uc = unitcell(frame)
         sys.xpositions .= @view(pos[popc])
         sys.ypositions .= @view(pos[protein])
-        sys.unitcell = unitcell(frame)
+        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         md_count[iframe] = count(p -> p.within_cutoff, md)
         # Test direct (out-of-place) call
@@ -151,7 +153,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 133,
     )
     # Test conversion if float types have different precision
@@ -159,14 +161,14 @@ end
         xpositions = [ Point3D{Float32}(v) for v in xsolvent ],
         ypositions = [ Point3D{Float32}(v) for v in xsolute ],
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix, 
         xn_atoms_per_molecule = 134,
     )
     mdf64 = minimum_distances(
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix, 
         xn_atoms_per_molecule = 134,
     )
     @test all(mdf32 .≈ mdf64)

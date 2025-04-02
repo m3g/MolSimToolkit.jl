@@ -386,12 +386,57 @@ function next_frame!(simulation::Simulation)
 end
 
 """
+    UnitCell{T}
+
+A structure to store the unit cell of a frame in the trajectory.
+The unit cell is represented by a 3x3 matrix of type `SMatrix{3,3,T,9}`.
+
+The `valid` field indicates if the unit cell is valid (not zero). The `orthorhombic` field
+indicates if the unit cell is orthorhombic (all angles are 90 degrees).
+
+"""
+struct UnitCell{T}
+    matrix::SMatrix{3,3,T,9}
+    valid::Bool
+    orthorhombic::Bool
+end
+
+function Base.show(io::IO, uc::UnitCell)
+    print(io,typeof(uc), " - Orthorhombic: ", uc.orthorhombic)
+    for i in 1:3
+        print(io, "\n")
+        print(io, @sprintf("%8.3f %8.3f %8.3f", @view(uc.matrix[i, :])...))
+    end 
+end 
+
+function wrap(y, x, uc::UnitCell)
+    !uc.valid && return y
+    wrap(y, x, uc.matrix)
+end
+
+"""
     unitcell(frame::Chemfiles.Frame)
 
 Returns the unit cell of the current frame in the trajectory.
 
 """
-unitcell(f::Chemfiles.Frame) = unitcell(Chemfiles.UnitCell(f))
+function unitcell(f::Chemfiles.Frame) 
+    mat = unitcell(Chemfiles.UnitCell(f))
+    if all(==(0), mat)
+        @warn """\n
+            Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
+            Wrapping of coordinates will be disabled for current frame.
+            
+        """
+        valid = false
+    else
+        valid = true
+    end
+    scale = 1e-10 * (maximum(mat) - minimum(mat))
+    orthorhombic = all(mat[i,j] < scale && mat[j,i] < scale for i in 1:3 for j in i+1:3)
+    return UnitCell(mat, valid, orthorhombic)
+end
+_unitcell(f::Chemfiles.Frame) = unitcell(Chemfiles.UnitCell(f))
 unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
 
 @testitem "unitcell" begin
@@ -401,8 +446,8 @@ unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.mat
     import Chemfiles
     traj = Chemfiles.Trajectory(Testing.namd_traj)
     frame = Chemfiles.read(traj)
-    u = unitcell(frame)
-    @test u ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
+    uc = unitcell(frame)
+    @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
 end
 
 import Base: firstindex, lastindex

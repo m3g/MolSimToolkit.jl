@@ -133,6 +133,7 @@ end
 
 @testitem "MD - AllPairs" begin
     using PDBTools
+    using LinearAlgebra: diag
     ats = readPDB(MolSimToolkit.Testing.namd_pdb)
     popc = selindex(ats, "resname POPC")
     protein = selindex(ats, "protein")
@@ -149,7 +150,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 134,
         yn_atoms_per_molecule = length(protein),
     )
@@ -157,9 +158,10 @@ end
     ymd_indices = zeros(Int, length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
+        uc = unitcell(current_frame(simulation))
         sys.xpositions .= @view(pos[popc])
         sys.ypositions .= @view(pos[protein])
-        sys.unitcell = unitcell(frame)
+        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])
@@ -171,7 +173,7 @@ end
                 xn_atoms_per_molecule = 134,
                 yn_atoms_per_molecule = length(protein),
                 cutoff = 6.0,
-                unitcell = sys.unitcell
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
             )
             @test all(md_out[1] .≈ md[1])
             @test all(md_out[2] .≈ md[2])
@@ -184,7 +186,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 124,
         yn_atoms_per_molecule = length(protein),
     )
@@ -193,7 +195,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc, 
+        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
         xn_atoms_per_molecule = 134,
         yn_atoms_per_molecule = length(protein) + 1,
     )
