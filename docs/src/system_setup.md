@@ -11,16 +11,33 @@ and sizes necessary to build different systems. Currently (as of version 1.27.0)
 supports the construction of systems of a solute (macromolecule for example) solvated by a 
 a single solvent or a mixture of two solvents. 
 
+- [Solute-Solvent system](@ref)
+- [Solute-Solvent-Cossolvent system](@ref)
+
 ### How to use it
 
 ```julia-repl
 julia> using MolSimToolkit.PackmolInputCreator
 ```
 
+## Running Packmol
+
+`Packmol` can be run directly from within Julia using the `Packmol` Julia package:
+```julia
+using Packmol
+run_packmol("./box.inp")
+```
+If everything runs correctly, the output PDB file of the system will be created.
+
 ## Solute-Solvent system
 
 Here, `SolutionBoxUS` stands for `Solute (U)` and `Solvent (S)`.
 The density of the solvent can be one of `"g/mL"` or `"mol/L"` (molarity).
+
+```@docs
+PackmolInputCreator.SolutionBoxUS
+write_packmol_input(::SolutionBoxUS)
+```
 
 ### Setting up the system properties
 
@@ -74,6 +91,13 @@ Here, `SolutionBoxUSC` stands for `Solute (U)`, `Solvent (S)`, and `Cossolvent (
 The concentration units can be one of `"mol/L"` (molarity), `"x"` (molar fraction),
 `"vv"` (volume fraction), and `"mm"` (mass fraction). The density is assumed
 to be in `g/mL`. 
+
+```@docs
+SolutionBoxUSC
+write_packmol_input(::SolutionBoxUSC)
+convert_concentration
+convert_density_table!
+```
 
 ### Setting up the system properties
 
@@ -152,22 +176,3 @@ provided.
 Alternatively, the size of the box can be provided explicitly
 with the `box_sides = [ a, b, c ]` parameters, where `a`, `b`, and `c` are the lengths of the box
 in each dimension. 
-
-## Running Packmol
-
-`Packmol` can be run directly from within Julia using the `Packmol` Julia package:
-```julia
-using Packmol
-run_packmol("./box.inp")
-```
-If everything runs correctly, the output file `system.pdb` will be generated.
-
-## Reference help entries
-
-```@autodocs
-Modules = [MolSimToolkit.PackmolInputCreator]
-Order = [:function, :type]
-```
-
-
-
