@@ -51,13 +51,13 @@ function SolutionBoxUSC(;
         throw(ArgumentError("Last line of density table must be the density of pure cossolvent, with cossolvent concentration equal to 1.0"))
     end
     if isnothing(solute_molar_mass)
-        solute_molar_mass = mass(readPDB(solute_pdbfile))
+        solute_molar_mass = mass(read_pdb(solute_pdbfile))
     end
     if isnothing(solvent_molar_mass)
-        solvent_molar_mass = mass(readPDB(solvent_pdbfile))
+        solvent_molar_mass = mass(read_pdb(solvent_pdbfile))
     end
     if isnothing(cossolvent_molar_mass)
-        cossolvent_molar_mass = mass(readPDB(cossolvent_pdbfile))
+        cossolvent_molar_mass = mass(read_pdb(cossolvent_pdbfile))
     end
     system = SolutionBoxUSC(
         concentration_units,
@@ -288,7 +288,8 @@ end
         output="system.pdb",
         # box size
         box_sides::AbstractVector{<:Real}, # or
-        margin::Real
+        margin::Real,
+        cubic::Bool = false,
     )
 
 Function that generates an input file for Packmol. 
@@ -296,6 +297,9 @@ Function that generates an input file for Packmol.
 The box sides are given in Ångströms, and can be provided as a vector of 3 elements.
 Alternativelly, the margin can be provided, and the box sides will be calculated as
 the maximum and minimum coordinates of the solute plus the margin in all 3 dimensions.
+
+If `cubic` is set to true, the box will be cubic, and the box sides will be
+equal in all 3 dimensions, respecting the minimum margin provided.
 
 """
 function write_packmol_input(
@@ -305,6 +309,7 @@ function write_packmol_input(
     output="system.pdb",
     box_sides::Union{AbstractVector{<:Real},Nothing} = nothing,
     margin::Union{Real,Nothing} = nothing, 
+    cubic::Bool = false,
     # testing option
     debug = false,
 )
@@ -354,14 +359,20 @@ function write_packmol_input(
     elseif !isnothing(box_sides) && !isnothing(margin)
         throw(ArgumentError("Either box_sides or margin must be provided, but not both."))
     end
-    solute_atoms = readPDB(system.solute_pdbfile)
+    solute_atoms = read_pdb(system.solute_pdbfile)
     solute_extrema = round.(maxmin(solute_atoms).xlength; digits=3)
     if !isnothing(margin)
         box_sides = solute_extrema .+ 2 .* margin
     end
 
     # Box volume (Å³)
-    vbox = box_sides[1] * box_sides[2] * box_sides[3]
+    if !cubic
+        vbox = box_sides[1] * box_sides[2] * box_sides[3]
+    else
+        max_side = maximum(box_sides)
+        vbox = max_side^3
+        box_sides .= max_side
+    end
 
     # Solution volume (vbox - vsolute) - vsolute is estimated
     # as if it had the same mass density of the solution
@@ -421,6 +432,8 @@ function write_packmol_input(
         Final volume fraction = $((nc * Mc / ρc)/((nc * Mc / ρc) + (nw * Mw / ρw)))
         Final molar fraction = $(nc/(nc+nw))
 
+        Cubic box requested: $cubic
+
         ==================================================================
         """
     println(summary)
@@ -450,20 +463,20 @@ function write_packmol_input(
             pbc $(join( -1.0*l, " ")), $(join( l, " "))
 
             structure $solute_pdbfile
-              number 1
-              center
-              fixed 0. 0. 0. 0. 0. 0.
+                number 1
+                center
+                fixed 0. 0. 0. 0. 0. 0.
             end structure
 
             structure $solvent_pdbfile
-              number $nw
+                number $nw
             end structure
             """)
         if nc > 0
             println(io,
                 """
                 structure $cossolvent_pdbfile
-                  number $nc
+                    number $nc
                 end structure
                 """)
         end

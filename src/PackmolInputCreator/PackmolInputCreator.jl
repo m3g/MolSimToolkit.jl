@@ -7,6 +7,7 @@ export convert_concentration, convert_density_table!
 export density_pure_solvent, density_pure_cossolvent
 export write_packmol_input
 export SolutionBoxUSC
+export SolutionBoxUS
 
 abstract type SolutionBox end
 density_pure_solvent(system::SolutionBox) = system.density_table[begin, 2]
@@ -49,6 +50,7 @@ end
 fixrange(x) = x < 0 ? 0 : (x > 1 ? 1 : x)
 
 # System types
+include("./SolutionBoxUS.jl")
 include("./SolutionBoxUSC.jl")
 
 # Tests
