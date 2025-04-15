@@ -22,7 +22,7 @@ Calculate the coordination number of the solute atoms with the solvent atoms.
 
 # Keyword Arguments
 
-- `solvent_natomspermol::Int`: Number of atoms per solvent molecule.
+- `solvent_natomspermol::Integer`: Number of atoms per solvent molecule.
 - `cutoff::Real`: Cutoff distance.
 - `show_progress::Bool`: Show progress bar. (optional, default: `true`)
 
