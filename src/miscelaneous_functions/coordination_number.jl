@@ -3,12 +3,16 @@
         sim::Simulation,
         solute::AbstractVector{<:PDBTools.Atom},
         solvent::AbstractVector{<:PDBTools.Atom};
-        solvent_natomspermol::Int,
+        solvent_natomspermol::Integer,
         cutoff::Real,
         show_progress::Bool = true
     )
 
 Calculate the coordination number of the solute atoms with the solvent atoms.
+
+!!! note
+    The distance considered is the **minimum distance** between the solute atoms 
+    and the atoms of each solvent molecule.
 
 # Positional Arguments
 
@@ -52,7 +56,7 @@ function coordination_number(
     sim::Simulation,
     solute::AbstractVector{<:PDBTools.Atom},
     solvent::AbstractVector{<:PDBTools.Atom};
-    solvent_natomspermol::Int,
+    solvent_natomspermol::Integer,
     cutoff::Real,
     show_progress::Bool = true,
 )
