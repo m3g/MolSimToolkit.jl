@@ -78,7 +78,7 @@ function intermittent_correlation(
         np = count(x -> isequal(x, itype), data)
         np_all += (np * (np - 1)) ÷ 2
     end
-    p = Progress(np_all, !show_progress)
+    p = Progress(np_all; show_progress)
     for type in types_considered
         positions = findall(x -> isequal(x, type), data)
         np = length(positions)
