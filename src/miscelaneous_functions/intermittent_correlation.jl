@@ -73,7 +73,12 @@ function intermittent_correlation(
     types_considered = filter!(types, unique(data))
     counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     chances = copy(counts)
-    p = Progress(length(types_considered)*maxdelta, !show_progress)
+    np_all = 0
+    for itype in types_considered
+        np = count(x -> isequal(x, itype), data)
+        np_all += (np * (np - 1)) ÷ 2
+    end
+    p = Progress(np_all, !show_progress)
     for type in types_considered
         positions = findall(x -> isequal(x, type), data)
         np = length(positions)
@@ -82,7 +87,6 @@ function intermittent_correlation(
             while positions[i] + delta <= length(data)
                 chances[delta] += 1
                 delta += 1
-                next!(p)
                 delta > maxdelta && break
             end
             for j in i:np
@@ -90,6 +94,7 @@ function intermittent_correlation(
                 if delta <= maxdelta
                     counts[delta] += 1
                 end
+                next!(p)
             end
         end
     end
