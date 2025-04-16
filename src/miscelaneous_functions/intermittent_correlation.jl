@@ -3,6 +3,7 @@
         data::AbstractVector; 
         maxdelta = length(data) ÷ 10, 
         types::Function = x -> true,
+        show_progress::Bool = true,
     )
 
 Calculate the intermittent correlation function of a time series. That is,
@@ -20,6 +21,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 - `types` (optional): A function that returns `true` for the types of data
    that should be considered. Defaults to all data, i. e. `x -> true`. For 
    example, to ignore `0` values, use `types = x -> x != 0`.  
+- `show_progress::Bool`: Show progress bar. Defaults to `true`.
 
 # Examples
 
@@ -33,7 +35,7 @@ julia> using MolSimToolkit
 
 julia> data = [ mod(i,2) for i in 1:10^4 ];
 
-julia> intermittent_correlation(data; maxdelta=4)
+julia> intermittent_correlation(data; maxdelta=4, show_progress=false)
 5-element OffsetArray(::Vector{Float64}, 0:4) with eltype Float64 with indices 0:4:
  1.0
  0.0
@@ -41,7 +43,7 @@ julia> intermittent_correlation(data; maxdelta=4)
  0.0
  1.0
 
-julia> intermittent_correlation(data; maxdelta=4, types = x -> x != 0)
+julia> intermittent_correlation(data; maxdelta=4, types = x -> x != 0, show_progress=false)
 5-element OffsetArray(::Vector{Float64}, 0:4) with eltype Float64 with indices 0:4:
  1.0
  0.0
@@ -56,13 +58,14 @@ of the `0` values.
 
 !!! compat
     This function was added in version 1.9.0 of MolSimToolkit. The `types` argument
-    was added in version 1.10.0.
+    was added in version 1.10.0 and the `show_progress` argument in version 1.28.0.
 
 """
 function intermittent_correlation(
     data::AbstractVector;
     maxdelta::Integer=max(1, length(data) ÷ 10),
     types::F=x -> true,
+    show_progress::Bool=true,
 ) where {F<:Function}
     if maxdelta > length(data) - 1
         throw(ArgumentError("maxdelta must be less than the length of the data minus 1"))
@@ -70,6 +73,7 @@ function intermittent_correlation(
     types_considered = filter!(types, unique(data))
     counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     chances = copy(counts)
+    p = Progress(length(types_considered)*maxdelta, !show_progress)
     for type in types_considered
         positions = findall(x -> isequal(x, type), data)
         np = length(positions)
@@ -78,6 +82,7 @@ function intermittent_correlation(
             while positions[i] + delta <= length(data)
                 chances[delta] += 1
                 delta += 1
+                next!(p)
                 delta > maxdelta && break
             end
             for j in i:np
@@ -107,6 +112,8 @@ end
     for i in 2:101
         push!(data, data[i-1] + (mod(i, 2) == 0))
     end
+    c = intermittent_correlation(data; show_progress=false)
+    @test c[0:1] == [1.0, 0.5]
     c = intermittent_correlation(data)
     @test c[0:1] == [1.0, 0.5]
     @test all(==(0), c[2:end])
