@@ -1,0 +1,27 @@
+#
+# MDLovoFit - Version 20.1.1
+#
+# Fraction of best aligned atoms to consider:  0.80
+# Output trajectory file: mysim_aligned.pdb
+# Different assignment for each frame: F
+# RMSF output file: mysim_rmsf.dat
+# Number of trials for each alignment:   100
+#
+# Trajectory files: 
+#   /tmp/jl_HCd2jEj0hK_mdlovofit_trajectory.pdb
+#
+# Total number of atoms:       43
+# Number of atoms of selection:       43
+# Total number of atoms found:       43
+#
+#     FRAME   RMSD: BEST ALIGNED          OTHER ATOMS            ALL ATOMS
+# Wrote RMSF output file:             mysim_rmsf.dat
+          1          0.000000000          0.000000000          0.000000000
+          2          1.160252751          6.191488808          2.213302158
+          3          1.637706621          6.092467263          2.570098383
+          4          1.195009928          5.017081553          1.994978407
+          5          1.666009905          9.239781062          3.251217822
+# Average RMSD of least mobile atoms:      1.41474
+# Average RMSD of most mobile atoms:       6.63520
+# Average RMSD of all atoms:               2.50740
+# Wrote RMSF output file:             mysim_rmsf.dat
