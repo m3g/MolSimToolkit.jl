@@ -124,7 +124,7 @@ end
     md_min = zeros(length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
-        uc = unitcell(frame)
+        local uc = unitcell(frame)
         sys.xpositions .= @view(pos[popc])
         sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
