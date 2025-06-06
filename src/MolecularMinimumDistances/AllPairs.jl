@@ -158,7 +158,7 @@ end
     ymd_indices = zeros(Int, length(simulation))
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
-        uc = unitcell(current_frame(simulation))
+        local uc = unitcell(current_frame(simulation))
         sys.xpositions .= @view(pos[popc])
         sys.ypositions .= @view(pos[protein])
         sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
