@@ -5,6 +5,7 @@ using CellListMap: ParticleSystem, map_pairwise, map_pairwise!
 using ..MolSimToolkit: Simulation, positions, unitcell
 using ..MolSimToolkit.MolecularMinimumDistances
 import OrderedCollections
+import PDBTools
 
 export reweight, full_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, gauss
 
