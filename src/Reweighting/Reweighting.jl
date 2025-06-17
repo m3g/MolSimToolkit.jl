@@ -4,8 +4,9 @@ import PDBTools
 using CellListMap: ParticleSystem, map_pairwise, map_pairwise!
 using ..MolSimToolkit: Simulation, positions, unitcell
 using ..MolSimToolkit.MolecularMinimumDistances
+import OrderedCollections
 
-export reweight, lennard_jones_perturbation, poly_decay_perturbation, gaussian_decay_perturbation
+export reweight, full_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations
 
 const testdir = "$(@__DIR__)/test"
 
@@ -275,6 +276,48 @@ end
         5.816867,
         5.229801999999999,
         5.382747999999999,
+        6.127764,
+        6.212621      
+    ] atol = 1.e-4
+end
+
+@testitem "Reweighting small trajectory min dist with contributions using full reweight" begin
+    import PDBTools
+    import OrderedCollections
+    using MolSimToolkit.Reweighting
+    using MolSimToolkit.Reweighting: testdir
+
+    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory_2.xtc")
+
+    g1 = PDBTools.selindex(simulation.atoms, "residue 4981 and name F12")
+
+    g2 = PDBTools.selindex(simulation.atoms, at -> at.residue == 4981 && at.name in ["H", "H21", "H22"])
+
+    c1 = at -> at = true
+
+    c2 = at -> at.residue == 4981 && at.name in ["H21", "H22"]
+
+    dist(r) = r
+
+    Dict = OrderedCollections.OrderedDict(1 => Perturbation(simulation.atoms, c1, c2, dist))
+
+    input = SystemPerturbations(g1, 1, g2, 1, Dict)
+
+    res = full_reweight(simulation,
+                    input;
+                    k = 1.0,
+                    T = 1.0,
+                    cutoff = 12.0,
+            )
+    @test res[1].energy ≈ [
+        5.450897,
+        6.018059,
+        6.05581,
+        5.92624299,
+        5.067425,
+        5.816867,
+        5.22980199,
+        5.38274799,
         6.127764,
         6.212621      
     ] atol = 1.e-4
