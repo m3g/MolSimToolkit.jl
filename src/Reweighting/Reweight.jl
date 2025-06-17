@@ -280,11 +280,11 @@ function full_reweight(
                         energy_vec[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
                     end
                 end
+                @. prob_rel_vec = exp(-energy_vec/(k*T))
+                prob_vec = prob_rel_vec/sum(prob_rel_vec)
+                output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
             end
         end
-        @. prob_rel_vec = exp(-energy_vec/(k*T))
-        prob_vec = prob_rel_vec/sum(prob_rel_vec)
-        output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     end
     return output
 end
