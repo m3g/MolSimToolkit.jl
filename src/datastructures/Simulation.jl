@@ -1,4 +1,5 @@
 export Simulation
+export UnitCell
 export frame_range
 export frame_index
 export length
@@ -386,12 +387,70 @@ function next_frame!(simulation::Simulation)
 end
 
 """
+    UnitCell{T}
+
+A structure to store the unit cell of a frame in the trajectory.
+The unit cell is represented by a 3x3 matrix of type `SMatrix{3,3,T,9}`.
+
+The `valid` field indicates if the unit cell is valid (not zero). The `orthorhombic` field
+indicates if the unit cell is orthorhombic (all angles are 90 degrees).
+
+"""
+struct UnitCell{T}
+    matrix::SMatrix{3,3,T,9}
+    valid::Bool
+    orthorhombic::Bool
+end
+
+function Base.show(io::IO, uc::UnitCell)
+    print(io,typeof(uc), " - Orthorhombic: ", uc.orthorhombic)
+    for i in 1:3
+        print(io, "\n")
+        print(io, @sprintf("%8.3f %8.3f %8.3f", @view(uc.matrix[i, :])...))
+    end 
+end 
+
+function wrap(y, x, uc::UnitCell)
+    !uc.valid && return y
+    wrap(y, x, uc.matrix)
+end
+
+@testitem "UnitCell - show" begin
+    using ShowMethodTesting
+    using MolSimToolkit: Testing
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    first_frame!(sim)
+    uc = unitcell(current_frame(sim))
+    @test parse_show(uc; repl = ["MolSimToolkit." => ""] ) ≈ """
+        UnitCell{Float64} - Orthorhombic: true
+            47.411    0.000    0.000
+            0.000   47.411    0.000
+            0.000    0.000   87.798
+    """
+end
+
+"""
     unitcell(frame::Chemfiles.Frame)
 
 Returns the unit cell of the current frame in the trajectory.
 
 """
-unitcell(f::Chemfiles.Frame) = unitcell(Chemfiles.UnitCell(f))
+function unitcell(f::Chemfiles.Frame) 
+    mat = unitcell(Chemfiles.UnitCell(f))
+    if all(==(0), mat)
+        @warn """\n
+            Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
+            Wrapping of coordinates will be disabled for current frame.
+            
+        """ _file = nothing _line = nothing
+        valid = false
+    else
+        valid = true
+    end
+    scale = 1e-10 * (maximum(mat) - minimum(mat))
+    orthorhombic = all(mat[i,j] < scale && mat[j,i] < scale for i in 1:3 for j in i+1:3)
+    return UnitCell(mat, valid, orthorhombic)
+end
 unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
 
 @testitem "unitcell" begin
@@ -401,8 +460,17 @@ unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.mat
     import Chemfiles
     traj = Chemfiles.Trajectory(Testing.namd_traj)
     frame = Chemfiles.read(traj)
-    u = unitcell(frame)
-    @test u ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
+    uc = unitcell(frame)
+    @test uc.valid == true
+    @test uc.orthorhombic == true
+    @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
+    sim = Simulation(Testing.short_nopbc_pdb, Testing.short_nopbc_traj)
+    first_frame!(sim)
+    f = current_frame(sim)
+    uc = unitcell(f)
+    @test all(==(0), uc.matrix)
+    @test uc.valid == false
+    @test uc.orthorhombic == false
 end
 
 import Base: firstindex, lastindex

@@ -119,7 +119,7 @@ function bulk_coordination(
         ypositions=p[reference_solute_indices],
         xn_atoms_per_molecule=n_atoms_per_molecule_solute,
         cutoff=cutoff,
-        unitcell=uc,
+        unitcell= uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
     )
     imol_atoms = _imol_atoms(1, n_atoms_per_molecule_solute, solute_indices)
     sys2 = CrossPairs(
@@ -127,7 +127,7 @@ function bulk_coordination(
         ypositions=p[imol_atoms],
         xn_atoms_per_molecule=n_atoms_per_molecule_solvent,
         cutoff=dmax,
-        unitcell=uc,
+        unitcell= uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
     )
 
     # Initialize the histogram
@@ -142,7 +142,7 @@ function bulk_coordination(
         # Compute all the minimum-distances between the reference molecule and the solute
         sys1.xpositions .= @view(p[solute_indices])
         sys1.ypositions .= @view(p[reference_solute_indices])
-        sys1.unitcell = uc
+        sys1.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         reference_list = minimum_distances!(sys1)
         # Now, we will run over the reference_list, and for each distances
         # to the reference, find the number of solvent atoms that are closer 
@@ -153,7 +153,7 @@ function bulk_coordination(
             imol_atoms = _imol_atoms(imol, n_atoms_per_molecule_solute, solute_indices)
             sys2.xpositions .= @view(p[solvent_indices])
             sys2.ypositions .= @view(p[imol_atoms])
-            sys2.unitcell = uc
+            sys2.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
             solvent_distances = minimum_distances!(sys2)
             bin = max(1, ceil(Int, md.d / bin_size))
             nmols_in_bin[bin] += 1
