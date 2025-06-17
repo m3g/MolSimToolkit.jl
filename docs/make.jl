@@ -5,6 +5,7 @@ using Plots
 push!(LOAD_PATH, "../")
 push!(LOAD_PATH, "../src/")
 using MolSimToolkit
+using MolSimToolkit.PackmolInputCreator
 using MolSimToolkitShared
 makedocs(
     modules = [

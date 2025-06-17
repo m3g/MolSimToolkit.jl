@@ -1,5 +1,5 @@
 """
-    rmsd(simulation::Simulation, indices::AbstractVector{Int}; mass = nothing, reference_frame = nothing, show_progress = true)
+    rmsd(simulation::Simulation, indices::AbstractVector{<:Integer}; mass = nothing, reference_frame = nothing, show_progress = true)
 
 Computes the root mean square deviation (RMSD) between two sets of points in along a trajectory.
 
@@ -46,7 +46,7 @@ julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
 
 """
 function rmsd(
-    simulation::Simulation, indices::AbstractVector{Int};
+    simulation::Simulation, indices::AbstractVector{<:Integer};
     mass=nothing,
     reference_frame=nothing,
     show_progress=true,
@@ -170,8 +170,8 @@ end
 """
     rmsd_matrix(
         simulation::Simulation, 
-        indices::AbstractVector{Int}; 
-        mass::Union{AbstractVector{Int}, Nothing} = nothing,
+        indices::AbstractVector{<:Integer}; 
+        mass::Union{AbstractVector{<:Integer}, Nothing} = nothing,
         align::Bool = true,
         show_progress = true,
     )
@@ -215,8 +215,8 @@ julia> rmsd_matrix(simulation, cas; show_progress=false)
 """
 function rmsd_matrix(
     simulation::Simulation,
-    indices::AbstractVector{Int};
-    mass::Union{AbstractVector{Int},Nothing}=nothing,
+    indices::AbstractVector{<:Integer};
+    mass::Union{AbstractVector{<:Integer},Nothing}=nothing,
     align::Bool=true,
     show_progress::Bool=true,
 )
