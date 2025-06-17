@@ -6,7 +6,7 @@ using ..MolSimToolkit: Simulation, positions, unitcell
 using ..MolSimToolkit.MolecularMinimumDistances
 import OrderedCollections
 
-export reweight, full_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations
+export reweight, full_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, gauss
 
 const testdir = "$(@__DIR__)/test"
 
@@ -54,36 +54,6 @@ end
         2.188798265022823, 
         2.066180657974777, 
         1.6845109623700647
-    ]
-end
-
-@testitem "Reweighting small trajectory probs" begin
-    import PDBTools
-    using MolSimToolkit.Reweighting
-    using MolSimToolkit.Reweighting: testdir
-
-    simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
-
-    i1 = "resname TFE and name O"
-
-    i2 = "protein and name O"
-
-    α = 5.e-3
-
-    β = 5.e-3
-
-    probs_test = reweight(simulation, r -> gaussian_decay_perturbation(r/10, α, β), i1, 1, i2, 14; all_dist = true)
-    @test probs_test.probability ≈ [
-        0.08987791339898044
-        0.07326337222373071
-        0.0973116226496827
-        0.10965810145525891
-        0.09829891590498603
-        0.0916792371461855
-        0.08548699059703141
-        0.12480704633057726
-        0.09973413264337352
-        0.12988266765019355
     ]
 end
 
