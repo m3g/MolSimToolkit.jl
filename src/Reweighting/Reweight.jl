@@ -167,8 +167,8 @@ function reweight(
     n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
     
     #Checking if PDB file and input match
-    check_n_mol(simulation, gp_1, n_molecules_gp_1, "group 1", debug)
-    check_n_mol(simulation, gp_2, n_molecules_gp_2, "group 2", debug)
+    check_n_input(simulation, gp_1, n_molecules_gp_1, "group 1", debug)
+    check_n_input(simulation, gp_2, n_molecules_gp_2, "group 2", debug)
     
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
