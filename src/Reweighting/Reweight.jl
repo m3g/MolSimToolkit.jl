@@ -24,7 +24,7 @@ struct SystemPerturbations
     number_atoms_group1::Int
     group2::Vector{Int}
     number_atoms_group2::Int
-    perturbations::OrderedDict{Any, Perturbation}
+    perturbations::OrderedCollections.OrderedDict{Any, Perturbation}
 end
 
 Perturbation(atoms, subgroup1::Union{String, Function}, subgroup2::Union{String, Function}, perturbation_function::Function) =
