@@ -29,4 +29,4 @@ end
 skew(r, A, B, C, D) = 1 + A*exp(-B*(r - C)^2) / (1 + exp(D*(r - C)))
 
 #Gaussian Perturbation
-gauss(r, α, β, μ) = 1 + α*exp(-β*(r - μ)^2)
+gauss(r, α, β, μ) = 1 + α*exp(-β*(r - μ)^2
