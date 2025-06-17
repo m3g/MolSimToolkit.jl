@@ -1,6 +1,6 @@
 module Reweighting
 
-import PDBTools
+using LinearAlgebra: diag
 using CellListMap: ParticleSystem, map_pairwise, map_pairwise!
 using ..MolSimToolkit: Simulation, positions, unitcell
 using ..MolSimToolkit.MolecularMinimumDistances

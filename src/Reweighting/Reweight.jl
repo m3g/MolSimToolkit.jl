@@ -173,13 +173,14 @@ function reweight(
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
+        uc = unitcell(frame)
         gp_1_coord = coordinates[gp1]
         gp_2_coord = coordinates[gp2]
         if all_dist
             system = ParticleSystem(
                 xpositions = gp_1_coord,
                 ypositions = gp_2_coord,
-                unitcell = unitcell(frame),
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
                 cutoff = cutoff,
                 output = 0.0,
                 output_name = :total_energy
@@ -193,7 +194,7 @@ function reweight(
                     ypositions = gp_2_coord,
                     xn_atoms_per_molecule = n_at_per_mol_gp_1,
                     yn_atoms_per_molecule = n_at_per_mol_gp_2,
-                    unitcell = unitcell(frame),
+                    unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
                     cutoff = cutoff
                 )
                 for d_i in eachindex(gp_2_list)
@@ -261,6 +262,7 @@ function full_reweight(
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
+        uc = unitcell(frame)
         gp_1_coord = coordinates[pert_input.group1]
         gp_2_coord = coordinates[pert_input.group2]
         for mol_ind in 1:n_molecules_gp1
@@ -270,7 +272,7 @@ function full_reweight(
                 ypositions = gp_2_coord,
                 xn_atoms_per_molecule = pert_input.number_atoms_group1,
                 yn_atoms_per_molecule = pert_input.number_atoms_group2,
-                unitcell = unitcell(frame),
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
                 cutoff = cutoff
             )
             for pk in keys(pert_input.perturbations)
