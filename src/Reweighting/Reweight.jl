@@ -245,7 +245,7 @@ end
 function multiple_perturbations_reweight(
     simulation::Simulation,
     pert_input::SystemPerturbations;
-    all_dist::Bool = false
+    all_distances::Bool = false,
     k::Real = 1.0,
     T::Real = 1.0,
     cutoff::Real = 12.0,
@@ -262,9 +262,9 @@ function multiple_perturbations_reweight(
 
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
+        coordinates = positions(frame)
         gp_1_coord = coordinates[pert_input.group1]
         gp_2_coord = coordinates[pert_input.group2]
-        coordinates = positions(frame)
         uc = unitcell(frame)
         if all_distances #WIP
                 system = ParticleSystem(
