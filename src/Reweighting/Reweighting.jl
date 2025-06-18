@@ -7,7 +7,7 @@ using ..MolSimToolkit.MolecularMinimumDistances
 import OrderedCollections
 import PDBTools
 
-export reweight, full_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, gauss
+export reweight, multiple_perturbations_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, gauss
 
 const testdir = "$(@__DIR__)/test"
 
@@ -274,7 +274,7 @@ end
 
     input = SystemPerturbations(g1, 1, g2, 1, Dict)
 
-    res = full_reweight(simulation,
+    res = multiple_perturbations_reweight(simulation,
                     input;
                     k = 1.0,
                     T = 1.0,
