@@ -270,7 +270,7 @@ end
 
     dist(r) = r
 
-    Dict = OrderedCollections.OrderedDict(1 => Perturbation(simulation.atoms, c1, c2, dist), 2 => Perturbation(simulation.atoms, c1, c1, dist))
+    Dict = OrderedCollections.OrderedDict(1 => Perturbation(simulation.atoms, c1, c2, dist))
 
     input = SystemPerturbations(g1, 1, g2, 1, Dict)
 

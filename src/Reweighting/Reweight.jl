@@ -285,16 +285,22 @@ function multiple_perturbations_reweight(
                     cutoff = cutoff
                 )
                 for pk in keys(pert_input.perturbations)
-                    println("Performing calculations using key $(pk)")
-                    computed_distances = 0.0
+                    if debug
+                        println("Performing calculations using key $(pk)")
+                        computed_distances = 0.0
+                    end
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            computed_distances += 1
+                            if debug
+                                computed_distances += 1
+                            end
                             output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
                         end
                     end
-                    println("output energy: $(output[pk].energy[iframe])")
-                    println("Total computed distances for frame $iframe: $computed_distances")
+                    if debug
+                        println("output energy: $(output[pk].energy[iframe])")
+                        println("Total computed distances for frame $iframe: $computed_distances")
+                    end
                 end
             end
         end
