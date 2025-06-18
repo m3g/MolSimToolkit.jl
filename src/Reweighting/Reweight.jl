@@ -252,11 +252,11 @@ function multiple_perturbations_reweight(
     debug::Bool = false,
 )
     #Defining results
-    output = OrderedCollections.OrderedDict{Any, ReweightResults}()
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
-
+    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => ReweightResults(prob_vec, prob_rel_vec, energy_vec) for i in keys(pert_input.perturbations))
+    
     #Number of atoms per molecule
     n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
 
@@ -294,16 +294,17 @@ function multiple_perturbations_reweight(
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
                             computed_distances += 1
-                            energy_vec[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
+                            output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
                         end
                     end
                     println("Total computed distances for frame $iframe: $computed_distances")
-                    @. prob_rel_vec = exp(-energy_vec/(k*T))
-                    prob_vec = prob_rel_vec/sum(prob_rel_vec)
-                    output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
                 end
             end
         end
+    end
+    for pk in keys(output)
+    [output[pk].relative_probability[i] = exp(-output[pk].energy[i]/(k*T)) for i in eachindex(output[pk].relative_probability)]
+    [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
     end
     return output
 end
