@@ -242,13 +242,14 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
     """)
 end
 
-function full_reweight(
+function multiple_perturbations_reweight(
     simulation::Simulation,
     pert_input::SystemPerturbations;
+    all_dist::Bool = false
     k::Real = 1.0,
     T::Real = 1.0,
     cutoff::Real = 12.0,
-    debug::Bool = false
+    debug::Bool = false,
 )
     #Defining results
     output = OrderedCollections.OrderedDict{Any, ReweightResults}()
@@ -261,30 +262,46 @@ function full_reweight(
 
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
-        coordinates = positions(frame)
-        uc = unitcell(frame)
         gp_1_coord = coordinates[pert_input.group1]
         gp_2_coord = coordinates[pert_input.group2]
-        for mol_ind in 1:n_molecules_gp1
-            gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * pert_input.number_atoms_group1 + 1 : mol_ind * pert_input.number_atoms_group1]
-            gp_1_list, gp_2_list = minimum_distances(
-                xpositions = gp_1_coord_ref,
+        coordinates = positions(frame)
+        uc = unitcell(frame)
+        if all_distances #WIP
+                system = ParticleSystem(
+                xpositions = gp_1_coord,
                 ypositions = gp_2_coord,
-                xn_atoms_per_molecule = pert_input.number_atoms_group1,
-                yn_atoms_per_molecule = pert_input.number_atoms_group2,
                 unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
-                cutoff = cutoff
+                cutoff = cutoff,
+                output = 0.0,
+                output_name = :total_energy
             )
-            for pk in keys(pert_input.perturbations)
-                energy_vec[iframe] = 0.0
-                for d_i in eachindex(gp_2_list)                    
-                    if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                        energy_vec[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
+            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system) #WIP
+        else
+            for mol_ind in 1:n_molecules_gp1
+                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * pert_input.number_atoms_group1 + 1 : mol_ind * pert_input.number_atoms_group1]
+                gp_1_list, gp_2_list = minimum_distances(
+                    xpositions = gp_1_coord_ref,
+                    ypositions = gp_2_coord,
+                    xn_atoms_per_molecule = pert_input.number_atoms_group1,
+                    yn_atoms_per_molecule = pert_input.number_atoms_group2,
+                    unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                    cutoff = cutoff
+                )
+                for pk in keys(pert_input.perturbations)
+                    println("Performing calculations using key $(pk)")
+                    energy_vec[iframe] = 0.0
+                    computed_distances = 0.0
+                    for d_i in eachindex(gp_2_list)                    
+                        if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
+                            computed_distances += 1
+                            energy_vec[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
+                        end
                     end
+                    println("Total computed distances for frame $iframe: $computed_distances")
+                    @. prob_rel_vec = exp(-energy_vec/(k*T))
+                    prob_vec = prob_rel_vec/sum(prob_rel_vec)
+                    output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
                 end
-                @. prob_rel_vec = exp(-energy_vec/(k*T))
-                prob_vec = prob_rel_vec/sum(prob_rel_vec)
-                output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
             end
         end
     end
