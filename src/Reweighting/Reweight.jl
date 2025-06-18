@@ -13,11 +13,31 @@ struct ReweightResults{T<:Real}
     energy::Vector{T}
 end
 
+struct Perturbation{F<:Function}
+    subgroup1::Vector{Int}
+    subgroup2::Vector{Int}
+    perturbation_function::F
+end
+
+struct SystemPerturbations
+    group1::Vector{Int}
+    number_atoms_group1::Int
+    group2::Vector{Int}
+    number_atoms_group2::Int
+    perturbations::OrderedCollections.OrderedDict{Any, Perturbation}
+end
+
+Perturbation(atoms, subgroup1::Union{String, Function}, subgroup2::Union{String, Function}, perturbation_function::Function) =
+    Perturbation(PDBTools.selindex(atoms, subgroup1), PDBTools.selindex(atoms, subgroup2), perturbation_function)
+
 """
     reweight(
         simulation::Simulation, 
         f_perturbation::Function, 
-        group_1::AbstractVector{<:Integer}; 
+        group    for i in eachindex(perturbations)
+        perturbations[i][1] = findall(i1 -> i1 in PDBTools.select(simulation.atoms, perturbations[i][1]), simulation.atoms[gp1]) 
+        perturbations[i][2] = findall(i2 -> i2 in PDBTools.select(simulation.atoms, perturbations[i][2]), simulation.atoms[gp2])
+    endist::Bool = false,
         cutoff::Real = 12.0, 
         k::Real = 1.0, 
         T::Real = 1.0
@@ -25,10 +45,13 @@ end
     reweight(
         simulation::Simulation, 
         f_perturbation::Function, 
-        group_1::AbstractVector{<:Integer}, 
-        group_2::AbstractVector{<:Integer};     
+        group_1::AbstractVector{<:Integer},
+        n_atoms_per_molecule_gp_1::Int,
+        group_2::AbstractVector{<:Integer},
+        n_atoms_per_molecule_gp_2::Int;
+        all_dist::Bool = false,
         cutoff::Real = 12.0, 
-        k::Real = 1.0, 
+        k::Real = 1.0,
         T::Real = 1.0
     )
 
@@ -36,11 +59,16 @@ Function that calculates the energy difference when a perturbation is applied on
 
 It returns "ReweightResults" structure that contains three results: `probability`, `relative_probability` and `energy` vectors.
 
-The function needs a MolSimToolkit's simulation object, another function to compute the perturbation and one or two types of atoms.
+The function needs a MolSimToolkit's simulation object, another function to compute the perturbation, and one or two types of atoms.
 
 Additionally, you can also define a cutoff distance, the constant "k" (in some cases, it will be Boltzmann constant) and the temperature, T, of the system.
 
-Group_1 (and group_2) is a vector of atoms indexes, extracted, for example, from a pdb file. 
+group_1 (and group_2) is a vector of atoms indexes, extracted, for example, from a pdb file. 
+
+n_atoms_per_molecule is the number of atoms per molecules of each group
+
+By default, only minimum distances are computed in order to perturb the system.
+Using all_dist option allows the computation of all possible distances between the selected group of atoms
 
 # Example
 
@@ -68,7 +96,7 @@ julia> i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
 1-element AbstractVector{<:Integer}:
  171
 
-julia> sum_of_dist = reweight(simulation, (i,j,d2) -> d2, i1, i2; cutoff = 25.0)
+julia> sum_of_dist = reweight(simulation, r -> r, i1, 2, i2, 1; all_dist = true, cutoff = 25.0)
 -------------
 FRAME WEIGHTS
 -------------
@@ -107,61 +135,77 @@ This result is the energy difference between the  perturbed frame and the origin
 ```
 """
 function reweight(
-    simulation::Simulation, 
-    f_perturbation::Function, 
-    group_1::AbstractVector{<:Integer}; 
-    cutoff::Real = 12.0, 
-    k::Real = 1.0, 
-    T::Real = 1.0
+    simulation::Simulation, #MolSimToolkit simulation object
+    perturb_func::Function, #Perturbation function
+    gp_1::Union{String, Function}, #Group 1 atoms
+    n_at_per_mol_gp_1::Int, #Number of atoms per molecule of group 1
+    gp_2::Union{String, Function},  #Group 2 atoms
+    n_at_per_mol_gp_2::Int; #Number of atoms per molecule molecules of group 2
+    all_dist::Bool = false, #Compute every possible distance option
+    mol_1_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 1 are we interested?
+    mol_2_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 2 are we interested?
+    cutoff::Real = 12.0,  #Cutoff distance for calculations
+    k::Real = 1.0, #Boltzmann constat value
+    T::Real = 1.0, #temperature of the system
+    debug::Bool = true
 )
+    #Defining results vector
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
-    for (iframe, frame) in enumerate(simulation)
-        coordinates = positions(frame)
-        first_coors = coordinates[group_1]
-        system = ParticleSystem(
-            xpositions = first_coors,
-            unitcell = unitcell(frame),
-            cutoff = cutoff,
-            output = 0.0,
-            output_name = :total_energy
-        )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
-    end
-    @. prob_rel_vec = exp(-(energy_vec)/k*T)
-    prob_vec = prob_rel_vec/sum(prob_rel_vec)
-    output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
-    return output
-end
-function reweight(
-    simulation::Simulation, 
-    f_perturbation::Function, 
-    group_1::AbstractVector{<:Integer}, 
-    group_2::AbstractVector{<:Integer};     
-    cutoff::Real = 12.0, 
-    k::Real = 1.0, 
-    T::Real = 1.0
-)
-    prob_vec = zeros(length(simulation))
-    prob_rel_vec = zeros(length(simulation))
-    energy_vec = zeros(length(simulation))
+
+    #Defining molecules indexes
+    gp1 = PDBTools.selindex(simulation.atoms, gp_1)
+    gp2 = PDBTools.selindex(simulation.atoms, gp_2)
+
+    #Retrieving atoms from the contributions
+    ind_contrib_1 = findall(i -> i in PDBTools.select(simulation.atoms, mol_1_contrib), simulation.atoms[gp1])
+    ind_contrib_2 = findall(i -> i in PDBTools.select(simulation.atoms, mol_2_contrib), simulation.atoms[gp2])
+
+    #Number of atoms per molecule
+    n_molecules_gp_1 = length(gp1) ÷ n_at_per_mol_gp_1
+    n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
+    
+    #Checking if PDB file and input match
+    check_input(simulation, gp_1, n_molecules_gp_1, "group 1", debug)
+    check_input(simulation, gp_2, n_molecules_gp_2, "group 2", debug)
+    
+    #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
         coordinates = positions(frame)
         uc = unitcell(frame)
-        first_coors = coordinates[group_1]
-        second_coors = coordinates[group_2]
-        system = ParticleSystem(
-            xpositions = first_coors,
-            ypositions = second_coors,
-            unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
-            cutoff = cutoff,
-            output = 0.0,
-            output_name = :total_energy
-        )
-        energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + f_perturbation(i, j, sqrt(d2)/10), system)
+        gp_1_coord = coordinates[gp1]
+        gp_2_coord = coordinates[gp2]
+        if all_dist
+            system = ParticleSystem(
+                xpositions = gp_1_coord,
+                ypositions = gp_2_coord,
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                cutoff = cutoff,
+                output = 0.0,
+                output_name = :total_energy
+            )
+            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
+        else
+            for mol_ind in 1:n_molecules_gp_1
+                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_at_per_mol_gp_1 + 1 : mol_ind * n_at_per_mol_gp_1]
+                gp_1_list, gp_2_list = minimum_distances(
+                    xpositions = gp_1_coord_ref,
+                    ypositions = gp_2_coord,
+                    xn_atoms_per_molecule = n_at_per_mol_gp_1,
+                    yn_atoms_per_molecule = n_at_per_mol_gp_2,
+                    unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                    cutoff = cutoff
+                )
+                for d_i in eachindex(gp_2_list)
+                    if gp_2_list[d_i].within_cutoff && is_in(ind_contrib_2, gp_2_list[d_i].i) && is_in(ind_contrib_1, gp_2_list[d_i].j)
+                        energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
+                    end
+                end
+            end
+        end
     end
-    @. prob_rel_vec = exp(-(energy_vec)/k*T)
+    @. prob_rel_vec = exp(-energy_vec/(k*T))
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
     output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
     return output
@@ -197,3 +241,83 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
     
     """)
 end
+
+function full_reweight(
+    simulation::Simulation,
+    pert_input::SystemPerturbations;
+    k::Real = 1.0,
+    T::Real = 1.0,
+    cutoff::Real = 12.0,
+    debug::Bool = false
+)
+    #Defining results
+    output = OrderedCollections.OrderedDict{Any, ReweightResults}()
+    prob_vec = zeros(length(simulation))
+    prob_rel_vec = zeros(length(simulation))
+    energy_vec = zeros(length(simulation))
+
+    #Number of atoms per molecule
+    n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
+
+    #Performing computation for every frame
+    for (iframe, frame) in enumerate(simulation)
+        coordinates = positions(frame)
+        uc = unitcell(frame)
+        gp_1_coord = coordinates[pert_input.group1]
+        gp_2_coord = coordinates[pert_input.group2]
+        for mol_ind in 1:n_molecules_gp1
+            gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * pert_input.number_atoms_group1 + 1 : mol_ind * pert_input.number_atoms_group1]
+            gp_1_list, gp_2_list = minimum_distances(
+                xpositions = gp_1_coord_ref,
+                ypositions = gp_2_coord,
+                xn_atoms_per_molecule = pert_input.number_atoms_group1,
+                yn_atoms_per_molecule = pert_input.number_atoms_group2,
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                cutoff = cutoff
+            )
+            for pk in keys(pert_input.perturbations)
+                energy_vec[iframe] = 0.0
+                for d_i in eachindex(gp_2_list)                    
+                    if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
+                        energy_vec[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
+                    end
+                end
+                @. prob_rel_vec = exp(-energy_vec/(k*T))
+                prob_vec = prob_rel_vec/sum(prob_rel_vec)
+                output[pk] = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
+            end
+        end
+    end
+    return output
+end
+
+#Checking if PDB file and input match
+function check_input(simulation::Simulation, atom_group::Union{String, Function}, n_mol_per_group::Int, name::String, debug::Bool)
+    check = length(unique(PDBTools.residue.(PDBTools.select(simulation.atoms, atom_group)))) #check number of residues (number of molecules) in PDB
+    division = check ÷ n_mol_per_group
+    quotient = mod(check, n_mol_per_group)
+    if debug
+        if ((division == 1 && quotient == 0) || n_mol_per_group == 1)
+            println("Number of molecules in the system seems to be correct for $name ($n_mol_per_group)")
+        elseif division != 1 && quotient == 0
+            return @warn("""
+                Number of molecules in the system ($check) seems to be a multiple of your input for $name ($n_mol_per_group).
+                """)
+        elseif quotient != 0
+            return @warn("""
+                The number of residues ($check) in the PDB file for $name is different than the number of molecules based on the number on the input ($n_mol_per_group) 
+                """)
+        end
+    end
+end
+
+function is_in(x, i)
+    j = searchsortedfirst(x, i)
+    j > length(x) && return false
+    if x[j] == i
+        return true
+    else
+        return false
+    end
+end
+
