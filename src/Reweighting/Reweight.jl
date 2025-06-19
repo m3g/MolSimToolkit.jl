@@ -249,6 +249,7 @@ function multiple_perturbations_reweight(
     k::Real = 1.0,
     T::Real = 1.0,
     cutoff::Real = 12.0,
+    show_progress::Bool = false,
     debug::Bool = false,
 )
     #Defining results
@@ -285,9 +286,11 @@ function multiple_perturbations_reweight(
                     cutoff = cutoff
                 )
                 for pk in keys(pert_input.perturbations)
-                    if debug
+                    if show_progress || debug
                         println("Performing calculations using key $(pk)")
-                        computed_distances = 0.0
+                        if debug
+                            computed_distances = 0
+                        end
                     end
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
@@ -310,6 +313,17 @@ function multiple_perturbations_reweight(
         [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
     end
     return output
+end
+
+#Convert Results to DataFrames
+function conv_to_df(result_dict, δ, ints)
+    prob_df = DataFrame("Int" => δ)
+    rel_prob_df = DataFrame("Int" => δ)
+    eng_df = DataFrame("Int" => δ)
+    [prob_df[!, k] = [result_dict[i+9*(k-1)].probability for i in 1:length(δ)] for k in 1:ints]
+    [rel_prob_df[!, k] = [result_dict[i+9*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:ints]
+    [eng_df[!, k] = [result_dict[i+9*(k-1)].energy for i in 1:length(δ)] for k in 1:ints]
+    return prob_df, rel_prob_df, eng_df
 end
 
 #Checking if PDB file and input match
