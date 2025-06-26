@@ -302,7 +302,7 @@ function multiple_perturbations_reweight(
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
                             output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
-                            if output[pk].energy[iframe] > tol[pk]
+                            if abs(output[pk].energy[iframe]) > tol[pk]
                                 output[pk].distances[iframe] += 1
                             end
                         end
