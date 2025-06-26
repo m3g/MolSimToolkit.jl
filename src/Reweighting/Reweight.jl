@@ -327,6 +327,7 @@ function conv_to_df(result_dict, δ; int_names = nothing)
     prob_df = DataFrame("Int" => δ)
     rel_prob_df = DataFrame("Int" => δ)
     eng_df = DataFrame("Int" => δ)
+    dists_df = DataFrame("Int" => δ)
     if int_names !== nothing
         [prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
         [rel_prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
