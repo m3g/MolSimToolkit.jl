@@ -279,6 +279,7 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 12.0,
+                    show_progress = true
             )
     @test res[1].energy ≈ [
         5.450897,

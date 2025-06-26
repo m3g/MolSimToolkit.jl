@@ -11,6 +11,7 @@ struct ReweightResults{T<:Real}
     probability::Vector{T}
     relative_probability::Vector{T}
     energy::Vector{T}
+    distances::Vector{T}
 end
 
 struct Perturbation{F<:Function}
@@ -153,7 +154,7 @@ function reweight(
     prob_vec = zeros(length(simulation))
     prob_rel_vec = zeros(length(simulation))
     energy_vec = zeros(length(simulation))
-
+    distances_vec = zeros(length(simulation))
     #Defining molecules indexes
     gp1 = PDBTools.selindex(simulation.atoms, gp_1)
     gp2 = PDBTools.selindex(simulation.atoms, gp_2)
@@ -207,7 +208,7 @@ function reweight(
     end
     @. prob_rel_vec = exp(-energy_vec/(k*T))
     prob_vec = prob_rel_vec/sum(prob_rel_vec)
-    output = ReweightResults(prob_vec, prob_rel_vec, energy_vec)
+    output = ReweightResults(prob_vec, prob_rel_vec, energy_vec, distances_vec)
     return output
 end
 
@@ -253,8 +254,16 @@ function multiple_perturbations_reweight(
     debug::Bool = false,
 )
     #Defining results
-    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => ReweightResults(zeros(length(simulation)), zeros(length(simulation)), zeros(length(simulation))) for i in keys(pert_input.perturbations))
-    
+    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
+        ReweightResults(
+        zeros(length(simulation)), 
+        zeros(length(simulation)), 
+        zeros(length(simulation)),  
+        zeros(length(simulation))) 
+        for i in keys(pert_input.perturbations))
+    #setting max value for perturbations
+    tol = [findmax(abs.(pert_input.perturbations[pk].perturbation_function.(collect(range(0, step=4/1000, length=1001)))))[1]./1000 for pk in keys(pert_input.perturbations)]
+
     #Number of atoms per molecule
     n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
 
@@ -286,18 +295,16 @@ function multiple_perturbations_reweight(
                     cutoff = cutoff
                 )
                 for pk in keys(pert_input.perturbations)
-                    if show_progress || debug
-                        println("Performing calculations using key $(pk)")
-                        if debug
-                            computed_distances = 0
-                        end
+                    computed_distances = 0
+                    if (show_progress || debug) && iframe == length(simulation)
+                        println("Performed calculations using key $(pk)")
                     end
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            if debug
-                                computed_distances += 1
-                            end
                             output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
+                            if output[pk].energy[iframe] > tol[pk]
+                                output[pk].distances[iframe] += 1
+                            end
                         end
                     end
                     if debug
