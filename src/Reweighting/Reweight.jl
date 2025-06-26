@@ -323,15 +323,21 @@ function multiple_perturbations_reweight(
 end
 
 #Convert Results to DataFrames
-function conv_to_df(result_dict, δ, ints)
+function conv_to_df(result_dict, δ; int_names = nothing)
     prob_df = DataFrame("Int" => δ)
     rel_prob_df = DataFrame("Int" => δ)
     eng_df = DataFrame("Int" => δ)
-    dists_df = DataFrame("Int" => δ)
-    [prob_df[!, k] = [result_dict[i+9*(k-1)].probability for i in 1:length(δ)] for k in 1:ints]
-    [rel_prob_df[!, k] = [result_dict[i+9*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:ints]
-    [eng_df[!, k] = [result_dict[i+9*(k-1)].energy for i in 1:length(δ)] for k in 1:ints]
-    [dists_df[!, k] = [result_dict[i+9*(k-1)].distances for i in 1:length(δ)] for k in 1:ints]
+    if int_names !== nothing
+        [prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [rel_prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [eng_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [dists_df[!,int_names[k]] = [result_dict[i+length(δ)*(k-1)].distances for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+    else
+        [prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [rel_prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [eng_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [dists_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].distances for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+    end
     return prob_df, rel_prob_df, eng_df, dists_df
 end
 
