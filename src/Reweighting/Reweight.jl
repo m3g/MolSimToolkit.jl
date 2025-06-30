@@ -28,8 +28,29 @@ struct SystemPerturbations
     perturbations::OrderedCollections.OrderedDict{Any, Perturbation}
 end
 
+#
 Perturbation(atoms, subgroup1::Union{String, Function}, subgroup2::Union{String, Function}, perturbation_function::Function) =
     Perturbation(PDBTools.selindex(atoms, subgroup1), PDBTools.selindex(atoms, subgroup2), perturbation_function)
+
+#Convert Results to DataFrames
+function conv_to_df(result_dict, δ; int_names = nothing)
+    prob_df = DataFrame("Int" => δ)
+    rel_prob_df = DataFrame("Int" => δ)
+    eng_df = DataFrame("Int" => δ)
+    dists_dict = OrderedDict{Any, Vector{Int64}}()
+    if int_names !== nothing
+        [prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [rel_prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [eng_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [dists_dict[int_names[k]] = Int.(result_dict[(k-1)*length(δ) + 1].distances) for k in 1:(length(result_dict) ÷ length(δ))]
+    else
+        [prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [rel_prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [eng_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
+        [dists_dict[k] = Int.(result_dict[(k-1)*length(δ) + 1].distances) for k in 1:(length(result_dict) ÷ length(δ))]
+    end
+    return prob_df, rel_prob_df, eng_df, dists_dict
+end
 
 """
     reweight(
@@ -301,10 +322,9 @@ function multiple_perturbations_reweight(
                     end
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)
-                            if abs(output[pk].energy[iframe]) > tol[pk]
-                                output[pk].distances[iframe] += 1
-                            end
+                            eng = pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
+                            output[pk].energy[iframe] += eng > tol[pk] ? eng : 0
+                            output[pk].distances[iframe] += eng > tol[pk] ? 1 : 0
                         end
                     end
                     if debug
@@ -320,26 +340,6 @@ function multiple_perturbations_reweight(
         [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
     end
     return output
-end
-
-#Convert Results to DataFrames
-function conv_to_df(result_dict, δ; int_names = nothing)
-    prob_df = DataFrame("Int" => δ)
-    rel_prob_df = DataFrame("Int" => δ)
-    eng_df = DataFrame("Int" => δ)
-    dists_df = DataFrame("Int" => δ)
-    if int_names !== nothing
-        [prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [rel_prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [eng_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [dists_df[!,int_names[k]] = [result_dict[i+length(δ)*(k-1)].distances for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-    else
-        [prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [rel_prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [eng_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [dists_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].distances for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-    end
-    return prob_df, rel_prob_df, eng_df, dists_df
 end
 
 #Checking if PDB file and input match
