@@ -286,7 +286,7 @@ function multiple_perturbations_reweight(
 
     #setting max value for perturbations
     d = collect(range(0, step=cutoff/1000, length=1001))
-    tol = [findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1]/1000 for pk in keys(pert_input.perturbations)]
+    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1]/1000 for pk in keys(pert_input.perturbations))
     computed_distances = 0
     computed_energy = 0
 
