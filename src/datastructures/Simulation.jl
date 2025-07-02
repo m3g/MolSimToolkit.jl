@@ -447,7 +447,7 @@ function unitcell(f::Chemfiles.Frame)
     else
         valid = true
     end
-    scale = 1e-10 * (maximum(mat) - minimum(mat))
+    scale = 1e-10 * abs(minimum(mat))
     orthorhombic = all(abs(mat[i,j]) < scale && abs(mat[j,i]) < scale for i in 1:3 for j in i+1:3)
     return UnitCell(mat, valid, orthorhombic)
 end
