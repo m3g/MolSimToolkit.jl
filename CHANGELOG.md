@@ -10,7 +10,10 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.1-DEV
+Version 1.29.2-DEV
+-------------
+
+Version 1.29.1
 -------------
 - ![BUGFIX][badge-bugfix] fix diagonal unitcell test for when cell is not orthorhombic and contains negative vector entries.
 
