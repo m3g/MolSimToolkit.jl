@@ -448,7 +448,7 @@ function unitcell(f::Chemfiles.Frame)
         valid = true
     end
     scale = 1e-10 * (maximum(mat) - minimum(mat))
-    orthorhombic = all(mat[i,j] < scale && mat[j,i] < scale for i in 1:3 for j in i+1:3)
+    orthorhombic = all(abs(mat[i,j]) < scale && abs(mat[j,i]) < scale for i in 1:3 for j in i+1:3)
     return UnitCell(mat, valid, orthorhombic)
 end
 unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
