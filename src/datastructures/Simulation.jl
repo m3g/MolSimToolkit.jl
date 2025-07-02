@@ -435,7 +435,7 @@ end
 Returns the unit cell of the current frame in the trajectory.
 
 """
-function unitcell(f::Chemfiles.Frame) 
+function unitcell(f::Chemfiles.Frame; tol=1e-10) 
     mat = unitcell(Chemfiles.UnitCell(f))
     if all(==(0), mat)
         @warn """\n
@@ -447,8 +447,8 @@ function unitcell(f::Chemfiles.Frame)
     else
         valid = true
     end
-    scale = 1e-10 * (maximum(mat) - minimum(mat))
-    orthorhombic = all(mat[i,j] < scale && mat[j,i] < scale for i in 1:3 for j in i+1:3)
+    s = abs(minimum(diag(mat))) # minimum diagonal element
+    orthorhombic = all(abs(mat[i, j]) < tol * s for i in 1:3, j in 1:3 if i != j)
     return UnitCell(mat, valid, orthorhombic)
 end
 unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
