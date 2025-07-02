@@ -281,9 +281,13 @@ function multiple_perturbations_reweight(
         zeros(length(simulation)), 
         zeros(length(simulation)),  
         zeros(length(simulation))) 
-        for i in keys(pert_input.perturbations))
+        for i in keys(pert_input.perturbations)
+    )
+
     #setting max value for perturbations
-    tol = [findmax(abs.(pert_input.perturbations[pk].perturbation_function.(collect(range(0, step=4/1000, length=1001)))))[1]./1000 for pk in keys(pert_input.perturbations)]
+    tol = [findmax(abs.(pert_input.perturbations[pk].perturbation_function.(collect(range(0, step=cutoff/1000, length=1001)))))[1]./1000 for pk in keys(pert_input.perturbations)]
+    computed_distances = 0
+    computed_energy = 0
 
     #Number of atoms per molecule
     n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
@@ -316,21 +320,22 @@ function multiple_perturbations_reweight(
                     cutoff = cutoff
                 )
                 for pk in keys(pert_input.perturbations)
-                    computed_distances = 0
                     if (show_progress || debug) && iframe == length(simulation)
                         println("Performed calculations using key $(pk)")
                     end
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            eng = pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
-                            output[pk].energy[iframe] += eng > tol[pk] ? eng : 0
-                            output[pk].distances[iframe] += eng > tol[pk] ? 1 : 0
+                            computed_energy = pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
+                            output[pk].energy[iframe] += computed_energy > tol[pk] ? computed_energy : 0
+                            output[pk].distances[iframe] += computed_energy > tol[pk] ? 1 : 0
                         end
                     end
                     if debug
                         println("output energy: $(output[pk].energy[iframe])")
                         println("Total computed distances for frame $iframe: $computed_distances")
                     end
+                    computed_distances = 0
+                    computed_energy = 0
                 end
             end
         end
