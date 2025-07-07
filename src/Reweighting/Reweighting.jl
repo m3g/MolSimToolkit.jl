@@ -279,6 +279,7 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 12.0,
+                    tolerance = 1000,
                     show_progress = true,
                     debug = true
             )

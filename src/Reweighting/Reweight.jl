@@ -271,6 +271,7 @@ function multiple_perturbations_reweight(
     k::Real = 1.0,
     T::Real = 1.0,
     cutoff::Real = 12.0,
+    tolerance = 100000,
     show_progress::Bool = false,
     debug::Bool = false,
 )
@@ -285,8 +286,8 @@ function multiple_perturbations_reweight(
     )
 
     #setting max value for perturbations
-    d = collect(range(0, step=cutoff/1000, length=1001))
-    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1]./1000 for pk in keys(pert_input.perturbations))
+    d = collect(range(0, step=cutoff/10000, length = 10000 + 1))
+    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1]./tolerance for pk in keys(pert_input.perturbations))
     if debug 
         [println("Tolerance for key $pk = $(tol[pk])") for pk in keys(tol)]
     end
