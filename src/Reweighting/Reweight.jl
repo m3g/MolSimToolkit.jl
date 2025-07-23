@@ -205,10 +205,13 @@ function reweight(
     computed_energy = 0
 
     #Defining function if CellListMap option is activated
-    function cell_list_func(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame)
+    function cell_list_func(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame, tol)
         if is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group2[j])
-            distance_vec[frame] += 1
-            return pert_func(d)
+            eng = pert_func(d)
+            if eng > tol
+                distance_vec[frame] += 1
+                return eng
+            end
         end
         return 0.
     end
@@ -241,7 +244,8 @@ function reweight(
                         pert_input.perturbations[pk].subgroup2, 
                         pert_input.perturbations[pk].perturbation_function,
                         output[pk].distances,
-                        iframe),
+                        iframe,
+                        tol[pk]),
                         system
                 )
                 system.output = 0.0
@@ -318,7 +322,7 @@ function reweight(
     computed_energy = 0
 
     #Defining function if CellListMap option is activated
-    function cell_list_func_one_group(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame)
+    function cell_list_func_one_group(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame, tol)
         atomic_indexes_per_molecule = [collect((mol - 1) * pert_input.number_atoms_group1 + 1 : 1 : mol * pert_input.number_atoms_group1) for mol in 1:n_molecules_gp1]
         for m in eachindex(atomic_indexes_per_molecule)
             if (is_in(atomic_indexes_per_molecule[m], i) && is_in(atomic_indexes_per_molecule[m], j)) || (is_in(atomic_indexes_per_molecule[m], j) && is_in(atomic_indexes_per_molecule[m], i))
@@ -326,8 +330,11 @@ function reweight(
             end
         end
         if (is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group1[j])) || (is_in(subgroup2, pert_input.group1[i]) && is_in(subgroup1, pert_input.group1[j])) 
-            distance_vec[frame] += 1
-            return pert_func(d)
+            eng = pert_func(d)
+            if eng > tol
+                distance_vec[frame] += 1
+                return eng
+            end
         end
         return 0.
     end
@@ -355,7 +362,8 @@ function reweight(
                         pert_input.perturbations[pk].subgroup2, 
                         pert_input.perturbations[pk].perturbation_function,
                         output[pk].distances,
-                        iframe),
+                        iframe,
+                        tol[pk]),
                         system
                 )
                 system.output = 0.0
