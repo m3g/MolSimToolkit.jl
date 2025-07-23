@@ -7,7 +7,7 @@ using ..MolSimToolkit.MolecularMinimumDistances
 import OrderedCollections
 import PDBTools
 
-export reweight, multiple_perturbations_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, SystemPerturbationsOneGroup, gauss, conv_to_df
+export reweight, multiple_perturbations_reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, SystemPerturbationsOneGroup, gauss
 
 const testdir = "$(@__DIR__)/test"
 
