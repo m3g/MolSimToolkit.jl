@@ -28,30 +28,14 @@ struct SystemPerturbations
     perturbations::OrderedCollections.OrderedDict{Any, Perturbation}
 end
 
-#
-Perturbation(atoms, subgroup1::Union{String, Function}, subgroup2::Union{String, Function}, perturbation_function::Function) =
-    Perturbation(PDBTools.selindex(atoms, subgroup1), PDBTools.selindex(atoms, subgroup2), perturbation_function)
-
-#Convert Results to DataFrames
-function conv_to_df(result_dict, δ; int_names = nothing)
-    prob_df = DataFrame("Int" => δ)
-    rel_prob_df = DataFrame("Int" => δ)
-    eng_df = DataFrame("Int" => δ)
-    dists_dict = OrderedDict{Any, Vector{Int64}}()
-    if int_names !== nothing
-        [prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [rel_prob_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [eng_df[!, int_names[k]] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [dists_dict[int_names[k]] = Int.(result_dict[(k-1)*length(δ) + 1].distances) for k in 1:(length(result_dict) ÷ length(δ))]
-    else
-        [prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [rel_prob_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].relative_probability for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [eng_df[!, "$k"] = [result_dict[i+length(δ)*(k-1)].energy for i in 1:length(δ)] for k in 1:(length(result_dict) ÷ length(δ))]
-        [dists_dict[k] = Int.(result_dict[(k-1)*length(δ) + 1].distances) for k in 1:(length(result_dict) ÷ length(δ))]
-    end
-    return prob_df, rel_prob_df, eng_df, dists_dict
+struct SystemPerturbationsOneGroup
+    group1::Vector{Int}
+    number_atoms_group1::Int
+    perturbations::OrderedCollections.OrderedDict{Any, Perturbation}
 end
 
+Perturbation(atoms, subgroup1::Union{String, Function}, subgroup2::Union{String, Function}, perturbation_function::Function) =
+    Perturbation(PDBTools.selindex(atoms, subgroup1), PDBTools.selindex(atoms, subgroup2), perturbation_function)
 """
     reweight(
         simulation::Simulation, 
@@ -156,82 +140,6 @@ julia> sum_of_dist.energy
 This result is the energy difference between the  perturbed frame and the original one. In this case, it is the sum of distances between the reffered atoms
 ```
 """
-function reweight(
-    simulation::Simulation, #MolSimToolkit simulation object
-    perturb_func::Function, #Perturbation function
-    gp_1::Union{String, Function}, #Group 1 atoms
-    n_at_per_mol_gp_1::Int, #Number of atoms per molecule of group 1
-    gp_2::Union{String, Function},  #Group 2 atoms
-    n_at_per_mol_gp_2::Int; #Number of atoms per molecule molecules of group 2
-    all_dist::Bool = false, #Compute every possible distance option
-    mol_1_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 1 are we interested?
-    mol_2_contrib::Union{String, Function} = at -> at = true, #Which atoms of group 2 are we interested?
-    cutoff::Real = 12.0,  #Cutoff distance for calculations
-    k::Real = 1.0, #Boltzmann constat value
-    T::Real = 1.0, #temperature of the system
-    debug::Bool = true
-)
-    #Defining results vector
-    prob_vec = zeros(length(simulation))
-    prob_rel_vec = zeros(length(simulation))
-    energy_vec = zeros(length(simulation))
-    distances_vec = zeros(length(simulation))
-    #Defining molecules indexes
-    gp1 = PDBTools.selindex(simulation.atoms, gp_1)
-    gp2 = PDBTools.selindex(simulation.atoms, gp_2)
-
-    #Retrieving atoms from the contributions
-    ind_contrib_1 = findall(i -> i in PDBTools.select(simulation.atoms, mol_1_contrib), simulation.atoms[gp1])
-    ind_contrib_2 = findall(i -> i in PDBTools.select(simulation.atoms, mol_2_contrib), simulation.atoms[gp2])
-
-    #Number of atoms per molecule
-    n_molecules_gp_1 = length(gp1) ÷ n_at_per_mol_gp_1
-    n_molecules_gp_2 = length(gp2) ÷ n_at_per_mol_gp_2
-    
-    #Checking if PDB file and input match
-    check_input(simulation, gp_1, n_molecules_gp_1, "group 1", debug)
-    check_input(simulation, gp_2, n_molecules_gp_2, "group 2", debug)
-    
-    #Performing computation for every frame
-    for (iframe, frame) in enumerate(simulation)
-        coordinates = positions(frame)
-        uc = unitcell(frame)
-        gp_1_coord = coordinates[gp1]
-        gp_2_coord = coordinates[gp2]
-        if all_dist
-            system = ParticleSystem(
-                xpositions = gp_1_coord,
-                ypositions = gp_2_coord,
-                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
-                cutoff = cutoff,
-                output = 0.0,
-                output_name = :total_energy
-            )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system)
-        else
-            for mol_ind in 1:n_molecules_gp_1
-                gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * n_at_per_mol_gp_1 + 1 : mol_ind * n_at_per_mol_gp_1]
-                gp_1_list, gp_2_list = minimum_distances(
-                    xpositions = gp_1_coord_ref,
-                    ypositions = gp_2_coord,
-                    xn_atoms_per_molecule = n_at_per_mol_gp_1,
-                    yn_atoms_per_molecule = n_at_per_mol_gp_2,
-                    unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
-                    cutoff = cutoff
-                )
-                for d_i in eachindex(gp_2_list)
-                    if gp_2_list[d_i].within_cutoff && is_in(ind_contrib_2, gp_2_list[d_i].i) && is_in(ind_contrib_1, gp_2_list[d_i].j)
-                        energy_vec[iframe] += perturb_func(gp_2_list[d_i].d)
-                    end
-                end
-            end
-        end
-    end
-    @. prob_rel_vec = exp(-energy_vec/(k*T))
-    prob_vec = prob_rel_vec/sum(prob_rel_vec)
-    output = ReweightResults(prob_vec, prob_rel_vec, energy_vec, distances_vec)
-    return output
-end
 
 import Base.show
 import Statistics
@@ -263,17 +171,17 @@ function Base.show(io::IO, mime::MIME"text/plain", res::ReweightResults)
     
     """)
 end
-
-function multiple_perturbations_reweight(
-    simulation::Simulation,
-    pert_input::SystemPerturbations;
-    all_distances::Bool = false,
-    k::Real = 1.0,
-    T::Real = 1.0,
-    cutoff::Real = 12.0,
-    tolerance = 100000,
-    show_progress::Bool = false,
-    debug::Bool = false,
+#Function for two molecular entities
+function reweight(
+    simulation::Simulation, #Simulation object
+    pert_input::SystemPerturbations; #Data structure containing molecular entities and their subgroups whose distances will be perturbed
+    all_distances::Bool = false, #Flag to use CellListMap, computing all possible distances between the entities besides minimum distances
+    k::Real = 1.0, #Boltzmann constant
+    T::Real = 1.0, #Temperature
+    cutoff::Real = 12.0, #Cutoff of distances
+    tolerance = 1/10000, #Minimum value to compute one interaction
+    show_progress::Bool = false, #Exhibit the progress of the execution
+    debug::Bool = false #Flag for debugging  
 )
     #Defining results
     output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
@@ -287,15 +195,23 @@ function multiple_perturbations_reweight(
 
     #setting max value for perturbations
     d = collect(range(0, step=cutoff/10000, length = 10000 + 1))
-    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1]./tolerance for pk in keys(pert_input.perturbations))
+    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1] .* tolerance for pk in keys(pert_input.perturbations))
     if debug 
         [println("Tolerance for key $pk = $(tol[pk])") for pk in keys(tol)]
     end
-    computed_distances = 0
-    computed_energy = 0
 
     #Number of atoms per molecule
     n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
+    computed_energy = 0
+
+    #Defining function if CellListMap option is activated
+    function cell_list_func(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame)
+        if is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group2[j])
+            distance_vec[frame] += 1
+            return pert_func(d)
+        end
+        return 0.
+    end
 
     #Performing computation for every frame
     for (iframe, frame) in enumerate(simulation)
@@ -303,8 +219,8 @@ function multiple_perturbations_reweight(
         gp_1_coord = coordinates[pert_input.group1]
         gp_2_coord = coordinates[pert_input.group2]
         uc = unitcell(frame)
-        if all_distances #WIP
-                system = ParticleSystem(
+        if all_distances
+            system = ParticleSystem(
                 xpositions = gp_1_coord,
                 ypositions = gp_2_coord,
                 unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
@@ -312,7 +228,24 @@ function multiple_perturbations_reweight(
                 output = 0.0,
                 output_name = :total_energy
             )
-            energy_vec[iframe] = map_pairwise!((x, y, i, j, d2, total_energy) -> total_energy + perturb_func(sqrt(d2)), system) #WIP
+            for pk in keys(pert_input.perturbations)
+                if (show_progress || debug) && iframe == length(simulation)
+                    println("Performed calculations using key $(pk)")
+                end
+                output[pk].energy[iframe] = map_pairwise!(
+                    (x, y, i, j, d2, total_energy) -> total_energy + cell_list_func(
+                        i, 
+                        j, 
+                        sqrt(d2), 
+                        pert_input.perturbations[pk].subgroup1, 
+                        pert_input.perturbations[pk].subgroup2, 
+                        pert_input.perturbations[pk].perturbation_function,
+                        output[pk].distances,
+                        iframe),
+                        system
+                )
+                system.output = 0.0
+            end
         else
             for mol_ind in 1:n_molecules_gp1
                 gp_1_coord_ref = gp_1_coord[(mol_ind - 1) * pert_input.number_atoms_group1 + 1 : mol_ind * pert_input.number_atoms_group1]
@@ -337,9 +270,127 @@ function multiple_perturbations_reweight(
                     end
                     if debug
                         println("output energy: $(output[pk].energy[iframe])")
-                        println("Total computed distances for frame $iframe: $computed_distances")
+                        println("Total computed distances for frame $iframe: $(output[pk].distances[iframe])")
                     end
-                    computed_distances = 0
+                    computed_energy = 0
+                end
+            end
+        end
+    end
+    for pk in keys(output)
+        [output[pk].relative_probability[i] = exp(-output[pk].energy[i]/(k*T)) for i in eachindex(output[pk].relative_probability)]
+        [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
+    end
+    return output
+end
+
+#Function for one molecular entity
+function reweight(
+    simulation::Simulation, #Simulation object
+    pert_input::SystemPerturbationsOneGroup; #Data structure containing molecular entities and their subgroups whose distances will be perturbed
+    all_distances::Bool = false, #Flag to use CellListMap, computing all possible distances between the entities besides minimum distances
+    k::Real = 1.0, #Boltzmann constant
+    T::Real = 1.0, #Temperature
+    cutoff::Real = 12.0, #Cutoff of distances
+    tolerance = 1/10000, #Minimum value to compute one interaction
+    show_progress::Bool = false, #Exhibit the progress of the execution
+    debug::Bool = false #Flag for debugging  
+)
+    #Defining results
+    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
+        ReweightResults(
+        zeros(length(simulation)), 
+        zeros(length(simulation)), 
+        zeros(length(simulation)),  
+        zeros(length(simulation))) 
+        for i in keys(pert_input.perturbations)
+    )
+
+    #setting max value for perturbations
+    d = collect(range(0, step=cutoff/10000, length = 10000 + 1))
+    tol = OrderedCollections.OrderedDict(pk => findmax(abs.(pert_input.perturbations[pk].perturbation_function.(d)))[1] .* tolerance for pk in keys(pert_input.perturbations))
+    if debug 
+        [println("Tolerance for key $pk = $(tol[pk])") for pk in keys(tol)]
+    end
+
+    #Number of atoms per molecule
+    n_molecules_gp1 = length(pert_input.group1) ÷ pert_input.number_atoms_group1
+    computed_energy = 0
+
+    #Defining function if CellListMap option is activated
+    function cell_list_func_one_group(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame)
+        atomic_indexes_per_molecule = [collect((mol - 1) * pert_input.number_atoms_group1 + 1 : 1 : mol * pert_input.number_atoms_group1) for mol in 1:n_molecules_gp1]
+        for m in eachindex(atomic_indexes_per_molecule)
+            if (is_in(atomic_indexes_per_molecule[m], i) && is_in(atomic_indexes_per_molecule[m], j)) || (is_in(atomic_indexes_per_molecule[m], j) && is_in(atomic_indexes_per_molecule[m], i))
+                return 0.
+            end
+        end
+        if (is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group1[j])) || (is_in(subgroup2, pert_input.group1[i]) && is_in(subgroup1, pert_input.group1[j])) 
+            distance_vec[frame] += 1
+            return pert_func(d)
+        end
+        return 0.
+    end
+
+    #Performing computation for every frame
+    for (iframe, frame) in enumerate(simulation)
+        coordinates = positions(frame)
+        gp_coord = coordinates[pert_input.group1]
+        uc = unitcell(frame)
+        if all_distances
+            system = ParticleSystem(
+                xpositions = gp_coord,
+                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                cutoff = cutoff,
+                output = 0.0,
+                output_name = :total_energy
+            )
+            for pk in keys(pert_input.perturbations)
+                output[pk].energy[iframe] = map_pairwise!(
+                    (x, y, i, j, d2, total_energy) -> total_energy + cell_list_func_one_group(
+                        i, 
+                        j, 
+                        sqrt(d2), 
+                        pert_input.perturbations[pk].subgroup1, 
+                        pert_input.perturbations[pk].subgroup2, 
+                        pert_input.perturbations[pk].perturbation_function,
+                        output[pk].distances,
+                        iframe),
+                        system
+                )
+                system.output = 0.0
+                if (show_progress || debug) && iframe == length(simulation)
+                    println("Performed calculations using key $(pk)")
+                end
+            end
+        else
+            for mol_ind in 1:n_molecules_gp1
+                i_index = (mol_ind - 1) * pert_input.number_atoms_group1 + 1
+                f_index = mol_ind * pert_input.number_atoms_group1
+                gp_coord_ref = gp_coord[i_index : f_index]
+                gp_1_list, gp_2_list = minimum_distances(
+                    xpositions = gp_coord_ref,
+                    ypositions = gp_coord,
+                    xn_atoms_per_molecule = pert_input.number_atoms_group1,
+                    yn_atoms_per_molecule = pert_input.number_atoms_group1,
+                    unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                    cutoff = cutoff
+                )
+                for pk in keys(pert_input.perturbations)
+                    if (show_progress || debug) && iframe == length(simulation)
+                        println("Performed calculations using key $(pk)")
+                    end
+                    for d_i in eachindex(gp_2_list)                    
+                        if gp_2_list[d_i].within_cutoff && is_in(collect(i_index:1:f_index), gp_2_list[d_i].i) == false && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group1[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
+                            computed_energy = pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)/2 
+                            output[pk].energy[iframe] += abs(computed_energy) > tol[pk] ? computed_energy : 0
+                            output[pk].distances[iframe] += abs(computed_energy) > tol[pk] ? 1/2 : 0
+                        end
+                    end
+                    if debug
+                        println("output energy: $(output[pk].energy[iframe])")
+                        println("Total computed distances for frame $iframe: $(output[pk].distances[iframe])")
+                    end
                     computed_energy = 0
                 end
             end
