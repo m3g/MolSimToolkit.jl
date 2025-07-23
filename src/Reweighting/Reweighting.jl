@@ -7,7 +7,7 @@ using ..MolSimToolkit.MolecularMinimumDistances
 import OrderedCollections
 import PDBTools
 
-export reweight, reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, SystemPerturbationsOneGroup, gauss
+export reweight, lennard_jones_perturbation, Perturbation, SystemPerturbations, SystemPerturbationsOneGroup, gauss
 
 const testdir = "$(@__DIR__)/test"
 
@@ -339,7 +339,7 @@ end
     ] atol = 1.e-4
 end
 
-@testitem "Reweight with small trajectory using minimum distances and contributions from one group" begin
+@testitem "Reweight with small trajectory using all distances and contributions from one group" begin
     import PDBTools
     import OrderedCollections
     using MolSimToolkit.Reweighting
@@ -348,10 +348,6 @@ end
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
     g1 = PDBTools.selindex(simulation.atoms, at -> at.resname == "SOL" && at.residue in [100,120,140] && at.name != "MW")
-
-#    c1 = at -> at.name in ["HW1", "HW2"]
-
-#    c2 = at -> at.name in ["O"]
 
     c1 = at -> at = true
 
