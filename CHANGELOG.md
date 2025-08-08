@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.2-DEV
 -------------
+- ![INFO][badge-info] document the fields of the `UnitCell` type.
 
 Version 1.29.1
 -------------
