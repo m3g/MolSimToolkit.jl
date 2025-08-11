@@ -1,5 +1,6 @@
 module Reweighting
 
+using ProgressMeter
 using LinearAlgebra: diag
 using CellListMap: ParticleSystem, map_pairwise, map_pairwise!
 using ..MolSimToolkit: Simulation, positions, unitcell
@@ -44,9 +45,6 @@ end #Module Reweighting
                     k = 1.0,
                     T = 1.0,
                     cutoff = 12.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
     @test res[1].energy ≈ [
         2.66700,
@@ -103,9 +101,6 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 12.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
     @test res[1].energy ≈ [
         5.450897,
@@ -156,9 +151,6 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 15.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
 
     @test res["a"].energy ≈ [
@@ -224,9 +216,6 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 15.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
 
     @test res["a"].energy ≈ [
@@ -294,9 +283,6 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 27.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
 
     @test res["a"].energy ≈ [
@@ -372,9 +358,6 @@ end
                     k = 1.0,
                     T = 1.0,
                     cutoff = 27.0,
-                    tolerance = 1/10000,
-                    show_progress = true,
-                    debug = true
             )
 
     @test res["a"].energy ≈ [
@@ -403,7 +386,7 @@ end
         0.0
     ] atol = 1.e-4
 
-    @test res["b"].energy ≈ [
+    @test res["b"].energy ≈ [ #VIZINHOS MAIS PRÓXIMOS DO MolSimToolkit NÃO SERVIU PARA TESTAR OS RESULTADOS!!!!!!! FALAR COM LEANDRO
         140.8590610379914, 
         226.09738285953762, 
         68.69849119519456, 
