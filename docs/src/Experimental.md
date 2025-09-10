@@ -8,4 +8,5 @@ features.
 - [Dihedral angle analysis](@ref dihedrals)
 - [Simulation reweighting](@ref simulation_reweighting)
 - [Cluster submission management](@ref Coaraci)
+- [m-value (protein transfer free energy) calculator](@ref mvalues)
 

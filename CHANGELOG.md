@@ -12,7 +12,9 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.2-DEV
 -------------
+- ![FEATURE][badge-feature] Experimental: mvalue calculator.
 - ![INFO][badge-info] document the fields of the `UnitCell` type.
+- ![INFO][badge-info] increase PDBTools.jl compat bound to 3.2.
 
 Version 1.29.1
 -------------
