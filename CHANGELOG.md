@@ -15,6 +15,7 @@ Version 1.29.2-DEV
 - ![FEATURE][badge-feature] Experimental: mvalue calculator.
 - ![INFO][badge-info] document the fields of the `UnitCell` type.
 - ![INFO][badge-info] increase PDBTools.jl compat bound to 3.2.
+- ![INFO][badge-info] install gromacs on CI runs on Linux, to test mvalue SASA computations.
 
 Version 1.29.1
 -------------
