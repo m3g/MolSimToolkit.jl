@@ -83,8 +83,11 @@ include("./Reweighting/Reweighting.jl")
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
 
-# Cluster managemeng
+# Cluster management
 include("./Coaraci/Coaraci.jl")
+
+# m-value calculations
+include("./mvalue/mvalue.jl")
 
 # Structure for plotting styles
 struct MolSimStyle end
