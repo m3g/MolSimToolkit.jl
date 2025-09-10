@@ -64,7 +64,12 @@ r_1jmc = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1jmc_clean,
 @test isapprox(r_1jmc.bb, references["1jmc"][2]; rtol=1e-1)
 @test isapprox(r_1jmc.sc, references["1jmc"][3]; rtol=1e-1)
 
-if !isnothing(Sys.which("gmx"))
+gmx = Sys.which("gmx")
+if isnothing(gmx)
+    @warn "gmx executable not available: some tests won't be run"
+end
+
+if !isnothing(gmx)
     sasa_1jmc = run_gmx_sasa(;
         native_pdb=joinpath(dir,"1MJC_native.pdb"),
         desnat_pdb=joinpath(dir,"1MJC_straight.pdb"),
@@ -80,7 +85,7 @@ r_2rn2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2rn2_clean,
 @test isapprox(r_2rn2.bb, references["2rn2"][2]; rtol=1e-1)
 @test isapprox(r_2rn2.sc, references["2rn2"][3]; rtol=1e-1)
 
-if !isnothing(Sys.which("gmx"))
+if !isnothing(gmx)
     sasa_2rn2 = run_gmx_sasa(;
         native_pdb=joinpath(dir,"2RN2_native.pdb"),
         desnat_pdb=joinpath(dir,"2RN2_straight.pdb"),
