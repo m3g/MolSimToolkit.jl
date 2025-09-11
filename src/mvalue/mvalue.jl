@@ -1,6 +1,6 @@
 using PDBTools
 
-export mvalue, tfe_asa, parse_server_output, run_gmx_sasa
+export mvalue, parse_mvalue_server_sasa, run_gmx_sasa
 
 abstract type CosolventType end
 struct Urea <: CosolventType end
@@ -15,11 +15,10 @@ as implemented by Moeser and Horinek (https://doi.org/10.1021/acs.jpcb.7b02138).
 
 - `pdbname::AbstractString`: Path to the PDB file of the protein structure.
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
-  upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS. 
-
-    a) The output of the server can be parsed using the `parse_server_output` function defined in this module.
-    b) Alternatively, the SASA values can be calculated using GROMACS with the `run_gmx_sasa` function defined in this module.
-       This function requires GROMACS to be installed and accessible from the command line. (use type=1)
+  upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
+    - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
+    - Alternatively, the SASA values can be calculated using GROMACS with the `run_gmx_sasa` function defined in this module.
+       This function requires GROMACS to be installed and accessible from the command line. 
 
 - `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
     according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
@@ -39,11 +38,12 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 
 ```julia
 # Using SASA values from the m-value server
-
-tanford_transfer_model(; pdbname="protein.pdb", sasas=parse_server_output(server_output), type=2)
+sasas_from_server=parse_mvalue_server_sasa(server_output)
+mvalue(; pdbname="protein.pdb", sasas=sasas_from_server, type=2)
 
 # Using SASA values calculated with GROMACS
-tanford_transfer_model(; pdbname="protein.pdb", sasas=run_gmx_sasa(native_pdb="native.pdb", desnat_pdb="desnat.pdb"), type=1)
+sasas_gmx=run_gmx_sasa(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
+mvalue(; pdbname="protein.pdb", sasas=sasas_gmx, type=1)
 ```
 
 """
@@ -61,7 +61,7 @@ function mvalue(::Type{<:CosolventType}=Urea; pdbname, sasas, type=1)
     return (tot=DeltaG, bb=DeltaG_BB, sc=DeltaG_SC, restype=DeltaG_per_residue)
 end
 
-"""
+#=
     tfe_asa(::Type{Urea}, restype::AbstractString)
 
 Returns the transfer free energy per unit area (kcal/nm^2) for side chain and backbone
@@ -82,7 +82,7 @@ where dg_aa is in cal/mol and ASA in Å², resulting in kcal/nm².
 The backbone contribution is assumed to be the same for all amino acids and is calculated
 using the backbone ASA of glycine, according to the universal model of Moeser and Horinek.
 
-"""
+=#
 function tfe_asa(::Type{Urea}, restype::AbstractString)
     isolated_ASA = Dict{String,Tuple{Float64,Float64}}( 
                    # BB      SC   (Å^2)
@@ -142,13 +142,13 @@ function tfe_asa(::Type{Urea}, restype::AbstractString)
     return (dg_aa[restype]/1000) / (last(isolated_ASA[restype])/100), bb_contribution # side chain
 end
 
-"""
+#=
     read_gmx_sasa_values(filename::String, n)
 
 Reads the output of `gmx sasa` and returns the SASA values.
 `n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
 
-"""
+=#
 function read_gmx_sasa_values(filename::String, n)
     local sasa_values
     open(filename, "r") do io
@@ -163,9 +163,10 @@ function read_gmx_sasa_values(filename::String, n)
 end
 
 """
-    parse_server_output(string::AbstractString)
+    parse_mvalue_server_sasa(string::AbstractString)
 
-Parses the SASA output from the m-value server (http://best.bio.jhu.edu/mvalue/) into a dictionary.
+Parses the SASA output from the m-value calculator server (http://best.bio.jhu.edu/mvalue/), into a dictionary
+that can be directly used as input to the `mvalue` function.
 
 The input string should contain lines formatted as follows, and correspond to the SASA values for each amino acid type:
 
@@ -186,7 +187,7 @@ is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` 
 Each of these keys maps to a tuple containing three Float64 values representing the minimum, average, and maximum SASA values in Å².
 
 """
-function parse_server_output(string::AbstractString)
+function parse_mvalue_server_sasa(string::AbstractString)
     sasa = Dict{String, Dict{Symbol, Tuple{Float64,Float64,Float64}}}()
     for line in split(string, "\n")
         # Replace (, ) and [, ], | with spaces
@@ -211,7 +212,7 @@ end
     run_gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString)
 
 Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
-using GROMACS. 
+using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
 
 # Arguments
 

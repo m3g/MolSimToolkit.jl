@@ -1,6 +1,6 @@
 @testitem "mvalue" begin
 
-sasa_1jmc_clean = parse_server_output(
+sasa_1jmc_clean = parse_mvalue_server_sasa(
 """
 ALA 		    5 	 (    95.6)    138.1 [   180.6] 	 | 	 (    -4.6)     35.7 [    75.9] 
 PHE 		    6 	 (   430.8)    491.1 [   557.4] 	 | 	 (    65.0)    119.0 [   173.0] 
@@ -25,7 +25,7 @@ CYS 		    0 	 (     0.0)      0.0 [     0.0] 	 | 	 (     0.0)      0.0 [     0.0
 """
 )
 
-sasa_2rn2_clean = parse_server_output(
+sasa_2rn2_clean = parse_mvalue_server_sasa(
 """
 ALA 		   14 	 (   426.2)    545.2 [   664.2] 	 | 	 (   149.9)    262.6 [   375.3] 
 PHE 		    2 	 (   187.5)    207.6 [   229.7] 	 | 	 (    29.9)     47.9 [    65.9] 
