@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.4-DEV
 -------------
+- ![INFO][badge-info] removed `atomic_mass` overload (with piracy) of PDBTools function.
 
 Version 1.29.3
 -------------
