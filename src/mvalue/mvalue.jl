@@ -5,6 +5,7 @@ export mvalue, parse_mvalue_server_sasa, run_gmx_sasa
 
 abstract type CosolventType end
 struct Urea <: CosolventType end
+struct TMAO <: CosolventType end
 
 """
     mvalue(; pdbname, sasas, type=1)
@@ -48,13 +49,13 @@ mvalue(; pdbname="protein.pdb", sasas=sasas_gmx, type=1)
 ```
 
 """
-function mvalue(::Type{<:CosolventType}=Urea; pdbname, sasas, type=1)
+function mvalue(Cosolvent::Type{<:CosolventType}=Urea; pdbname, sasas, type=1)
     protein = read_pdb(pdbname, "protein")
     residue_types = unique(resname.(protein)) 
     DeltaG_per_residue = Dict{String, @NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_types
-        DeltaG_per_residue[rname] = (bb = (last(tfe_asa(Urea, rname))) * (sasas[rname][:bb][type]/100), 
-                                     sc = (first(tfe_asa(Urea, rname))) * (sasas[rname][:sc][type]/100))
+        DeltaG_per_residue[rname] = (bb = (last(tfe_asa(Cosolvent, rname))) * (sasas[rname][:bb][type]/100), 
+                                     sc = (first(tfe_asa(Cosolvent, rname))) * (sasas[rname][:sc][type]/100))
     end
     DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue))
     DeltaG_SC = sum(getfield(DeltaG_per_residue[key], :sc) for key in keys(DeltaG_per_residue))
