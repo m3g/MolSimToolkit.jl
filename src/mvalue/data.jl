@@ -10,7 +10,7 @@ const cosolvent_column = Dict(
     "Urea" => 7,
     "urea" => 7,
     "UREA" => 7,
-    "UreaWrong" => 8,
+    "UreaApp" => 8,
     "UreaMH" => 9,
 )
 
