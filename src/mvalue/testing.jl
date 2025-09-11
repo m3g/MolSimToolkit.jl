@@ -96,4 +96,39 @@ if !isnothing(gmx)
     @test isapprox(r_2rn2.sc, -1.23; rtol=1e-1)
 end
 
+# Results from running the Auton and Bolen m-value server with 1mjc_clean.pdb
+data_mvalue_server_auton_and_bolen_1mjc = Dict(
+    "TMAO" => (   224,   1160,  2095),
+    "Sarcosine" => (   406,   1010,   1614),
+    "Betaine" => (  -502,     76,    650),
+    "Proline" => (  -200,    226,    649),
+    "Sorbitol" => (   378,    780,   1183),
+    "Sucrose" => (   189,    876,   1559),
+    "Urea" => (  -293,   -711,  -1132),
+)
+
+for (cos, dg) in data_mvalue_server_auton_and_bolen_1mjc
+    for ig in 1:3
+        m = mvalue(model=AutonBolen, cosolvent=key, pdbname=joinpath(dir,"1mjc_clean.pdb"), sasas=sasa_1mjc_clean, type=ig)
+        @test m ≈ dg[ig] rtol = 0.1
+    end
+end
+
+data_mvalue_server_auton_and_bolen_2rn2 = Dict(
+   "TMAO" => (   978,   3215,   5453),
+   "Sarcosine" => (  1410,   2867,   4323),
+   "Betaine" => ( -1301,    130,   1560),
+   "Proline" => (  -568,    464,   1496),
+   "Sorbitol" => (   830,   1757,   2684),
+   "Sucrose" => (   952,   2578,   4202),
+   "Urea" => ( -1217,  -2226,  -3236)
+)
+
+for (cos, dg) in data_mvalue_server_auton_and_bolen_2rn2
+    for ig in 1:3
+        m = mvalue(model=AutonBolen, cosolvent=key, pdbname=joinpath(dir,"2rn2_clean.pdb"), sasas=sasa_2rn2_clean, type=ig)
+        @test m ≈ dg[ig] rtol = 0.1
+    end
+end
+
 end
