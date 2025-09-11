@@ -62,26 +62,21 @@ function mvalue(::Type{<:CosolventType}=Urea; pdbname, sasas, type=1)
     return (tot=DeltaG, bb=DeltaG_BB, sc=DeltaG_SC, restype=DeltaG_per_residue)
 end
 
+function _tfe_sasa(restype, tfe_bb, tfe_sc_restype, isolated_ASA_bb, isolated_ASA_sc)
+    # converted to kcal/nm^2 here
+    bb_contribution = (tfe_bb/1000) / (first(isolated_ASA_bb)/100) 
+    if restype == "GLY"
+        return 0.0, bb_contribution
+    end
+    return (tfe_sc_restype/1000) / (last(isolated_ASA_sc)/100), bb_contribution # side chain, backbone
+end
+
 #=
     tfe_asa(::Type{Urea}, restype::AbstractString)
 
 Returns the transfer free energy per unit area (kcal/nm^2) for side chain and backbone
-for a given amino acid type in urea solution according to the Tanford transfer model.
-
-Isolated ASA values are from the Supporting Table 2 of https://doi.org/10.1073/pnas.0507053102
-(https://www.pnas.org/doi/suppl/10.1073/pnas.0507053102/suppl_file/07053table2.pdf)
-
-The dg_aa values are GTFE+ values from Table S1 of https://doi.org/10.1021/jp409934q
-(https://pubs.acs.org/doi/10.1021/jp409934q#_i14)
-
-The transfer free energy per unit area is calculated as:
-
-    Δg = (dg_aa / 1000) / (ASA / 100)
-
-where dg_aa is in cal/mol and ASA in Å², resulting in kcal/nm².
-
-The backbone contribution is assumed to be the same for all amino acids and is calculated
-using the backbone ASA of glycine, according to the universal model of Moeser and Horinek.
+for a given amino acid type in urea solution according to the Tanford transfer model,
+as implemente by Moeser and Horinek (https://pubs.acs.org/doi/10.1021/jp409934q#_i14).
 
 =#
 function tfe_asa(::Type{Urea}, restype::AbstractString;
@@ -96,15 +91,6 @@ function tfe_asa(::Type{Urea}, restype::AbstractString;
         isolated_ASA["GLY"], # universal model: same for all residues
         isolated_ASA[restype],
     )
-end
-
-function _tfe_sasa(restype, tfe_bb, tfe_sc_restype, isolated_ASA_bb, isolated_ASA_sc)
-    # converted to kcal/nm^2 here
-    bb_contribution = (tfe_bb/1000) / (first(isolated_ASA_bb)/100) 
-    if restype == "GLY"
-        return 0.0, bb_contribution
-    end
-    return (tfe_sc_restype/1000) / (last(isolated_ASA_sc)/100), bb_contribution # side chain, backbone
 end
 
 #=
@@ -258,7 +244,7 @@ end
 #=
 
 Amino acid side-chain and peptide backbone unit transfer free energies (cal/mol) from water to 1M osmolyte
-Supplementary Table 1 of https://doi.org/10.1073/pnas.0507053102
+Values for Urea GTFE+ values from Table S1 of https://doi.org/10.1021/jp409934q (https://pubs.acs.org/doi/10.1021/jp409934q#_i14)
 
 =#
 const tfe_sc_bb_moeser_and_horinek = Dict(
@@ -318,7 +304,6 @@ const tfe_sc_bb_auton_and_bolen = Dict(
     "CYS" => (      0,          0,          0,          0,          0,          0,          0), # not reported
     "BB"  => (     90,         52,         67,         48,         35,         62,        -39),
 )
-
 
 #= 
 
