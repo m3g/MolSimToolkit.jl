@@ -128,6 +128,7 @@ reported in Supplementary Table 2 of https://doi.org/10.1073/pnas.0507053102
 These are the average values of Table 1 of https://doi.org/10.1021/bi962819o
 Can be used for testing, but **do not** provide the same accuracy as the values
 calculated with GROMACS or obtained from the m-value server.
+
 =# 
 
 const sasa_desnat_average = Dict(
