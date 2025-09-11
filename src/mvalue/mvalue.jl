@@ -57,16 +57,16 @@ mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_
 
 """
 function mvalue(;
-    model::Type{<:MvalueModel} = MoeserHorinek,
-    cosolvent::String = "urea",
+    model::Type{<:MvalueModel}=MoeserHorinek,
+    cosolvent::String="urea",
     pdbname, sasas, type=1
 )
     protein = read_pdb(pdbname, "protein")
-    residue_types = unique(resname.(protein)) 
-    DeltaG_per_residue = Dict{String, @NamedTuple{bb::Float64, sc::Float64}}()
+    residue_types = unique(resname.(protein))
+    DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_types
-        DeltaG_per_residue[rname] = (bb = (last(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:bb][type]/100), 
-                                     sc = (first(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:sc][type]/100))
+        DeltaG_per_residue[rname] = (bb=(last(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:bb][type] / 100),
+            sc=(first(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:sc][type] / 100))
     end
     DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue))
     DeltaG_SC = sum(getfield(DeltaG_per_residue[key], :sc) for key in keys(DeltaG_per_residue))
@@ -90,14 +90,14 @@ function tfe_asa(
     col = cosolvent_column[cosolvent]
     if model == MoeserHorinek
         # united model: all bb ASA contributions are the same
-        bb_contribution = tfe_sc_bb_moeser_and_horinek["BB"][col] / first(isolated_ASA["GLY"]) 
+        bb_contribution = tfe_sc_bb_moeser_and_horinek["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
             0.0
         else
             tfe_sc_bb_moeser_and_horinek[restype][col] / last(isolated_ASA[restype])
         end
     elseif model == AutonBolen
-        bb_contribution = tfe_sc_bb_auton_and_bolen["BB"][col] / first(isolated_ASA[restype]) 
+        bb_contribution = tfe_sc_bb_auton_and_bolen["BB"][col] / first(isolated_ASA[restype])
         sc_contribution = if restype == "GLY"
             0.0
         else
@@ -107,7 +107,7 @@ function tfe_asa(
         error("model must be either MoeserHorinek or AutonBolen")
     end
     # convert to kcal / nm^2 and return
-    return sc_contribution/10, bb_contribution/10
+    return sc_contribution / 10, bb_contribution / 10
 end
 
 #=
@@ -156,7 +156,7 @@ Each of these keys maps to a tuple containing three Float64 values representing 
 
 """
 function parse_mvalue_server_sasa(string::AbstractString)
-    sasa = Dict{String, Dict{Symbol, Tuple{Float64,Float64,Float64}}}()
+    sasa = Dict{String,Dict{Symbol,Tuple{Float64,Float64,Float64}}}()
     for line in split(string, "\n")
         # Replace (, ) and [, ], | with spaces
         line = replace(line, '(' => ' ', ')' => ' ', '[' => ' ', ']' => ' ', '|' => ' ')
@@ -168,7 +168,7 @@ function parse_mvalue_server_sasa(string::AbstractString)
         sc1 = parse(Float64, data[3])
         sc2 = parse(Float64, data[4])
         sc3 = parse(Float64, data[5])
-        bb1 = parse(Float64, data[6]) 
+        bb1 = parse(Float64, data[6])
         bb2 = parse(Float64, data[7])
         bb3 = parse(Float64, data[8])
         sasa[resname] = Dict(:sc => (sc1, sc2, sc3), :bb => (bb1, bb2, bb3))
@@ -198,7 +198,7 @@ function run_gmx_sasa(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
 )
-    sasas = Dict{String, Dict{Symbol, Float64}}()
+    sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
         sasa_bb_native, sasa_sc_native = 100 .* run_gmx_sasa_single(native_pdb, rname) # returns in nm^2
@@ -212,8 +212,8 @@ end
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
 function run_gmx_sasa_single(pdbname, resname)
-    index_file = tempname()*".ndx"
-    sasa_file = tempname()*".xvg"
+    index_file = tempname() * ".ndx"
+    sasa_file = tempname() * ".xvg"
     p = read_pdb(pdbname, "protein and not element H")
     inds_protein = index.(p)
     inds_sidechain = index.(select(p, "resname $resname and not (name N CA C O)"))
