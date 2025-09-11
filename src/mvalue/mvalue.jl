@@ -93,18 +93,18 @@ function tfe_asa(::Type{Urea}, restype::AbstractString;
         restype,
         tfe_sc_bb["BB"][col],
         tfe_sc_bb[restype][col],
-        isolated_ASA["GLY"],
+        isolated_ASA["GLY"], # universal model: same for all residues
         isolated_ASA[restype],
     )
 end
 
-function _tfe_sasa(restype, tfe_bb, tfe_sc_restype, isolated_ASA_GLY, isolated_ASA_restype)
+function _tfe_sasa(restype, tfe_bb, tfe_sc_restype, isolated_ASA_bb, isolated_ASA_sc)
     # converted to kcal/nm^2 here
-    bb_contribution = (tfe_bb/1000) / (first(isolated_ASA_GLY)/100) # universal model: equal for all AAs
+    bb_contribution = (tfe_bb/1000) / (first(isolated_ASA_bb)/100) 
     if restype == "GLY"
         return 0.0, bb_contribution
     end
-    return (tfe_sc_restype/1000) / (last(isolated_ASA_restype)/100), bb_contribution # side chain, backbone
+    return (tfe_sc_restype/1000) / (last(isolated_ASA_sc)/100), bb_contribution # side chain, backbone
 end
 
 #=
