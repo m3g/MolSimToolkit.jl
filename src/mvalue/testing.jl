@@ -1,6 +1,6 @@
 @testitem "mvalue" begin
 
-sasa_1jmc_clean = parse_mvalue_server_sasa(
+sasa_1MJC_clean = parse_mvalue_server_sasa(
 """
 ALA 		    5 	 (    95.6)    138.1 [   180.6] 	 | 	 (    -4.6)     35.7 [    75.9] 
 PHE 		    6 	 (   430.8)    491.1 [   557.4] 	 | 	 (    65.0)    119.0 [   173.0] 
@@ -25,7 +25,7 @@ CYS 		    0 	 (     0.0)      0.0 [     0.0] 	 | 	 (     0.0)      0.0 [     0.0
 """
 )
 
-sasa_2rn2_clean = parse_mvalue_server_sasa(
+sasa_2RN2_clean = parse_mvalue_server_sasa(
 """
 ALA 		   14 	 (   426.2)    545.2 [   664.2] 	 | 	 (   149.9)    262.6 [   375.3] 
 PHE 		    2 	 (   187.5)    207.6 [   229.7] 	 | 	 (    29.9)     47.9 [    65.9] 
@@ -53,16 +53,16 @@ CYS 		    3 	 (   183.2)    213.4 [   243.5] 	 | 	 (    32.3)     56.7 [    81.2
 # Result from Moeser and Horinek https://doi.org/10.1021/jp409934q
 references = Dict(
 #                    total                  bb                   sc         
-    "1jmc" => (-0.8470588235294114, -0.44117647058823506, -0.44117647058823506),
-    "2rn2" => (-2.3647058823529408, -1.1999999999999997, -1.164705882352941)
+    "1MJC" => (-0.8470588235294114, -0.44117647058823506, -0.44117647058823506),
+    "2RN2" => (-2.3647058823529408, -1.1999999999999997, -1.164705882352941)
 )
 
 dir=@__DIR__
 
-r_1jmc = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1jmc_clean, type=2)
-@test isapprox(r_1jmc.tot, references["1jmc"][1]; rtol=1e-1)
-@test isapprox(r_1jmc.bb, references["1jmc"][2]; rtol=1e-1)
-@test isapprox(r_1jmc.sc, references["1jmc"][3]; rtol=1e-1)
+r_1MJC = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1MJC_clean, type=2)
+@test isapprox(r_1MJC.tot, references["1MJC"][1]; rtol=1e-1)
+@test isapprox(r_1MJC.bb, references["1MJC"][2]; rtol=1e-1)
+@test isapprox(r_1MJC.sc, references["1MJC"][3]; rtol=1e-1)
 
 gmx = Sys.which("gmx")
 if isnothing(gmx)
@@ -70,34 +70,34 @@ if isnothing(gmx)
 end
 
 if !isnothing(gmx)
-    sasa_1jmc = run_gmx_sasa(;
+    sasa_1MJC = run_gmx_sasa(;
         native_pdb=joinpath(dir,"1MJC_native.pdb"),
         desnat_pdb=joinpath(dir,"1MJC_straight.pdb"),
     )
-    r_1jmc = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1jmc)
-    @test isapprox(r_1jmc.tot, -1.24; rtol=1e-1)
-    @test isapprox(r_1jmc.bb, -0.777; rtol=1e-1)
-    @test isapprox(r_1jmc.sc, -0.463; rtol=1e-1)
+    r_1MJC = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1MJC)
+    @test isapprox(r_1MJC.tot, -1.24; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.777; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.463; rtol=1e-1)
 end
 
-r_2rn2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2rn2_clean, type=2)
-@test isapprox(r_2rn2.tot, references["2rn2"][1]; rtol=1e-1)
-@test isapprox(r_2rn2.bb, references["2rn2"][2]; rtol=1e-1)
-@test isapprox(r_2rn2.sc, references["2rn2"][3]; rtol=1e-1)
+r_2RN2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2RN2_clean, type=2)
+@test isapprox(r_2RN2.tot, references["2RN2"][1]; rtol=1e-1)
+@test isapprox(r_2RN2.bb, references["2RN2"][2]; rtol=1e-1)
+@test isapprox(r_2RN2.sc, references["2RN2"][3]; rtol=1e-1)
 
 if !isnothing(gmx)
-    sasa_2rn2 = run_gmx_sasa(;
+    sasa_2RN2 = run_gmx_sasa(;
         native_pdb=joinpath(dir,"2RN2_native.pdb"),
         desnat_pdb=joinpath(dir,"2RN2_straight.pdb"),
     )
-    r_2rn2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2rn2)
-    @test isapprox(r_2rn2.tot, -3.17; rtol=1e-1)
-    @test isapprox(r_2rn2.bb, -1.94; rtol=1e-1)
-    @test isapprox(r_2rn2.sc, -1.23; rtol=1e-1)
+    r_2RN2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2RN2)
+    @test isapprox(r_2RN2.tot, -3.17; rtol=1e-1)
+    @test isapprox(r_2RN2.bb, -1.94; rtol=1e-1)
+    @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
 end
 
-# Results from running the Auton and Bolen m-value server with 1mjc_clean.pdb
-data_mvalue_server_auton_and_bolen_1mjc = Dict(
+# Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
+data_mvalue_server_auton_and_bolen_1MJC = Dict(
     "TMAO" => (   224,   1160,  2095),
     "Sarcosine" => (   406,   1010,   1614),
     "Betaine" => (  -502,     76,    650),
@@ -107,14 +107,14 @@ data_mvalue_server_auton_and_bolen_1mjc = Dict(
     "Urea" => (  -293,   -711,  -1132),
 )
 
-for (cos, dg) in data_mvalue_server_auton_and_bolen_1mjc
+for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
     for ig in 1:3
-        m = mvalue(model=AutonBolen, cosolvent=key, pdbname=joinpath(dir,"1mjc_clean.pdb"), sasas=sasa_1mjc_clean, type=ig)
-        @test m ≈ dg[ig] rtol = 0.1
+        m = mvalue(model=AutonBolen, cosolvent=cos, pdbname=joinpath(dir,"1MJC_clean.pdb"), sasas=sasa_1MJC_clean, type=ig)
+        @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
     end
 end
 
-data_mvalue_server_auton_and_bolen_2rn2 = Dict(
+data_mvalue_server_auton_and_bolen_2RN2 = Dict(
    "TMAO" => (   978,   3215,   5453),
    "Sarcosine" => (  1410,   2867,   4323),
    "Betaine" => ( -1301,    130,   1560),
@@ -124,10 +124,10 @@ data_mvalue_server_auton_and_bolen_2rn2 = Dict(
    "Urea" => ( -1217,  -2226,  -3236)
 )
 
-for (cos, dg) in data_mvalue_server_auton_and_bolen_2rn2
+for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
     for ig in 1:3
-        m = mvalue(model=AutonBolen, cosolvent=key, pdbname=joinpath(dir,"2rn2_clean.pdb"), sasas=sasa_2rn2_clean, type=ig)
-        @test m ≈ dg[ig] rtol = 0.1
+        m = mvalue(model=AutonBolen, cosolvent=cos, pdbname=joinpath(dir,"2RN2_clean.pdb"), sasas=sasa_2RN2_clean, type=ig)
+        @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
     end
 end
 

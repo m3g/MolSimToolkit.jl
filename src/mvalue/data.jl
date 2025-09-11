@@ -91,4 +91,67 @@ const tfe_sc_bb_auton_and_bolen = Dict(
     "BB"  => (     90,         52,         67,         48,         35,         62,        -39,         -39,      -39),
 )
 
+#= 
+
+Isolated ASA values are from the Supporting Table 2 of https://doi.org/10.1073/pnas.0507053102
+(https://www.pnas.org/doi/suppl/10.1073/pnas.0507053102/suppl_file/07053table2.pdf)
+
+=#
+const isolated_ASA = Dict{String,Tuple{Float64,Float64}}( 
+                # BB      SC   (Å^2)
+    "ALA"	=> (46.2,	71.9),
+    "PHE"	=> (38.4,	184.4),
+    "LEU"	=> (35.3,	157.8),
+    "ILE"	=> (30.9,	150.1),
+    "VAL"	=> (36.1,	128.4),
+    "PRO"	=> (35.6,	111.0),
+    "MET"	=> (38.6,	164.8),
+    "TRP"	=> (37.4,	228.9),
+    "GLY"	=> (88.1,	0),
+    "SER"	=> (44.0,	85.8),
+    "THR"	=> (37.9,	114.6),
+    "TYR"	=> (38.7,	198.1),
+    "GLN"	=> (37.8,	155.4),
+    "ASN"	=> (40.2,	125.3),
+    "ASP"	=> (40.5,	118.2),
+    "GLU"	=> (37.8,	148.4),
+    "HIS"	=> (40.4,	162.1),
+    "LYS"	=> (38.7,	187.1),
+    "ARG"	=> (39.1,	216.9),
+    "CYS"	=> (42.6,	103.5),
+) 
+
+#=
+
+Average SASA values from lower and upper bounds of the denatured state ensemble,
+reported in Supplementary Table 2 of https://doi.org/10.1073/pnas.0507053102
+These are the average values of Table 1 of https://doi.org/10.1021/bi962819o
+Can be used for testing, but **do not** provide the same accuracy as the values
+calculated with GROMACS or obtained from the m-value server.
+=# 
+
+const sasa_desnat_average = Dict(
+    "ALA" => Dict(:bb => 27.9,	:sc => 55.1),
+    "PHE" => Dict(:bb => 24.3,	:sc => 128.8),
+    "LEU" => Dict(:bb => 22.7,	:sc => 109.6),
+    "ILE" => Dict(:bb => 20.0,	:sc => 117.1),
+    "VAL" => Dict(:bb => 20.4,	:sc => 96.4),
+    "PRO" => Dict(:bb => 22.5,	:sc => 87.0),
+    "MET" => Dict(:bb => 25.3,	:sc => 122.4),
+    "TRP" => Dict(:bb => 23.6,	:sc => 156.6),
+    "GLY" => Dict(:bb => 65.2,	:sc => 0.0),
+    "SER" => Dict(:bb => 29.4,	:sc => 66.5),
+    "THR" => Dict(:bb => 24.1,	:sc => 84.3),
+    "TYR" => Dict(:bb => 25.6,	:sc => 141.7),
+    "GLN" => Dict(:bb => 25.3,	:sc => 116.9),
+    "ASN" => Dict(:bb => 25.2,	:sc => 90.1),
+    "ASP" => Dict(:bb => 26.0,	:sc => 87.0),
+    "GLU" => Dict(:bb => 25.7,	:sc => 113.4),
+    "HIS" => Dict(:bb => 24.2,	:sc => 111.5),
+    "LYS" => Dict(:bb => 26.1,	:sc => 150.7),
+    "ARG" => Dict(:bb => 25.1,	:sc => 171.1),
+    "CYS" => Dict(:bb => 26.4,	:sc => 73.0),
+)
+
+
 

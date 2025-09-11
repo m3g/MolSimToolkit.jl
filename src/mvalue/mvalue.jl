@@ -20,7 +20,7 @@ Auton and Bolen (https://doi.org/10.1016/s0076-6879(07)28023-1, https://www.pnas
 # Arguments
 
 - `model`: The model to be used. Must be `MoeserHorinek` or `AutonBolen`. `MoeserHorinek` is only implemented for `cosolvent="urea"`,
-   and should be more precise in that case. Other solvents are available for AutonBolen`.
+   and should be more precise in that case. Other solvents are available for `AutonBolen`.
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(MolSimToolkit.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `pdbname::AbstractString`: Path to the PDB file of the protein structure.
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
