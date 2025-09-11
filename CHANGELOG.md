@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.4-DEV
+Version 1.29.4
 -------------
 - ![FEATURE][badge-feature] Support for the AutoBolen model of mvalue calcuation.
 - ![FEATURE][badge-feature] Code support for other cosolvents than urea in the calculation of m-values.
