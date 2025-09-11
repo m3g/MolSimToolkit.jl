@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Cluster submission management · MolSimToolkit.jl</title><meta name="title" content="Cluster submission management · MolSimToolkit.jl"/><meta property="og:title" content="Cluster submission management · MolSimToolkit.jl"/><meta property="twitter:title" content="Cluster submission management · MolSimToolkit.jl"/><meta name="description" content="Documentation for MolSimToolkit.jl."/><meta property="og:description" content="Documentation for MolSimToolkit.jl."/><meta property="twitter:description" content="Documentation for MolSimToolkit.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="MolSimToolkit.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">MolSimToolkit.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Structural analyses</span><ul><li><a class="tocitem" href="../Structural_properties/">Distances and misc.</a></li><li><a class="tocitem" href="../Dihedrals/">Dihedral angle analysis</a></li><li><a class="tocitem" href="../secondary_structures/">Secondary structure</a></li><li><a class="tocitem" href="../structural_alignment/">Structural alignment</a></li></ul></li><li><span class="tocitem">Simulation statistics</span><ul><li><a class="tocitem" href="../block_averages/">Block averages</a></li><li><a class="tocitem" href="../remd/">Replica exchange</a></li></ul></li><li><span class="tocitem">Interactions</span><ul><li><a class="tocitem" href="../Solvation_and_interactions/">Coordination numbers</a></li><li><a class="tocitem" href="../molecular_minimum_distances/">Molecular Minimum Distances</a></li></ul></li><li><span class="tocitem">Time-dependent properties</span><ul><li><a class="tocitem" href="../intermittent_correlation/">Intermittent correlation</a></li></ul></li><li><a class="tocitem" href="../system_setup/">System setup</a></li><li><a class="tocitem" href="../plotting_style/">Plotting style</a></li><li><a class="tocitem" href="../Developer/">Developer zone</a></li><li><span class="tocitem">Experimental</span><ul><li><a class="tocitem" href="../Reweighting/">Simulation Reweighting</a></li><li class="is-active"><a class="tocitem" href>Cluster submission management</a><ul class="internal"><li><a class="tocitem" href="#SLURM/Gromacs-example"><span>SLURM/Gromacs example</span></a></li><li><a class="tocitem" href="#PBS-example"><span>PBS example</span></a></li><li><a class="tocitem" href="#Example-log-file"><span>Example log file</span></a></li></ul></li><li><a class="tocitem" href="../mvalues/">m-value calculator</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Experimental</a></li><li class="is-active"><a href>Cluster submission management</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Cluster submission management</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl/blob/main/docs/src/Coaraci.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Coaraci"><a class="docs-heading-anchor" href="#Coaraci">Cluster submission management</a><a id="Coaraci-1"></a><a class="docs-heading-anchor-permalink" href="#Coaraci" title="Permalink"></a></h1><div class="admonition is-warning" id="Warning-8007652dd6776eba"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-8007652dd6776eba" title="Permalink"></a></header><div class="admonition-body"><p>This is an experimental feature. Breaking changes may occur without  a breaking package release.</p></div></div><p>The <code>Coaraci</code> module of <code>MolSimToolkit</code> manages the submission of multiple independent tasks in a single job of a cluster, where the job requested multiple nodes. For example, a job requests 20 nodes from a SLURM computer cluster, and the goal is to run independent simulations on each of the nodes. This script will distribute the simulations in the nodes and, when more nodes than simulations are available, release the spare nodes to the cluster.</p><p>Currently fully supports the SLURM cluster manager. Partial support for PBS is available.</p><div class="admonition is-compat" id="Compat-8a6c585a3acbbdf0"><header class="admonition-header">Compat<a class="admonition-anchor" href="#Compat-8a6c585a3acbbdf0" title="Permalink"></a></header><div class="admonition-body"><p>The <code>Coaraci</code> module was introduced in MolSimToolkit v1.20.0</p></div></div><h2 id="SLURM/Gromacs-example"><a class="docs-heading-anchor" href="#SLURM/Gromacs-example">SLURM/Gromacs example</a><a id="SLURM/Gromacs-example-1"></a><a class="docs-heading-anchor-permalink" href="#SLURM/Gromacs-example" title="Permalink"></a></h2><h3 id="The-submission-script"><a class="docs-heading-anchor" href="#The-submission-script">The submission script</a><a id="The-submission-script-1"></a><a class="docs-heading-anchor-permalink" href="#The-submission-script" title="Permalink"></a></h3><p>Consider the following script to submit a job in a SLURM cluster. Here, we aim to run many (more than 20) independent simulations, and we request 20 nodes from the cluster. Each simulation will run in 48 cores inside each node.</p><pre><code class="language-bash hljs">#!/bin/bash
+#SBATCH -n 48
+#SBATCH --job-name test
+#SBATCH --nodes 20
+#SBATCH --partition=paralela
+#SBATCH -o /home/users/test/proteina/job_files/out_tmao_replica13.txt
+#SBATCH -e /home/users/test/proteina/job_files/err_tmao_replica13.txt
+
+cd $SLURM_SUBMIT_DIR
+
+#### Run the Julia script
+julia simulations.jl</code></pre><h3 id="The-Julia-script"><a class="docs-heading-anchor" href="#The-Julia-script">The Julia script</a><a id="The-Julia-script-1"></a><a class="docs-heading-anchor-permalink" href="#The-Julia-script" title="Permalink"></a></h3><p>Let us call this script <code>simulations.jl</code>, which is invoked by the submission script, as shown above.</p><pre><code class="language-julia hljs">using MolSimToolkit: Coaraci
+
+# Define a structure that contains all the data required to run your simulations.
+# none of the fields is mandatory, but here they will be used.
+@kwdef struct SimulationData
+    title::String
+    dir::String
+    cosolvent::String
+    finish_file::String
+end
+
+#
+# MANDATORY: Define these 3 functions:
+#
+# Define `task_run`: which is the command that runs a single simulation, possibly using as arguments
+# the simulation data
+Coaraci.task_run(s::SimulationData) = &quot;/home/ander/run_script/run_single_simulation.sh $(s.dir) $(s.cosolvent)&quot;
+
+# Define a function `task_finished` that recognizes if a simulation was already run.
+Coaraci.task_finished(s::SimulationData) = isfile(joinpath(s.dir,s.finish_file))
+
+# Define a function `title` that sets the title of the run:
+Coaraci.task_title(s::SimulationData) = s.title
+
+# Simulation list: the following will create a list of simulations
+# that have to be executed. Each simulation is defined by a directory.
+# Here, we construct the directory names with the specifiers of each
+# simulation. Important: the result is a list of **full** directories
+# paths for each simulation.
+base_dir=&quot;/home/users/test/protein&quot;
+concentrations = [ &quot;0.1&quot; &quot;0.2&quot; ]
+replicas = [ &quot;replica1&quot;, &quot;replica2&quot; ]
+# This is the crucial part: build a proper list of simulation objects:
+simulation_list = SimulationData[]
+for conc in concentrations, rep in replicas
+    sim = SimulationData(
+        title=&quot;$conc/$rep&quot;,
+        dir=joinpath(base_dir,conc,rep),
+        cosolvent=&quot;tmao&quot;,
+        finish_file=&quot;production.gro&quot;,
+    )
+    push!(simulation_list, sim)
+end
+
+# Execute the script that runs the simulations in parallel, one per node.
+# The name of the log file of the script is set here.
+Coaraci.simulate(
+    simulation_list; 
+    logfile=&quot;mysimulations.log&quot;,
+    #ntasks_per_node=1
+)</code></pre><p>The optional <code>ntasks_per_node</code> parameter can be set to define how many tasks are run per node.  In this case, for example, if <code>ntasks_per_node=2</code>, the script that runs each task inside the  node should request only half of the CPUs of the node, for maximal efficiency. By default, <code>ntasks_per_node=1</code>.  </p><h3 id="The-script-that-runs-a-simulation-inside-a-node"><a class="docs-heading-anchor" href="#The-script-that-runs-a-simulation-inside-a-node">The script that runs a simulation inside a node</a><a id="The-script-that-runs-a-simulation-inside-a-node-1"></a><a class="docs-heading-anchor-permalink" href="#The-script-that-runs-a-simulation-inside-a-node" title="Permalink"></a></h3><p>The following script receives 2 arguments, which are provided by the definition of <code>task_run</code>, in the script above. At the end of all simulations, the <code>production.gro</code> file is generated, which  is then identified as the marker of a finished run. A finished run will not be run again.</p><p>And, finally, the script that submit the actual simulations, <strong>from within the node</strong>, and using, here 48 cores (in a single node), is, for example:</p><pre><code class="language-bash hljs">#!/bin/bash
+simulation_dir=$1 # first argument of script
+
+# second argument of script: in this case, the cosolvent: can be used
+# to label or run specific analyzes for the same simulation
+cosolvent=$2
+
+n=48 # processors in this node
+
+#### modules necessary to run Gromacs #########
+module load hwloc
+module load gnu12
+module load openmpi4
+module load gcc-runtime/12.2.0-gcc-12.2.0-lbbfl34
+module load gcc-runtime/12.2.0-gcc-12.2.0-sqqkkcb
+module load gromacs/2023-gcc-12.2.0-zktp5lx
+
+# Important: go into simulation dir
+cd $simulation_dir
+
+# Run simulations: gromacs here
+/home/users/apereira/softwares/packmol-20.15.1/packmol &lt; box.inp &gt; box.log
+gmx_mpi grompp -f mim.mdp -c solvated.pdb -r solvated.pdb -p processed.top -o em.tpr -maxwarn 3 &gt; /dev/null
+mpirun -np $n gmx_mpi mdrun -v -deffnm em -ntomp 1  &gt; /dev/null #  -npme 12 -dd 4 3 3
+
+gmx_mpi grompp -f nvt.mdp -c em.gro -r em.gro -p processed.top -o nvt.tpr -maxwarn 3 &gt; /dev/null
+mpirun -np $n gmx_mpi mdrun -v -deffnm nvt -ntomp 1 &gt; /dev/null
+
+gmx_mpi grompp -f npt.mdp -c nvt.gro -r nvt.gro -p processed.top -o npt.tpr -maxwarn 3 &gt; /dev/null
+mpirun -np $n gmx_mpi mdrun -v -deffnm npt -ntomp 1 &gt; /dev/null
+
+gmx_mpi grompp -f prod.mdp -c npt.gro -r npt.gro -p processed.top -o prod.tpr -maxwarn 3 &gt; /dev/null
+mpirun -np $n gmx_mpi mdrun -v -deffnm prod -ntomp 1 &gt; /dev/null</code></pre><h2 id="PBS-example"><a class="docs-heading-anchor" href="#PBS-example">PBS example</a><a id="PBS-example-1"></a><a class="docs-heading-anchor-permalink" href="#PBS-example" title="Permalink"></a></h2><p>The following script submits a job the <code>parexp</code> queue of a PBS cluster:</p><pre><code class="language-bash hljs">#PBS -N meuteste
+#PBS -q parexp
+#PBS -l nodes=2:ppn=48
+#PBS -m abe
+#PBS -e erros
+#PBS -o saida
+
+cd $PBS_O_WORKDIR
+julia submission.jl</code></pre><p>Where <code>submission.jl</code> is the following script, which sets up two very simple tasks that just wait some <code>delay</code> seconds to finish:</p><pre><code class="language-julia hljs">using MolSimToolkit: Coaraci
+@kwdef struct TestTask 
+    title::String
+    delay::Int
+    output_file::String
+end
+dir=&quot;/home/lovelace/proj/proj864/user/test/&quot;
+Coaraci.task_finished(t::TestTask) = isfile(t.output_file)
+Coaraci.task_title(t::TestTask) = t.title
+Coaraci.task_run(t::TestTask) = &quot;$dir/run.sh $dir $(t.title) $(t.delay) $(t.output_file)&quot;
+task_list = [ 
+    TestTask(title=&quot;A&quot;, delay=30, output_file=&quot;end1.txt&quot;), 
+    TestTask(title=&quot;B&quot;, delay= 2, output_file=&quot;end2.txt&quot;),
+]
+Coaraci.simulate(task_list; ntasks_per_node=1)</code></pre><p>and the <code>run.sh</code> script being executed is:</p><pre><code class="language-bash hljs">#!/bin/bash
+cd $1 # running dir
+sleep $3 # delay
+hname=`hostname`
+echo &quot;running! $2 in $hname&quot; &gt; $4 # title and output_file name</code></pre><p>Note that the delay is passed as the third argument of the execution. The script will run a 30s  long task on the first node, and a 2s task on the second node. When the second task finishes, the second node is released. Note: PBS does not allow releasing the primary node, thus it will be kept even if no task is running on it.</p><h2 id="Example-log-file"><a class="docs-heading-anchor" href="#Example-log-file">Example log file</a><a id="Example-log-file-1"></a><a class="docs-heading-anchor-permalink" href="#Example-log-file" title="Permalink"></a></h2><p>A typical log file will look like:</p><pre><code class="language-bash hljs">=============================================================
+Starting Coaraci managed submissions: 2024-10-11 10:48:54
+=============================================================
+Cluster type: MolSimToolkit.Coaraci.PBS
+JOB ID: 144830.ada
+Nodes: adano62, adano72
+Number of tasks per node: 1
+-------------------------------------------------------------
+Number of tasks to run: 2
+-------------------------------------------------------------
+1: running A in node adano62 (1 in this node)
+2: running B in node adano72 (1 in this node)
+2: B in node adano72 finished successfully after 2 seconds, 507 milliseconds.
+&gt; 1 nodes released. Keeping nodes: adano62
+1: A in node adano62 finished successfully after 30 seconds, 480 milliseconds.
+-------------------------------------------------------------
+finished all tasks:
+ - tasks finished successfully: 2
+ - tasks finished with errors: 0
+=============================================================
+End Coaraci managed submissions: 2024-10-11 10:49:24
+Total running time: 30 seconds, 762 milliseconds
+=============================================================</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Reweighting/">« Simulation Reweighting</a><a class="docs-footer-nextpage" href="../mvalues/">m-value calculator »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 11 September 2025 19:26">Thursday 11 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
