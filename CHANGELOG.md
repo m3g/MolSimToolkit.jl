@@ -12,6 +12,8 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.3-DEV
 -------------
+- ![INFO][badge-info] renamed `parse_server_output` to `parse_mvalue_server_sasa`, for clarity.
+- ![INFO][badge-info] updated mvalue docs.
 
 Version 1.29.2
 -------------
