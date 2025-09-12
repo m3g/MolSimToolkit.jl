@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.5-DEV
+Version 1.29.5
 -------------
 - ![INFO][badge-info] documentation updated for mvalue.
 - ![INFO][badge-info] renamed `run_gmx_sasa` to `gmx_sasa`.
