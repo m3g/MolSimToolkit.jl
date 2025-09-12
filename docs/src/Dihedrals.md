@@ -3,9 +3,8 @@ CollapsedDocStrings = true
 ```
 # [Dihedral angle analysis](@id dihedrals)
 
-```@autodocs
-Modules = [ MolSimToolkit ]
-Pages = [ 
-    "dihedrals.jl",
-]
+```@docs
+average_dihedrals
+dihedral
+dihedrals
 ```
