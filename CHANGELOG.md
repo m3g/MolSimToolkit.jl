@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 1.29.7-DEV
+-------------
+
 Version 1.29.6
 -------------
 - ![INFO][badge-info] use `dihedral` and `dihedrals` from MolSimToolkitShared.
