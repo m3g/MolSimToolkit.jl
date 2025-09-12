@@ -70,7 +70,7 @@ if isnothing(gmx)
 end
 
 if !isnothing(gmx)
-    sasa_1MJC = run_gmx_sasa(;
+    sasa_1MJC = gmx_sasa(;
         native_pdb=joinpath(dir,"1MJC_native.pdb"),
         desnat_pdb=joinpath(dir,"1MJC_straight.pdb"),
     )
@@ -86,7 +86,7 @@ r_2RN2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2RN2_clean,
 @test isapprox(r_2RN2.sc, references["2RN2"][3]; rtol=1e-1)
 
 if !isnothing(gmx)
-    sasa_2RN2 = run_gmx_sasa(;
+    sasa_2RN2 = gmx_sasa(;
         native_pdb=joinpath(dir,"2RN2_native.pdb"),
         desnat_pdb=joinpath(dir,"2RN2_straight.pdb"),
     )

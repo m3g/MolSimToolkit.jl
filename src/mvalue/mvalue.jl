@@ -1,6 +1,6 @@
 using PDBTools
 
-export mvalue, parse_mvalue_server_sasa, run_gmx_sasa
+export mvalue, parse_mvalue_server_sasa, gmx_sasa
 export MoeserHorinek, AutonBolen
 #export sasa_desnat_average
 
@@ -13,9 +13,8 @@ include("./data.jl")
 """
     mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname, sasas, type=1)
 
-Calculates the m-value transfer free energy of a protein in 1M urea solution using the Tanford transfer model,
-as implemented by Moeser and Horinek (https://doi.org/10.1021/acs.jpcb.7b02138) or by 
-Auton and Bolen (https://doi.org/10.1016/s0076-6879(07)28023-1, https://www.pnas.org/doi/10.1073/pnas.0706251104).
+Calculates the m-value (transfer free energy of a protein in 1M solution) using the Tanford transfer model,
+as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 # Arguments
 
@@ -26,8 +25,7 @@ Auton and Bolen (https://doi.org/10.1016/s0076-6879(07)28023-1, https://www.pnas
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
-    - Alternatively, the SASA values can be calculated using GROMACS with the `run_gmx_sasa` function defined in this module.
-       This function requires GROMACS to be installed and accessible from the command line. 
+    - Alternatively, the SASA values can be calculated using GROMACS with the `gmx_sasa` function defined in this module.
 
 - `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
     according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
@@ -39,7 +37,7 @@ A named tuple with the following fields:
 - `tot`: Total transfer free energy (kcal/mol).
 - `bb`: Contribution from the backbone (kcal/mol).
 - `sc`: Contribution from the side chains (kcal/mol).
-- `restype`: A dictionary with the transfer free energy contributions per residue type.
+- `restype`: A dictionary with the transfer free energy contributions per residue type (kcal/mol).
 
 Each entry in the dictionary is a named tuple with `bb` and `sc` fields representing the backbone and side chain contributions, respectively.
 
@@ -51,9 +49,15 @@ sasas_from_server=parse_mvalue_server_sasa(server_output)
 mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname="protein.pdb", sasas=sasas_from_server, type=2)
 
 # Using SASA values calculated with GROMACS
-sasas_gmx=run_gmx_sasa(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
+sasas_gmx=gmx_sasa(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
 mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_gmx, type=1)
 ```
+
+## References
+
+1. https://doi.org/10.1021/acs.jpcb.7b02138
+2. https://doi.org/10.1016/s0076-6879(07)28023-1
+3. https://www.pnas.org/doi/10.1073/pnas.0706251104)
 
 """
 function mvalue(;
@@ -139,18 +143,21 @@ that can be directly used as input to the `mvalue` function.
 The input string should contain lines formatted as follows, and correspond to the SASA values for each amino acid type:
 
 ```julia
-ALA 		    8 	 (    11.1)     79.1 [   147.1] 	 | 	 (   -13.0)     51.4 [   115.8] 
-PHE 		    3 	 (   166.9)    197.1 [   230.2] 	 | 	 (    29.4)     56.4 [    83.4] 
-LEU 		    7 	 (   475.2)    532.2 [   589.3] 	 | 	 (    89.3)    145.3 [   201.3] 
+sasa_from_server = \"\"\"
+ALA 	8 	 (    11.1)     79.1 [   147.1] | (   -13.0)     51.4 [   115.8] 
+PHE 	3 	 (   166.9)    197.1 [   230.2] | (    29.4)     56.4 [    83.4] 
+LEU 	7 	 (   475.2)    532.2 [   589.3] | (    89.3)    145.3 [   201.3] 
 ...
-LYS 		    6 	 (   171.5)    220.4 [   269.3] 	 | 	 (    -4.5)     42.0 [    88.5] 
-ARG 		    1 	 (   110.2)    124.4 [   138.6] 	 | 	 (    17.1)     25.0 [    33.0] 
-CYS 		    0 	 (     0.0)      0.0 [     0.0] 	 | 	 (     0.0)      0.0 [     0.0] 
+LYS 	6 	 (   171.5)    220.4 [   269.3] | (    -4.5)     42.0 [    88.5] 
+ARG 	1 	 (   110.2)    124.4 [   138.6] | (    17.1)     25.0 [    33.0] 
+CYS 	0 	 (     0.0)      0.0 [     0.0] | (     0.0)      0.0 [     0.0] 
+\"\"\"
 ```
 
-This data can be found in the output of the server, under the title "Sidechain and Backbone changes in Accessible Surface Area."
+This data can be found in the output of the server, under the title 
+`"Sidechain and Backbone changes in Accessible Surface Area"`.
 
-The function returns a dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value 
+The function returns a dictionary where each key is an amino acid three-letter code (e.g., `"ALA"`, `"PHE"`), and the value 
 is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values. 
 Each of these keys maps to a tuple containing three Float64 values representing the minimum, average, and maximum SASA values in Å².
 
@@ -177,10 +184,13 @@ function parse_mvalue_server_sasa(string::AbstractString)
 end
 
 """
-    run_gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString)
+    gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString)
 
 Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
+
+!!! note
+    This function requires GROMACS (`gmx sasa` executable) to be installed and accessible from the command line. 
 
 # Arguments
 
@@ -194,15 +204,15 @@ is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` 
 Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
 
 """
-function run_gmx_sasa(;
+function gmx_sasa(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
 )
     sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
-        sasa_bb_native, sasa_sc_native = 100 .* run_gmx_sasa_single(native_pdb, rname) # returns in nm^2
-        sasa_bb_desnat, sasa_sc_desnat = 100 .* run_gmx_sasa_single(desnat_pdb, rname)
+        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_single(native_pdb, rname) # returns in nm^2
+        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_single(desnat_pdb, rname)
         sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
@@ -211,7 +221,7 @@ end
 #
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
-function run_gmx_sasa_single(pdbname, resname)
+function gmx_sasa_single(pdbname, resname)
     index_file = tempname() * ".ndx"
     sasa_file = tempname() * ".xvg"
     p = read_pdb(pdbname, "protein and not element H")

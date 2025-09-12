@@ -12,6 +12,8 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.5-DEV
 -------------
+- ![INFO][badge-info] documentation updated for mvalue.
+- ![INFO][badge-info] renamed `run_gmx_sasa` to `gmx_sasa`.
 
 Version 1.29.4
 -------------

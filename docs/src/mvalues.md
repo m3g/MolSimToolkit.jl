@@ -8,11 +8,10 @@ CollapsedDocStrings = true
     This is an experimental feature. Breaking changes may occur without 
     a breaking package release.
 
-```@autodocs
-Modules = [ MolSimToolkit ]
-Pages = [ 
-    "mvalue/mvalue.jl",
-]
+```@docs
+mvalue
+gmx_sasa
+parse_mvalue_server_sasa
 ```
 
 
