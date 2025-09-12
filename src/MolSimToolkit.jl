@@ -14,7 +14,9 @@ import MolSimToolkitShared: center_of_mass,
                             wrap_to_first,
                             align, 
                             align!, 
-                            rmsd 
+                            rmsd,
+                            dihedral,
+                            dihedrals
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
@@ -32,6 +34,7 @@ export intermittent_correlation
 export bulk_coordination
 export coordination_number
 export center_of_mass
+export dihedral, dihedrals
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
