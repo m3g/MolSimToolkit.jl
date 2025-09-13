@@ -14,7 +14,9 @@ import MolSimToolkitShared: center_of_mass,
                             wrap_to_first,
                             align, 
                             align!, 
-                            rmsd 
+                            rmsd,
+                            dihedral,
+                            dihedrals
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector
@@ -33,6 +35,7 @@ export intermittent_correlation
 export bulk_coordination
 export coordination_number
 export center_of_mass
+export dihedral, dihedrals
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -43,9 +46,6 @@ export ss_map, ss_mean, ss_heatmap
 
 # Version of the package: used for printing in some places
 const version = pkgversion(@__MODULE__)
-
-# Minimal AtomType interface
-atomic_mass(atom::PDBTools.Atom) = PDBTools.mass(atom)
 
 # Testing module
 include("../test/Testing.jl")
@@ -84,8 +84,11 @@ include("./Reweighting/Reweighting.jl")
 # Simulation setup facilities
 include("./PackmolInputCreator/PackmolInputCreator.jl")
 
-# Cluster managemeng
+# Cluster management
 include("./Coaraci/Coaraci.jl")
+
+# m-value calculations
+include("./mvalue/mvalue.jl")
 
 # Structure for plotting styles
 struct MolSimStyle end

@@ -390,10 +390,10 @@ end
     UnitCell{T}
 
 A structure to store the unit cell of a frame in the trajectory.
-The unit cell is represented by a 3x3 matrix of type `SMatrix{3,3,T,9}`.
 
-The `valid` field indicates if the unit cell is valid (not zero). The `orthorhombic` field
-indicates if the unit cell is orthorhombic (all angles are 90 degrees).
+The `matrix` field contains the unit cell vectors as a static matrix of type `SMatrix{3,3,T,9}`.
+The `valid` field indicates whether the unit cell is valid (i.e., not all vectors are zero).
+The `orthorhombic` field indicates whether the unit cell is orthorhombic, which means that all off-diagonal elements are close to zero.
 
 """
 struct UnitCell{T}

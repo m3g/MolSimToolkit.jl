@@ -10,8 +10,35 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.2-DEV
+Version 1.29.7-DEV
 -------------
+
+Version 1.29.6
+-------------
+- ![INFO][badge-info] use `dihedral` and `dihedrals` from MolSimToolkitShared.
+
+Version 1.29.5
+-------------
+- ![INFO][badge-experimental] renamed `run_gmx_sasa` to `gmx_sasa`.
+- ![INFO][badge-info] documentation updated for mvalue.
+
+Version 1.29.4
+-------------
+- ![FEATURE][badge-experimental] Support for the AutoBolen model of mvalue calcuation.
+- ![FEATURE][badge-experimental] Code support for other cosolvents than urea in the calculation of m-values.
+- ![INFO][badge-info] removed `atomic_mass` overload (with piracy) of PDBTools function.
+
+Version 1.29.3
+-------------
+- ![INFO][badge-experimental] renamed `parse_server_output` to `parse_mvalue_server_sasa`, for clarity.
+- ![INFO][badge-info] updated mvalue docs.
+
+Version 1.29.2
+-------------
+- ![FEATURE][badge-experimental] Experimental: mvalue calculator.
+- ![INFO][badge-info] document the fields of the `UnitCell` type.
+- ![INFO][badge-info] increase PDBTools.jl compat bound to 3.2.
+- ![INFO][badge-info] install gromacs on CI runs on Linux, to test mvalue SASA computations.
 
 Version 1.29.1
 -------------
