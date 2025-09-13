@@ -246,7 +246,7 @@ end
     ] atol = 1.e-4
 end
 
-@testitem "Reweight with small trajectory using minimum distances and contributions from one group" begin
+@testitem "Reweight with small trajectory using minimum distances and contributions from one group" begin #ADICIONAR TESTE COM CONTRIBUIÇÕES NÃO REPETIDAS (OXIGENIO E HIDROGENIOS, POR EX.)
     import PDBTools
     import OrderedCollections
     using MolSimToolkit.Reweighting
@@ -266,7 +266,7 @@ end
 
     c11 = at -> at.name in ["HW1", "HW2"]
 
-    c12 = at -> at = true
+    c12 = at -> true
 
     dist(r) = r
 

@@ -198,7 +198,7 @@ function reweight(
     function cell_list_func(i, j, d, subgroup1, subgroup2, pert_func::Function, distance_vec, frame)
         if is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group2[j])
             eng = pert_func(d)
-            if abs(eng) > 0
+            if eng != 0
                 distance_vec[frame] += 1
                 return eng
             end
@@ -251,7 +251,7 @@ function reweight(
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
                             output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
-                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) > 0 ? 1 : 0
+                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) != 0 ? 1 : 0
                         end
                     end
                     computed_energy = 0
@@ -299,7 +299,7 @@ function reweight(
         end
         if (is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group1[j])) || (is_in(subgroup2, pert_input.group1[i]) && is_in(subgroup1, pert_input.group1[j])) 
             eng = pert_func(d)
-            if abs(eng) > 0
+            if eng != 0
                 distance_vec[frame] += 1
                 return eng
             end
@@ -348,11 +348,11 @@ function reweight(
                     unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
                     cutoff = cutoff
                 )
-                for pk in keys(pert_input.perturbations)
-                    for d_i in eachindex(gp_2_list)                    
+                for pk in keys(pert_input.perturbations) #CORRIGIR CONTRIBUIÇÕES DIFERENTES (SÓ FUNCIONA PARA CONTRIBUIÇÕES IGUAIS)
+                    for d_i in eachindex(gp_2_list)                  
                         if gp_2_list[d_i].within_cutoff && is_in(collect(i_index:1:f_index), gp_2_list[d_i].i) == false && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group1[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)/2 
-                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) > 0 ? 1/2 : 0
+                            output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d)/2
+                            output[pk].distances[iframe] += output[pk].energy[iframe] != 0 ? 1/2 : 0
                         end
                     end
                     computed_energy = 0
