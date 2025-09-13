@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.7
+Version 1.29.8-DEV
 -------------
 - ![INFO][badge-experimental] use `threeletter` to convert from residue names to residue types when computing mvalues, thus supporting all alternate names `PDBTools.protein_residues` define.
 
