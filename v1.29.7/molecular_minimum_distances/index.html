@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Molecular Minimum Distances · MolSimToolkit.jl</title><meta name="title" content="Molecular Minimum Distances · MolSimToolkit.jl"/><meta property="og:title" content="Molecular Minimum Distances · MolSimToolkit.jl"/><meta property="twitter:title" content="Molecular Minimum Distances · MolSimToolkit.jl"/><meta name="description" content="Documentation for MolSimToolkit.jl."/><meta property="og:description" content="Documentation for MolSimToolkit.jl."/><meta property="twitter:description" content="Documentation for MolSimToolkit.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="MolSimToolkit.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">MolSimToolkit.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Structural analyses</span><ul><li><a class="tocitem" href="../Structural_properties/">Distances and misc.</a></li><li><a class="tocitem" href="../Dihedrals/">Dihedral angle analysis</a></li><li><a class="tocitem" href="../secondary_structures/">Secondary structure</a></li><li><a class="tocitem" href="../structural_alignment/">Structural alignment</a></li></ul></li><li><span class="tocitem">Simulation statistics</span><ul><li><a class="tocitem" href="../block_averages/">Block averages</a></li><li><a class="tocitem" href="../remd/">Replica exchange</a></li></ul></li><li><span class="tocitem">Interactions</span><ul><li><a class="tocitem" href="../Solvation_and_interactions/">Coordination numbers</a></li><li class="is-active"><a class="tocitem" href>Molecular Minimum Distances</a><ul class="internal"><li><a class="tocitem" href="#Features"><span>Features</span></a></li><li><a class="tocitem" href="#Most-typical-use:-Understanding-solvation"><span>Most typical use: Understanding solvation</span></a></li><li><a class="tocitem" href="#Performance"><span>Performance</span></a></li><li><a class="tocitem" href="#Example-input-files"><span>Example input files</span></a></li><li><a class="tocitem" href="#Shortest-distances-from-a-solute"><span>Shortest distances from a solute</span></a></li><li><a class="tocitem" href="#All-shortest-distances"><span>All shortest distances</span></a></li><li><a class="tocitem" href="#Shortest-distances-within-molecules"><span>Shortest distances within molecules</span></a></li><li><a class="tocitem" href="#Advanced-usage"><span>Advanced usage</span></a></li><li><a class="tocitem" href="#Citation"><span>Citation</span></a></li><li><a class="tocitem" href="#Help-entries"><span>Help entries</span></a></li><li><a class="tocitem" href="#Details-of-the-illustration"><span>Details of the illustration</span></a></li></ul></li></ul></li><li><span class="tocitem">Time-dependent properties</span><ul><li><a class="tocitem" href="../intermittent_correlation/">Intermittent correlation</a></li></ul></li><li><a class="tocitem" href="../system_setup/">System setup</a></li><li><a class="tocitem" href="../plotting_style/">Plotting style</a></li><li><a class="tocitem" href="../Developer/">Developer zone</a></li><li><span class="tocitem">Experimental</span><ul><li><a class="tocitem" href="../Reweighting/">Simulation Reweighting</a></li><li><a class="tocitem" href="../Coaraci/">Cluster submission management</a></li><li><a class="tocitem" href="../mvalues/">m-value calculator</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Interactions</a></li><li class="is-active"><a href>Molecular Minimum Distances</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Molecular Minimum Distances</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/MolSimToolkit.jl/blob/main/docs/src/molecular_minimum_distances.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Molecular-Minimum-Distances"><a class="docs-heading-anchor" href="#Molecular-Minimum-Distances">Molecular Minimum Distances</a><a id="Molecular-Minimum-Distances-1"></a><a class="docs-heading-anchor-permalink" href="#Molecular-Minimum-Distances" title="Permalink"></a></h1><p>Computes the minimum distance between <em>molecules</em>, which are represented as arrays of coordinates in two or three dimensions. </p><p>To understand the utility and purpose of this package, consider the image below:</p><p><img src="../images/molecular_minimum_distances/nearest.png" alt="nearest.png"/></p><p>Here, there is one <em>blue</em> molecule, with 6 atoms, and several <em>red</em> molecules, with 2 atoms each. The package has identified which are the molecules of the <em>red</em> set that have at leat one atom within a cutoff from the atoms of the <em>blue</em> molecule, and annotated the corresponding atoms and the distances.</p><h2 id="Features"><a class="docs-heading-anchor" href="#Features">Features</a><a id="Features-1"></a><a class="docs-heading-anchor-permalink" href="#Features" title="Permalink"></a></h2><ul><li>Fast <a href="https://github.com/m3g/CellListMap.jl">cell-list approach</a>, to compute minimum-distance for thousands, or millions of atoms. </li><li>General periodic boundary conditions supported. </li><li>Advanced mode for in-place calculations, for non-allocating iterative calls (for analysis of MD trajectories, for example).</li><li>Modes for the calculation of minimum-distances in sets of molecules.</li></ul><h2 id="Most-typical-use:-Understanding-solvation"><a class="docs-heading-anchor" href="#Most-typical-use:-Understanding-solvation">Most typical use: Understanding solvation</a><a id="Most-typical-use:-Understanding-solvation-1"></a><a class="docs-heading-anchor-permalink" href="#Most-typical-use:-Understanding-solvation" title="Permalink"></a></h2><p>The most typical scenario is that of a protein, or another macromolecule, in a box of solvent. For example, here we download a frame of a protein which was simulated in a mixture of water and TMAO: </p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, PDBTools
+
+julia&gt; atoms = MolSimToolkit.MolecularMinimumDistances.download_example()
+   Array{Atoms,1} with 62026 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮ 
+   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  0.00  1.00     1    WAT2     62024
+   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
+   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026</code></pre><p>Next, we extract the protein coordinates, and the TMAO coordinates:</p><pre><code class="language-julia-repl hljs">julia&gt; protein = coor(atoms,&quot;protein&quot;)
+1463-element Vector{SVector{3, Float64}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]
+ [-9.488, -13.913, -5.295]
+ ⋮
+ [6.408, -12.034, -8.343]
+ [6.017, -10.967, -9.713]
+
+julia&gt; tmao = coor(atoms,&quot;resname TMAO&quot;)
+2534-element Vector{SVector{3, Float64}}:
+ [-23.532, -9.347, 19.545]
+ [-23.567, -7.907, 19.381]
+ [-22.498, -9.702, 20.497]
+ ⋮
+ [13.564, -16.517, 12.419]
+ [12.4, -17.811, 12.052]</code></pre><p>The system was simulated with periodic boundary conditions, with sides in this frame of <code>[83.115, 83.044, 83.063]</code>, and this information will be provided to the minimum-distance computation.</p><p>Finally, we find all the TMAO molecules having at least one atom closer than 12 Angstroms to the protein, using the current package (TMAO has 14 atoms):</p><pre><code class="language-julia-repl hljs">julia&gt; list = minimum_distances(
+           xpositions=tmao, # solvent
+           ypositions=protein, # solute
+           xn_atoms_per_molecule=14,
+           cutoff=12.0,
+           unitcell=[83.115, 83.044, 83.063]
+       )
+181-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(true, 2526, 97, 9.652277658666891)
+
+julia&gt; count(x -&gt; x.within_cutoff, list)
+33</code></pre><p>Thus, 33 TMAO molecules are within the cutoff distance from the protein, and the distances can be used to study the solvation of the protein.</p><div class="admonition is-success" id="Tip-934ee0711f1dc673"><header class="admonition-header">Tip<a class="admonition-anchor" href="#Tip-934ee0711f1dc673" title="Permalink"></a></header><div class="admonition-body"><p>The <code>coordination_number</code> function of this package essentially performs the above calculation iteratively  along a trajectory. The source of of such function is simple and can be used to further understand the utility and usage of the minimum-distance calculations.</p></div></div><h2 id="Performance"><a class="docs-heading-anchor" href="#Performance">Performance</a><a id="Performance-1"></a><a class="docs-heading-anchor-permalink" href="#Performance" title="Permalink"></a></h2><p>This package exists because this computation is fast. For example, let us choose the water molecules instead, and benchmark the time required to compute this set of distances:</p><pre><code class="language-julia-repl hljs">julia&gt; water = coor(atoms,&quot;resname TIP3&quot;)
+58014-element Vector{SVector{3, Float64}}:
+ [-28.223, 19.92, -27.748]
+ [-27.453, 20.358, -27.476]
+ [-27.834, 19.111, -28.148]
+ ⋮
+ [13.218, -3.647, -34.453]
+ [12.618, -4.977, -34.303]
+
+julia&gt; using BenchmarkTools
+
+julia&gt; @btime minimum_distances(
+           xpositions=$water, # solvent
+           ypositions=$protein, # solute
+           xn_atoms_per_molecule=3,
+           cutoff=12.0,
+           unitcell=[83.115, 83.044, 83.063]
+       );
+  6.288 ms (3856 allocations: 13.03 MiB)</code></pre><p>To compare, a naive algorithm to compute the same thing takes roughly 400x more for this system size:</p><pre><code class="language-julia-repl hljs">julia&gt; @btime MolSimToolkit.MolecularMinimumDistances.naive_md($water, $protein, 3, [83.115, 83.044, 83.063], 12.0);
+  2.488 s (97 allocations: 609.16 KiB)</code></pre><p>And the computation can be made faster and in-place using the more advanced interface that allows preallocation of main necessary arrays:</p><pre><code class="language-julia-repl hljs">julia&gt; sys = CrossPairs(
+           xpositions=water, # solvent
+           ypositions=protein, # solute
+           xn_atoms_per_molecule=3,
+           cutoff=12.0,
+           unitcell=[83.115, 83.044, 83.063]
+       )
+CrossPairs system with:
+
+Number of atoms of set: 58014
+Number of atoms of target structure: 1463
+Cutoff: 12.0
+unitcell: [83.12, 0.0, 0.0, 0.0, 83.04, 0.0, 0.0, 0.0, 83.06]
+Number of molecules in set: 4144
+
+julia&gt; @btime minimum_distances!($sys);
+  2.969 ms (196 allocations: 22.80 KiB)</code></pre><p>The remaining allocations occur only for the launching of multiple threads:</p><pre><code class="language-julia-repl hljs">julia&gt; sys = CrossPairs(
+           xpositions=water, # solvent
+           ypositions=protein, # solute
+           xn_atoms_per_molecule=14,
+           cutoff=12.0,
+           unitcell=[83.115, 83.044, 83.063],
+           parallel=false # default is true
+       );
+
+julia&gt; @btime minimum_distances!($sys);
+  15.249 ms (0 allocations: 0 bytes)</code></pre><h2 id="Example-input-files"><a class="docs-heading-anchor" href="#Example-input-files">Example input files</a><a id="Example-input-files-1"></a><a class="docs-heading-anchor-permalink" href="#Example-input-files" title="Permalink"></a></h2><p>The examples here use a molecular system, but the package actually only considers the coordinates of the atoms and the number of atoms of each molecule. Thus, more general distance problems can be tackled.</p><p>The input atomic positions used in the following examples can be obtained with:</p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, PDBTools
+
+julia&gt; system = MolSimToolkit.MolecularMinimumDistances.download_example() 
+   Array{Atoms,1} with 62026 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮ 
+   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  0.00  1.00     1    WAT2     62024
+   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
+   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
+</code></pre><p>The system consists of a protein (with 1463 atoms), solvated by 181 TMAO molecules (with 14 atoms each), 19338 water molecules, and some ions. </p><p>These coordinates belong to a snapshot of a simulation which was performed with cubic periodic boundary conditions, with a box side of <code>84.48</code> Angstrom. </p><p>The coordinates of each of the types of molecules can be extracted from the <code>system</code> array of atoms with (using <code>PDBTools</code> - <code>v0.13</code> or greater):</p><pre><code class="language-julia-repl hljs">julia&gt; protein = coor(system,&quot;protein&quot;)
+1463-element Vector{StaticArrays.SVector{3, Float64}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]
+ [-9.488, -13.913, -5.295]
+ ⋮
+ [6.408, -12.034, -8.343]
+ [6.017, -10.967, -9.713]
+
+julia&gt; tmao = coor(system,&quot;resname TMAO&quot;)
+2534-element Vector{StaticArrays.SVector{3, Float64}}:
+ [-23.532, -9.347, 19.545]
+ [-23.567, -7.907, 19.381]
+ [-22.498, -9.702, 20.497]
+ ⋮
+ [13.564, -16.517, 12.419]
+ [12.4, -17.811, 12.052]
+
+julia&gt; water = coor(system,&quot;water&quot;)
+58014-element Vector{StaticArrays.SVector{3, Float64}}:
+ [-28.223, 19.92, -27.748]
+ [-27.453, 20.358, -27.476]
+ [-27.834, 19.111, -28.148]
+ ⋮
+ [13.218, -3.647, -34.453]
+ [12.618, -4.977, -34.303]</code></pre><p>Using these vectors of coordinates, we will illustrate the use of the current package.</p><h2 id="Shortest-distances-from-a-solute"><a class="docs-heading-anchor" href="#Shortest-distances-from-a-solute">Shortest distances from a solute</a><a id="Shortest-distances-from-a-solute-1"></a><a class="docs-heading-anchor-permalink" href="#Shortest-distances-from-a-solute" title="Permalink"></a></h2><p>The simplest usage consists of finding for each molecule of one set the atoms of the other set which are closer to them. For example, here we want the atoms of the proteins which are closer to each TMAO molecule (14 atoms), within a cutoff of <code>12.0</code> Angstroms.</p><p>The simulations was performed with periodic boundary conditions, in a cubic box of sides <code>[84.48, 84.48, 84.48]</code>. We compute the minimum distances with:</p><pre><code class="language-julia-repl hljs">julia&gt; list = minimum_distances(
+           xpositions=tmao, # solvent
+           ypositions=protein, # solute
+           xn_atoms_per_molecule=14,
+           cutoff=12.0,
+           unitcell=[84.48, 84.48, 84.48]
+       )
+181-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(true, 2526, 97, 9.652277658666891)</code></pre><p>The <code>list</code> contains, for each <em>molecule</em> of TMAO, a <code>MinimumDistance</code> object, containing the following fields,  exemplified by printing the last entry of the list:</p><pre><code class="language-julia-repl hljs">julia&gt; list[end]
+MinimumDistance{Float64}(true, 2526, 97, 9.652277658666891)
+
+Distance within cutoff, within_cutoff = true
+x atom of pair, i = 2526
+y atom of pair, j = 97
+Distance found, d = 9.652277658666891</code></pre><p>The fields <code>within_cutoff</code>, <code>i</code>, <code>j</code>, and <code>d</code> show if a distance was found within the cutoff, the indices of the atoms involved in the contact, and their distance.</p><p>Getter functions are available to extract eac hof these fields, to add some convenience: <code>within_cutoff</code>, <code>iatom</code>, <code>jatom</code>, and <code>distance</code>.</p><div class="admonition is-info" id="Note-51932425a8ed0e35"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-51932425a8ed0e35" title="Permalink"></a></header><div class="admonition-body"><p>If the solute has more than one molecule, this will not be taken into  consideration in this mode. All molecules will be considered as part of the same structure (the number of atoms per molecule of the <code>protein</code> is not a parameter here).</p></div></div><h2 id="All-shortest-distances"><a class="docs-heading-anchor" href="#All-shortest-distances">All shortest distances</a><a id="All-shortest-distances-1"></a><a class="docs-heading-anchor-permalink" href="#All-shortest-distances" title="Permalink"></a></h2><p>A similar call of the previous section can be used to compute, for each molecule of a set of molecules, which is the closest atom of every other molecule of another set. </p><p>In the example, we can compute for each TMAO molecule, which is the closest atom of water, and vice-versa. The difference from the previous call is that now wee need to provide the number of atoms of both TMAO and water:</p><pre><code class="language-julia-repl hljs">julia&gt; water_list, tmao_list = minimum_distances(
+           xpositions=water,
+           ypositions=tmao,
+           xn_atoms_per_molecule=3,
+           yn_atoms_per_molecule=14,
+           unitcell=[84.48, 84.48, 84.48],
+           cutoff=12.0
+       );
+
+julia&gt; water_list
+19338-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 2, 1512, 4.779476331147592)
+ MinimumDistance{Float64}(true, 6, 734, 2.9413928673334357)
+ MinimumDistance{Float64}(true, 8, 859, 5.701548824661595)
+ ⋮
+ MinimumDistance{Float64}(true, 58010, 1728, 3.942870781549911)
+ MinimumDistance{Float64}(true, 58014, 2058, 2.2003220218867936)
+
+julia&gt; tmao_list
+181-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 12, 22520, 2.1985345118965056)
+ MinimumDistance{Float64}(true, 20, 33586, 2.1942841657360606)
+ MinimumDistance{Float64}(true, 37, 26415, 2.1992319113726926)
+ ⋮
+ MinimumDistance{Float64}(true, 2512, 37323, 2.198738501959709)
+ MinimumDistance{Float64}(true, 2527, 33664, 2.1985044916943015)</code></pre><p>Two lists were returned, the first containing, for each water molecule, <code>MinimumDistance</code> data associated to the closest TMAO molecule (meaning the atoms involved in the contact and their distance). Similarly, the second list contains, for each TMAO molecule, the <code>MinimumDistance</code> data associated to each TMAO molecule. </p><h2 id="Shortest-distances-within-molecules"><a class="docs-heading-anchor" href="#Shortest-distances-within-molecules">Shortest distances within molecules</a><a id="Shortest-distances-within-molecules-1"></a><a class="docs-heading-anchor-permalink" href="#Shortest-distances-within-molecules" title="Permalink"></a></h2><p>There is an interface to compute the shortest distances of molecules within a set of molecules. That is, given one group of molecules, compute for each molecule which is the shortest distance among the other molecules of the same type. </p><p>A typical call would be:</p><pre><code class="language-julia-repl hljs">julia&gt; water_list = minimum_distances(
+           xpositions=water,
+           xn_atoms_per_molecule=3,
+           unitcell=[84.48, 84.48, 84.48],
+           cutoff=12.0
+       )
+19338-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 2, 33977, 2.1997806708851724)
+ MinimumDistance{Float64}(true, 4, 43684, 2.1994928961012814)
+ MinimumDistance{Float64}(true, 9, 28030, 2.1997583958244142)
+ ⋮
+ MinimumDistance{Float64}(true, 58010, 22235, 2.1992096307537414)
+ MinimumDistance{Float64}(true, 58012, 9318, 2.20003227249056)</code></pre><p>Which contains for each water molecule the atoms involved in the closest contact to any other water molecule, and the distances (within the cutoff). A pictorial representation of a result of this type is, for a simpler system:</p><p><img src="../images/molecular_minimum_distances/self_pair.png" alt="self pairs"/></p><p>This can be used for the identification of connectivity networks, for example, or for some types of clustering.</p><h2 id="Advanced-usage"><a class="docs-heading-anchor" href="#Advanced-usage">Advanced usage</a><a id="Advanced-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced-usage" title="Permalink"></a></h2><h3 id="System-build-and-update"><a class="docs-heading-anchor" href="#System-build-and-update">System build and update</a><a id="System-build-and-update-1"></a><a class="docs-heading-anchor-permalink" href="#System-build-and-update" title="Permalink"></a></h3><p>If the molecular minimum distances will be computed many times for similar systems, it is possible to construct the system and update its properties. The use of the interface of <code>CellListMap</code> is required (requires <code>CellListMap</code> version <code>0.7.24</code> or greater). </p><p>For example, let us build one system with a protein and water:</p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, PDBTools
+
+julia&gt; system = MolecularMinimumDistances.download_example();
+
+julia&gt; protein = coor(system, &quot;protein&quot;);
+
+julia&gt; water = coor(system, &quot;water&quot;);</code></pre><p>We now build the <code>CrossPairs</code>  type of system, instead of calling the <code>minimum_distances</code> function directly:</p><pre><code class="language-julia-repl hljs">julia&gt; sys = CrossPairs(
+           xpositions=water, # solvent
+           ypositions=protein, # solute
+           xn_atoms_per_molecule=3,
+           cutoff=12.0,
+           unitcell=[84.48, 84.48, 84.48]
+       )
+CrossPairs system with:
+
+Number of atoms of set x: 58014
+Number of molecules in set x: 19338
+Number of atoms of target structure y: 1463
+Cutoff: 12.0
+unitcell: [84.48, 0.0, 0.0, 0.0, 84.48, 0.0, 0.0, 0.0, 84.48]</code></pre><p>Now <code>sys</code>  contains the necessary arrays for computing the list of minimum distances. We use now the <code>minimum_distances!</code>  function (with the <code>!</code>), to update that list:</p><pre><code class="language-julia-repl hljs">julia&gt; minimum_distances!(sys)
+19338-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(true, 58011, 383, 10.24673074692606)
+ MinimumDistance{Float64}(false, 0, 0, Inf)</code></pre><p>The system can be now updated: the positions, cutoff, or unitcell can be modified, with the  following interfaces:</p><h3 id="Updating-positions"><a class="docs-heading-anchor" href="#Updating-positions">Updating positions</a><a id="Updating-positions-1"></a><a class="docs-heading-anchor-permalink" href="#Updating-positions" title="Permalink"></a></h3><p>To update the positions, modify the <code>sys.xpositions</code> (or <code>ypositions</code>)  array. We will boldy demonstrate this by making the first atom of the <code>x</code> set to be close to the first atom of the protein, and recomputing the distances:</p><pre><code class="language-julia-repl hljs">julia&gt; using StaticArrays
+
+julia&gt; sys.xpositions[2] = sys.ypositions[1] + SVector(1.0,0.0,0.0);
+
+julia&gt; minimum_distances!(sys)
+19338-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 2, 4, 0.9202923448556931)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(true, 58011, 383, 10.24673074692606)
+ MinimumDistance{Float64}(false, 0, 0, Inf)</code></pre><h3 id="Updating-the-cutoff,-unitcell-and-parallel-flag"><a class="docs-heading-anchor" href="#Updating-the-cutoff,-unitcell-and-parallel-flag">Updating the cutoff, unitcell and parallel flag</a><a id="Updating-the-cutoff,-unitcell-and-parallel-flag-1"></a><a class="docs-heading-anchor-permalink" href="#Updating-the-cutoff,-unitcell-and-parallel-flag" title="Permalink"></a></h3><p>The <code>cutoff</code>, <code>unitcell</code> and <code>parallel</code> data of the <code>sys</code> objects can be modified  directly. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; sys
+CrossPairs system with:
+
+Number of atoms of set x: 58014
+Number of molecules in set x: 19338
+Number of atoms of target structure y: 1463
+Cutoff: 15.0
+unitcell: [100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0]
+
+julia&gt; sys.cutoff = 10.0
+10.0
+
+julia&gt; sys.unitcell = [84.4, 84.4, 84.4]
+3-element Vector{Float64}:
+ 84.4
+ 84.4
+ 84.4
+
+julia&gt; sys.parallel = false
+false
+
+julia&gt; sys
+CrossPairs system with:
+
+Number of atoms of set x: 58014
+Number of molecules in set x: 19338
+Number of atoms of target structure y: 1463
+Cutoff: 10.0
+unitcell: [84.4, 0.0, 0.0, 0.0, 84.4, 0.0, 0.0, 0.0, 84.4]</code></pre><div class="admonition is-info" id="Note-fdd745880e37c0f7"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-fdd745880e37c0f7" title="Permalink"></a></header><div class="admonition-body"><p>It is not possible to update the <code>unitcell</code> from a Orthorhombic to a general Triclinic cell. If the system will be Triclinic at any moment, the <code>unitcell</code> must be initialized with the full matrix instead of a  vector of sides.</p></div></div><h3 id="Index-of-molecules"><a class="docs-heading-anchor" href="#Index-of-molecules">Index of molecules</a><a id="Index-of-molecules-1"></a><a class="docs-heading-anchor-permalink" href="#Index-of-molecules" title="Permalink"></a></h3><p>Additionally, the low level interface allows the definition of more general groups of particles, in the sense that &quot;molecule&quot; can have different number of atoms in the same set. Therefore, one needs to provide <em>a function</em> that returns the index of the molecule of each atom, given the index of the atom. </p><p>Briefly, if a set of atoms belong to molecules of the same number of atoms, one can compute the index of each molecule using</p><pre><code class="language-julia hljs">mol_indices(i,n) = div((i - 1), n) + 1</code></pre><p>where <code>i</code> is the atom index in the array of coordinates, and <code>n</code> is the number of atoms per molecule. This is the default assumed in the basic interface, and can be called with:</p><pre><code class="language-julia-repl hljs">julia&gt; using StaticArrays
+
+julia&gt; x = rand(SVector{3,Float64},9); # 3 water molecules
+
+julia&gt; mol_indices(2,3) # second atom belongs to first molecule
+1
+
+julia&gt; mol_indices(4,3) # fourth atom belongs to second molecule
+2</code></pre><p>Typically, as we will show, this function will be used for setting up molecule indices.</p><p>However, more general indexing can be used. For instance, let us suppose that the 9 atoms of the <code>x</code> array of coordinates above belong to <code>2</code> molecules, with <code>4</code> and <code>5</code> atoms each. Then, we could define, for example:</p><pre><code class="language-julia-repl hljs">julia&gt; my_mol_indices(i) = i &lt;= 4 ? 1 : 2
+my_mol_indices (generic function with 1 method)
+
+julia&gt; my_mol_indices(4)
+1
+
+julia&gt; my_mol_indices(5)
+2</code></pre><p>Since the function can close-over an array of molecular indices, the definition can be completely general, that is:</p><pre><code class="language-julia-repl hljs">julia&gt; molecular_indices = [ 1, 3, 3, 2, 2, 1, 3, 1, 2 ];
+
+julia&gt; my_mol_indices(i) = molecular_indices[i]
+my_mol_indices (generic function with 1 method)
+
+julia&gt; my_mol_indices(1)
+1
+
+julia&gt; my_mol_indices(5)
+2</code></pre><p>In summary, this function that given the index of the atom returns the index of the corresponding molecule must be provided in the advanced interface, and typically will be just a closure around the number of atoms per molecule, using the already available <code>mol_indices</code> function. </p><h4 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h4><p>Let us mix water and TMAO molecules in the same set, and use a general function to compute the indices of the molecules of each atom: </p><pre><code class="language-julia-repl hljs">julia&gt; system = MolecularMinimumDistances.download_example();
+
+julia&gt; protein = coor(system, &quot;protein&quot;);
+
+julia&gt; tmao_and_water = select(system, &quot;resname TMAO or resname TIP3&quot;)
+   Array{Atoms,1} with 60548 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+    1479    N    TMAO     A        1      120  -23.532   -9.347   19.545  0.00  1.00     1    TMAO      1479
+    1480   C1    TMAO     A        1      120  -23.567   -7.907   19.381  0.00  1.00     1    TMAO      1480
+    1481   C2    TMAO     A        1      120  -22.498   -9.702   20.497  0.00  1.00     1    TMAO      1481
+                                                       ⋮ 
+   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  0.00  1.00     1    WAT2     62024
+   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
+   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
+
+julia&gt; findfirst(at -&gt; at.resname == &quot;TIP3&quot;, tmao_and_water)
+2535</code></pre><p>Thus, the <code>tmao_and_water</code> atom array has two different types of molecules, TMAO with 14 atoms, and water with 3 atoms.  The first atom of a water molecule is atom <code>2535</code> of the array. We extract the coordinates of the atoms with:</p><pre><code class="language-julia-repl hljs">julia&gt; solvent = coor(tmao_and_water)
+60548-element Vector{SVector{3, Float64}}:
+ [-23.532, -9.347, 19.545]
+ [-23.567, -7.907, 19.381]
+ [-22.498, -9.702, 20.497]
+ ⋮
+ [13.218, -3.647, -34.453]
+ [12.618, -4.977, -34.303]</code></pre><p>And now we define a function that, given the index of the atom, returns the molecule to which it belongs:</p><pre><code class="language-julia-repl hljs">julia&gt; function mol_indices(i) 
+           if i &lt; 2535 # TMAO (14 atoms per molecule) 
+               div(i-1,14) + 1 
+           else # water (3 atoms per molecule)
+               mol_indices(2534) + div(i-2534-1,3) + 1
+           end
+       end
+mol_indices (generic function with 3 method)</code></pre><p>The function above computes the molecular indices for TMAO in the standard way, and computes the water  molecular indices by first summing the molecule index of the last TMAO molecule, and subtracting from the atomic index of water the last index of the last TMAO atom. We can test this: </p><pre><code class="language-julia-repl hljs">julia&gt; mol_indices(14) # last atom of first TMAO
+1
+
+julia&gt; mol_indices(15) # first atom of second TMAO
+2
+
+julia&gt; mol_indices(2534) # last atom of last TMAO
+181
+
+julia&gt; mol_indices(2535) # first atom of first water
+182
+
+julia&gt; mol_indices(2537) # last atom of first water
+182
+
+julia&gt; mol_indices(2538) # first atom of second water
+183</code></pre><p>With this function, we can construct the system using it instead of the <code>xn_atoms_per_molecule</code> integer variable, to obtain the solvation of the protein by both TMAO and water in a single run:</p><pre><code class="language-julia-repl hljs">julia&gt; sys = CrossPairs(
+           xpositions=solvent, # solvent = coor(tmao_and_water)
+           ypositions=protein, # solute
+           xmol_indices = mol_indices,
+           cutoff=12.0,
+           unitcell=[84.48, 84.48, 84.48]
+       )
+CrossPairs system with:
+
+Number of atoms of set x: 60548
+Number of molecules in set x: 19519
+Number of atoms of target structure y: 1463
+Cutoff: 12.0
+unitcell: [84.48, 0.0, 0.0, 0.0, 84.48, 0.0, 0.0, 0.0, 84.48]</code></pre><p>As we can see, the number of molecules is correct (the sum of the number of water and tmao molecules). And the list of minimum distances will retrive the information of the closest protein atom to all solvent molecules of the set:</p><pre><code class="language-julia-repl hljs">julia&gt; minimum_distances!(sys)
+19519-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(true, 60545, 383, 10.24673074692606)
+ MinimumDistance{Float64}(false, 0, 0, Inf)</code></pre><h2 id="Citation"><a class="docs-heading-anchor" href="#Citation">Citation</a><a id="Citation-1"></a><a class="docs-heading-anchor-permalink" href="#Citation" title="Permalink"></a></h2><p>If this package was useful, please cite the article describing the main algorithms on which it is based:</p><p>L. Martínez, <strong>CellListMap.jl: Efficient and customizable cell list implementation for calculation of pairwise particle properties within a cutoff.</strong> <em>Computer Physics Communications</em> <strong>279</strong>, 108452 (2022). </p><p>DOI: <a href="https://doi.org/10.1016/j.cpc.2022.108452">10.1016/j.cpc.2022.108452</a></p><h2 id="Help-entries"><a class="docs-heading-anchor" href="#Help-entries">Help entries</a><a id="Help-entries-1"></a><a class="docs-heading-anchor-permalink" href="#Help-entries" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.iatom-Tuple{MinimumDistance}" href="#MolSimToolkit.MolecularMinimumDistances.iatom-Tuple{MinimumDistance}"><code>MolSimToolkit.MolecularMinimumDistances.iatom</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">iatom(md::MinimumDistance) = md.i</code></pre><p>Returns the index of the atom of the first set that is closer to the atom of the second set.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L87-L92">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.jatom-Tuple{MinimumDistance}" href="#MolSimToolkit.MolecularMinimumDistances.jatom-Tuple{MinimumDistance}"><code>MolSimToolkit.MolecularMinimumDistances.jatom</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">jatom(md::MinimumDistance) = md.j</code></pre><p>Returns the index of the atom of the second set that is closer to the atom of the first set.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L95-L100">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.minimum_distances!-Tuple{Any}" href="#MolSimToolkit.MolecularMinimumDistances.minimum_distances!-Tuple{Any}"><code>MolSimToolkit.MolecularMinimumDistances.minimum_distances!</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">minimum_distances!(system)</code></pre><p>Function that computes the minimum distances for an initialized system, of <code>SelfPairs</code>, <code>CrossPairs</code>, or <code>AllPairs</code> types. </p><p>The function returs a <code>Vector{MinimumDistance}</code> cor <code>SelfPairs</code> and <code>CrossPairs</code> inputs, and a Tuple of two of such vectors for the <code>AllPairs</code> input types.</p><p>This function is used as an advanced alternative from preallocated system inputs. Only a few allocations  remain on a call to <code>minimum_distances!</code>, mostly related to the launch of the multithreaded  calculations.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, StaticArrays
+
+julia&gt; sys = SelfPairs(
+           xpositions = rand(SVector{3,Float64},1000), 
+           unitcell=[1,1,1], 
+           cutoff = 0.1, 
+           xn_atoms_per_molecule=10,
+       )
+SelfPairs system with:
+
+Number of atoms: 1000
+Cutoff: 0.1
+unitcell: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+Number of molecules: 100
+
+julia&gt; minimum_distances!(sys)
+100-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 8, 579, 0.03570387474690425)
+ MinimumDistance{Float64}(true, 12, 534, 0.02850448652684309)
+ ⋮
+ MinimumDistance{Float64}(true, 996, 423, 0.03655145613454862)
+
+julia&gt; using BenchmarkTools
+
+julia&gt; @btime minimum_distances!($sys);
+  178.468 μs (209 allocations: 22.80 KiB)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L260-L304">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.minimum_distances-Tuple{}" href="#MolSimToolkit.MolecularMinimumDistances.minimum_distances-Tuple{}"><code>MolSimToolkit.MolecularMinimumDistances.minimum_distances</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">minimum_distances(
+   xpositions::AbstractVector{&lt;:SVector},
+   # or xpositions *and* ypositions (CrossPairs or AllPairs)
+   cutoff=0.1,
+   unitcell=[1,1,1],
+   xn_atoms_per_molecule=5
+   # or xn_atoms_per_molecule (CrossPairs)
+   # or xn_atoms_per_molecule *and* yn_atoms_per_molecule (AllPairs)
+)</code></pre><p>This function computes directly the minimum distances in a set of particles.  Depending on the number of input position arrays provided and on the number of molecular index information provided, a different type of calculation is performed:</p><ul><li><p>If <code>xpositions</code> and <code>xn_atoms_per_molecule</code> are provided, the minimum distances within the set of molecules of the set provided are computed. </p></li><li><p>If <code>xpositions</code> and <code>ypositions</code> are provided, and <strong>only</strong> <code>xn_atoms_per_molecule</code> is provided, the minimum distance of molecule of set <code>x</code> will be computed relative to set <code>y</code> (or, in other words, <code>ypositions</code> are considered a single structure) </p></li><li><p>If <code>xpositions</code> and <code>ypositions</code> are provided, and <code>xn_atoms_per_molecule</code> <strong>and</strong> <code>yn_atoms_per_molecule</code> are given, the minimum distances of each molecule of <code>x</code> to any atom of <code>y</code> are computed, and vice-versa. A tuple of vectors of minimum distances is returned, with lengths corresponding to the number of molecules of sets <code>x</code> and <code>y</code>, respectively.</p></li></ul><p>As for the other functions are constructors, the <code>xn_atoms_per_molecule</code> keyword parameters can be substituted by a general function which returns the molecular  index of the molecule of each atom (i. e. <code>(i) -&gt; (i-1)%n_atoms_per_molecule + 1</code> in the simplest and default case).</p><p><strong>Examples</strong></p><p><strong>Single set of molecules: all minimum distances within the set</strong></p><p>Note that the output contains a vector of <code>MinimumDistance</code> elements with a length equal to the number of molecules of the set.</p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, StaticArrays
+
+julia&gt; list = minimum_distances(
+           xpositions = rand(SVector{3,Float64},10^5), 
+           unitcell=[1,1,1], 
+           cutoff = 0.1, 
+           xn_atoms_per_molecule=10)
+10000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 5, 71282, 0.007669490894775502)
+ MinimumDistance{Float64}(true, 19, 36374, 0.005280726329888545)
+ ⋮
+ MinimumDistance{Float64}(true, 99998, 44320, 0.006509632622462869)</code></pre><p><strong>Two sets: minimum distances of one set relative to the other</strong></p><p>Note that the output contains the number of molecules of the <code>x</code> set. For each molecule of this set, the minimum distance to the set <code>y</code> is  computed. This is the typical &quot;solute-solvent&quot; example, where <code>x</code> contains the solvent positions, and <code>y</code> contains the solute positions.</p><pre><code class="language-julia-repl hljs">julia&gt; list = minimum_distances(
+           xpositions = rand(SVector{3,Float64},10^5), 
+           ypositions = rand(SVector{3,Float64},10^3),
+           unitcell=[1,1,1], 
+           cutoff = 0.1, 
+           xn_atoms_per_molecule=10,
+       )
+10000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 5, 596, 0.025526453519907292)
+ MinimumDistance{Float64}(true, 18, 391, 0.014114699969628301)
+ ⋮
+ MinimumDistance{Float64}(true, 99993, 289, 0.016089848937890512)</code></pre><p><strong>Two-sets: computing all minimum distances among molecules</strong></p><p>If the number of molecules of both sets are provided with the <code>xn_atoms_per_molecule</code> and <code>yn_atoms_per_molecule</code> keywords, both sets are split into molecules, and all minimum distances are computed. For each molecule of each set,  the minimimum distance to any other molecule of the other set is returned. The output is a tuple of lists.</p><pre><code class="language-julia-repl hljs">julia&gt; lists = minimum_distances(
+           xpositions = rand(SVector{3,Float64},10^5), 
+           ypositions = rand(SVector{3,Float64},10^3),
+           unitcell=[1,1,1], 
+           cutoff = 0.1, 
+           xn_atoms_per_molecule=10,
+           yn_atoms_per_molecule=100
+       );
+
+julia&gt; lists[1]
+10000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 10, 471, 0.03211876310646438)
+ MinimumDistance{Float64}(true, 13, 113, 0.0364141004391549)
+ ⋮
+ MinimumDistance{Float64}(true, 99992, 673, 0.0345818388567913)
+
+julia&gt; lists[2]
+10-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 81, 754, 0.002292544732548094)
+ MinimumDistance{Float64}(true, 156, 17208, 0.0018147268509811352)
+ ⋮
+ MinimumDistance{Float64}(true, 944, 98048, 0.002902338025311851)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L313-L425">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.within_cutoff-Tuple{MinimumDistance}" href="#MolSimToolkit.MolecularMinimumDistances.within_cutoff-Tuple{MinimumDistance}"><code>MolSimToolkit.MolecularMinimumDistances.within_cutoff</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">within_cutoff(md::MinimumDistance) = md.within_cutoff</code></pre><p>Returns <code>true</code> if the distance is within the cutoff, and <code>false</code> otherwise.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L70-L75">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.distance-Tuple{MinimumDistance}" href="#PDBTools.distance-Tuple{MinimumDistance}"><code>PDBTools.distance</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">distance(md::MinimumDistance) = md.d</code></pre><p>Returns the distance between the atoms of the pair.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L79-L84">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.AllPairs-Union{Tuple{}, Tuple{F2}, Tuple{F1}} where {F1&lt;:Union{Nothing, Function}, F2&lt;:Union{Nothing, Function}}" href="#MolSimToolkit.MolecularMinimumDistances.AllPairs-Union{Tuple{}, Tuple{F2}, Tuple{F1}} where {F1&lt;:Union{Nothing, Function}, F2&lt;:Union{Nothing, Function}}"><code>MolSimToolkit.MolecularMinimumDistances.AllPairs</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">AllPairs(;
+    xpositions::AbstractVector{&lt;:AbstractVector{&lt;:Real}},
+    ypositions::AbstractVector{&lt;:AbstractVector{&lt;:Real}},
+    cutoff::Real,
+    unitcell::AbstractVecOrMat,
+    xn_atoms_per_molecule::Integer,
+    yn_atoms_per_molecule::Integer,
+    parallel::Bool=true
+)</code></pre><p>Initializes a particle system for the calculation of minimum distances between one molecule and a set of other molecules. Returns a list  minimum distances (<code>MinimumDistance</code> type), containing for each molecule of the set the information about the closest distance to the reference molecule.</p><p>Instead of the number of atoms per molecule, the user can also provide a  more general <code>xmol_indices</code> and/or <code>ymol_indices</code> functions,  which, for each atomic index, returns the corresponding molecular index (which is <code>mol_indices(i) = (i-1)%n + 1</code> where <code>n</code> is the number of atoms per molecule if all molecules have the same number of atoms and are continously stored in the array of positions). </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, StaticArrays
+
+julia&gt; sys = AllPairs(
+           xpositions=rand(SVector{3,Float64},10^5), # &quot;solvent&quot; (set of molecules)
+           ypositions=rand(SVector{3,Float64},1000), # &quot;solute&quot; (target structure)
+           cutoff=0.1,
+           unitcell=[1,1,1],
+           xn_atoms_per_molecule=5, # of the &quot;solvent&quot;
+           yn_atoms_per_molecule=10 # of the &quot;solvent&quot;
+       )
+AllPairs system with:
+
+Number of atoms of first set: 100000
+Number of molecules in first set: 20000
+
+Number of atoms of second set: 1000
+Number of molecules in second set: 100
+
+Cutoff: 0.1
+unitcell: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+
+julia&gt; minimum_distances!(sys)[1]
+20000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 1, 859, 0.037219109441123784)
+ MinimumDistance{Float64}(true, 10, 117, 0.042183794688796634)
+ ⋮
+ MinimumDistance{Float64}(true, 99996, 168, 0.014269620784984633)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/AllPairs.jl#L23-L79">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.CrossPairs-Union{Tuple{}, Tuple{F1}} where F1&lt;:Union{Nothing, Function}" href="#MolSimToolkit.MolecularMinimumDistances.CrossPairs-Union{Tuple{}, Tuple{F1}} where F1&lt;:Union{Nothing, Function}"><code>MolSimToolkit.MolecularMinimumDistances.CrossPairs</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">CrossPairs(;
+    xpositions::AbstractVector{&lt;:AbstractVector{&lt;:Real}},
+    ypositions::AbstractVector{&lt;:AbstractVector{&lt;:Real}},
+    cutoff::Real,
+    unitcell::AbstractVecOrMat,
+    xn_atoms_per_molecule::Integer,
+    parallel::Bool=true
+)</code></pre><p>Initializes a particle system for the calculation of minimum distances between one molecule and a set of other molecules. Returns a list  minimum distances (<code>MinimumDistance</code> type), containing for each molecule of the set the information about the closest distance to the reference molecule.</p><p>Instead of the number of atoms per molecule, the user can also provide a  more general <code>mol_indices</code> function, which, for each atomic index, returns the  corresponding molecular index (which is <code>mol_indices(i) = (i-1)%n + 1</code> where <code>n</code> is the number of atoms per molecule if all molecules have the same number of atoms and are continously stored in the array of positions). </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, StaticArrays
+
+julia&gt; sys = CrossPairs(
+           xpositions=rand(SVector{3,Float64},10^5), # &quot;solvent&quot; (set of molecules)
+           ypositions=rand(SVector{3,Float64},1000), # &quot;solute&quot; (target structure)
+           cutoff=0.1,
+           unitcell=[1,1,1],
+           xn_atoms_per_molecule=5 # of the &quot;solvent&quot;
+       )
+CrossPairs system with:
+
+Number of atoms of set: 100000
+Number of atoms of target structure: 1000
+Cutoff: 0.1
+unitcell: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+Number of molecules in set: 20000
+
+julia&gt; minimum_distances!(sys)
+20000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 1, 859, 0.037219109441123784)
+ MinimumDistance{Float64}(true, 10, 117, 0.042183794688796634)
+ ⋮
+ MinimumDistance{Float64}(true, 99996, 168, 0.014269620784984633)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/CrossPairs.jl#L20-L71">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.MinimumDistance" href="#MolSimToolkit.MolecularMinimumDistances.MinimumDistance"><code>MolSimToolkit.MolecularMinimumDistances.MinimumDistance</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MinimumDistance{T}</code></pre><p>The lists of minimum-distances are stored in arrays of type <code>Vector{MinimumDistance{T}}</code>. The index of this vector corresponds to the index of the molecule in the original array.</p><p><code>MinimumDistance{T}</code> is a simple structure that contains four fields: a boolean marker indicating if the distance is within the cutoff, the indices <code>i</code> and <code>j</code> of the atoms of the  molecules that are closer to each other, and the distance <code>d</code>, with type <code>T</code>, which is the same as that of the coordinates of the input vectors of coordinates. The best way to access the information of a <code>MinimumDistance</code> element is through the getter functions <code>within_cutoff</code>, <code>distance</code>, <code>iatom</code>, and <code>jatom</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; md = MinimumDistance{Float32}(true, 2, 5, 1.f0)
+MinimumDistance{Float32}(true, 2, 5, 1.0f0)
+
+julia&gt; iatom(md)
+2
+
+julia&gt; jatom(md)
+5
+
+julia&gt; distance(md)
+1.0f0
+
+julia&gt; within_cutoff(md)
+true</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/MolecularMinimumDistances.jl#L18-L50">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MolSimToolkit.MolecularMinimumDistances.SelfPairs-Union{Tuple{}, Tuple{F1}, Tuple{T}} where {T&lt;:Real, F1&lt;:Union{Nothing, Function}}" href="#MolSimToolkit.MolecularMinimumDistances.SelfPairs-Union{Tuple{}, Tuple{F1}, Tuple{T}} where {T&lt;:Real, F1&lt;:Union{Nothing, Function}}"><code>MolSimToolkit.MolecularMinimumDistances.SelfPairs</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">SelfPairs(;
+    xpositions::AbstractVector{&lt;:AbstractVector{&lt;:Real}},
+    cutoff::Real,
+    unitcell::AbstractVecOrMat,
+    xn_atoms_per_molecule::Integer,
+    parallel::Bool=true
+) where T&lt;:Real</code></pre><p>Initializes a particle system for the calculation of minimum distances within a single set of molecules. The shortest distance of each molecule to any other molecule of the same set is computed.</p><p>Instead of the number of atoms per molecule, the user can also provide a  more general <code>mol_indices</code> function, which, for each atomic index, returns the  corresponding molecular index (which is <code>mol_indices(i) = (i-1)%n + 1</code> where <code>n</code> is the number of atoms per molecule if all molecules have the same number of atoms and are continously stored in the array of positions). </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MolSimToolkit, StaticArrays
+
+julia&gt; sys = SelfPairs(
+           xpositions=rand(SVector{3,Float64},10^5),
+           cutoff=0.1,
+           unitcell=[1,1,1],
+           xn_atoms_per_molecule=5
+       )
+SelfPairs system with:
+
+Number of atoms: 100000
+Cutoff: 0.1
+unitcell: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+Number of molecules: 20000
+
+julia&gt; minimum_distances!(sys)
+20000-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 4, 24930, 0.008039482961077074)
+ MinimumDistance{Float64}(true, 6, 74055, 0.0049818659155905255)
+ ⋮
+ MinimumDistance{Float64}(true, 99999, 75403, 0.0025051670801269433)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/MolSimToolkit.jl/blob/b49812907e9e85e0960365c2e40739ae2358f982/src/MolecularMinimumDistances/SelfPairs.jl#L18-L64">source</a></section></article><h2 id="Details-of-the-illustration"><a class="docs-heading-anchor" href="#Details-of-the-illustration">Details of the illustration</a><a id="Details-of-the-illustration-1"></a><a class="docs-heading-anchor-permalink" href="#Details-of-the-illustration" title="Permalink"></a></h2><p>The initial illustration here consists of a toy solute-solvent example, where the solute is an approximately hexagonal molecule, and the solvent is composed by 40 diatomic molecules. The toy system is built as follows:</p><pre><code class="language-julia hljs">using MolecularMinimumDistances, StaticArrays
+# x will contain the &quot;solvent&quot;, composed by 40 diatomic molecules
+T = SVector{2,Float64}
+x = T[]
+cmin = T(-20,-20)
+for i in 1:40
+    v = cmin .+ 40*rand(T)
+    push!(x, v)
+    theta = 2pi*rand()
+    push!(x, v .+ T(sin(theta),cos(theta)))
+end
+# y will contain the &quot;solute&quot;, composed by an approximate hexagonal molecule
+y = [ T(1,1), T(1,-1), T(0,-1.5), T(-1,-1), T(-1,1), T(0,1.5) ]</code></pre><p>Next, we compute the minimum distances between each molecule of <code>x</code> (the solvent) and the solute. In the input we need to specify the number of atoms of each molecule in <code>x</code>, and the cutoff up to which we want the distances to be computed:</p><pre><code class="language-julia-repl hljs">julia&gt; list = minimum_distances(
+           xpositions=x,
+           ypositions=y,
+           xn_atoms_per_molecule=2,
+           unitcell=[40.0, 40.0],
+           cutoff=10.0
+       )
+40-element Vector{MinimumDistance{Float64}}:
+ MinimumDistance{Float64}(true, 2, 3, 1.0764931248364737)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ MinimumDistance{Float64}(false, 0, 0, Inf)
+ ⋮
+ MinimumDistance{Float64}(true, 74, 5, 7.899981412729262)
+ MinimumDistance{Float64}(false, 0, 0, Inf)</code></pre><p>The output is a list of <code>MinimumDistance</code> data structures, one for each molecule in <code>x</code>. The <code>true</code> indicates that a distance smaller than the cutoff was found, and for these the indices of the atoms in <code>x</code> and <code>y</code> associated are reported, along with the distance between them.</p><p>In this example, from the 40 molecules of <code>x</code>, eleven had atoms closer than the cutoff to some atom of <code>y</code>:</p><pre><code class="language-julia-repl hljs">julia&gt; count(x -&gt; x.within_cutoff, list)
+11</code></pre><p>We have an auxiliary function to plot the result, in this case where the &quot;atoms&quot; are bi-dimensional:</p><pre><code class="language-julia hljs">using Plots
+import MolecularMinimumDistances: plot_md!
+p = plot(lims=(-20,20),framestyle=:box,grid=false,aspect_ratio=1)
+plot_md!(p, x, 2, y, 6, list, y_cycle=true)</code></pre><p>will produce the illustration plot above, in which the nearest point between the two sets is identified.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Solvation_and_interactions/">« Coordination numbers</a><a class="docs-footer-nextpage" href="../intermittent_correlation/">Intermittent correlation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Saturday 13 September 2025 13:44">Saturday 13 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
