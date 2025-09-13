@@ -66,7 +66,7 @@ function mvalue(;
     pdbname, sasas, type=1
 )
     protein = read_pdb(pdbname, "protein")
-    residue_types = unique(resname.(protein))
+    residue_types = unique(threeletter.(resname.(protein)))
     DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_types
         DeltaG_per_residue[rname] = (bb=(last(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:bb][type] / 100),
