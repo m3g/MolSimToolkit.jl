@@ -12,6 +12,10 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.8-DEV
 -------------
+- ![FEATURE][badge-experimental] Rename `gmx_sasa` to `gmx_delta_sasa_per_restype` for clarity (and also the currently internal `gmx_sasa_single` to `gmx_sasa_per_restype`).
+- ![FEATURE][badge-experimental] Support providing the `gmx` executable to `gmx_delta_sasa_per_restype` function as a keyword argument.
+- ![BUGFIX][badge-bugfix] On `mvalue`, run over residue names and convert to types internally, because the `sasas` data will be based on residue names.
+
 
 
 Version 1.29.7
@@ -24,7 +28,7 @@ Version 1.29.6
 
 Version 1.29.5
 -------------
-- ![INFO][badge-experimental] renamed `run_gmx_sasa` to `gmx_sasa`.
+- ![INFO][badge-experimental] renamed `run_gmx_delta_sasa_per_restype` to `gmx_delta_sasa_per_restype`.
 - ![INFO][badge-info] documentation updated for mvalue.
 
 Version 1.29.4
