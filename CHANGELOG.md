@@ -12,6 +12,8 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.8-DEV
 -------------
+- ![BUGFIX][badge-bugfix] On `mvalue`, run over residue names and convert to types internally, because the `sasas` data will be based on residue names.
+
 
 
 Version 1.29.7

@@ -66,11 +66,12 @@ function mvalue(;
     pdbname, sasas, type=1
 )
     protein = read_pdb(pdbname, "protein")
-    residue_types = unique(threeletter.(resname.(protein)))
+    residue_names = unique(resname.(protein))
     DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
-    for rname in residue_types
-        DeltaG_per_residue[rname] = (bb=(last(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:bb][type] / 100),
-            sc=(first(tfe_asa(model, cosolvent, rname))) * (sasas[rname][:sc][type] / 100))
+    for rname in residue_names
+        rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
+        DeltaG_per_residue[rtype] = (bb=(last(tfe_asa(model, cosolvent, rtype))) * (sasas[rname][:bb][type] / 100),
+            sc=(first(tfe_asa(model, cosolvent, rtype))) * (sasas[rname][:sc][type] / 100))
     end
     DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue))
     DeltaG_SC = sum(getfield(DeltaG_per_residue[key], :sc) for key in keys(DeltaG_per_residue))
