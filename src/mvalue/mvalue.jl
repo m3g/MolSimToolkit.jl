@@ -191,7 +191,8 @@ Calculates the change in solvent accessible surface area (SASA) upon denaturatio
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
 
 !!! note
-    This function requires GROMACS (`gmx sasa` executable) to be installed and accessible from the command line. 
+    This function requires GROMACS (`gmx sasa` executable) to be installed and accessible from the command line.
+    The path to the `gmx` executable can be provided with the `gmx` keyword.
 
 # Arguments
 
@@ -228,7 +229,7 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     # Check if the gmx executable exists
     if isnothing(Sys.which(gmx))
         throw(ArgumentError("""\n
-            Could not find GROMACS `$gmx` executable. Add it to the path or provide it explicitly with the `gmx` keyword argument.
+            Could not find GROMACS `$gmx` executable. Add the `gmx` command to the path or provide it explicitly with the `gmx` keyword argument.
 
         """))
     end
@@ -255,16 +256,16 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     if length(inds_sidechain) == 0 # special case for GLY
         sasa_sc = 0.0
         try
-            run(pipeline(`gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
-            error("Error running gmx sasa for of $resname in $pdbname")
+            error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_bb = read_gmx_delta_sasa_per_restype_values(sasa_file, 1)[1]
     else
         try
-            run(pipeline(`gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
-            error("Error running gmx sasa for of $resname in $pdbname")
+            error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_temp = read_gmx_delta_sasa_per_restype_values(sasa_file, 2)
         sasa_sc, sasa_bb = sasa_temp[1], sasa_temp[2]
