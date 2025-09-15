@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.8-DEV
 -------------
+- ![FEATURE][badge-experimental] Support providing the `gmx` executable to `gmx_sasa` function as a keyword argument.
 - ![BUGFIX][badge-bugfix] On `mvalue`, run over residue names and convert to types internally, because the `sasas` data will be based on residue names.
 
 

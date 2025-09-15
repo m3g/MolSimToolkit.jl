@@ -185,7 +185,7 @@ function parse_mvalue_server_sasa(string::AbstractString)
 end
 
 """
-    gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString)
+    gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString, gmx="gmx")
 
 Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
@@ -197,6 +197,7 @@ using GROMACS. Returns a dictionary that can be directly used as input to the `m
 
 - `native_pdb::AbstractString`: Path to the PDB file of the native protein structure.
 - `desnat_pdb::AbstractString`: Path to the PDB file of the denatured protein structure.
+- `gmx`: the path to the `gmx` GROMACS exectuable (by default it expects `gmx` to be on the path).
 
 # Returns
 
@@ -208,12 +209,13 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 function gmx_sasa(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
+    gmx="gmx",
 )
     sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
-        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_single(native_pdb, rname) # returns in nm^2
-        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_single(desnat_pdb, rname)
+        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_single(native_pdb, rname; gmx) # returns in nm^2
+        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_single(desnat_pdb, rname; gmx)
         sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
@@ -222,7 +224,14 @@ end
 #
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
-function gmx_sasa_single(pdbname, resname)
+function gmx_sasa_single(pdbname, resname; gmx="gmx")
+    # Check if the gmx executable exists
+    if isnothing(Sys.which(gmx))
+        throw(ArgumentError("""\n
+            Could not find GROMACS `$gmx` executable. Add it to the path or provide it explicitly with the `gmx` keyword argument.
+
+        """))
+    end
     index_file = tempname() * ".ndx"
     sasa_file = tempname() * ".xvg"
     p = read_pdb(pdbname, "protein and not element H")
