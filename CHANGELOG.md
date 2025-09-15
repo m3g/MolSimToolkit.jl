@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.9-DEV
 -------------
+- ![BUGFIX][badge-bugfix] Fix call to custom `gmx` executable in `gmx_sasa_per_restype`. 
 
 Version 1.29.8
 -------------

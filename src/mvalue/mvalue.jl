@@ -255,16 +255,16 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     if length(inds_sidechain) == 0 # special case for GLY
         sasa_sc = 0.0
         try
-            run(pipeline(`gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
-            error("Error running gmx sasa for of $resname in $pdbname")
+            error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_bb = read_gmx_delta_sasa_per_restype_values(sasa_file, 1)[1]
     else
         try
-            run(pipeline(`gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
-            error("Error running gmx sasa for of $resname in $pdbname")
+            error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_temp = read_gmx_delta_sasa_per_restype_values(sasa_file, 2)
         sasa_sc, sasa_bb = sasa_temp[1], sasa_temp[2]
