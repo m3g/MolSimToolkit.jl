@@ -191,7 +191,8 @@ Calculates the change in solvent accessible surface area (SASA) upon denaturatio
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
 
 !!! note
-    This function requires GROMACS (`gmx sasa` executable) to be installed and accessible from the command line. 
+    This function requires GROMACS (`gmx sasa` executable) to be installed and accessible from the command line.
+    The path to the `gmx` executable can be provided with the `gmx` keyword.
 
 # Arguments
 
