@@ -229,7 +229,7 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     # Check if the gmx executable exists
     if isnothing(Sys.which(gmx))
         throw(ArgumentError("""\n
-            Could not find GROMACS `$gmx` executable. Add it to the path or provide it explicitly with the `gmx` keyword argument.
+            Could not find GROMACS `$gmx` executable. Add the `gmx` command to the path or provide it explicitly with the `gmx` keyword argument.
 
         """))
     end
