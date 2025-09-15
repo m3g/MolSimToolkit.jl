@@ -48,7 +48,7 @@ polymer (`poly_h.pdb`), and *one molecule* of water:
 # Directory of test files
 test_dir = MolSimToolkit.PackmolInputCreator.PackmolInputCreatorDirectory*"/test"
 # Construction of system data structure
-system = SolutionBoxUSC(
+system = SolutionBoxUS(
     solute_pdbfile = "$test_dir/data/poly_h.pdb",
     solvent_pdbfile = "$test_dir/data/water.pdb",
     density = 1.0,
