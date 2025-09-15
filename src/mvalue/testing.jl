@@ -70,7 +70,7 @@
     end
     
     if !isnothing(gmx)
-        sasa_1MJC = gmx_sasa(;
+        sasa_1MJC = gmx_delta_sasa_per_restype(;
             native_pdb=joinpath(dir,"1MJC_native.pdb"),
             desnat_pdb=joinpath(dir,"1MJC_straight.pdb"),
         )
@@ -86,7 +86,7 @@
     @test isapprox(r_2RN2.sc, references["2RN2"][3]; rtol=1e-1)
     
     if !isnothing(gmx)
-        sasa_2RN2 = gmx_sasa(;
+        sasa_2RN2 = gmx_delta_sasa_per_restype(;
             native_pdb=joinpath(dir,"2RN2_native.pdb"),
             desnat_pdb=joinpath(dir,"2RN2_straight.pdb"),
         )
@@ -132,13 +132,13 @@
     end
 
     # gmx keyword argument tests
-    @test_throws ArgumentError gmx_sasa(;
+    @test_throws ArgumentError gmx_delta_sasa_per_restype(;
             native_pdb=joinpath(dir,"1MJC_native.pdb"),
             desnat_pdb=joinpath(dir,"1MJC_straight.pdb"),
             gmx="/tmp/gmx_fake",
         )
     if !isnothing(gmx)
-        @test length(gmx_sasa(;
+        @test length(gmx_delta_sasa_per_restype(;
                 native_pdb=joinpath(dir,"2RN2_native.pdb"),
                 desnat_pdb=joinpath(dir,"2RN2_straight.pdb"),
                 gmx=gmx,

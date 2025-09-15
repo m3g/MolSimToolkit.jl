@@ -1,6 +1,6 @@
 using PDBTools
 
-export mvalue, parse_mvalue_server_sasa, gmx_sasa
+export mvalue, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype
 export MoeserHorinek, AutonBolen
 #export sasa_desnat_average
 
@@ -25,7 +25,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
-    - Alternatively, the SASA values can be calculated using GROMACS with the `gmx_sasa` function defined in this module.
+    - Alternatively, the SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.
 
 - `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
     according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
@@ -49,7 +49,7 @@ sasas_from_server=parse_mvalue_server_sasa(server_output)
 mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname="protein.pdb", sasas=sasas_from_server, type=2)
 
 # Using SASA values calculated with GROMACS
-sasas_gmx=gmx_sasa(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
+sasas_gmx=gmx_delta_sasa_per_restype(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
 mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_gmx, type=1)
 ```
 
@@ -116,13 +116,13 @@ function tfe_asa(
 end
 
 #=
-    read_gmx_sasa_values(filename::String, n)
+    read_gmx_delta_sasa_per_restype_values(filename::String, n)
 
 Reads the output of `gmx sasa` and returns the SASA values.
 `n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
 
 =#
-function read_gmx_sasa_values(filename::String, n)
+function read_gmx_delta_sasa_per_restype_values(filename::String, n)
     local sasa_values
     open(filename, "r") do io
         for line in eachline(io)
@@ -185,7 +185,7 @@ function parse_mvalue_server_sasa(string::AbstractString)
 end
 
 """
-    gmx_sasa(; native_pdb::AbstractString, desnat_pdb::AbstractString, gmx="gmx")
+    gmx_delta_sasa_per_restype(; native_pdb::AbstractString, desnat_pdb::AbstractString, gmx="gmx")
 
 Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
@@ -206,7 +206,7 @@ is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` 
 Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
 
 """
-function gmx_sasa(;
+function gmx_delta_sasa_per_restype(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
     gmx="gmx",
@@ -214,8 +214,8 @@ function gmx_sasa(;
     sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
-        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_single(native_pdb, rname; gmx) # returns in nm^2
-        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_single(desnat_pdb, rname; gmx)
+        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_per_restype(native_pdb, rname; gmx) # returns in nm^2
+        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_per_restype(desnat_pdb, rname; gmx)
         sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
@@ -224,7 +224,7 @@ end
 #
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
-function gmx_sasa_single(pdbname, resname; gmx="gmx")
+function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     # Check if the gmx executable exists
     if isnothing(Sys.which(gmx))
         throw(ArgumentError("""\n
@@ -259,14 +259,14 @@ function gmx_sasa_single(pdbname, resname; gmx="gmx")
         catch
             error("Error running gmx sasa for of $resname in $pdbname")
         end
-        sasa_bb = read_gmx_sasa_values(sasa_file, 1)[1]
+        sasa_bb = read_gmx_delta_sasa_per_restype_values(sasa_file, 1)[1]
     else
         try
             run(pipeline(`gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
             error("Error running gmx sasa for of $resname in $pdbname")
         end
-        sasa_temp = read_gmx_sasa_values(sasa_file, 2)
+        sasa_temp = read_gmx_delta_sasa_per_restype_values(sasa_file, 2)
         sasa_sc, sasa_bb = sasa_temp[1], sasa_temp[2]
     end
     rm(sasa_file, force=true)
