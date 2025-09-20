@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.10-DEV
 -------------
+- ![INFO][badge-info] Support EasyFit 0.7.1+
 
 Version 1.29.9
 -------------
