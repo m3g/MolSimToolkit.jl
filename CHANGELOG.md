@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.10-DEV
+Version 1.29.10
 -------------
 - ![INFO][badge-info] Support EasyFit 0.7.1+
 
