@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.11
+Version 1.29.11-DEV
 -------------
 - ![FEATURE][badge-experimental] Implement `delta_sasa_per_restype` to compute SASAs using PDBTools.
 - ![INFO][badge-info] Require PDBTools 3.5.1
