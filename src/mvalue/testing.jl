@@ -1,4 +1,5 @@
 @testitem "mvalue" begin
+    import PDBTools
 
     sasa_1MJC_clean = parse_mvalue_server_sasa(
     """
@@ -74,8 +75,8 @@
     
     # with PDBTools.sasa
     sasa_1MJC_julia = delta_sasa_per_restype(;
-        native=read_pdb(joinpath(dir,"1MJC_native.pdb"), "protein"),
-        desnat=read_pdb(joinpath(dir,"1MJC_straight.pdb"), "protein"),
+        native=PDBTools.read_pdb(joinpath(dir,"1MJC_native.pdb"), "protein"),
+        desnat=PDBTools.read_pdb(joinpath(dir,"1MJC_straight.pdb"), "protein"),
     )
     r_1MJC = mvalue(;pdbname=joinpath(dir,"1MJC_native.pdb"), sasas=sasa_1MJC_julia)
     @test isapprox(r_1MJC.tot, -0.941; rtol=1e-1)
@@ -102,8 +103,8 @@
     @test isapprox(r_2RN2.sc, references["2RN2"][3]; rtol=1e-1)
 
     sasa_2RN2_julia = delta_sasa_per_restype(;
-        native=read_pdb(joinpath(dir,"2RN2_native.pdb"), "protein"),
-        desnat=read_pdb(joinpath(dir,"2RN2_straight.pdb"), "protein"),
+        native=PDBTools.read_pdb(joinpath(dir,"2RN2_native.pdb"), "protein"),
+        desnat=PDBTools.read_pdb(joinpath(dir,"2RN2_straight.pdb"), "protein"),
     )
     r_2RN2 = mvalue(;pdbname=joinpath(dir,"2RN2_native.pdb"), sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -2.41; rtol=1e-1)
