@@ -10,8 +10,9 @@ CollapsedDocStrings = true
 
 ```@docs
 mvalue
-gmx_delta_sasa_per_restype
+delta_sasa_per_restype
 parse_mvalue_server_sasa
+gmx_delta_sasa_per_restype
 ```
 
 
