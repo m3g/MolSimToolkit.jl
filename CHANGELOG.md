@@ -10,21 +10,24 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 1.29.13-DEV
+---------------
+
 Version 1.29.12
--------------
+---------------
 - ![FEATURE][badge-experimental] Add backbone and sidechain selection functions, `n_dots` and `ignore_hydrogen` as optional parameters to `[gmx_]delta_sasa_per_residue` functions.
 
 Version 1.29.11
--------------
+---------------
 - ![FEATURE][badge-experimental] Implement `delta_sasa_per_restype` to compute SASAs using PDBTools.
 - ![INFO][badge-info] Requires PDBTools 3.5.5
 
 Version 1.29.10
--------------
+---------------
 - ![INFO][badge-info] Support EasyFit 0.7.1+
 
 Version 1.29.9
--------------
+--------------
 - ![BUGFIX][badge-bugfix] Fix call to custom `gmx` executable in `gmx_sasa_per_restype`. 
 
 Version 1.29.8
