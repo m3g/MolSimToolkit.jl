@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.12-DEV
 -------------
+- ![FEATURE][badge-experimental] Add backbone and sidechain selection functions, `n_dots` and `ignore_hydrogen` as optional parameters to `[gmx_]delta_sasa_per_residue` functions.
 
 Version 1.29.11
 -------------

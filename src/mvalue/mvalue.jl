@@ -120,24 +120,59 @@ function tfe_asa(
     return sc_contribution / 10, bb_contribution / 10
 end
 
-#=
-    read_gmx_delta_sasa_per_restype_values(filename::String, n)
+"""
+    delta_sasa_per_restype(; 
+        native::AbstractVector{<:PDBTools.Atom}, 
+        desnat::AbstractVector{<:PDBTools.Atom}
+    )
 
-Reads the output of `gmx sasa` and returns the SASA values.
-`n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
+Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
+using PDBTools. Returns a dictionary that can be directly used as input to the `mvalue` function.
 
-=#
-function read_gmx_delta_sasa_per_restype_values(filename::String, n)
-    local sasa_values
-    open(filename, "r") do io
-        for line in eachline(io)
-            if startswith(line, r"@|#")
-                continue
-            end
-            sasa_values = parse.(Float64, split(line)[3:2+n])
+# Arguments
+
+- `native`: Vector of PDBTools.Atom objects for the native structure.
+- `desnat`: Vector of PDBTools.Atom objects for the denatured structure.
+
+# Returns
+
+A dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value
+is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values.
+Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
+
+# Optional arguments
+
+- `n_dots::Int=500`: Sets the precision of the SASA calculation (greater is better).
+- `backbone::Function = at -> name(at) in ("N", "CA", "C", "O")`: Define what is a backbone atom.
+- `sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O"))`: Define what is a sidechain atom.
+- `ignore_hydrogen::Bool = true`: By default, ignore all Hydrogen atoms of the structure.
+
+"""
+function delta_sasa_per_restype(;
+    native::AbstractVector{<:PDBTools.Atom},
+    desnat::AbstractVector{<:PDBTools.Atom},
+    n_dots::Int=500,
+    backbone::Function = at -> name(at) in ("N", "CA", "C", "O"),
+    sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O")),
+    ignore_hydrogen::Bool = true,
+)
+    keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
+    native_atomic_sasa = PDBTools.atomic_sasa(select(native, keepH); n_dots)
+    desnat_atomic_sasa = PDBTools.atomic_sasa(select(desnat, keepH); n_dots)
+    sasas = Dict{String,Dict{Symbol,Float32}}()
+    for rname in unique(resname.(eachresidue(native)))
+        bb_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && backbone(at))
+        bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> resname(at) == rname && backbone(at))
+        if !ignore_hydrogen || rname != "GLY"
+            sc_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && sidechain(at))
+            sc_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> resname(at) == rname && sidechain(at))
+        else
+            sc_native = 0.0
+            sc_desnat = 0.0
         end
+        sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
     end
-    return sasa_values
+    return sasas # Å^2  
 end
 
 """
@@ -189,8 +224,28 @@ function parse_mvalue_server_sasa(string::AbstractString)
     return sasa
 end
 
+#=
+    read_gmx_delta_sasa_per_restype_values(filename::String, n)
+
+Reads the output of `gmx sasa` and returns the SASA values.
+`n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
+
+=#
+function read_gmx_delta_sasa_per_restype_values(filename::String, n)
+    local sasa_values
+    open(filename, "r") do io
+        for line in eachline(io)
+            if startswith(line, r"@|#")
+                continue
+            end
+            sasa_values = parse.(Float64, split(line)[3:2+n])
+        end
+    end
+    return sasa_values
+end
+
 """
-    gmx_delta_sasa_per_restype(; native_pdb::AbstractString, desnat_pdb::AbstractString, gmx="gmx")
+    gmx_delta_sasa_per_restype(; native_pdb::AbstractString, desnat_pdb::AbstractString)
 
 Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
 using GROMACS. Returns a dictionary that can be directly used as input to the `mvalue` function.
@@ -203,7 +258,14 @@ using GROMACS. Returns a dictionary that can be directly used as input to the `m
 
 - `native_pdb::AbstractString`: Path to the PDB file of the native protein structure.
 - `desnat_pdb::AbstractString`: Path to the PDB file of the denatured protein structure.
+
+# Optional arguments 
+
 - `gmx`: the path to the `gmx` GROMACS exectuable (by default it expects `gmx` to be on the path).
+- `n_dots::Int`: sets the precision of the SASA grid (greater is better).
+- `backbone::Function = at -> name(at) in ("N", "CA", "C", "O")`: Define what is a backbone atom.
+- `sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O"))`: Define what is a sidechain atom.
+- `ignore_hydrogen::Bool=true`: By default, ignore all hydrogen atoms.
 
 # Returns
 
@@ -215,60 +277,34 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 function gmx_delta_sasa_per_restype(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
+    n_dots::Int=500,
+    ignore_hydrogen::Bool=true,
     gmx="gmx",
+    backbone::Function = at -> name(at) in ("N", "CA", "C", "O"),
+    sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O")),
 )
     sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
-        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_per_restype(native_pdb, rname; gmx) # returns in nm^2
-        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_per_restype(desnat_pdb, rname; gmx)
+        sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_per_restype(native_pdb, rname; gmx, n_dots, backbone, sidechain, ignore_hydrogen) # returns in nm^2
+        sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_per_restype(desnat_pdb, rname; gmx, n_dots, backbone, sidechain, ignore_hydrogen)
         sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
 end
 
-"""
-    delta_sasa_per_restype(; 
-        native::AbstractVector{<:PDBTools.Atom}, 
-        desnat::AbstractVector{<:PDBTools.Atom}
-    )
-
-Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
-using PDBTools. Returns a dictionary that can be directly used as input to the `mvalue` function.
-
-# Arguments
-
-- `native`: Vector of PDBTools.Atom objects for the native structure.
-- `desnat`: Vector of PDBTools.Atom objects for the denatured structure.
-
-# Returns
-
-A dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value
-is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values.
-Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
-
-"""
-function delta_sasa_per_restype(;
-    native::AbstractVector{<:PDBTools.Atom},
-    desnat::AbstractVector{<:PDBTools.Atom},
-)
-    native_atomic_sasa = PDBTools.atomic_sasa(native)
-    desnat_atomic_sasa = PDBTools.atomic_sasa(desnat)
-    sasas = Dict{String,Dict{Symbol,Float32}}()
-    for rname in unique(resname.(eachresidue(native)))
-        bb_native = PDBTools.sasa(native_atomic_sasa, at -> isbackbone(at) && resname(at) == rname)
-        bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> isbackbone(at) && resname(at) == rname)
-        sc_native = PDBTools.sasa(native_atomic_sasa, at -> issidechain(at) && resname(at) == rname)
-        sc_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> issidechain(at) && resname(at) == rname)
-        sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
-    end
-    return sasas # Å^2  
-end
-
 #
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
-function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
+function gmx_sasa_per_restype(
+    pdbname, rname; 
+    gmx="gmx", 
+    n_dots::Int=500,
+    backbone::Function,
+    sidechain::Function,
+    ignore_hydrogen::Bool=true,
+)
+    keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
     # Check if the gmx executable exists
     if isnothing(Sys.which(gmx))
         throw(ArgumentError("""\n
@@ -278,10 +314,10 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     end
     index_file = tempname() * ".ndx"
     sasa_file = tempname() * ".xvg"
-    p = read_pdb(pdbname, "protein and not element H")
+    p = read_pdb(pdbname, at -> isprotein(at) && keepH(at))
     inds_protein = index.(p)
-    inds_sidechain = index.(select(p, "resname $resname and not (name N CA C O)"))
-    inds_backbone = index.(select(p, "resname $resname and name N CA C O"))
+    inds_sidechain = index.(select(p, at -> resname(at) == rname && sidechain(at)))
+    inds_backbone = index.(select(p, at -> resname(at) == rname && backbone(at)))
     open(index_file, "w") do io
         write(io, "[ SC ]\n")
         for i in inds_sidechain
@@ -299,14 +335,14 @@ function gmx_sasa_per_restype(pdbname, resname; gmx="gmx")
     if length(inds_sidechain) == 0 # special case for GLY
         sasa_sc = 0.0
         try
-            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots $n_dots -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
             error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_bb = read_gmx_delta_sasa_per_restype_values(sasa_file, 1)[1]
     else
         try
-            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots 500 -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots $n_dots -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
             error("Error running $gmx sasa for of $resname in $pdbname")
         end
