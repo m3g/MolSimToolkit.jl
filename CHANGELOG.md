@@ -13,7 +13,7 @@ MolSimToolkit.jl Changelog
 Version 1.29.11-DEV
 -------------
 - ![FEATURE][badge-experimental] Implement `delta_sasa_per_restype` to compute SASAs using PDBTools.
-- ![INFO][badge-info] Require PDBTools 3.5.1
+- ![INFO][badge-info] Requires PDBTools 3.5.1
 
 Version 1.29.10
 -------------
