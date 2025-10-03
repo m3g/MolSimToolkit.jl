@@ -79,9 +79,18 @@
         desnat=PDBTools.read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein"),
     )
     r_1MJC = mvalue(; pdbname=joinpath(dir, "1MJC_native.pdb"), sasas=sasa_1MJC_julia)
-    @test isapprox(r_1MJC.tot, -0.937; rtol=1e-1)
+    @test isapprox(r_1MJC.tot, -1.23; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.772; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.462; rtol=1e-1)
+    sasa_1MJC_julia = delta_sasa_per_restype(;
+        native=PDBTools.read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein"),
+        desnat=PDBTools.read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein"),
+        ignore_hydrogen=false,
+    )
+    r_1MJC = mvalue(; pdbname=joinpath(dir, "1MJC_native.pdb"), sasas=sasa_1MJC_julia)
+    @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
     @test isapprox(r_1MJC.bb, -0.398; rtol=1e-1)
-    @test isapprox(r_1MJC.sc, -0.539; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.621; rtol=1e-1)
 
     if !isnothing(gmx)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
@@ -92,6 +101,15 @@
         @test isapprox(r_1MJC.tot, -1.24; rtol=1e-1)
         @test isapprox(r_1MJC.bb, -0.777; rtol=1e-1)
         @test isapprox(r_1MJC.sc, -0.463; rtol=1e-1)
+        sasa_1MJC = gmx_delta_sasa_per_restype(;
+            native_pdb=joinpath(dir, "1MJC_native.pdb"),
+            desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
+            ignore_hydrogen=false,
+        )
+        r_1MJC = mvalue(; pdbname=joinpath(dir, "1MJC_native.pdb"), sasas=sasa_1MJC)
+        @test isapprox(r_1MJC.tot, -1.01; rtol=1e-1)
+        @test isapprox(r_1MJC.bb, -0.342; rtol=1e-1)
+        @test isapprox(r_1MJC.sc, -0.668; rtol=1e-1)
     end
 
     #
@@ -107,9 +125,18 @@
         desnat=PDBTools.read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein"),
     )
     r_2RN2 = mvalue(; pdbname=joinpath(dir, "2RN2_native.pdb"), sasas=sasa_2RN2_julia)
-    @test isapprox(r_2RN2.tot, -2.41; rtol=1e-1)
+    @test isapprox(r_2RN2.tot, -3.13; rtol=1e-1)
+    @test isapprox(r_2RN2.bb, -1.89; rtol=1e-1)
+    @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
+    sasa_2RN2_julia = delta_sasa_per_restype(;
+        native=PDBTools.read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein"),
+        desnat=PDBTools.read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein"),
+        ignore_hydrogen=false,
+    )
+    r_2RN2 = mvalue(; pdbname=joinpath(dir, "2RN2_native.pdb"), sasas=sasa_2RN2_julia)
+    @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.03; rtol=1e-1)
-    @test isapprox(r_2RN2.sc, -1.39; rtol=1e-1)
+    @test isapprox(r_2RN2.sc, -1.57; rtol=1e-1)
 
     if !isnothing(gmx)
         sasa_2RN2 = gmx_delta_sasa_per_restype(;
@@ -120,6 +147,15 @@
         @test isapprox(r_2RN2.tot, -3.17; rtol=1e-1)
         @test isapprox(r_2RN2.bb, -1.94; rtol=1e-1)
         @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
+        sasa_2RN2 = gmx_delta_sasa_per_restype(;
+            native_pdb=joinpath(dir, "2RN2_native.pdb"),
+            desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
+            ignore_hydrogen=false,
+        )
+        r_2RN2 = mvalue(; pdbname=joinpath(dir, "2RN2_native.pdb"), sasas=sasa_2RN2)
+        @test isapprox(r_2RN2.tot, -2.54; rtol=1e-1)
+        @test isapprox(r_2RN2.bb, -0.88; rtol=1e-1)
+        @test isapprox(r_2RN2.sc, -1.66; rtol=1e-1)
     end
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
