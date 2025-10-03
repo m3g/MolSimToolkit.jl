@@ -133,6 +133,7 @@
         desnat=PDBTools.read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein"),
         ignore_hydrogen=false,
     )
+    r_2RN2 = mvalue(; pdbname=joinpath(dir, "2RN2_native.pdb"), sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.03; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.57; rtol=1e-1)
@@ -151,6 +152,7 @@
             desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
             ignore_hydrogen=false,
         )
+        r_2RN2 = mvalue(; pdbname=joinpath(dir, "2RN2_native.pdb"), sasas=sasa_2RN2)
         @test isapprox(r_2RN2.tot, -2.54; rtol=1e-1)
         @test isapprox(r_2RN2.bb, -0.88; rtol=1e-1)
         @test isapprox(r_2RN2.sc, -1.66; rtol=1e-1)
