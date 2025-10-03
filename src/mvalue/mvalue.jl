@@ -1,6 +1,6 @@
 using PDBTools
 
-export mvalue, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype
+export mvalue, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype
 export MoeserHorinek, AutonBolen
 #export sasa_desnat_average
 
@@ -25,7 +25,8 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
-    - Alternatively, the SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.
+    - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
+    - SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.
 
 - `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
     according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
@@ -47,6 +48,10 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 # Using SASA values from the m-value server
 sasas_from_server=parse_mvalue_server_sasa(server_output)
 mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname="protein.pdb", sasas=sasas_from_server, type=2)
+
+# Using SASA values calculated with PDBTools.jl
+sasas=delta_sasa_per_restype(native=read_pdb("native.pdb"), desnat=read_pdb("desnat.pdb"))
+mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_gmx, type=1)
 
 # Using SASA values calculated with GROMACS
 sasas_gmx=gmx_delta_sasa_per_restype(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
@@ -220,6 +225,44 @@ function gmx_delta_sasa_per_restype(;
         sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
+end
+
+"""
+    delta_sasa_per_restype(; 
+        native::AbstractVector{<:PDBTools.Atom}, 
+        desnat::AbstractVector{<:PDBTools.Atom}
+    )
+
+Calculates the change in solvent accessible surface area (SASA) upon denaturation for each amino acid type
+using PDBTools. Returns a dictionary that can be directly used as input to the `mvalue` function.
+
+# Arguments
+
+- `native`: Vector of PDBTools.Atom objects for the native structure.
+- `desnat`: Vector of PDBTools.Atom objects for the denatured structure.
+
+# Returns
+
+A dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value
+is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values.
+Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
+
+"""
+function delta_sasa_per_restype(;
+    native::AbstractVector{<:PDBTools.Atom},
+    desnat::AbstractVector{<:PDBTools.Atom},
+)
+    native_atomic_sasa = PDBTools.atomic_sasa(native)
+    desnat_atomic_sasa = PDBTools.atomic_sasa(desnat)
+    sasas = Dict{String,Dict{Symbol,Float32}}()
+    for rname in unique(resname.(eachresidue(native)))
+        bb_native = PDBTools.sasa(native_atomic_sasa, at -> isbackbone(at) && resname(at) == rname)
+        bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> isbackbone(at) && resname(at) == rname)
+        sc_native = PDBTools.sasa(native_atomic_sasa, at -> issidechain(at) && resname(at) == rname)
+        sc_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> issidechain(at) && resname(at) == rname)
+        sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
+    end
+    return sasas # Å^2  
 end
 
 #
