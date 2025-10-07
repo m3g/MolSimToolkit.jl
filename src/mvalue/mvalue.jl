@@ -157,8 +157,8 @@ function delta_sasa_per_restype(;
     ignore_hydrogen::Bool = true,
 )
     keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
-    native_atomic_sasa = PDBTools.atomic_sasa(select(native, keepH); n_dots)
-    desnat_atomic_sasa = PDBTools.atomic_sasa(select(desnat, keepH); n_dots)
+    native_atomic_sasa = PDBTools.sasa_particles(select(native, keepH); n_dots)
+    desnat_atomic_sasa = PDBTools.sasa_particles(select(desnat, keepH); n_dots)
     sasas = Dict{String,Dict{Symbol,Float32}}()
     for rname in unique(resname.(eachresidue(native)))
         bb_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && backbone(at))
