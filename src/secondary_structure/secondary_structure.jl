@@ -17,11 +17,9 @@ function _ss_frame!(
     ss_method::F=stride_run
 ) where {F<:Function}
     coordinates = positions(frame)
-    for (iat, at) in pairs(atoms)
+    for at in atoms
         iatom = PDBTools.index(at)
-        atoms[iat].x = coordinates[iatom].x
-        atoms[iat].y = coordinates[iatom].y
-        atoms[iat].z = coordinates[iatom].z
+        set_position!(at, coordinates[iatom])
     end
     # This is very bad: we are writting temporary files twice for each frame
     # one here, one in the ss_method function, to adjust the PDB header
