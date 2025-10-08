@@ -541,11 +541,7 @@ function get_frame(simulation::Simulation, iframe::Integer)
     end
     p = positions(current_frame(simulation))
     ats = atoms(simulation)
-    for iat in eachindex(ats, p)
-        ats[iat].x = p[iat].x
-        ats[iat].y = p[iat].y
-        ats[iat].z = p[iat].z
-    end
+    set_position!.(ats, p)
     return ats
 end
 
