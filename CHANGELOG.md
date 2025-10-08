@@ -15,7 +15,6 @@ Version 1.29.13-DEV
 - ![FEATURE][badge-experimental] Support for PBCs in `delta_sasa_per_residue` with the `unitcell` keyword.
 - ![FEATURE][badge-experimental] Changed interface of `mvalue` functions: the funcions now receive vectors of atoms, and thus the keyword `pdbname`  was renamed to `atoms`. 
 
-
 Version 1.29.12
 ---------------
 - ![FEATURE][badge-experimental] Add backbone and sidechain selection functions, `n_dots` and `ignore_hydrogen` as optional parameters to `[gmx_]delta_sasa_per_residue` functions.

@@ -157,14 +157,14 @@ function delta_sasa_per_restype(;
     native::AbstractVector{<:PDBTools.Atom},
     desnat::AbstractVector{<:PDBTools.Atom},
     n_dots::Int=500,
-    backbone::Function = at -> name(at) in ("N", "CA", "C", "O"),
-    sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O")),
-    ignore_hydrogen::Bool = true,
+    backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
+    sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
+    ignore_hydrogen::Bool=true,
     unitcell=nothing,
 )
     keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
-    native_atoms= select(native, at -> isprotein(at) & keepH(at))
-    desnat_atoms= select(desnat, at -> isprotein(at) & keepH(at))
+    native_atoms = select(native, at -> isprotein(at) & keepH(at))
+    desnat_atoms = select(desnat, at -> isprotein(at) & keepH(at))
     native_atomic_sasa = PDBTools.sasa_particles(native_atoms; n_dots, unitcell)
     desnat_atomic_sasa = PDBTools.sasa_particles(desnat_atoms; n_dots, unitcell)
     sasas = Dict{String,Dict{Symbol,Float32}}()
@@ -288,8 +288,8 @@ function gmx_delta_sasa_per_restype(;
     n_dots::Int=500,
     ignore_hydrogen::Bool=true,
     gmx="gmx",
-    backbone::Function = at -> name(at) in ("N", "CA", "C", "O"),
-    sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O")),
+    backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
+    sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
 )
     sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
@@ -305,8 +305,8 @@ end
 # Runs gmx sasa for a single residue type in a given PDB file.
 #
 function gmx_sasa_per_restype(
-    pdbname, rname; 
-    gmx="gmx", 
+    pdbname, rname;
+    gmx="gmx",
     n_dots::Int=500,
     backbone::Function,
     sidechain::Function,
