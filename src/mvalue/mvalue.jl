@@ -11,7 +11,7 @@ struct AutonBolen <: MvalueModel end
 include("./data.jl")
 
 """
-    mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname, sasas, type=1)
+    mvalue(; model=MoeserHorinek, cosolvent="urea", atoms:AbstractVector{<:PDBTools.Atom}, sasas, type=1)
 
 Calculates the m-value (transfer free energy of a protein in 1M solution) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
@@ -21,7 +21,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `model`: The model to be used. Must be `MoeserHorinek` or `AutonBolen`. `MoeserHorinek` is only implemented for `cosolvent="urea"`,
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(MolSimToolkit.cosolvent_column)) .* '"'; by=lowercase),", "))
-- `pdbname::AbstractString`: Path to the PDB file of the protein structure.
+- `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
@@ -45,17 +45,20 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 # Example calls
 
 ```julia
-# Using SASA values from the m-value server
-sasas_from_server=parse_mvalue_server_sasa(server_output)
-mvalue(; model=MoeserHorinek, cosolvent="urea", pdbname="protein.pdb", sasas=sasas_from_server, type=2)
+using MolSimToolkit
+protein = read_pdb("protein.pdb")
 
 # Using SASA values calculated with PDBTools.jl
 sasas=delta_sasa_per_restype(native=read_pdb("native.pdb"), desnat=read_pdb("desnat.pdb"))
-mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_gmx, type=1)
+mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas_gmx, type=1)
+
+# Using SASA values from the m-value server
+sasas_from_server=parse_mvalue_server_sasa(server_output)
+mvalue(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_server, type=2)
 
 # Using SASA values calculated with GROMACS
 sasas_gmx=gmx_delta_sasa_per_restype(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
-mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_gmx, type=1)
+mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas_gmx, type=1)
 ```
 
 ## References
@@ -68,9 +71,9 @@ mvalue(; model=AutonBolen, cosolvent="TMAO", pdbname="protein.pdb", sasas=sasas_
 function mvalue(;
     model::Type{<:MvalueModel}=MoeserHorinek,
     cosolvent::String="urea",
-    pdbname, sasas, type=1
+    atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=1
 )
-    protein = read_pdb(pdbname, "protein")
+    protein = select(atoms, "protein")
     residue_names = unique(resname.(protein))
     DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_names
@@ -146,6 +149,8 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 - `backbone::Function = at -> name(at) in ("N", "CA", "C", "O")`: Define what is a backbone atom.
 - `sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O"))`: Define what is a sidechain atom.
 - `ignore_hydrogen::Bool = true`: By default, ignore all Hydrogen atoms of the structure.
+- `unitcell=nothing`: By default, do not use periodic boundary conditions. To use PBCs, define A
+  unitcell by providing either a 3x3 matrix or, for orthorhombic cells, a vector of length 3 of cell sides.
 
 """
 function delta_sasa_per_restype(;
@@ -155,12 +160,15 @@ function delta_sasa_per_restype(;
     backbone::Function = at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O")),
     ignore_hydrogen::Bool = true,
+    unitcell=nothing,
 )
     keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
-    native_atomic_sasa = PDBTools.sasa_particles(select(native, keepH); n_dots)
-    desnat_atomic_sasa = PDBTools.sasa_particles(select(desnat, keepH); n_dots)
+    native_atoms= select(native, at -> isprotein(at) & keepH(at))
+    desnat_atoms= select(desnat, at -> isprotein(at) & keepH(at))
+    native_atomic_sasa = PDBTools.sasa_particles(native_atoms; n_dots, unitcell)
+    desnat_atomic_sasa = PDBTools.sasa_particles(desnat_atoms; n_dots, unitcell)
     sasas = Dict{String,Dict{Symbol,Float32}}()
-    for rname in unique(resname.(eachresidue(native)))
+    for rname in unique(resname.(eachresidue(native_atoms)))
         bb_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && backbone(at))
         bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> resname(at) == rname && backbone(at))
         if !ignore_hydrogen || rname != "GLY"
