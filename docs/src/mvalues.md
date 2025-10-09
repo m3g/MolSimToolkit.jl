@@ -42,14 +42,14 @@ function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Ato
         set_position!.(protein_at_frame, p)
         # Compute variations in SASA relative to reference
         dsasa = delta_sasa_per_restype(;
-            native=protein,
+            native=protein_ref,
             desnat=protein_at_frame,
         )
         # Compute mvalue
         m = mvalue(;
             model=MoeserHorinek,
             cosolvent="urea",
-            atoms=protein,
+            atoms=protein_ref,
             sasas=dsasa,
         )
         # push total, backbone and sidechain mvalues to arrays
