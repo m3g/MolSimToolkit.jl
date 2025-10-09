@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.13-DEV
+Version 1.29.13
 ---------------
 - ![FEATURE][badge-experimental] Support for PBCs in `delta_sasa_per_residue` with the `unitcell` keyword.
 - ![FEATURE][badge-experimental] Changed interface of `mvalue` functions: the funcions now receive vectors of atoms, and thus the keyword `pdbname`  was renamed to `atoms`. 
