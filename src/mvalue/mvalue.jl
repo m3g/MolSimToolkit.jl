@@ -50,7 +50,7 @@ protein = read_pdb("protein.pdb")
 
 # Using SASA values calculated with PDBTools.jl
 sasas=delta_sasa_per_restype(native=read_pdb("native.pdb"), desnat=read_pdb("desnat.pdb"))
-mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas_gmx, type=1)
+mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas)
 
 # Using SASA values from the m-value server
 sasas_from_server=parse_mvalue_server_sasa(server_output)
@@ -58,7 +58,7 @@ mvalue(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_
 
 # Using SASA values calculated with GROMACS
 sasas_gmx=gmx_delta_sasa_per_restype(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
-mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas_gmx, type=1)
+mvalue(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas_gmx)
 ```
 
 ## References

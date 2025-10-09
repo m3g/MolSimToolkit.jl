@@ -7,6 +7,8 @@ push!(LOAD_PATH, "../src/")
 using MolSimToolkit
 using MolSimToolkit.PackmolInputCreator
 using MolSimToolkitShared
+ENV["LINES"] = 10
+ENV["COLUMNS"] = 120
 makedocs(
     modules = [
         MolSimToolkit, MolSimToolkitShared,
