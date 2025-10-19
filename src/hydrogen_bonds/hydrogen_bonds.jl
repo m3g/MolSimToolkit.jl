@@ -75,7 +75,7 @@ end
     hbs = hydrogen_bonds(sim, "protein", "water")
     @test hbs == [75, 81, 76, 68, 80]
 
-    hbs = hydrogen_bonds(sim, "resname POPCC", "water")
+    hbs = hydrogen_bonds(sim, "resname POPC", "water")
     @test hbs == [413, 403, 406, 392, 376]
 
 end
