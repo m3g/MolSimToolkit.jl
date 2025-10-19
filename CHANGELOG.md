@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.14-DEV
+Version 1.29.14
 ---------------
 - ![FEATURE][badge-experimental] Add `hydrogen_bonds` function.
 
