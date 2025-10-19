@@ -7,13 +7,14 @@ using ChunkSplitters: index_chunks
         sel::Union{String,Function}; 
         nthreads=Threads.nthreads(),
         show_progress::Bool=true,
+        parallel::Bool=true,
         kargs...
     )
     hydrogen_bonds(
         sim::Simulation, 
         sel1::Union{String,Function}, 
         sel2::Union{String,Function}; 
-        nthreads=Threads.nthreads(),
+        parallel::Bool=true,
         kargs...
     )
 
@@ -26,7 +27,7 @@ function PDBTools.hydrogen_bonds(
     sim::Simulation,
     sel1::Union{String,Function}=at->true,
     sel2::Union{String,Function,Nothing}=nothing;
-    nthreads::Integer=Threads.nthreads(),
+    parallel::Bool=true,
     show_progress::Bool=true,
     kargs...
 )
@@ -35,7 +36,7 @@ function PDBTools.hydrogen_bonds(
     lk = ReentrantLock()
     restart!(sim)
     prg = Progress(length(sim); enabled=show_progress)
-    @sync for frame_inds in index_chunks(1:length(sim); n=nthreads)
+    @sync for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
         @spawn begin
             local index_current_frame
             local uc
@@ -71,6 +72,9 @@ end
     sim = Simulation(Testing.gmx_pdb, Testing.gmx_traj)
 
     hbs = hydrogen_bonds(sim, "protein")
+    @test hbs == [58, 60, 54, 54, 58]
+
+    hbs = hydrogen_bonds(sim, "protein"; parallel=false)
     @test hbs == [58, 60, 54, 54, 58]
 
     hbs = hydrogen_bonds(sim, "protein", "resname HOH SOL")
