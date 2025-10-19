@@ -67,15 +67,16 @@ end
     using PDBTools
     using MolSimToolkit.Testing
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    # Tested vs. gmx hbond
+    sim = Simulation(Testing.gmx_pdb, Testing.gmx_traj)
 
     hbs = hydrogen_bonds(sim, "protein")
-    @test hbs == [32, 28, 27, 27, 26]
+    @test hbs == [58, 60, 54, 54, 58]
 
-    hbs = hydrogen_bonds(sim, "protein", "water")
-    @test hbs == [75, 81, 76, 68, 80]
+    hbs = hydrogen_bonds(sim, "protein", "resname HOH SOL")
+    @test hbs == [152, 153, 149, 149, 157]
 
-    hbs = hydrogen_bonds(sim, "resname POPC", "water")
-    @test hbs == [413, 403, 406, 392, 376]
+    hbs = hydrogen_bonds(sim, "resname HOH", "resname SOL")
+    @test hbs == [151, 155, 152, 147, 147]
 
 end

@@ -14,4 +14,8 @@ mdlovofit_traj = joinpath(test_dir, "data/mdlovofit/trajectory.dcd")
 short_nopbc_pdb = joinpath(test_dir, "data/namd/short_nopbc.pdb")
 short_nopbc_traj = joinpath(test_dir, "data/namd/short_nopbc.dcd")
 
+gmx_pdb = joinpath(test_dir, "data/gromacs/system.pdb")
+gmx_traj = joinpath(test_dir, "data/gromacs/5frames.xtc")
+gmx_tpr = joinpath(test_dir, "data/gromacs/system.tpr")
+
 end # module Testing
