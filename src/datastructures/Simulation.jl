@@ -35,9 +35,9 @@ are provided by a different source than the PDB file.
 
 The `frames` or `first`, `last`, and `step` arguments can be used to specify the frames to be iterated over:
 
-    - `frames` can be a vector of frame indices, e. g., `frames=[1,2,3,5]` or `frames=9:2:20`.
-    - `first`, `last`, and `step` are Integers that specify the frames to be iterated over. 
-      If `last` is not specified, the last frame in the trajectory will be used.
+- `frames` can be a vector of frame indices, e. g., `frames=[1,2,3,5]` or `frames=9:2:20`.
+- `first`, `last`, and `step` are Integers that specify the frames to be iterated over. 
+   If `last` is not specified, the last frame in the trajectory will be used.
 
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
@@ -65,8 +65,7 @@ One important feature of the `Simulation` object is that it can be iterated over
 The `pairs` iterator can also be used to iterate over the frames, returning a tuple with the frame index
 and the frame itself. 
 
-The `enumerate` iterator can also be used to iterate over the frames, returning
-a tuple with the frame counter and the frame itself.
+The `enumerate` iterator can also be used to iterate over the frames, returning a tuple with the frame counter and the frame itself.
 
 # Examples
 
