@@ -4,16 +4,10 @@ using ChunkSplitters: index_chunks
 """
     hydrogen_bonds(
         sim::Simulation, 
-        sel::Union{String,Function}; 
+        sel1::Union{String,Function}=at -> true, 
+        sel2::Union{Nothing,String,Function}=nothing; 
         nthreads=Threads.nthreads(),
         show_progress::Bool=true,
-        parallel::Bool=true,
-        kargs...
-    )
-    hydrogen_bonds(
-        sim::Simulation, 
-        sel1::Union{String,Function}, 
-        sel2::Union{String,Function}; 
         parallel::Bool=true,
         kargs...
     )
