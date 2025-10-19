@@ -42,6 +42,7 @@ makedocs(
             "Simulation Reweighting" => "Reweighting.md",
             "Cluster submission management" => "Coaraci.md",
             "m-value calculator" => "mvalues.md",
+            "Hydrogen bonds" => "hydrogen_bonds.md",
         ], 
     ],
 )

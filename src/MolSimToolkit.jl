@@ -35,6 +35,7 @@ export bulk_coordination
 export coordination_number
 export center_of_mass
 export dihedral, dihedrals
+export hydrogen_bonds
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
@@ -59,6 +60,7 @@ include("./miscelaneous_functions/dihedrals.jl")
 include("./miscelaneous_functions/center_of_mass.jl")
 include("./miscelaneous_functions/most_representative_structure.jl")
 include("./secondary_structure/secondary_structure.jl")
+include("./hydrogen_bonds/hydrogen_bonds.jl")
 
 # Time-dependent properties
 include("./miscelaneous_functions/intermittent_correlation.jl")
