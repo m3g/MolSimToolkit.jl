@@ -1,6 +1,10 @@
 using Base.Threads: @spawn
 using ChunkSplitters: index_chunks
 
+# To do list:
+# improve performance by not computing repeatedly the selection,
+# the polar bonds, and preallocating ParticleSystem for each thread.
+
 """
     hydrogen_bonds(
         sim::Simulation, 
@@ -15,6 +19,33 @@ using ChunkSplitters: index_chunks
 Compute the number of hydrogen bonds for each frame of a simulation. 
 
 For further details on `kargs...` see the help entry of `PDBTools.hydrogen_bonds`.
+
+!!! warning
+    Experimental feature: interface may change without breaking package release.
+
+# Example
+
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> hbs = hydrogen_bonds(sim, "protein")
+5-element Vector{Int64}:
+ 32
+ 28
+ 27
+ 27
+ 26
+
+julia> hbs = hydrogen_bonds(sim, "protein", "water")
+5-element Vector{Int64}:
+ 75
+ 81
+ 76
+ 68
+ 80
+```
 
 """
 function PDBTools.hydrogen_bonds(
