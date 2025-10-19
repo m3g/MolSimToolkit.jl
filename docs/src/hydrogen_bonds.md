@@ -5,7 +5,7 @@ CollapsedDocStrings = true
 # [Hydrogen bonds](@id hbonds)
 
 Computes the number of hydrogen bonds of a set of atoms, or between two sets 
-of atoms, for each frame in a simualtion.
+of atoms, for each frame in a simulation.
 
 !!! warning
     This is an experimental feature. Breaking changes may occur without 
