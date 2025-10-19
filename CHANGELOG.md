@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.14-DEV
 ---------------
+- ![FEATURE][badge-experimental] Add `hydrogen_bonds` function.
 
 Version 1.29.13
 ---------------
