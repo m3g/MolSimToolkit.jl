@@ -1,7 +1,7 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
 version = "1.29.16-DEV"
+authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
 
 [deps]
 CellListMap = "69e1c6dd-3888-40e6-b3c8-31ac5f578864"
@@ -16,6 +16,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MDLovoFit_jll = "d8780812-71d7-51d3-b38b-dae269fdfcb3"
 MolSimToolkitShared = "aea21201-7910-416e-b888-414710bebccb"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PDBTools = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
@@ -48,6 +49,7 @@ LinearAlgebra = "1.10"
 MDLovoFit_jll = "20.1"
 MolSimToolkitShared = "1.2.1"
 OffsetArrays = "1.13"
+OrderedCollections = "1.8.1"
 PDBTools = "3.8.0"
 Plots = "1.39"
 Printf = "1.10"
