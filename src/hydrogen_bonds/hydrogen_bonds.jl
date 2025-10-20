@@ -6,9 +6,7 @@ using OrderedCollections: OrderedDict
 include("./internals.jl")
 
 """
-    hydrogen_bonds(sim::Simulation, sel; kargs...)
-    hydrogen_bonds(sim::Simulation, sel1, sel2; kargs...)
-    hydrogen_bonds(sim::Simulation, [ sel1 => sel2, sel3 => sel4, ... ]; kargs...)
+    hydrogen_bonds(sim::Simulation, sel1, sel1 => sel2,...; kargs...)
 
 !!! warning
     Experimental feature: interface changes can occur in non-breaking releases.
@@ -18,17 +16,12 @@ Function to compute the number of hydrogen bonds per frame in a simulation.
 ### Arguments
 
 - `ats::AbstractVector{<:PDBTools.Atom}`: Vector of atoms to analyze.
-and
-- `sel1::Union{String,Nothing}=nothing`: Selection of atoms to consider. 
-   If `sel1` is not defined, all atoms will be considered.
-or
-- `sel1::String`: First selection of atoms to consider.
-- `sel2::String`: Second selection of atoms to consider.
-or
-- `[ sel1 => sel2]::AbstractVector{Pair{String,String}}`: Use to define multiple pairs of selections for which
-  hydrogen bonds will be computed. 
+and, optinally,
+- a list of selections or pairs of selections, given as selection strings. Examples: `"protein"``, 
+  `"protein" => "water"`, etc.
 
-In all cases, if two sets are different they must not contain overlapping atoms. 
+If no selection is provided, the hydrogen bonds among all atoms are computed.
+If two selections of a pair are different, their atoms must not overlap.
 
 ### Returns
 
@@ -55,12 +48,13 @@ julia> hbs = hydrogen_bonds(sim, "protein")
 OrderedCollections.OrderedDict{String, Vector{Int64}} with 1 entry:
   "protein => protein" => [32, 28, 27, 27, 26]
 
-julia> hbs = hydrogen_bonds(sim, "protein", "water")
+julia> hbs = hydrogen_bonds(sim, "protein" => "water")
 OrderedCollections.OrderedDict{String, Vector{Int64}} with 1 entry:
   "protein => water" => [75, 81, 76, 68, 80]
 
-julia> hbs = hydrogen_bonds(sim, ["protein" => "water", "water" => "resname POPC"])
-OrderedCollections.OrderedDict{String, Vector{Int64}} with 2 entries:
+julia> hbs = hydrogen_bonds(sim, "protein", "protein" => "water", "water" => "resname POPC")
+OrderedCollections.OrderedDict{String, Vector{Int64}} with 3 entries:
+  "protein => protein"    => [32, 28, 27, 27, 26]
   "protein => water"      => [75, 81, 76, 68, 80]
   "water => resname POPC" => [413, 403, 406, 392, 376]
 ```
@@ -72,7 +66,7 @@ OrderedCollections.OrderedDict{String, Vector{Int64}} with 2 entries:
 """
 function PDBTools.hydrogen_bonds(
     sim::Simulation,
-    selection_pairs::AbstractVector{Pair{String,String}};
+    selections::Union{Nothing,String,Pair{String,String}}...=nothing;
     parallel::Bool=true,
     show_progress::Bool=true,
     donnor_acceptor_distance::Real=3.5f0,
@@ -80,6 +74,16 @@ function PDBTools.hydrogen_bonds(
     electronegative_elements=("N", "O", "F", "S"),
     d_covalent_bond::Real=1.2f0,
 )
+    # Convert list of arguments in list of pairs of selections
+    if isnothing(first(selections))
+        selection_pairs = ["all" =>"all"]
+    else
+        selection_pairs = [
+            sel isa String ? sel => sel : first(sel) => last(sel)
+            for sel in selections
+        ] 
+    end
+
     # initialize trajectory
     firstframe!(sim)
     uc_first_frame = unitcell(current_frame(sim))
@@ -226,27 +230,6 @@ function PDBTools.hydrogen_bonds(
     return hbonds
 end
 
-function PDBTools.hydrogen_bonds(
-    sim::Simulation,
-    sel1::Union{String,Nothing}=nothing;
-    kargs...
-)
-    sel = isnothing(sel1) ? "all" : sel1
-    return hydrogen_bonds(sim, [sel => sel]; kargs...)
-end
-
-#
-# Function that receives the two selections
-#
-function PDBTools.hydrogen_bonds(
-    sim::Simulation,
-    sel1::Union{String,Function},
-    sel2::Union{String,Function};
-    kargs...
-)
-    return hydrogen_bonds(sim, [sel1 => sel2]; kargs...)
-end
-
 @testitem "hydrogen bonds" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
@@ -260,27 +243,25 @@ end
     hbs = hydrogen_bonds(sim, "protein"; parallel=false)
     @test hbs["protein => protein"] == [58, 60, 54, 54, 58]
 
-    hbs = hydrogen_bonds(sim, "protein", "resname HOH SOL")
+    hbs = hydrogen_bonds(sim, "protein" => "resname HOH SOL")
     @test hbs["protein => resname HOH SOL"] == [152, 153, 149, 149, 157]
 
-    hbs = hydrogen_bonds(sim, "resname HOH", "resname SOL")
+    hbs = hydrogen_bonds(sim, "resname HOH" => "resname SOL")
     @test hbs["resname HOH => resname SOL"] == [151, 155, 152, 147, 147]
 
     hbs = hydrogen_bonds(sim; electronegative_elements=("O", "N"))
     @test hbs["all => all"] == [18231, 18205, 18113, 18063, 18090]
 
     hbs = hydrogen_bonds(sim,
-        [
-            "protein" => "protein",
-            "protein" => "resname HOH SOL",
-            "resname HOH" => "resname SOL",
-        ]
+        "protein" => "protein",
+        "protein" => "resname HOH SOL",
+        "resname HOH" => "resname SOL",
     )
     @test hbs["protein => protein"] == [58, 60, 54, 54, 58]
     @test hbs["protein => resname HOH SOL"] == [152, 153, 149, 149, 157]
     @test hbs["resname HOH => resname SOL"] == [151, 155, 152, 147, 147]
 
-    @test_throws "overlap" hydrogen_bonds(sim, "protein", "protein and resname ARG")
-    @test_throws "overlap" hydrogen_bonds(sim, [ "resname HOH" => "resname HOH and residue 134"])
+    @test_throws "overlap" hydrogen_bonds(sim, "protein" => "protein and resname ARG")
+    @test_throws "overlap" hydrogen_bonds(sim, "resname HOH" => "resname HOH and residue 134")
 
 end
