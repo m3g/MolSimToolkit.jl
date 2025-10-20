@@ -36,7 +36,7 @@ plot(MolSimStyle,
 )
 ```
 
-Alternativelly, multiple pairs of selections can be provided, for faster computations,```@example hbonds
+Alternativelly, multiple pairs of selections can be provided, for faster computations,
 ```@example hbonds
 hbs = hydrogen_bonds(sim, 
     [
@@ -51,6 +51,6 @@ The result can be converted directly to a `DataFrame`
 using DataFrames, CSV
 df = DataFrame(hbs)
 ```
-and saved to CSV file with `CSV.write(df)`.
+and saved to CSV file with `CSV.write("hbonds.csv", df)`.
 
 
