@@ -7,10 +7,6 @@ CollapsedDocStrings = true
 Computes the number of hydrogen bonds of a set of atoms, or between two sets 
 of atoms, for each frame in a simulation.
 
-!!! warning
-    This is an experimental feature. Breaking changes may occur without 
-    a breaking package release.
-
 ```@docs
 hydrogen_bonds
 ```
