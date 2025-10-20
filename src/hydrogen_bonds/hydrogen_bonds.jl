@@ -8,9 +8,6 @@ include("./internals.jl")
 """
     hydrogen_bonds(sim::Simulation, sel1, sel1 => sel2,...; kargs...)
 
-!!! warning
-    Experimental feature: interface changes can occur in non-breaking releases.
-
 Function to compute the number of hydrogen bonds per frame in a simulation.
 
 ### Arguments

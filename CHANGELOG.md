@@ -10,9 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.16-DEV
----------------
-- ![FEATURE][badge-experimental] Function `hydrogen_bonds` accepts a multiple selections and pairs of selections, to compute many h-bond data at once.
+Version 1.30.0
+--------------
+- ![FEATURE][badge-feature] Make `hydrogen_bonds` a stable interface, and it accepts a multiple selections and pairs of selections, to compute many h-bond data at once.
 
 Version 1.29.15
 ---------------

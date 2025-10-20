@@ -19,6 +19,7 @@ makedocs(
     pages=[
         "Home" => "index.md",
         "Structural analyses" => Any[
+            "Hydrogen bonds" => "hydrogen_bonds.md",
             "Distances and misc." => "Structural_properties.md",
             "Dihedral angle analysis" => "Dihedrals.md",
             "Secondary structure" => "secondary_structures.md",
@@ -42,7 +43,6 @@ makedocs(
             "Simulation Reweighting" => "Reweighting.md",
             "Cluster submission management" => "Coaraci.md",
             "m-value calculator" => "mvalues.md",
-            "Hydrogen bonds" => "hydrogen_bonds.md",
         ], 
     ],
 )
