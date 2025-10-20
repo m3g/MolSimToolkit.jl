@@ -280,7 +280,7 @@ end
     @test hbs["protein => resname HOH SOL"] == [152, 153, 149, 149, 157]
     @test hbs["resname HOH => resname SOL"] == [151, 155, 152, 147, 147]
 
-    @test_throws "overlap" hydrogen_bonds(sim, "protein", "protein")
+    @test_throws "overlap" hydrogen_bonds(sim, "protein", "protein and resname ARG")
     @test_throws "overlap" hydrogen_bonds(sim, [ "resname HOH" => "resname HOH and residue 134"])
 
 end
