@@ -51,4 +51,12 @@ df = DataFrame(hbs)
 ```
 and saved to CSV file with `CSV.write("hbonds.csv", df)`.
 
+!!! note
+    The order of the pairs, e. g. `"protein" => "water"` or `"water" => "protein"`, does not affect the
+    result, as electronegative atoms of both groups will be considered as possible hydrogen bond donnors and/or acceptors.
+
+    When a single selection is provided, e. g. `"protein"`, the hydrogen bonds within that selection are
+    computed, with no repetitions.
+
+
 
