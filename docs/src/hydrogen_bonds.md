@@ -28,12 +28,29 @@ hbs_prot = hydrogen_bonds(sim, "protein")
 hbs_prot_water = hydrogen_bonds(sim, "protein", "water")
 # Plot 
 plot(MolSimStyle, 
-    [hbs_prot hbs_prot_water];
+    [hbs_prot["protein => protein"] hbs_prot_water["protein => water"]];
     xlabel="frame",
     ylabel="number of hydrogen bonds",
     label=["protein-protein" "protein-water"],
     legend=:outertopright,
 )
 ```
+
+Alternativelly, multiple pairs of selections can be provided, for faster computations,```@example hbonds
+```@example hbonds
+hbs = hydrogen_bonds(sim, 
+    [
+        "protein" => "protein", 
+        "protein" => "water",
+        "protein" => "resname POPC",
+    ]
+)
+``` 
+The result can be converted directly to a `DataFrame`
+```@example hbonds
+using DataFrames, CSV
+df = DataFrame(hbs)
+```
+and saved to CSV file with `CSV.write(df)`.
 
 
