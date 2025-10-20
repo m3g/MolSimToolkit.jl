@@ -5,17 +5,7 @@ using CellListMap: CellListMap, ParticleSystem, map_pairwise!, update_unitcell!
 include("./internals.jl")
 
 """
-function PDBTools.hydrogen_bonds(
-    sim::Simulation,
-    sel1::Union{String,Function}=at -> true
-    sel2::Union{Nothing,String,Function}=nothing;
-    parallel::Bool=true,
-    show_progress::Bool=true,
-    donnor_acceptor_distance::Real=3.5f0,
-    angle_cutoff::Real=30,
-    electronegative_elements=("N", "O", "F", "S"),
-    d_covalent_bond::Real=1.2f0,
-)
+    hydrogen_bonds(sim::Simulation, sel1, sel2; kargs...)
 
 !!! warning
     Experimental feature: interface changes can occur in non-breaking releases.
@@ -26,14 +16,15 @@ Function to compute the number of hydrogen bonds per frame in a simulation.
 
 - `ats::AbstractVector{<:PDBTools.Atom}`: Vector of atoms to analyze.
 and
-- `sel1::Union{Function, String}=at -> true`: Selection of atoms to consider. Can be a function or a selection string. This selection is optional.
+- `sel1::Union{Function, String}=at -> true`: Selection of atoms to consider. Can be a function or a selection string. 
+   If neither `sel1` or `sel2` are defined, all atoms will be considered.
 or
 - `sel1::Union{Function, String}`: First selection of atoms to consider. Can be a function or a selection string.
 - `sel2::Union{Function, String}`: Second selection of atoms to consider. Can be a function or a selection string.
 
 In the case of two sets, `sel1` and `sel2` must not overlap.
 
-### Keyword Arguments
+### Optional keyword arguments
 
 - `parallel::Bool=true`: Defines if the calculation is run in parallel. Requires starting Julia with multi-threading.
 - `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
@@ -290,6 +281,9 @@ end
 
     hbs = hydrogen_bonds(sim, "resname HOH", "resname SOL")
     @test hbs == [151, 155, 152, 147, 147]
+
+    hbs = hydrogen_bonds(sim; electronegative_elements=("O", "N"))
+    @test hbs ==  [ 18231, 18205, 18113, 18063, 18090 ]
 
     @test_throws "ArgumentError" hydrogen_bonds(sim, "protein", "protein")
 
