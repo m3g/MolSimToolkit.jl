@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.15-DEV
 ---------------
+- ![ENHANCEMENT][badge-enhancement] Computation of hydrogen bonds is much faster when running in parallel.
 
 Version 1.29.14
 ---------------
