@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.29.15
+Version 1.29.16-DEV
 ---------------
 - ![ENHANCEMENT][badge-enhancement] Computation of hydrogen bonds is much faster when running in parallel.
 
