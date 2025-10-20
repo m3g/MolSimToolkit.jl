@@ -1,6 +1,6 @@
 using Base.Threads: @spawn
 using ChunkSplitters: index_chunks
-using CellListMap: CellListMap, ParticleSystem, map_pairwise, update_unitcell!
+using CellListMap: CellListMap, ParticleSystem, map_pairwise!, update_unitcell!
 
 include("./internals.jl")
 
@@ -133,7 +133,7 @@ function PDBTools.hydrogen_bonds(
                 sys.xpositions .= ats_sel_positions
                 update_unitcell!(sys, uc.matrix)
                 # Compute number of hydrogen bonds
-                number_of_hbonds = map_pairwise(
+                number_of_hbonds = map_pairwise!(
                     (x, y, i, j, d2, number_of_hbonds) -> begin
                         el_i = element(ats_sel[i])
                         el_j = element(ats_sel[j])
@@ -239,7 +239,7 @@ function PDBTools.hydrogen_bonds(
                 sys.ypositions .= ats_sel_positions2
                 update_unitcell!(sys, uc.matrix)
                 # Compute number of hydrogen bonds
-                number_of_hbonds = map_pairwise(
+                number_of_hbonds = map_pairwise!(
                     (x, y, i, j, d2, number_of_hbonds) -> begin
                         at_i = ats_sel1[i]
                         at_j = ats_sel2[j]
