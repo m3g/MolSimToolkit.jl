@@ -104,4 +104,9 @@ function count_hbonds2(i, x, y, polar_bonds, positions, unitcell, ang)
     return number_of_hbonds
 end
 
-
+struct SelectionData{A<:PDBTools.Atom,}
+    ats::Vector{A}
+    inds::Vector{Int32}
+    polar_bonds::HPolarBonds
+end
+_key_name(sel1, sel2) = "$sel1 => $sel2"
