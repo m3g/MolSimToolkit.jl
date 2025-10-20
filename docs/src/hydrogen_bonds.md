@@ -25,7 +25,7 @@ sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
 # Compute h-bonds of the protein with itself
 hbs_prot = hydrogen_bonds(sim, "protein")
 # Compute h-bonds between protein and water
-hbs_prot_water = hydrogen_bonds(sim, "protein", "water")
+hbs_prot_water = hydrogen_bonds(sim, "protein" => "water")
 # Plot 
 plot(MolSimStyle, 
     [hbs_prot["protein => protein"] hbs_prot_water["protein => water"]];
@@ -36,14 +36,12 @@ plot(MolSimStyle,
 )
 ```
 
-Alternativelly, multiple pairs of selections can be provided, for faster computations,
+Alternativelly, multiple selections, or pairs of selections can be provided, for faster computations,
 ```@example hbonds
 hbs = hydrogen_bonds(sim, 
-    [
-        "protein" => "protein", 
+        "protein", 
         "protein" => "water",
         "protein" => "resname POPC",
-    ]
 )
 ``` 
 The result can be converted directly to a `DataFrame`

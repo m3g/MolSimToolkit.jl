@@ -12,7 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.29.16-DEV
 ---------------
-- ![FEATURE][badge-experimental] Function `hydrogen_bonds` accepts a vector of pairs of selections, to compute many h-bond data at once.
+- ![FEATURE][badge-experimental] Function `hydrogen_bonds` accepts a multiple selections and pairs of selections, to compute many h-bond data at once.
 
 Version 1.29.15
 ---------------
