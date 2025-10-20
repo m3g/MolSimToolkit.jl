@@ -94,7 +94,6 @@ function PDBTools.hydrogen_bonds(
 
     hbonds = zeros(Int, length(sim))
     iframe = 0
-    lk = ReentrantLock()
     restart!(sim)
     prg = Progress(length(sim); enabled=show_progress)
     @sync for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
@@ -111,7 +110,7 @@ function PDBTools.hydrogen_bonds(
                 output_name=:number_of_hbonds
             )
             for _ in frame_inds
-                lock(lk) do
+                lock(sim) do
                     nextframe!(sim)
                     iframe += 1
                     next!(prg)
@@ -195,7 +194,6 @@ function PDBTools.hydrogen_bonds(
 
     hbonds = zeros(Int, length(sim))
     iframe = 0
-    lk = ReentrantLock()
     restart!(sim)
     prg = Progress(length(sim); enabled=show_progress)
     @sync for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
@@ -214,7 +212,7 @@ function PDBTools.hydrogen_bonds(
                 output_name=:number_of_hbonds,
             )
             for _ in frame_inds
-                lock(lk) do
+                lock(sim) do
                     nextframe!(sim)
                     iframe += 1
                     next!(prg)
