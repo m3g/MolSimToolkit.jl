@@ -291,6 +291,6 @@ end
     hbs = hydrogen_bonds(sim, "resname HOH", "resname SOL")
     @test hbs == [151, 155, 152, 147, 147]
 
-    @test_throws ArgumentError hydrogen_bonds(sim, "protein", "protein")
+    @test_throws "ArgumentError" hydrogen_bonds(sim, "protein", "protein")
 
 end
