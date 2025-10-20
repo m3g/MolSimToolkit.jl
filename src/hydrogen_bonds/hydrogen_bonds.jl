@@ -12,23 +12,22 @@ Function to compute the number of hydrogen bonds per frame in a simulation.
 
 ### Arguments
 
-- `ats::AbstractVector{<:PDBTools.Atom}`: Vector of atoms to analyze.
-and, optinally,
-- a list of selections or pairs of selections, given as selection strings. Examples: `"protein"``, 
+- `sim::Simulation`: The `Simulation` object. 
+and, optionally,
+- a list of selections, or pairs of selections, given as selection strings. Examples: `"protein"`, 
   `"protein" => "water"`, etc.
 
 If no selection is provided, the hydrogen bonds among all atoms are computed.
-If two selections of a pair are different, their atoms must not overlap.
+If two selections of a pair are different, their atoms must not overlap (an error will be thrown).
 
 ### Returns
 
-- An ordered dictionary in which the key specifies the selection pair and the values are vectors with the number of hydrogen
-  bonds in each frame.
+- An ordered dictionary in which the key specifies the selections and the values are vectors with the 
+  number of hydrogen bonds in each frame.
 
 ### Optional keyword arguments
 
 - `parallel::Bool=true`: Defines if the calculation is run in parallel. Requires starting Julia with multi-threading.
-- `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
 - `donnor_acceptor_distance::Real=3.5f0`: Maximum distance between donnor and acceptor to consider a hydrogen bond.
 - `angle_cutoff::Real=30`: Maximum angle (in degrees) between donnor-hydrogen-acceptor to consider a hydrogen bond.
 - `electronegative_elements=("N", "O", "F", "S")`: Elements considered electronegative for hydrogen bonding.
