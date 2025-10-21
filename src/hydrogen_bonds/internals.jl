@@ -220,3 +220,59 @@ function setup_particle_systems(
     return systems
 end
 
+#=
+    count_hbonds_same_selection(sys, s1, angle_cutoff, electronegative_elements) -> Int
+
+Count hydrogen bonds when donor and acceptor are in the same selection.
+=#
+function count_hbonds(sys::CellListMap.ParticleSystem1, s1, angle_cutoff, electronegative_elements)
+    nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
+        el_i = element(s1.ats[i])
+        el_j = element(s1.ats[j])
+        if (el_i in electronegative_elements) & (el_j in electronegative_elements)
+            number_of_hbonds += count_hbonds(
+                i, x, y, s1.polar_bonds,
+                sys.positions, sys.unitcell,
+                angle_cutoff,
+            )
+            number_of_hbonds += count_hbonds(
+                j, y, x, s1.polar_bonds,
+                sys.positions, sys.unitcell,
+                angle_cutoff,
+            )
+        end
+        return number_of_hbonds
+    end
+    return nhb
+end
+
+#=
+    count_hbonds(sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements) -> Int
+
+Count hydrogen bonds between two different selections.
+=#
+function count_hbonds(sys::CellListMap.ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
+    nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
+        at_i = s1.ats[i]
+        at_j = s2.ats[j]
+        if index(at_i) == index(at_j)
+            throw(ArgumentError("""\n
+                Different selections cannot overlap. Detected atom $(index(at_i)) in both selections \"$sel1\" and \"$sel2\".
+                """))
+        end
+        el_i = element(at_i)
+        el_j = element(at_j)
+        if (el_i in electronegative_elements) & (el_j in electronegative_elements)
+            number_of_hbonds += count_hbonds2(
+                i, x, y, s1.polar_bonds, sys.xpositions,
+                sys.unitcell, angle_cutoff
+            )
+            number_of_hbonds += count_hbonds2(
+                j, y, x, s2.polar_bonds, sys.ypositions,
+                sys.unitcell, angle_cutoff
+            )
+        end
+        return number_of_hbonds
+    end
+    return nhb
+end
