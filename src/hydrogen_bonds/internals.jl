@@ -110,3 +110,113 @@ struct SelectionData{A<:PDBTools.Atom,}
     polar_bonds::HPolarBonds
 end
 _key_name(sel1, sel2) = "$sel1 => $sel2"
+
+#=
+
+    process_selections(selections) -> Vector{Pair{String,String}}
+
+Convert input selections into a list of pairs. If no selection is provided, returns ["all"=>"all"].
+
+=#
+function process_selections(selections)
+    if isnothing(first(selections))
+        return ["all" => "all"]
+    end
+    return [sel isa String ? sel => sel : first(sel) => last(sel) for sel in selections]
+end
+
+#=
+
+    initialize_hbonds_data(sim, selection_pairs) -> Tuple{OrderedDict, Dict}
+
+Initialize the results dictionary and process selection data for each unique selection.
+
+=#
+function initialize_hbonds_data(
+    sim::Simulation,
+    selection_pairs::Vector{Pair{String,String}};
+    parallel::Bool=true,
+    donnor_acceptor_distance::Real=3.5f0,
+    electronegative_elements=("N", "O", "F", "S"),
+    d_covalent_bond::Real=1.2f0,
+)
+    hbonds = OrderedDict{String,Vector{Int}}()
+    selection_data = Dict{String,SelectionData}()
+
+    p_first_frame = positions(current_frame(sim))
+    uc_first_frame = unitcell(current_frame(sim))
+
+    for selection_pair in selection_pairs
+        sel1, sel2 = first(selection_pair), last(selection_pair)
+        hbonds[_key_name(sel1, sel2)] = zeros(Int, length(sim))
+
+        for sel in selection_pair
+            if !haskey(selection_data, sel)
+                ats_sel = select(atoms(sim), sel)
+                inds_sel = index.(ats_sel)
+                polar_bonds = find_hbond_donnors(
+                    ats_sel;
+                    positions=@view(p_first_frame[inds_sel]),
+                    unitcell=uc_first_frame.matrix,
+                    cutoff=donnor_acceptor_distance,
+                    parallel=parallel,
+                    electronegative_elements=electronegative_elements,
+                    d_covalent_bond=d_covalent_bond,
+                )
+                selection_data[sel] = SelectionData(ats_sel, inds_sel, polar_bonds)
+            end
+        end
+    end
+
+    return hbonds, selection_data
+end
+
+#=
+
+    setup_particle_systems(selection_pairs, selection_data, uc_first_frame, donnor_acceptor_distance, parallel) 
+        -> Dict{String,Union{ParticleSystem1,ParticleSystem2}}
+
+
+Initialize CellListMap particle systems for each selection pair.
+
+=#
+function setup_particle_systems(
+    selection_pairs,
+    selection_data,
+    uc_first_frame,
+    donnor_acceptor_distance,
+    parallel
+)
+    systems = Dict{String,Union{CellListMap.ParticleSystem1,CellListMap.ParticleSystem2}}()
+
+    for selection_pair in selection_pairs
+        sel1, sel2 = first(selection_pair), last(selection_pair)
+        key = _key_name(sel1, sel2)
+
+        if sel1 == sel2
+            s1 = selection_data[sel1]
+            systems[key] = ParticleSystem(
+                positions=coor.(s1.ats),
+                unitcell=uc_first_frame.matrix,
+                cutoff=donnor_acceptor_distance,
+                output=0,
+                parallel=parallel,
+                output_name=:number_of_hbonds
+            )
+        else
+            s1, s2 = selection_data[sel1], selection_data[sel2]
+            systems[key] = ParticleSystem(
+                xpositions=coor.(s1.ats),
+                ypositions=coor.(s2.ats),
+                unitcell=uc_first_frame.matrix,
+                cutoff=donnor_acceptor_distance,
+                output=0,
+                parallel=parallel,
+                output_name=:number_of_hbonds
+            )
+        end
+    end
+
+    return systems
+end
+

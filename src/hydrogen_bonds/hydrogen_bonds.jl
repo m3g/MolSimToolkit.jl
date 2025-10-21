@@ -70,86 +70,36 @@ function PDBTools.hydrogen_bonds(
     electronegative_elements=("N", "O", "F", "S"),
     d_covalent_bond::Real=1.2f0,
 )
-    # Convert list of arguments in list of pairs of selections
-    if isnothing(first(selections))
-        selection_pairs = ["all" =>"all"]
-    else
-        selection_pairs = [
-            sel isa String ? sel => sel : first(sel) => last(sel)
-            for sel in selections
-        ] 
-    end
+    selection_pairs = process_selections(selections)
 
-    # initialize trajectory
+    # Initialize trajectory and get first frame data
     first_frame!(sim)
     uc_first_frame = unitcell(current_frame(sim))
     p_first_frame = positions(current_frame(sim))
 
-    # Dictionary that will carry the results
-    hbonds = OrderedDict{String,Vector{Int}}()
+    # Initialize results and process selections
+    hbonds, selection_data = initialize_hbonds_data(
+        sim, selection_pairs;
+        parallel=parallel,
+        donnor_acceptor_distance=donnor_acceptor_distance,
+        electronegative_elements=electronegative_elements,
+        d_covalent_bond=d_covalent_bond
+    )
 
-    # Building the selection data for each selection
-    selection_data = Dict{String,SelectionData}()
-    for selection_pair in selection_pairs
-        sel1 = first(selection_pair)
-        sel2 = last(selection_pair)
-        hbonds[_key_name(sel1, sel2)] = zeros(Int, length(sim))
-        for sel in selection_pair
-            if !haskey(selection_data, sel)
-                ats_sel = select(atoms(sim), sel)
-                inds_sel = index.(ats_sel)
-                polar_bonds = find_hbond_donnors(
-                    ats_sel;
-                    positions=@view(p_first_frame[inds_sel]),
-                    unitcell=uc_first_frame.matrix,
-                    cutoff=donnor_acceptor_distance,
-                    parallel,
-                    electronegative_elements,
-                    d_covalent_bond,
-                )
-                selection_data[sel] = SelectionData(ats_sel, inds_sel, polar_bonds)
-            end
-        end
-    end
-
+    # Process frames in parallel
     iframe = 0
     restart!(sim)
     prg = Progress(length(sim); enabled=show_progress)
+
     @sync for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
         @spawn begin
-            local index_current_frame
             local uc
+            local index_current_frame
             local current_positions = copy(p_first_frame)
-            systems = Dict{String,Union{CellListMap.ParticleSystem1, CellListMap.ParticleSystem2}}()
-            for selection_pair in selection_pairs
-                sel1 = first(selection_pair)
-                sel2 = last(selection_pair)
-                if sel1 == sel2
-                    s1 = selection_data[sel1]
-                    sys = ParticleSystem(
-                        positions=coor.(s1.ats),
-                        unitcell=uc_first_frame.matrix,
-                        cutoff=donnor_acceptor_distance,
-                        output=0,
-                        parallel=parallel,
-                        output_name=:number_of_hbonds
-                    )
-                    systems[_key_name(sel1, sel2)] = sys
-                else
-                    s1 = selection_data[sel1]
-                    s2 = selection_data[sel2]
-                    sys = ParticleSystem(
-                        xpositions=coor.(s1.ats),
-                        ypositions=coor.(s2.ats),
-                        unitcell=uc_first_frame.matrix,
-                        cutoff=donnor_acceptor_distance,
-                        output=0,
-                        parallel=parallel,
-                        output_name=:number_of_hbonds,
-                    )
-                    systems[_key_name(sel1, sel2)] = sys
-                end
-            end
+            systems = setup_particle_systems(
+                selection_pairs, selection_data,
+                uc_first_frame, donnor_acceptor_distance, parallel
+            )
             for _ in frame_inds
                 lock(sim) do
                     next_frame!(sim)
@@ -223,6 +173,7 @@ function PDBTools.hydrogen_bonds(
             end
         end
     end
+
     return hbonds
 end
 
@@ -243,7 +194,7 @@ end
     @test hbs["protein => resname SOL"] == [152, 153, 149, 149, 157]
 
     hbs = hydrogen_bonds(sim, "resname SOL and residue < 7000" => "resname SOL and residue >= 7000")
-    @test hbs["resname SOL and residue < 7000 => resname SOL and residue >= 7000"] == [9049, 9062, 8903, 8977, 8857] 
+    @test hbs["resname SOL and residue < 7000 => resname SOL and residue >= 7000"] == [9049, 9062, 8903, 8977, 8857]
 
     hbs = hydrogen_bonds(sim; electronegative_elements=("O", "N"))
     @test hbs["all => all"] == [18231, 18205, 18113, 18063, 18090]
@@ -255,7 +206,7 @@ end
     )
     @test hbs["protein => protein"] == [58, 60, 54, 54, 58]
     @test hbs["protein => resname SOL"] == [152, 153, 149, 149, 157]
-    @test hbs["resname SOL and residue < 7000 => resname SOL and residue >= 7000"] == [9049, 9062, 8903, 8977, 8857] 
+    @test hbs["resname SOL and residue < 7000 => resname SOL and residue >= 7000"] == [9049, 9062, 8903, 8977, 8857]
 
     @test_throws "overlap" hydrogen_bonds(sim, "protein" => "protein and resname ARG")
     @test_throws "overlap" hydrogen_bonds(sim, "resname SOL" => "resname SOL and residue 7000")
