@@ -1,4 +1,4 @@
-using Base.Threads: @spawn
+using Base.Threads: @threads
 using ChunkSplitters: index_chunks
 using CellListMap: CellListMap, ParticleSystem, map_pairwise!, update_unitcell!
 using OrderedCollections: OrderedDict
@@ -91,85 +91,45 @@ function PDBTools.hydrogen_bonds(
     restart!(sim)
     prg = Progress(length(sim); enabled=show_progress)
 
-    @sync for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
-        @spawn begin
-            local uc
-            local index_current_frame
-            local current_positions = copy(p_first_frame)
-            systems = setup_particle_systems(
-                selection_pairs, selection_data,
-                uc_first_frame, donnor_acceptor_distance, parallel
-            )
-            for _ in frame_inds
-                lock(sim) do
-                    next_frame!(sim)
-                    current_positions .= positions(current_frame(sim))
-                    uc = unitcell(current_frame(sim))
-                    iframe += 1
-                    index_current_frame = iframe
-                    next!(prg)
+    @threads for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
+        local uc
+        local index_current_frame
+        local current_positions = copy(p_first_frame)
+        systems = setup_particle_systems(
+            selection_pairs, selection_data,
+            uc_first_frame, donnor_acceptor_distance, parallel
+        )
+        for _ in frame_inds
+            lock(sim) do
+                next_frame!(sim)
+                current_positions .= positions(current_frame(sim))
+                uc = unitcell(current_frame(sim))
+                iframe += 1
+                index_current_frame = iframe
+                next!(prg)
+            end
+            for selection_pair in selection_pairs
+                sel1, sel2 = first(selection_pair), last(selection_pair)
+                key = _key_name(sel1, sel2)
+                sys = systems[key]
+                if sel1 == sel2
+                    s1 = selection_data[sel1]
+                    sys.xpositions .= @view(current_positions[s1.inds])
+                    update_unitcell!(sys, uc.matrix)
+                    number_of_hbonds = count_hbonds(
+                        sys, s1, angle_cutoff, electronegative_elements
+                    )
+                else
+                    s1 = selection_data[sel1]
+                    s2 = selection_data[sel2]
+                    sys.xpositions .= @view(current_positions[s1.inds])
+                    sys.ypositions .= @view(current_positions[s2.inds])
+                    update_unitcell!(sys, uc.matrix)
+                    number_of_hbonds = count_hbonds(
+                        sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements
+                    )
                 end
-                for selection_pair in selection_pairs
-                    sel1 = first(selection_pair)
-                    sel2 = last(selection_pair)
-                    if sel1 == sel2
-                        sys = systems[_key_name(sel1, sel2)]
-                        s1 = selection_data[sel1]
-                        # Update ParticleSystem for this frame
-                        sys.xpositions .= @view(current_positions[s1.inds])
-                        update_unitcell!(sys, uc.matrix)
-                        # Compute number of hydrogen bonds
-                        number_of_hbonds = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
-                            el_i = element(s1.ats[i])
-                            el_j = element(s1.ats[j])
-                            if (el_i in electronegative_elements) & (el_j in electronegative_elements)
-                                number_of_hbonds += count_hbonds(
-                                    i, x, y, s1.polar_bonds,
-                                    sys.positions, sys.unitcell,
-                                    angle_cutoff,
-                                )
-                                number_of_hbonds += count_hbonds(
-                                    j, y, x, s1.polar_bonds,
-                                    sys.positions, sys.unitcell,
-                                    angle_cutoff,
-                                )
-                            end
-                            return number_of_hbonds
-                        end
-                    elseif sel1 != sel2
-                        sys = systems[_key_name(sel1, sel2)]
-                        s1 = selection_data[sel1]
-                        s2 = selection_data[sel2]
-                        # Update ParticleSystem for this frame
-                        sys.xpositions .= @view(current_positions[s1.inds])
-                        sys.ypositions .= @view(current_positions[s2.inds])
-                        update_unitcell!(sys, uc.matrix)
-                        number_of_hbonds = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
-                            at_i = s1.ats[i]
-                            at_j = s2.ats[j]
-                            if index(at_i) == index(at_j)
-                                throw(ArgumentError("""\n
-                                    Different selections cannot overlap. Detected atom $(index(at_i)) in both selections \"$sel1\" and \"$sel2\".
-
-                                    """))
-                            end
-                            el_i = element(at_i)
-                            el_j = element(at_j)
-                            if (el_i in electronegative_elements) & (el_j in electronegative_elements)
-                                number_of_hbonds += count_hbonds2(
-                                    i, x, y, s1.polar_bonds, sys.xpositions,
-                                    sys.unitcell, angle_cutoff
-                                )
-                                number_of_hbonds += count_hbonds2(
-                                    j, y, x, s2.polar_bonds, sys.ypositions,
-                                    sys.unitcell, angle_cutoff
-                                )
-                            end
-                            return number_of_hbonds
-                        end
-                    end
-                    hbonds[_key_name(sel1, sel2)][index_current_frame] = number_of_hbonds
-                end
+                hbonds[key][index_current_frame] = number_of_hbonds
             end
         end
     end
