@@ -81,7 +81,7 @@ function PDBTools.hydrogen_bonds(
     end
 
     # initialize trajectory
-    firstframe!(sim)
+    first_frame!(sim)
     uc_first_frame = unitcell(current_frame(sim))
     p_first_frame = positions(current_frame(sim))
 
@@ -152,12 +152,12 @@ function PDBTools.hydrogen_bonds(
             end
             for _ in frame_inds
                 lock(sim) do
-                    nextframe!(sim)
-                    iframe += 1
-                    next!(prg)
-                    index_current_frame = iframe
+                    next_frame!(sim)
                     current_positions .= positions(current_frame(sim))
                     uc = unitcell(current_frame(sim))
+                    iframe += 1
+                    index_current_frame = iframe
+                    next!(prg)
                 end
                 for selection_pair in selection_pairs
                     sel1 = first(selection_pair)
