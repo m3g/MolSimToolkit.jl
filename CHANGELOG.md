@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.30.1-DEV
 --------------
+- ![INFO][badge-info] Organize `hydrogen_bonds` code.
 
 Version 1.30.0
 --------------
