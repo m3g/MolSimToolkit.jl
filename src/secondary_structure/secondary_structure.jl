@@ -19,7 +19,7 @@ function _ss_frame!(
 ) where {F<:Function}
     p = positions(frame)
     uc = unitcell(frame)
-    for (iat, at) in enumearate(atoms)
+    for (iat, at) in enumerate(atoms)
         iatom = PDBTools.index(at)
         set_position!(at, p[iatom])
         if reconstruct_structure
