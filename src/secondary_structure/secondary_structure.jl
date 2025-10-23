@@ -14,12 +14,21 @@ const replace_aa_code = Dict{String,String}(
 function _ss_frame!(
     atoms::AbstractVector{<:PDBTools.Atom},
     frame::Chemfiles.Frame;
-    ss_method::F=stride_run
+    ss_method::F=stride_run,
+    reconstruct_structure=true,
 ) where {F<:Function}
-    coordinates = positions(frame)
-    for at in atoms
+    p = positions(frame)
+    uc = unitcell(frame)
+    for (iat, at) in enumearate(atoms)
         iatom = PDBTools.index(at)
-        set_position!(at, coordinates[iatom])
+        set_position!(at, p[iatom])
+        if reconstruct_structure
+            if iat == 1
+                set_position!(at, p[iatom])
+            else
+                set_position!(at, wrap(p[iatom], coor(atoms[iat-1]), uc))
+            end
+        end
     end
     # This is very bad: we are writting temporary files twice for each frame
     # one here, one in the ss_method function, to adjust the PDB header
@@ -33,7 +42,8 @@ end
         simulation::Simulation; 
         selection::Union{AbstractString,Function}=PDBTools.isprotein,
         ss_method=stride_run,
-        show_progress=true
+        show_progress=true,
+        reconstruct_structure=true,
     )
 
 Calculates the secondary structure map of the trajectory. 
@@ -50,6 +60,11 @@ algorithm, while DSSP is the default one in PDB database.
 The `show_progress` keyword argument controls whether a progress bar is shown.
 
 For the classes, refer to the ProteinSecondaryStructures.jl package documentation.
+
+The `reconstruct_structure` keyword argument controls whether the structure is reconstructed
+using the unit cell information before calculating the secondary structure. This is useful
+when the trajectory contains periodic boundary conditions and the protein is split across
+the unit cell boundaries.
 
 ## Example
 
@@ -83,7 +98,8 @@ function ss_map(
     simulation::Simulation;
     selection::Union{AbstractString,Function}=PDBTools.isprotein,
     ss_method::F=stride_run,
-    show_progress=true
+    show_progress=true,
+    reconstruct_structure=true,
 ) where {F<:Function}
     sel = PDBTools.select(atoms(simulation), selection)
     for iat in eachindex(sel)
@@ -94,7 +110,7 @@ function ss_map(
     ss_map = zeros(Int, length(PDBTools.eachresidue(sel)), length(simulation))
     p = Progress(length(simulation); enabled=show_progress)
     for (iframe, frame) in enumerate(simulation)
-        ss = _ss_frame!(sel, frame; ss_method)
+        ss = _ss_frame!(sel, frame; ss_method, reconstruct_structure)
         for (i, ssdata) in pairs(ss)
             ss_map[i, iframe] = ss_number(ssdata)
         end

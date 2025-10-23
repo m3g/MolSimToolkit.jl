@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.30.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Reconstruct structure before computing secondary structure.
 
 Version 1.30.1
 --------------
