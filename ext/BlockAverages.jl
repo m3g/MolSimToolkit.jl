@@ -163,13 +163,14 @@ function plot(
         legendtitle="Summary",
         legendfontsize=8,
     )
-    i95 = findfirst(i -> data.autocor[i] <= t95, eachindex(data.lags)) - 1
+    i95 = findfirst(i -> data.autocor[i] <= t95, eachindex(data.lags))
     isnothing(i95) && (i95 = length(data.lags))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\Delta t (0.95) = $(data.lags[i95])"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(data.tau_int; digits=2))"))
+    i95 -= 1
+    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\Delta t (0.95) = $(data.lags[i95])"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(data.tau_int; digits=4))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("N = $(length(data.x))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(data.n_effective; digits=2))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(round(data.xmean_stderr_neff; digits=2))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(Int, data.n_effective))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(round(data.xmean_stderr_neff; digits=4))"))
     return p
 end
 

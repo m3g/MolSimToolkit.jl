@@ -62,8 +62,6 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
     merr = findmax(b.xmean_stderr)
-    izerolag = findfirst(x -> x <= 0, b.autocor)
-    izerolag = isnothing(izerolag) ? 1 : izerolag
     print(io, chomp(
         """
         -------------------------------------------------------------------
@@ -80,10 +78,12 @@ function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
                  percentual: $((100/b.xmean)*(b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
                    absolute: $((b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
 
-        Autocorrelation is first zero with lag: $(b.lags[izerolag])
         Characteristic time of autocorrelation decay: 
                 as fraction of series length: $(b.tau / length(b.x))
                                     absolute: $(b.tau)
+
+        Integrated tau: $(b.tau_int) - n_effective = $(b.n_effective)
+        With n_effective: SEM: $(b.xmean_stderr_neff)
         -------------------------------------------------------------------
         """
     ))
@@ -225,15 +225,15 @@ function block_average(
         end
     end
 
+    n_input = length(x_input)
+
     # Compute auto-correlation function of the data
     if isnothing(lags)
-        lags = 0:round(Int, min(size(x, 1) - 1, 10 * log10(size(x, 1))))
-        auto_cor = autocor(x)
-    else
-        auto_cor = autocor(x, lags)
+        lags = 0:n-1
     end
+    auto_cor = autocor(x, lags)
 
-    t95 = 1.96 / sqrt(n)
+    t95 = 1.96 / sqrt(n_input)
     i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
     isnothing(i95) && (i95 = length(lags))
     tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
@@ -242,7 +242,7 @@ function block_average(
     xmean_stderr_neff = std(x) / sqrt(n_eff)
 
     return BlockAverageData{T}(
-        x,
+        x_input,
         xmean,
         blocksize,
         xmean_maxerr,
