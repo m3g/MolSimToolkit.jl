@@ -77,6 +77,7 @@ function plot(
         ylabel="value",
         label="",
         color=:black,
+        title=title,
     )
     hline!(
         [data.xmean],
@@ -84,7 +85,6 @@ function plot(
         alpha=0.5,
         color=:black,
         label=:none,
-        title=title,
         subplot=2,
     )
     plot!(

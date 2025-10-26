@@ -73,7 +73,7 @@ let us choose a block size of `25_000`, from a set similar to the one above:
 
 ```@example block_averages
 x = BlockAverages.test_data(10^5) 
-d = block_distribution(x; block_size = 25_000)
+d = block_distribution(x; block_size = 2_500)
 ```
 
 The following command will produce a plot similar to the following, in which the histogram
