@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.30.2-DEV
 --------------
+- ![FEATURE][badge-feature] Compute integrated correlation time and effective number of samples in BlockAverage, to plot. The exponential fit is new performed for the set of data in the 95% confidence interval. 
 - ![ENHANCEMENT][badge-enhancement] Reconstruct structure before computing secondary structure.
 
 Version 1.30.1

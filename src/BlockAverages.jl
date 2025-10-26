@@ -230,7 +230,10 @@ function block_average(
         auto_cor = autocor(x, lags)
     end
 
-    tau = fitexp(lags, auto_cor, c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    t95 = 1.96 / sqrt(n)
+    i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
+    isnothing(i95) && (i95 = length(lags))
+    tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
 
     return BlockAverageData{T}(
         x,
@@ -338,14 +341,13 @@ function brange(i, block_size)
 end
 
 # Generate correlated data to test
-function test_data(n)
-    temperature = 1.0
+function test_data(n; variance=0.1, temperature=1.0)
     x = Vector{Float64}(undef, n)
     x[1] = 0.0
     u = 0.0
     i = 1
     while i < n
-        x_trial = x[i] - 0.1 + 0.2 * rand()
+        x_trial = x[i] + variance * randn()
         u_trial = x_trial^2
         if u_trial < u || exp((u - u_trial) / temperature) > 0.5
             i += 1
