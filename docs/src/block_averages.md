@@ -72,7 +72,7 @@ block size. A relatively good fit to a gaussian distribution is expected. For in
 let us choose a block size of `25_000`, from a set similar to the one above:
 
 ```@example block_averages
-x = BlockAverages.test_data(10^4) 
+x = BlockAverages.test_data(10^5) 
 d = block_distribution(x; block_size = 25_000)
 ```
 
