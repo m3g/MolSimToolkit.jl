@@ -237,8 +237,8 @@ function block_average(
     i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
     isnothing(i95) && (i95 = length(lags))
     tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
-    tau_int = 1 + 2 * sum(data.autocor[i] for i in 2:i95-1; init=0.0)
-    n_eff = length(data.x) / tau_int
+    tau_int = 1 + 2 * sum(auto_cor[i] for i in 2:i95-1; init=0.0)
+    n_eff = n / tau_int
     xmean_stderr_neff = std(x) / sqrt(n_eff)
 
     return BlockAverageData{T}(
