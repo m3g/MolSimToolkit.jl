@@ -165,12 +165,9 @@ function plot(
     )
     i95 = findfirst(i -> data.autocor[i] <= t95, eachindex(data.lags)) - 1
     isnothing(i95) && (i95 = length(data.lags))
-    tau = 1 + 2 * sum(data.autocor[i] for i in 2:i95; init=0.0)
-    neff = length(data.x) / tau
-    plot!((1,1), subplot=5, lc=:white, label=latexstring(" "))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\Delta t (0.95) = $(data.lags[i95])"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(data.tau_int; digits=2))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("N  = $(length(data.x))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("N = $(length(data.x))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(data.n_effective; digits=2))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(round(data.xmean_stderr_neff; digits=2))"))
     return p
