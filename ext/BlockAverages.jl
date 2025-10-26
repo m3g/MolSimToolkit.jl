@@ -90,7 +90,7 @@ function plot(
     plot!(
         data.blocksize, data.xmean_maxerr,
         ylabel="worst block value",
-        xlabel=L"\textrm{block~size~}(N)",
+        xlabel=L"\textrm{block~size}",
         label=nothing,
         linewidth=2,
         marker=:circle,
@@ -105,8 +105,8 @@ function plot(
         subplot=2,
     )
     plot!(data.blocksize, data.xmean_stderr,
-        ylabel=L"\sigma^2 / \sqrt{N}",
-        xlabel=L"\textrm{block~size~}(N)",
+        ylabel=L"SD / \sqrt{N_{blocks}}",
+        xlabel=L"\textrm{block~size}",
         label=nothing,
         linewidth=2,
         marker=:circle,
