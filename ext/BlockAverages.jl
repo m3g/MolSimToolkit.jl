@@ -169,9 +169,10 @@ function plot(
     neff = length(data.x) / tau
     plot!((1,1), subplot=5, lc=:white, label=latexstring(" "))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\Delta t (0.95) = $(data.lags[i95])"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(tau; digits=2))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(data.tau_int; digits=2))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("N  = $(length(data.x))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(Int,neff))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(data.n_effective; digits=2))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(round(data.xmean_stderr_neff; digits=2))"))
     return p
 end
 
