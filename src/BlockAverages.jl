@@ -47,6 +47,9 @@ struct BlockAverageData{T}
     lags::AbstractVector{Int}
     autocor::Vector{Float64}
     tau::Float64
+    tau_int::Float64
+    n_effective::Float64
+    xmean_stderr_neff::Float64
 end
 
 function _print_block_sizes(blocksize)
