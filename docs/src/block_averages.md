@@ -9,6 +9,18 @@ Computes the block average of time-dependent data, to compute the standard error
 
 The package also outputs the autocorrelation function of the property, and the characteristic time of the correlation decay. 
 
+## Effective samples
+
+The number of effective samples if obtained by computing the integrated autocorrelation time $$\tau_{INT}$$,
+```math
+\tau_{INT} = 1 + 2\sum_{i=1}^M c(t)
+```
+where $$c(t)$$ is the autocorrelation function of the data and $$M$$ is the time lag (in data points) where $$c(t) < 1.96/\sqrt{N}$$ for the first time, which is the 95% confidence interval for the autocorrelation. The effective number of samples is then
+```math
+N_{\textrm{eff}} = \frac{N}{\tau_{INT}}
+```
+This allows the estimation of the effective standard error of the mean, as $$SD(data)/\sqrt{N_{\textrm{eff}}}$$.
+
 ## Data that is not time-correlated
 
 ### Compute the average of a random variable `x`:
@@ -39,10 +51,10 @@ b = block_average(x)
 The error of the estimate of the mean is, now, dependent on the block size, and we cannot see any convergence of the error, indicating that the sampling is not enough to obtain a reliable estimate of the mean value of `x`.
 
 ```@example block_averages
-plot(b)
+plot(b, title="Poorly sampled data")
 ```
 
-Several characteristics of the output indicate the poor convergence of the series: 1) The mean should be `0.` for this property; 2) the maximum standard error occurs with a block size which is half the length of the series (there is no plateau); 3) the standard error of the mean is of the order of the mean value; 4) The autocorrelation is first zero at ~20% of the length of the data set. 
+Several characteristics of the output indicate the poor convergence of the series: 1) the maximum standard error occurs with a block size which is half the length of the series (there is no plateau); 2) the standard error of the mean is of the order of the mean value; 3) The autocorrelation is first zero at ~20% of the length of the data set. 4) Finally, note that the number of effective samples is very small.
 
 ### Properly sampled data
 
