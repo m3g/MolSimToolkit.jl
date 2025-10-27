@@ -47,6 +47,9 @@ struct BlockAverageData{T}
     lags::AbstractVector{Int}
     autocor::Vector{Float64}
     tau::Float64
+    tau_int::Float64
+    n_effective::Float64
+    xmean_stderr_neff::Float64
 end
 
 function _print_block_sizes(blocksize)
@@ -59,8 +62,6 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
     merr = findmax(b.xmean_stderr)
-    izerolag = findfirst(x -> x <= 0, b.autocor)
-    izerolag = isnothing(izerolag) ? 1 : izerolag
     print(io, chomp(
         """
         -------------------------------------------------------------------
@@ -77,10 +78,12 @@ function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
                  percentual: $((100/b.xmean)*(b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
                    absolute: $((b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
 
-        Autocorrelation is first zero with lag: $(b.lags[izerolag])
         Characteristic time of autocorrelation decay: 
                 as fraction of series length: $(b.tau / length(b.x))
                                     absolute: $(b.tau)
+
+        Integrated tau: $(b.tau_int) - n_effective = $(b.n_effective)
+        With n_effective: SEM: $(b.xmean_stderr_neff)
         -------------------------------------------------------------------
         """
     ))
@@ -222,25 +225,34 @@ function block_average(
         end
     end
 
+    n_input = length(x_input)
+
     # Compute auto-correlation function of the data
     if isnothing(lags)
-        lags = 0:round(Int, min(size(x, 1) - 1, 10 * log10(size(x, 1))))
-        auto_cor = autocor(x)
-    else
-        auto_cor = autocor(x, lags)
+        lags = 0:n-1
     end
+    auto_cor = autocor(x, lags)
 
-    tau = fitexp(lags, auto_cor, c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    t95 = 1.96 / sqrt(n_input)
+    i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
+    isnothing(i95) && (i95 = length(lags))
+    tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    tau_int = 1 + 2 * sum(auto_cor[i] for i in 2:i95-1; init=0.0)
+    n_eff = n / tau_int
+    xmean_stderr_neff = std(x) / sqrt(n_eff)
 
     return BlockAverageData{T}(
-        x,
+        x_input,
         xmean,
         blocksize,
         xmean_maxerr,
         xmean_stderr,
         lags,
         auto_cor,
-        tau
+        tau,
+        tau_int,
+        n_eff,
+        xmean_stderr_neff,
     )
 
 end
@@ -338,14 +350,13 @@ function brange(i, block_size)
 end
 
 # Generate correlated data to test
-function test_data(n)
-    temperature = 1.0
+function test_data(n; variance=0.1, temperature=1.0)
     x = Vector{Float64}(undef, n)
     x[1] = 0.0
     u = 0.0
     i = 1
     while i < n
-        x_trial = x[i] - 0.1 + 0.2 * rand()
+        x_trial = x[i] + variance * randn()
         u_trial = x_trial^2
         if u_trial < u || exp((u - u_trial) / temperature) > 0.5
             i += 1
