@@ -356,13 +356,11 @@ function reweight(
                         end
                     end
                     computed_energy = 0
+                    output[pk].relative_probability = exp.(-output[pk].energy/(k*T))
+                    output[pk].probability = output[pk].relative_probability/sum(output[pk].relative_probability)
                 end
             end
         end
-    end
-    for pk in keys(output)
-        output[pk].relative_probability = @. exp(-output[pk].energy/(k*T))
-        output[pk].probability = @. output[pk].relative_probability/sum(output[pk].relative_probability)
     end
     return output
 end
