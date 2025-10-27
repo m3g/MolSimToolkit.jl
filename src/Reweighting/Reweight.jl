@@ -7,7 +7,7 @@ Structure that contains the result of the reweighting analysis of the sequence.
 
 `energy` is a vector that contains the energy difference for each frame in the simulation after applying some perturbation.
 """
-struct ReweightResults{T<:Real}
+mutable struct ReweightResults{T<:Real}
     probability::Vector{T}
     relative_probability::Vector{T}
     energy::Vector{T}
@@ -260,8 +260,8 @@ function reweight(
         end
     end
     for pk in keys(output)
-        [output[pk].relative_probability[i] = exp(-output[pk].energy[i]/(k*T)) for i in eachindex(output[pk].relative_probability)]
-        [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
+        output[pk].relative_probability = @. exp(-output[pk].energy/(k*T))
+        output[pk].probability = @. output[pk].relative_probability/sum(output[pk].relative_probability)
     end
     return output
 end
@@ -361,8 +361,8 @@ function reweight(
         end
     end
     for pk in keys(output)
-        [output[pk].relative_probability[i] = exp(-output[pk].energy[i]/(k*T)) for i in eachindex(output[pk].relative_probability)]
-        [output[pk].probability[i] = output[pk].relative_probability[i]/sum(output[pk].relative_probability) for i in eachindex(output[pk].probability)]
+        output[pk].relative_probability = @. exp(-output[pk].energy/(k*T))
+        output[pk].probability = @. output[pk].relative_probability/sum(output[pk].relative_probability)
     end
     return output
 end
