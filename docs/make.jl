@@ -7,6 +7,8 @@ push!(LOAD_PATH, "../src/")
 using MolSimToolkit
 using MolSimToolkit.PackmolInputCreator
 using MolSimToolkitShared
+ENV["LINES"] = 10
+ENV["COLUMNS"] = 120
 makedocs(
     modules = [
         MolSimToolkit, MolSimToolkitShared,
@@ -17,6 +19,7 @@ makedocs(
     pages=[
         "Home" => "index.md",
         "Structural analyses" => Any[
+            "Hydrogen bonds" => "hydrogen_bonds.md",
             "Distances and misc." => "Structural_properties.md",
             "Dihedral angle analysis" => "Dihedrals.md",
             "Secondary structure" => "secondary_structures.md",

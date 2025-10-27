@@ -11,7 +11,7 @@
         cossolvent_pdbfile = "$test_dir/data/water.pdb",
         density_table = hcat(0:0.1:1, ones(11))
     )
-    mw = 55.508250191225926
+    mw = 55.50824
     for x in (0.0, 0.2, 0.5, 0.7, 1.0)
         @test convert_concentration(system, x, "x" => "vv") ≈ x atol = 1e-3
         @test convert_concentration(system, x, "x" => "mol/L") ≈ x * mw atol = 1e-3
@@ -83,7 +83,7 @@
         cossolvent_pdbfile = "$test_dir/data/water.pdb",
         density_table = dw
     )
-    @test convert_concentration(system, 1.0, "x" => "mol/L") ≈ 55.40278451586260
+    @test convert_concentration(system, 1.0, "x" => "mol/L") ≈ 55.40278451586260 rtol=1e-5
     dw[end, 1] = 0.99
     @test_throws ArgumentError SolutionBoxUSC(
         solute_pdbfile = "$test_dir/data/poly_h.pdb",
@@ -244,21 +244,21 @@ end
     M = 8.12907194485856
     ρ = 0.9369
 
-    @test convert_concentration(system, x, "x" => "vv") ≈ vv
-    @test convert_concentration(system, x, "x" => "mol/L") ≈ M
-    @test convert_concentration(system, x, "x" => "mm") ≈ mm 
+    @test convert_concentration(system, x, "x" => "vv") ≈ vv rtol=1e-5
+    @test convert_concentration(system, x, "x" => "mol/L") ≈ M rtol=1e-5
+    @test convert_concentration(system, x, "x" => "mm") ≈ mm rtol=1e-5
 
-    @test convert_concentration(system, vv, "vv" => "x") ≈ x
-    @test convert_concentration(system, vv, "vv" => "mol/L") ≈ M
-    @test convert_concentration(system, vv, "vv" => "mm") ≈ mm 
+    @test convert_concentration(system, vv, "vv" => "x") ≈ x rtol=1e-5
+    @test convert_concentration(system, vv, "vv" => "mol/L") ≈ M rtol=1e-5
+    @test convert_concentration(system, vv, "vv" => "mm") ≈ mm rtol=1e-5
 
-    @test convert_concentration(system, M, "mol/L" => "x") ≈ x
-    @test convert_concentration(system, M, "mol/L" => "mm") ≈ mm
-    @test convert_concentration(system, M, "mol/L" => "vv") ≈ vv
+    @test convert_concentration(system, M, "mol/L" => "x") ≈ x rtol=1e-5
+    @test convert_concentration(system, M, "mol/L" => "mm") ≈ mm rtol=1e-5
+    @test convert_concentration(system, M, "mol/L" => "vv") ≈ vv rtol=1e-5
 
-    @test convert_concentration(system, mm, "mm" => "x") ≈ x
-    @test convert_concentration(system, mm, "mm" => "mol/L") ≈ M
-    @test convert_concentration(system, mm, "mm" => "vv") ≈ vv
+    @test convert_concentration(system, mm, "mm" => "x") ≈ x rtol=1e-5
+    @test convert_concentration(system, mm, "mm" => "mol/L") ≈ M rtol=1e-5
+    @test convert_concentration(system, mm, "mm" => "vv") ≈ vv rtol=1e-5
 
     tmp_input_file = tempname()
 

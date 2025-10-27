@@ -39,6 +39,7 @@ to the domain ρ[:,1].
 function interpolate_concentration(system, x)
     ρ = system.density_table
     i = findfirst(d -> d >= x, @view(ρ[:, 1]))
+    isnothing(i) && return ρ[end, 2]
     i == firstindex(@view(ρ[:, 1])) && return ρ[i, 2]
     ρ[i] == x && return ρ[i, 2]
     dρdx = (ρ[i, 2] - ρ[i-1, 2]) / (ρ[i, 1] - ρ[i-1, 1])

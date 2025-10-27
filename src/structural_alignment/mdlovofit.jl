@@ -65,11 +65,7 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
         iframe_in_range = frame_range(simulation)[iframe]
         if iframe_in_range in frame_indices
             p = positions(frame)[cA_inds]
-            for (iat, at) in enumerate(cA)
-                at.x = p[iat].x
-                at.y = p[iat].y
-                at.z = p[iat].z
-            end
+            set_position!.(cA, p)
             write_pdb(tmp_trajectory_file, cA; append=true)
         end
     end

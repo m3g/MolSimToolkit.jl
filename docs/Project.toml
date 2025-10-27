@@ -1,5 +1,7 @@
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 MolSimToolkit = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
