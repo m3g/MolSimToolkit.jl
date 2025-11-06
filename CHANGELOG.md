@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.31.1-DEV
+Version 1.31.1
 --------------
 - ![INFO][badge-info] Fix tests for compatibility with PDBTools. 3.11.0 (removed mvalue-related functions).
 - ![INFO][badge-info] Explicit imports for all PDBTools functions. 
