@@ -1,5 +1,5 @@
 @testitem "mvalue" begin
-    using PDBTools
+    using PDBTools: read_pdb, lattice_to_matrix
 
     sasa_1MJC_clean = parse_mvalue_server_sasa(
         """
