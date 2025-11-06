@@ -99,17 +99,16 @@ function adjust_xinput(x_input, block_size, var="max_block_size")
     end
     if length(x_input) % block_size != 0
         x = @view(x_input[firstindex(x_input):lastindex(x_input)-length(x_input)%block_size])
-        println("""
+        @warn """\n
+            Number of data points is not a multiple of $var.
 
-        WARNING: number of data points is not a multiple of $var.
+            This may cause poor block sampling, because the analysis
+            is performed only for sets of blocks that encompass to complete
+            data set. 
 
-                This may cause poor block sampling, because the analysis
-                is performed only for sets of blocks that encompass to complete
-                data set. 
+            >> Only the first $(length(x)) data points will be considered.
 
-                >> Only the first $(length(x)) data points will be considered.
-
-        """)
+        """ _file=nothing _line=nothing
     else
         x = x_input
     end
@@ -407,5 +406,8 @@ end # module BlockAverage
     > block_mean contains the mean computed for each block.
     -------------------------------------------------------------------
     """
+
+    @test_logs (:warn, r"Number of data") block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=3)
+    @test_throws "block_size not" block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=-1)
 
 end
