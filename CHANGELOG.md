@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.31.1-DEV
 --------------
+- ![INFO][badge-info] Fix tests for compatibility with PDBTools. 3.11.0
 
 Version 1.31.0
 --------------
