@@ -1,7 +1,6 @@
 using Statistics: mean
 using DelimitedFiles: readdlm
 using PDBTools: Atom, read_pdb, write_pdb, write_pdb_atom
-import MDLovoFit_jll
 using ChunkSplitters: chunks
 
 # Functions of the interface
@@ -9,6 +8,9 @@ export MDLovoFitResult
 export mdlovofit
 export MapFractionsResult
 export map_fractions
+
+import MDLovoFit_jll
+const mdlovofit_runner = MDLovoFit_jll.mdlovofit()
 
 #=
 
@@ -170,9 +172,7 @@ function map_fractions(
     tmp_trajectory_file, frame_indices = _write_temporary_trajectory(simulation, maxframes)
     # Run mdlovofit
     mapfrac_file = tempname() * "_mapfrac.dat"
-    MDLovoFit_jll.mdlovofit() do exe
-        run(pipeline(`$exe -mapfrac $tmp_trajectory_file`; stdout=mapfrac_file))
-    end
+    run(pipeline(`$mdlovofit_runner -mapfrac $tmp_trajectory_file`; stdout=mapfrac_file))
     data = readdlm(mapfrac_file, comments=true, comment_char='#')
     range = 1:findlast(<(1), data[:, 1])
     fraction = data[range, 1]
@@ -328,12 +328,10 @@ function mdlovofit(
         output_name * "_rmsf.dat", output_name * "_rmsd.dat", output_name * "_aligned.pdb"
     end
     try
-        MDLovoFit_jll.mdlovofit() do exe
-            run(pipeline(
-                `$exe -f $fraction -iref $reference_frame -rmsf $rmsf_file -t $output_pdb $tmp_trajectory_file`;
-                stdout=rmsd_file
-            ))
-        end
+        run(pipeline(
+            `$mdlovofit_runner -f $fraction -iref $reference_frame -rmsf $rmsf_file -t $output_pdb $tmp_trajectory_file`;
+            stdout=rmsd_file
+        ))
     catch
         "ERROR in MDLovoFit execution"
         "Command executed: $command"
@@ -347,15 +345,15 @@ function mdlovofit(
     # Read RMSF file
     rmsf = readdlm(rmsf_file; comments=true, comment_char='#')[:, 2]
     return MDLovoFitResult(
-        simulation, 
-        fraction, 
-        frame_indices, 
-        rmsd_low, 
-        rmsd_high, 
-        rmsd_all, 
-        rmsf, 
-        rmsf_file, 
-        rmsd_file, 
+        simulation,
+        fraction,
+        frame_indices,
+        rmsd_low,
+        rmsd_high,
+        rmsd_all,
+        rmsf,
+        rmsf_file,
+        rmsd_file,
         output_pdb
     )
 end
@@ -381,10 +379,10 @@ end
     @test length(mf.frame_indices) == 70
     @test sum(mf.rmsd_all) ≈ 66.11294932099999
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2,5])
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2, 5])
     mf = map_fractions(sim)
     @test mf.frame_indices == [2, 5]
-    @test sum(mf.rmsd_low) ≈ 75.73356675900001 
+    @test sum(mf.rmsd_low) ≈ 75.73356675900001
     @test sum(mf.rmsd_high) ≈ 769.6762035190002
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
@@ -411,7 +409,7 @@ end
 @testitem "mdlovofit" begin
     using ShowMethodTesting
     using MolSimToolkit, MolSimToolkit.Testing
-    using PDBTools 
+    using PDBTools
 
     sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
     @test_throws UndefKeywordError mdlovofit(sim)
@@ -431,8 +429,8 @@ end
     @test length(fit.frame_indices) == 50
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2,5])
-    md = mdlovofit(sim; fraction = 0.7)
+    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2, 5])
+    md = mdlovofit(sim; fraction=0.7)
     pdb = read_pdb(md.aligned_pdb)
     @test length(eachmodel(pdb)) == 2
     @test md.frame_indices == [2, 5]
