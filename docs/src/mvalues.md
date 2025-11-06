@@ -10,21 +10,21 @@ CollapsedDocStrings = true
 
 ## Computing m-values for single structure pairs
 
-```@docs
-mvalue
-delta_sasa_per_restype
-parse_mvalue_server_sasa
-gmx_delta_sasa_per_restype
-```
+The core infrastructure to compute *m*-values was moved to [PDBTools.jl](https://m3g.github.io/PDBTools.jl/stable/mvalue/). 
+Here we import the relevant functions of PDBTools.jl to compute *m*-values along a trajectory:
 
-## Computing m-values along a trajectory
+```@example mvalues
+using MolSimToolkit
+#using PDBTools: read_pdb, index, set_position!, 
+#                sasa_particles, sasa, mvalue, index, set_position!
+using PDBTools
+```
 
 Here we show an example of how to compute m-values along a trajectory. 
 We define a function to iterate over the simulation frames, and compute the m-values
 for each frame, considering the first frame as the reference state:
 
-```@example mvalue_traj
-using MolSimToolkit, PDBTools
+```@example mvalues
 function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Atom})
     # indices of the protein atoms, to fetch frame coordinates
     inds_protein = index.(protein_ref)
@@ -34,24 +34,17 @@ function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Ato
     tot = Float32[]
     bb = Float32[]
     sc = Float32[]
+    sasa_reference = sasa_particles(protein_ref)
     for frame in sim
         # fetch protein coordinates and unitcell 
         p = positions(frame)[inds_protein] 
         uc = unitcell(frame)
         # update coordinates (note the dot for broadcast)
         set_position!.(protein_at_frame, p)
-        # Compute variations in SASA relative to reference
-        dsasa = delta_sasa_per_restype(;
-            native=protein_ref,
-            desnat=protein_at_frame,
-        )
+        # Compute SASA of the protein in this frame
+        sasa_frame = sasa_particles(protein_at_frame; unitcell=uc) 
         # Compute mvalue
-        m = mvalue(;
-            model=MoeserHorinek,
-            cosolvent="urea",
-            atoms=protein_ref,
-            sasas=dsasa,
-        )
+        m = mvalue(sasa_reference, sasa_frame, "urea")
         # push total, backbone and sidechain mvalues to arrays
         push!(tot, m.tot)
         push!(bb, m.bb)
@@ -63,7 +56,7 @@ end
 
 Running the above function over a trajectory can be done with:
 
-```@example mvalue_traj
+```@example mvalues
 using MolSimToolkit.Testing # to load test files
 # Build Simulation object
 sim = Simulation(Testing.namd_pdb, Testing.namd_traj) 
@@ -73,7 +66,7 @@ protein = read_pdb(Testing.namd_pdb, "protein")
 firstframe!(sim)
 p_ref = positions(current_frame(sim))[index.(protein)]
 set_position!.(protein, p_ref) # note the dot
-# Run the mvalue-traj function
+# Run the mvalues-traj function
 tot, bb, sc = mvalue_traj(sim, protein)
 ```
 
