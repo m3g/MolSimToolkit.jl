@@ -50,7 +50,7 @@ function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Ato
         push!(bb, m.bb)
         push!(sc, m.sc)
     end
-    return tot, bb, sc
+    return (tot=tot, bb=bb, sc=sc)
 end
 ```
 
@@ -67,7 +67,7 @@ firstframe!(sim)
 p_ref = positions(current_frame(sim))[PDBTools.index.(protein)]
 PDBTools.set_position!.(protein, p_ref) # note the dot
 # Run the mvalues-traj function
-tot, bb, sc = mvalue_traj(sim, protein)
+m = mvalue_traj(sim, protein)
 ```
 
 Plotting the results, we obtain the $\Delta_{\textrm{ref}\rightarrow\textrm{target}}\Delta G^{T}$, the difference in transfer free energy
@@ -76,13 +76,13 @@ from water to urea at 1M, of the target structure at each frame relative to the 
 ```@example mvalues
 using Plots, Statistics
 plt = plot(MolSimStyle, layout=(1,2))
-plot!(plt, tot; label="Total", lw=2, sp=1)
-plot!(plt, bb; label="Backbone", lw=2, sp=1)
-plot!(plt, sc; label="Sidechains", lw=2, sp=1)
+plot!(plt, m.tot; label="Total", lw=2, sp=1)
+plot!(plt, m.bb; label="Backbone", lw=2, sp=1)
+plot!(plt, m.sc; label="Sidechains", lw=2, sp=1)
 plot!(xlabel="frame", ylabel="m-value / (kJ/mol)", sp=1)
 bar!(plt, [1  2  3],
-    [mean(tot)  mean(bb)  mean(sc)],
-    yerr=[std(tot)/5  std(bb)/5  std(sc)/5], # just illustrative
+    [mean(m.tot)  mean(m.bb)  mean(m.sc)],
+    yerr=[std(m.tot)/5  std(m.bb)/5  std(m.sc)/5], # just illustrative
     xticks=([1,2,3],["Total","Backbone","Sidechain"]),
     sp=2, label="", xlabel="", ylims=(-0.08,0),
     ylabel="m-value (kJ/mol)",
@@ -94,4 +94,3 @@ protein in time (target structures have more negative transfer free energies tha
 reference structure) with the interactions with
 the backbone being more relevant than those of the sidechains. The errors are
 of course only illustrative.
-
