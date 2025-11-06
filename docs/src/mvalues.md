@@ -42,7 +42,7 @@ function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Ato
         # update coordinates (note the dot for broadcast)
         set_position!.(protein_at_frame, p)
         # Compute SASA of the protein in this frame
-        sasa_frame = sasa_particles(protein_at_frame; unitcell=uc) 
+        sasa_frame = sasa_particles(protein_at_frame; unitcell=uc.matrix) 
         # Compute mvalue
         m = mvalue(sasa_reference, sasa_frame, "urea")
         # push total, backbone and sidechain mvalues to arrays
@@ -73,7 +73,7 @@ tot, bb, sc = mvalue_traj(sim, protein)
 Plotting the results, we obtain the $\Delta_{\textrm{ref}\rightarrow\textrm{target}}\Delta G^{T}$, the difference in transfer free energy
 from water to urea at 1M, of the target structure at each frame relative to the reference structure:
 
-```@example mvalue_traj
+```@example mvalues
 using Plots, Statistics
 plt = plot(MolSimStyle, layout=(1,2))
 plot!(plt, tot; label="Total", lw=2, sp=1)
