@@ -368,3 +368,44 @@ function test_data(n; variance=0.1, temperature=1.0)
 end
 
 end # module BlockAverage
+
+@testitem "block_averages" begin
+    using MolSimToolkit
+    using ShowMethodTesting
+    @test parse_show(block_average(sin.(0:0.1:10))) ≈ """
+    -------------------------------------------------------------------
+    BlockAverageData{Float64}
+    -------------------------------------------------------------------
+    Estimated value (mean by default) = 0.17924135232049382
+    Length of data series: 101
+
+    Block sizes: [1, 101]
+
+    Maximum standard error (error, block size): (0.06647291982753643, 1)
+
+    Deviations in last 3 blocks:
+             percentual: [-657.8641561330004, 0.0]  
+               absolute: [-1.1791646098845947, 0.0]  
+
+    Characteristic time of autocorrelation decay: 
+            as fraction of series length: 0.12726273736481775
+                                absolute: 12.853536473846592
+
+    Integrated tau: 18.939369142554224 - n_effective = 5.3328069821009265
+    With n_effective: SEM: 0.2892860623252932
+    -------------------------------------------------------------------
+    """
+
+    @test parse_show(lock_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2)) ≈ """
+    -------------------------------------------------------------------
+    BlockDistribution{50}
+    -------------------------------------------------------------------
+    Number of blocks: 50
+    Estimated mean: = 0.17919314549243645
+    Standard error of the mean: 0.09481562322937186
+    Standard deviation of the mean: 0.6704477014791758
+    > block_mean contains the mean computed for each block.
+    -------------------------------------------------------------------
+    """
+
+end
