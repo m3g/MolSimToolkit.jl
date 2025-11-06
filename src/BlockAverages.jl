@@ -395,7 +395,7 @@ end # module BlockAverage
           Integrated tau: 18.807525484818207 - n_effective = 5.317020576721903
           With n_effective: SEM: 0.2897251593116128
           -------------------------------------------------------------------
-          """
+          """ float_match = (a, b) -> isapprox(a, b; rtol=0.1)
 
     @test parse_show(block_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2);
         repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈

@@ -1,4 +1,5 @@
 /Manifest.toml
+*.cov
 .vscode/settings.json
 docs/Manifest.toml
 docs/build*
