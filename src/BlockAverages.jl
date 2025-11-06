@@ -395,7 +395,7 @@ end # module BlockAverage
     -------------------------------------------------------------------
     """
 
-    @test parse_show(lock_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2)) ≈ """
+    @test parse_show(block_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2)) ≈ """
     -------------------------------------------------------------------
     BlockDistribution{50}
     -------------------------------------------------------------------
