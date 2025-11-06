@@ -15,9 +15,9 @@ Here we import the relevant functions of PDBTools.jl to compute *m*-values along
 
 ```@example mvalues
 using MolSimToolkit
-#using PDBTools: read_pdb, index, set_position!, 
-#                sasa_particles, sasa, mvalue, index, set_position!
-using PDBTools
+import PDBTools
+# explicit use of the SASA and mvalue functions
+using PDBTools: sasa_particles, sasa, mvalue 
 ```
 
 Here we show an example of how to compute m-values along a trajectory. 
@@ -27,7 +27,7 @@ for each frame, considering the first frame as the reference state:
 ```@example mvalues
 function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Atom})
     # indices of the protein atoms, to fetch frame coordinates
-    inds_protein = index.(protein_ref)
+    inds_protein = PDBTools.index.(protein_ref)
     # Create a copy to update coordinates at each frame
     protein_at_frame = copy.(protein_ref)
     # Create arrays to store total and bb and sc contributions
@@ -40,7 +40,7 @@ function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Ato
         p = positions(frame)[inds_protein] 
         uc = unitcell(frame)
         # update coordinates (note the dot for broadcast)
-        set_position!.(protein_at_frame, p)
+        PDBTools.set_position!.(protein_at_frame, p)
         # Compute SASA of the protein in this frame
         sasa_frame = sasa_particles(protein_at_frame; unitcell=uc.matrix) 
         # Compute mvalue
@@ -61,11 +61,11 @@ using MolSimToolkit.Testing # to load test files
 # Build Simulation object
 sim = Simulation(Testing.namd_pdb, Testing.namd_traj) 
 # We are interested only in protein atoms
-protein = read_pdb(Testing.namd_pdb, "protein")
+protein = PDBTools.read_pdb(Testing.namd_pdb, "protein")
 # Lets get the positions of the first frame for reference
 firstframe!(sim)
-p_ref = positions(current_frame(sim))[index.(protein)]
-set_position!.(protein, p_ref) # note the dot
+p_ref = positions(current_frame(sim))[PDBTools.index.(protein)]
+PDBTools.set_position!.(protein, p_ref) # note the dot
 # Run the mvalues-traj function
 tot, bb, sc = mvalue_traj(sim, protein)
 ```
