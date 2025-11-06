@@ -540,7 +540,7 @@ function get_frame(simulation::Simulation, iframe::Integer)
     end
     p = positions(current_frame(simulation))
     ats = atoms(simulation)
-    set_position!.(ats, p)
+    PDBTools.set_position!.(ats, p)
     return ats
 end
 

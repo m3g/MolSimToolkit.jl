@@ -1,6 +1,5 @@
 using Statistics: mean
 using DelimitedFiles: readdlm
-using PDBTools: Atom, read_pdb, write_pdb, write_pdb_atom
 using ChunkSplitters: chunks
 
 # Functions of the interface
@@ -67,8 +66,8 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
         iframe_in_range = frame_range(simulation)[iframe]
         if iframe_in_range in frame_indices
             p = positions(frame)[cA_inds]
-            set_position!.(cA, p)
-            write_pdb(tmp_trajectory_file, cA; append=true)
+            PDBTools.set_position!.(cA, p)
+            PDBTools.write_pdb(tmp_trajectory_file, cA; append=true)
         end
     end
 
