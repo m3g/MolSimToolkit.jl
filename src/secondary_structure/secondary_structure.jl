@@ -21,12 +21,12 @@ function _ss_frame!(
     uc = unitcell(frame)
     for (iat, at) in enumerate(atoms)
         iatom = PDBTools.index(at)
-        set_position!(at, p[iatom])
+        PDBTools.set_position!(at, p[iatom])
         if reconstruct_structure
             if iat == 1
-                set_position!(at, p[iatom])
+                PDBTools.set_position!(at, p[iatom])
             else
-                set_position!(at, wrap(p[iatom], coor(atoms[iat-1]), uc))
+                PDBTools.set_position!(at, wrap(p[iatom], PDBTools.coor(atoms[iat-1]), uc))
             end
         end
     end
