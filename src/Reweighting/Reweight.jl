@@ -179,6 +179,7 @@ function reweight(
     k::Real = 1.0, #Boltzmann constant
     T::Real = 1.0, #Temperature
     cutoff::Real = 12.0, #Cutoff of distances
+    tol::Real = 1.e-16 #Tolerance to consider a distance contribution
 )
     #Defining results
     output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
@@ -251,7 +252,7 @@ function reweight(
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
                             output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
-                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) != 0 ? 1 : 0
+                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) >= tol ? 1 : 0
                         end
                     end
                     computed_energy = 0
