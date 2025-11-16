@@ -41,8 +41,8 @@ function find_hbond_donnors(
         (x, y, i, j, d2, polar_bonds) -> begin
             at_i = ats_sel[i]
             at_j = ats_sel[j]
-            el_i = element(at_i)
-            el_j = element(at_j)
+            el_i = PDBTools.element(at_i)
+            el_j = PDBTools.element(at_j)
             if (el_i in electronegative_elements) & (el_j == "H")
                 D = i
                 H = j
@@ -152,8 +152,8 @@ function initialize_hbonds_data(
 
         for sel in selection_pair
             if !haskey(selection_data, sel)
-                ats_sel = select(atoms(sim), sel)
-                inds_sel = index.(ats_sel)
+                ats_sel = PDBTools.select(atoms(sim), sel)
+                inds_sel = PDBTools.index.(ats_sel)
                 polar_bonds = find_hbond_donnors(
                     ats_sel;
                     positions=@view(p_first_frame[inds_sel]),
@@ -196,7 +196,7 @@ function setup_particle_systems(
         if sel1 == sel2
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
-                positions=coor.(s1.ats),
+                positions=PDBTools.coor.(s1.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=0,
@@ -206,8 +206,8 @@ function setup_particle_systems(
         else
             s1, s2 = selection_data[sel1], selection_data[sel2]
             systems[key] = ParticleSystem(
-                xpositions=coor.(s1.ats),
-                ypositions=coor.(s2.ats),
+                xpositions=PDBTools.coor.(s1.ats),
+                ypositions=PDBTools.coor.(s2.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=0,
@@ -227,8 +227,8 @@ Count hydrogen bonds when donor and acceptor are in the same selection.
 =#
 function count_hbonds(sys::CellListMap.ParticleSystem1, s1, angle_cutoff, electronegative_elements)
     nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
-        el_i = element(s1.ats[i])
-        el_j = element(s1.ats[j])
+        el_i = PDBTools.element(s1.ats[i])
+        el_j = PDBTools.element(s1.ats[j])
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             number_of_hbonds += count_hbonds(
                 i, x, y, s1.polar_bonds,
@@ -255,13 +255,13 @@ function count_hbonds(sys::CellListMap.ParticleSystem2, s1, s2, sel1, sel2, angl
     nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
         at_i = s1.ats[i]
         at_j = s2.ats[j]
-        if index(at_i) == index(at_j)
+        if PDBTools.index(at_i) == PDBTools.index(at_j)
             throw(ArgumentError("""\n
-                Different selections cannot overlap. Detected atom $(index(at_i)) in both selections \"$sel1\" and \"$sel2\".
+                Different selections cannot overlap. Detected atom $(PDBTools.index(at_i)) in both selections \"$sel1\" and \"$sel2\".
                 """))
         end
-        el_i = element(at_i)
-        el_j = element(at_j)
+        el_i = PDBTools.element(at_i)
+        el_j = PDBTools.element(at_j)
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             number_of_hbonds += count_hbonds2(
                 i, x, y, s1.polar_bonds, sys.xpositions,

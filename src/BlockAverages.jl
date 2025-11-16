@@ -99,17 +99,16 @@ function adjust_xinput(x_input, block_size, var="max_block_size")
     end
     if length(x_input) % block_size != 0
         x = @view(x_input[firstindex(x_input):lastindex(x_input)-length(x_input)%block_size])
-        println("""
+        @warn """\n
+            Number of data points is not a multiple of $var.
 
-        WARNING: number of data points is not a multiple of $var.
+            This may cause poor block sampling, because the analysis
+            is performed only for sets of blocks that encompass to complete
+            data set. 
 
-                This may cause poor block sampling, because the analysis
-                is performed only for sets of blocks that encompass to complete
-                data set. 
+            >> Only the first $(length(x)) data points will be considered.
 
-                >> Only the first $(length(x)) data points will be considered.
-
-        """)
+        """ _file = nothing _line = nothing
     else
         x = x_input
     end
@@ -368,3 +367,51 @@ function test_data(n; variance=0.1, temperature=1.0)
 end
 
 end # module BlockAverage
+
+@testitem "block_averages" begin
+    using MolSimToolkit
+    using ShowMethodTesting
+    @test parse_show(block_average(sin.(range(0,10; length=100)));
+        repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+          """
+          -------------------------------------------------------------------
+          BlockAverageData{Float64}
+          -------------------------------------------------------------------
+          Estimated value (mean by default) = 0.17919314549243645
+          Length of data series: 100
+          
+          Block sizes: [1, 2, ..., 50, 100]
+          
+          Maximum standard error (error, block size): (0.2639324800874966, 20)
+          
+          Deviations in last 3 blocks:
+                   percentual: [-336.4364749304436, 20.95533359280619, 0.0]  
+                     absolute: [-0.6028711020117342, 0.03755052141338261, 0.0]  
+          
+          Characteristic time of autocorrelation decay: 
+                  as fraction of series length: 0.1261996015343501
+                                      absolute: 12.619960153435008
+          
+          Integrated tau: 18.807525484818207 - n_effective = 5.317020576721903
+          With n_effective: SEM: 0.2897251593116128
+          -------------------------------------------------------------------
+          """ float_match = (a, b) -> isapprox(a, b; rtol=0.1)
+
+    @test parse_show(block_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2);
+        repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+          """
+          -------------------------------------------------------------------
+          BlockDistribution{50}
+          -------------------------------------------------------------------
+          Number of blocks: 50
+          Estimated mean: = 0.17919314549243645
+          Standard error of the mean: 0.09481562322937186
+          Standard deviation of the mean: 0.6704477014791758
+          > block_mean contains the mean computed for each block.
+          -------------------------------------------------------------------
+          """
+
+    @test_logs (:warn, r"Number of data") block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=3)
+    @test_throws "block_size not" block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=-1)
+
+end

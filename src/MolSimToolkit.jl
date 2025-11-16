@@ -36,6 +36,9 @@ export bulk_coordination
 export coordination_number
 export center_of_mass
 export dihedral, dihedrals
+
+# PDBTools.hydrogen_bonds is overloaded and reexported here
+import PDBTools.hydrogen_bonds
 export hydrogen_bonds
 
 # Reexported from ProteinSecondaryStructures for convenience
@@ -56,19 +59,19 @@ include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
 
 # Structural properties
-include("./miscelaneous_functions/distances.jl")
-include("./miscelaneous_functions/dihedrals.jl")
-include("./miscelaneous_functions/center_of_mass.jl")
-include("./miscelaneous_functions/most_representative_structure.jl")
+include("./miscellaneous_functions/distances.jl")
+include("./miscellaneous_functions/dihedrals.jl")
+include("./miscellaneous_functions/center_of_mass.jl")
+include("./miscellaneous_functions/most_representative_structure.jl")
 include("./secondary_structure/secondary_structure.jl")
 include("./hydrogen_bonds/hydrogen_bonds.jl")
 
 # Time-dependent properties
-include("./miscelaneous_functions/intermittent_correlation.jl")
+include("./miscellaneous_functions/intermittent_correlation.jl")
 
 # Solvation and interactions
-include("./miscelaneous_functions/bulk_coordination.jl")
-include("./miscelaneous_functions/coordination_number.jl")
+include("./miscellaneous_functions/bulk_coordination.jl")
+include("./miscellaneous_functions/coordination_number.jl")
 
 #  Structural alignment
 include("./structural_alignment/standard.jl")
@@ -88,9 +91,6 @@ include("./PackmolInputCreator/PackmolInputCreator.jl")
 
 # Cluster management
 include("./Coaraci/Coaraci.jl")
-
-# m-value calculations
-include("./mvalue/mvalue.jl")
 
 # Structure for plotting styles
 struct MolSimStyle end
