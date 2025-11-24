@@ -1,4 +1,5 @@
 export Simulation
+export Frame
 export UnitCell
 export frame_range
 export frame_index
@@ -59,6 +60,8 @@ The Simulation object can also be manipulated by the following functions:
 - `next_frame!(::Simulation)`: reads the next frame in the trajectory file and returns it. Moves the current frame to the next one.
 - `set_frame_range!(::Simulation; first, last, step)`: resets the range of frames to be iterated over. 
 - `get_frame(::Simulation, iframe)`: returns the frame at the given index in the trajectory.
+- `get_atoms(::Simulation, iframe)`: returns the atoms of the frame at the given index in the trajectory. The positions of the atoms are set to the positions of the frame.
+- `get_unitcell(::Simulation, iframe)`: returns the unit cell of the frame at the given index in the trajectory.
 
 One important feature of the `Simulation` object is that it can be iterated over, frame by frame. 
 
@@ -386,6 +389,18 @@ function next_frame!(simulation::Simulation)
 end
 
 """
+    Frame{T}
+
+A structure to store a frame in the trajectory.
+
+"""
+struct Frame{T<:Chemfiles.Frame} 
+    index::Int
+    frame::T
+end
+Base.show(io::IO, frame::Frame) = print(io, "Frame $(frame.index)")
+
+"""
     UnitCell{T}
 
 A structure to store the unit cell of a frame in the trajectory.
@@ -538,10 +553,34 @@ function get_frame(simulation::Simulation, iframe::Integer)
     while frame_index(simulation) != iframe
         next_frame!(simulation)
     end
-    p = positions(current_frame(simulation))
+    return current_frame(simulation)
+end
+
+"""
+    get_unitcell(simulation::Simulation, iframe::Integer)
+
+Returns the unit cell of the frame at the given index in the trajectory.
+
+"""
+function get_unitcell(simulation::Simulation, iframe::Integer)
+    frame = get_frame(simulation, iframe)
+    uc = unitcell(frame)
+    return uc
+end
+
+"""
+    get_atoms(simulation::Simulation, iframe::Integer)
+
+Returns the atoms of the frame at the given index in the trajectory. The positions of the atoms
+are set to the positions of the frame. This is useful for writing the atoms to a PDB file or for further processing.
+
+"""
+function get_atoms(simulation::Simulation, iframe::Integer)
+    frame = get_frame(simulation, iframe)
+    p = positions(frame)
     ats = atoms(simulation)
     PDBTools.set_position!.(ats, p)
-    return ats
+    return return ats
 end
 
 @testitem "Simulation" begin
@@ -583,7 +622,7 @@ end
     @test isnothing(path_pdb(simulation))
 end
 
-@testitem "get_frame" begin
+@testitem "get_frame/atoms/uc" begin
     using MolSimToolkit, MolSimToolkit.Testing, PDBTools
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
     frames = [ copy(positions(frame)) for frame in sim ]
