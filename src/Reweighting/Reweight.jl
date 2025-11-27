@@ -232,7 +232,7 @@ function reweight(
                         pert_input.perturbations[pk].subgroup1, 
                         pert_input.perturbations[pk].subgroup2, 
                         pert_input.perturbations[pk].perturbation_function,
-                        output[pk].distances,
+                        res_dic[i][4],
                         iframe),
                         system
                 )
