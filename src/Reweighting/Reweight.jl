@@ -261,9 +261,9 @@ function reweight(
             end
         end
     end
-    for pk in keys(output)
-        res_dic[pk][2] = exp.(-output[pk].energy/(k*T))
-        res_dic[pk][1] = output[pk].relative_probability/sum(output[pk].relative_probability)
+    for pk in keys(res_dic)
+        res_dic[pk][2] = exp.(-res_dic[pk][3]/(k*T))
+        res_dic[pk][1] = res_dic[pk][2]/sum(output[pk][2])
     end
     output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
         ReweightResults(
