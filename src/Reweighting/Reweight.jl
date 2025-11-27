@@ -263,7 +263,7 @@ function reweight(
     end
     for pk in keys(res_dic)
         res_dic[pk][2] = exp.(-res_dic[pk][3]/(k*T))
-        res_dic[pk][1] = res_dic[pk][2]/sum(output[pk][2])
+        res_dic[pk][1] = res_dic[pk][2]/sum(res_dic[pk][2])
     end
     output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
         ReweightResults(
