@@ -224,7 +224,7 @@ function reweight(
                 output_name = :total_energy
             )
             for pk in keys(pert_input.perturbations)
-                output[pk].energy[iframe] = map_pairwise!(
+                res_dic[pk][3][iframe] = map_pairwise!(
                     (x, y, i, j, d2, total_energy) -> total_energy + cell_list_func(
                         i, 
                         j, 
