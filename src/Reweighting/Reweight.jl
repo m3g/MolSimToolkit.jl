@@ -7,7 +7,7 @@ Structure that contains the result of the reweighting analysis of the sequence.
 
 `energy` is a vector that contains the energy difference for each frame in the simulation after applying some perturbation.
 """
-mutable struct ReweightResults{T<:Real}
+struct ReweightResults{T<:Real}
     probability::Vector{T}
     relative_probability::Vector{T}
     energy::Vector{T}
@@ -182,12 +182,13 @@ function reweight(
     tol::Real = 1.e-16 #Tolerance to consider a distance contribution
 )
     #Defining results
-    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
-        ReweightResults(
+    res_dic = OrderedCollections.OrderedDict{Any, Vector{Vector{Real}}}(i =>
+        [
         zeros(length(simulation)), 
         zeros(length(simulation)), 
         zeros(length(simulation)),  
-        zeros(length(simulation))) 
+        zeros(length(simulation))
+        ] 
         for i in keys(pert_input.perturbations)
     )
 
@@ -251,8 +252,8 @@ function reweight(
                 for pk in keys(pert_input.perturbations)
                     for d_i in eachindex(gp_2_list)                    
                         if gp_2_list[d_i].within_cutoff && is_in(pert_input.perturbations[pk].subgroup2, pert_input.group2[gp_2_list[d_i].i]) && is_in(pert_input.perturbations[pk].subgroup1, pert_input.group1[gp_2_list[d_i].j])
-                            output[pk].energy[iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
-                            output[pk].distances[iframe] += abs(output[pk].energy[iframe]) >= tol ? 1 : 0
+                            res_dic[pk][3][iframe] += pert_input.perturbations[pk].perturbation_function(gp_2_list[d_i].d) 
+                            res_dic[pk][4][iframe] += abs(res_dic[pk][3][iframe]) >= tol ? 1 : 0
                         end
                     end
                     computed_energy = 0
@@ -261,9 +262,18 @@ function reweight(
         end
     end
     for pk in keys(output)
-        output[pk].relative_probability = exp.(-output[pk].energy/(k*T))
-        output[pk].probability = output[pk].relative_probability/sum(output[pk].relative_probability)
+        res_dic[pk][2] = exp.(-output[pk].energy/(k*T))
+        res_dic[pk][1] = output[pk].relative_probability/sum(output[pk].relative_probability)
     end
+    output = OrderedCollections.OrderedDict{Any, ReweightResults}(i => 
+        ReweightResults(
+        res_dic[i][1], 
+        res_dic[i][2], 
+        res_dic[i][3],  
+        res_dic[i][4]
+        ) 
+        for i in keys(pert_input.perturbations)
+    )
     return output
 end
 
