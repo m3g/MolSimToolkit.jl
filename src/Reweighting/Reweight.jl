@@ -313,7 +313,7 @@ function reweight(
         if (is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group1[j])) || (is_in(subgroup2, pert_input.group1[i]) && is_in(subgroup1, pert_input.group1[j]))
             eng = pert_func(d)
             if abs(eng) >= tol
-                distance_vec[frame] += 2
+                distance_vec[frame] += 1
             end
             return eng
         end
