@@ -312,7 +312,7 @@ end
     ] atol = 1.e-3
 
 
-    @test res["a"].distances ≈ [
+    @test res["a"].distances == [
         7.0, 
         9.0, 
         7.0, 
@@ -323,7 +323,7 @@ end
         8.0, 
         5.0, 
         4.0
-    ] atol = 1.e-3
+    ] 
 
     @test res["b"].energy ≈ [
         129.7620583116274, 
@@ -387,7 +387,7 @@ end
         0.0
     ] atol = 1.e-3
 
-    @test res["a"].distances ≈ [
+    @test res["a"].distances == [
         18.0, 
         27.0, 
         9.0, 
@@ -398,7 +398,7 @@ end
         9.0, 
         9.0, 
         0.0
-    ] atol = 1.e-5
+    ]
 
     @test res["b"].energy ≈ [ #VIZINHOS MAIS PRÓXIMOS DO MolSimToolkit NÃO SERVIU PARA TESTAR OS RESULTADOS!!!!!!! FALAR COM LEANDRO
         140.8590610379914, 
@@ -413,7 +413,7 @@ end
         0.0
     ] atol = 1.e-4
 
-        @test res["b"].distances ≈ [
+        @test res["b"].distances == [
         8.0, 
         12.0, 
         4.0, 
@@ -424,5 +424,5 @@ end
         4.0, 
         4.0, 
         0.0
-    ] atol = 1.e-4
+    ]
 end
