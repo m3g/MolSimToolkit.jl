@@ -398,7 +398,7 @@ end
         9.0, 
         9.0, 
         0.0
-    ] atol = 1.e-4
+    ]
 
     @test res["b"].energy == [ #VIZINHOS MAIS PRÓXIMOS DO MolSimToolkit NÃO SERVIU PARA TESTAR OS RESULTADOS!!!!!!! FALAR COM LEANDRO
         140.8590610379914, 
