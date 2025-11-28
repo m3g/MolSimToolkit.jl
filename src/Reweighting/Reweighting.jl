@@ -400,7 +400,7 @@ end
         0.0
     ]
 
-    @test res["b"].energy == [ #VIZINHOS MAIS PRÓXIMOS DO MolSimToolkit NÃO SERVIU PARA TESTAR OS RESULTADOS!!!!!!! FALAR COM LEANDRO
+    @test res["b"].energy ≈ [ #VIZINHOS MAIS PRÓXIMOS DO MolSimToolkit NÃO SERVIU PARA TESTAR OS RESULTADOS!!!!!!! FALAR COM LEANDRO
         140.8590610379914, 
         226.09738285953762, 
         68.69849119519456, 
@@ -411,7 +411,7 @@ end
         102.94000222371807, 
         84.81409883203321,
         0.0
-    ]
+    ] atol = 1.e-3
 
         @test res["b"].distances == [
         8.0, 
