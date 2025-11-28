@@ -285,7 +285,7 @@ function reweight(
     k::Real = 1.0, #Boltzmann constant
     T::Real = 1.0, #Temperature
     cutoff::Real = 12.0, #Cutoff of distances
-    tol::Real = 1.e-16 #Tolerance to consider a distance contribution
+    tol::Real = 1.e-32 #Tolerance to consider a distance contribution
 )
     #Defining results
     res_dic = OrderedCollections.OrderedDict{Any, Vector{Vector{Real}}}(i =>
@@ -312,10 +312,10 @@ function reweight(
         end
         if (is_in(subgroup1, pert_input.group1[i]) && is_in(subgroup2, pert_input.group1[j])) || (is_in(subgroup2, pert_input.group1[i]) && is_in(subgroup1, pert_input.group1[j]))
             eng = pert_func(d)
-            if eng != 0
+            if abs(eng) >= tol
                 distance_vec[frame] += 1
-                return eng
             end
+            return eng
         end
         return 0.
     end
