@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.31.2-DEV
+Version 1.31.2
 --------------
 - ![ENHANCEMENT][badge-enhancement] Add safeguard for rounding errors in angle computation in hydrogen-bonds.
 
