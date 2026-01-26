@@ -25,6 +25,7 @@ using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
 using Statistics: mean
 using Printf: @sprintf
+using OrderedCollections
 
 export wrap, wrap_to_first
 export distances
