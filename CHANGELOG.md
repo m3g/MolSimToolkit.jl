@@ -10,14 +10,17 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.32.0-DEV
+Version 1.32.1-DEV
+--------------
+- ![INFO][badge-info] Requires CellListMap 0.10.0
+
+Version 1.32.0
 --------------
 - ![FEATURE][badge-feature] Support units in data values of block-average functions, and add the `dt` keyword parameter to define the time-step, also supporting units. 
-- ![FIX][badge-fix]: Add safeguard for rounding errors in angle computation in hydrogen-bonds.
+- ![ENHANCEMENT][badge-enhancement]: Add safeguard for rounding errors in angle computation in hydrogen-bonds.
 
 Version 1.31.1
 --------------
-- ![INFO][badge-info] Requires CellListMap 0.10.0
 - ![INFO][badge-info] Fix tests for compatibility with PDBTools. 3.11.0 (removed mvalue-related functions).
 - ![INFO][badge-info] Explicit imports for all PDBTools functions. 
 
