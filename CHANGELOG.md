@@ -13,6 +13,7 @@ MolSimToolkit.jl Changelog
 Version 1.32.0-DEV
 --------------
 - ![FEATURE][badge-feature] Support units in data values of block-average functions, and add the `dt` keyword parameter to define the time-step, also supporting units. 
+- ![FIX][badge-fix]: Add safeguard for rounding errors in angle computation in hydrogen-bonds.
 
 Version 1.31.1
 --------------
