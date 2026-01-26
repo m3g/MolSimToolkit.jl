@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.31.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Add safeguard for rounding errors in angle computation in hydrogen-bonds.
 
 Version 1.31.1
 --------------

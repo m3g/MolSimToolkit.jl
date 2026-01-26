@@ -17,7 +17,8 @@ end
 function hbond_angle(D, H, A)
     v1 = H - D
     v2 = A - D
-    return acosd(dot(v1, v2) / (norm(v1) * norm(v2)))
+    dp = dot(v1, v2) / (norm(v1) * norm(v2))
+    return acosd(clamp(dp, -one(dp), one(dp)))
 end
 
 function find_hbond_donnors(
