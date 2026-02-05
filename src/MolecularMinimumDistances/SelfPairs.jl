@@ -87,7 +87,8 @@ end
 # This file containst the functions for single-sets, that is for those cases where
 # the list of minimum-distances is between the molecules of a single component.
 #
-function update_list!(i, j, d2, list::List, system::SelfPairs)
+function update_list!(pair, list::List, system::SelfPairs)
+    (; i, j, d2) = pair
     imol = system.mol_indices(i)
     jmol = system.mol_indices(j)
     if imol != jmol

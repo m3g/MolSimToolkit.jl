@@ -37,8 +37,9 @@ function find_hbond_donnors(
         parallel,
         output_name=:polar_bonds,
     )
-    polar_bonds = map_pairwise!(
-        (x, y, i, j, d2, polar_bonds) -> begin
+    polar_bonds = pairwise!(
+        (pair, polar_bonds) -> begin
+            (;x, y, i, j, d2) = pair
             at_i = ats_sel[i]
             at_j = ats_sel[j]
             el_i = PDBTools.element(at_i)
@@ -226,7 +227,8 @@ end
 Count hydrogen bonds when donor and acceptor are in the same selection.
 =#
 function count_hbonds(sys::CellListMap.ParticleSystem1, s1, angle_cutoff, electronegative_elements)
-    nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
+    nhb = pairwise!(sys) do pair, number_of_hbonds
+        (;x, y, i, j) = pair
         el_i = PDBTools.element(s1.ats[i])
         el_j = PDBTools.element(s1.ats[j])
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
@@ -252,7 +254,8 @@ end
 Count hydrogen bonds between two different selections.
 =#
 function count_hbonds(sys::CellListMap.ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
-    nhb = map_pairwise!(sys) do x, y, i, j, _, number_of_hbonds
+    nhb = pairwise!(sys) do pair, number_of_hbonds
+        (;x, y, i, j) = pair
         at_i = s1.ats[i]
         at_j = s2.ats[j]
         if PDBTools.index(at_i) == PDBTools.index(at_j)

@@ -15,6 +15,7 @@ Version 1.31.2-DEV
 
 Version 1.31.1
 --------------
+- ![INFO][badge-info] Requires CellListMap 0.10.0
 - ![INFO][badge-info] Fix tests for compatibility with PDBTools. 3.11.0 (removed mvalue-related functions).
 - ![INFO][badge-info] Explicit imports for all PDBTools functions. 
 
