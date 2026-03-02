@@ -98,6 +98,23 @@ histogram(d)
 
 The optimal block size should be that for which the distribution is closer to a gaussian.
 
+## Support for Unitful quantities
+
+These functions support `Unitful.jl` quantities both for the response vector and for the `dt` parameter, which defines the time interval between samples. For example:
+
+```@example block_averages
+using Unitful
+xu = x .* u"Å" # assign units to the values of x
+b = block_average(xu; dt=1u"ns") # provide the time-step, in ns
+plot(b)
+```
+
+The distribution of the mean will also propagate the units correctly:
+
+```@example block_averages
+histogram(block_distribution(xu; block_size=2_500))
+```
+
 ## Reference functions
 
 ```@autodocs
