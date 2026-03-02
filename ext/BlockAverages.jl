@@ -179,6 +179,7 @@ end
 
 @testitem "blockaverages plotting" begin
     using MolSimToolkit, Plots, Unitful
+    ENV["GKSwstype"] = "nul"
 
     x = BlockAverages.test_data(10^6);
 

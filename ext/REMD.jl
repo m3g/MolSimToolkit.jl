@@ -83,6 +83,7 @@ end
 @testitem "REMD" begin
     using MolSimToolkit
     using Plots
+    ENV["GKSwstype"] = "nul"
     data = remd_data(MolSimToolkit.gmx2019_4_log)
     @test remd_replica_path(data, 0; stride=50) == [0, 0, 4, 5, 3, 1]
     @test remd_replica_path(data, 9; stride=50) == [9, 5, 1, 6, 6, 0]

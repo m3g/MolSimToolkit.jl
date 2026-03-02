@@ -95,6 +95,7 @@ end
 
 @testitem "mdlovofit - plots" begin
     using MolSimToolkit, PDBTools, Plots
+    ENV["GKSwstype"] = "nul"
     sim = Simulation(
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
