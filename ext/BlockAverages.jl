@@ -3,6 +3,9 @@ import Plots: histogram, plot
 using Plots: plot!, histogram!, hline!, annotate!, text, @layout
 using Plots.Measures: cm
 
+_round(x::Real; kargs...) = round(x; kargs...)
+_round(x; kargs...) = round(typeof(x), x; kargs...)
+
 """
     histogram(md::BlockDistribution; bins=:auto)
 
@@ -33,7 +36,7 @@ function histogram(md::BlockDistribution; bins=:auto)
     )
     histogram!(p, md.block_mean, bins=bins, normalize=:pdf, color=:gray, label=:none)
     σ = md.std_of_the_mean^2
-    plot!(p, x -> (1 / sqrt(π * σ)) * exp(-(x - md.mean)^2 / σ), linewidth=2, color=:black, label=:none)
+    plot!(p, x -> (1 / sqrt(π * σ)) * exp(-(oneunit(md.mean) * x - md.mean)^2 / σ), linewidth=2, color=:black, label=:none)
     return p
 end
 
@@ -100,8 +103,8 @@ function plot(
     )
     annotate!(
         maximum(data.blocksize) - 0.1 * maximum(data.blocksize),
-        max(data.xmean_maxerr[end], maximum(data.xmean_maxerr)) - 0.1 * (maximum(data.xmean_maxerr) - minimum(data.xmean_maxerr)),
-        text("mean = $(round(data.xmean, digits=2))", "Computer Modern", 12, :right),
+        (max(data.xmean_maxerr[end], maximum(data.xmean_maxerr)) - 0.1 * (maximum(data.xmean_maxerr) - minimum(data.xmean_maxerr))) / oneunit(data.xmean),
+        text("mean = $(_round(data.xmean, digits=2))", "Computer Modern", 12, :right),
         subplot=2,
     )
     plot!(data.blocksize, data.xmean_stderr,
@@ -116,7 +119,7 @@ function plot(
     )
     # Auto correlation function
     plot!(
-        data.lags,
+        data.lags * oneunit(data.tau),
         data.autocor,
         ylabel=L"c(\Delta t)",
         xlabel=L"\Delta t",
@@ -127,9 +130,9 @@ function plot(
     )
     t95 = 1.96 / sqrt(length(data.x))
     hline!([t95], subplot=4, ls=:dash, label="", color=:grey)
-    exp_fit = exp.(-inv(data.tau) .* data.lags)
+    exp_fit = exp.(-inv((data.tau / oneunit(data.tau))) .* data.lags) * oneunit(data.xmean)
     plot!(
-        data.lags,
+        data.lags * oneunit(data.tau),
         exp_fit,
         label=nothing,
         linewidth=2,
@@ -138,9 +141,9 @@ function plot(
         subplot=4,
     )
     annotate!(
-        data.lags[end] - 0.2 * data.lags[end],
-        0.8 * max(maximum(data.autocor), maximum(exp_fit)),
-        text("τ = $(round(data.tau, digits=2))", "Computer Modern", 12, :right),
+        (data.lags[end] - 0.2 * data.lags[end]),
+        (0.8 * max(maximum(data.autocor), maximum(exp_fit))) / oneunit(data.xmean),
+        text("τ = $(_round(data.tau; digits=2))", "Computer Modern", 12, :right),
         subplot=4,
     )
     plot!(
@@ -163,20 +166,22 @@ function plot(
         legendtitle="Summary",
         legendfontsize=8,
     )
-    i95 = findfirst(i -> data.autocor[i] <= t95, eachindex(data.lags))
+    i95 = findfirst(i -> (data.autocor[i] / oneunit(data.autocor[i])) <= t95, eachindex(data.lags))
     isnothing(i95) && (i95 = length(data.lags))
     i95 -= 1
-    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\Delta t (0.95) = $(data.lags[i95])"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(round(data.tau_int; digits=4))"))
+    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\Delta t (0.95) = $(data.lags[i95] * oneunit(data.tau))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(_round(data.tau_int; digits=4))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("N = $(length(data.x))"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(Int, data.n_effective))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(round(data.xmean_stderr_neff; digits=4))"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(_round(data.xmean_stderr_neff; digits=4))"))
     return p
 end
 
 @testitem "blockaverages plotting" begin
-    using MolSimToolkit, Plots
+    using MolSimToolkit, Plots, Unitful
+
     x = BlockAverages.test_data(10^6);
+
     md = block_distribution(x; block_size=10^5);
     tempfile = tempname()*".png"
     plt = histogram(md)
@@ -186,4 +191,16 @@ end
     plt = plot(b)
     savefig(plt, tempfile)
     @test isfile(tempfile)
+
+    x = x .* 1u"cm"
+    md = block_distribution(x; block_size=10^5);
+    tempfile = tempname()*".png"
+    plt = histogram(md)
+    savefig(plt, tempfile)
+    @test isfile(tempfile)
+    b = block_average(x, lags=0:100:10^5, dt=1u"s")
+    plt = plot(b)
+    savefig(plt, tempfile)
+    @test isfile(tempfile)
+
 end
