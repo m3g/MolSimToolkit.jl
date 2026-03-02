@@ -10,8 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.31.2-DEV
+Version 1.32.0-DEV
 --------------
+- ![FEATURE][badge-feature] Support units in data values of block-average functions, and add the `dt` keyword parameter to define the time-step, also supporting units. 
 
 Version 1.31.1
 --------------

@@ -26,7 +26,7 @@ number of integer divisions of `length(x)`.
 between the property in the block and the average property) is stored in this array, for
 each blocks size. 
 
-`xmean_stderr`: The standard error of the estimates of the property, meaning the standar 
+`xmean_stderr`: The standard error of the estimates of the property, meaning the standard
 deviation of the estimates divided by the square root of the number of blocks. 
 
 `autocor`: Is the autocorrelation function of the data, as a function of the lag. 
@@ -38,18 +38,18 @@ the `lags` parameter of the `block_average` function, as a range.
 of a single exponential, of the form `exp(-t/tau)` to the data. 
 
 """
-struct BlockAverageData{T}
+struct BlockAverageData{T,DT}
     x::Vector{T}
-    xmean::Float64
+    xmean::T
     blocksize::Vector{Int}
-    xmean_maxerr::Vector{Float64}
-    xmean_stderr::Vector{Float64}
+    xmean_maxerr::Vector{T}
+    xmean_stderr::Vector{T}
     lags::AbstractVector{Int}
-    autocor::Vector{Float64}
-    tau::Float64
-    tau_int::Float64
+    autocor::Vector{T}
+    tau::DT
+    tau_int::DT
     n_effective::Float64
-    xmean_stderr_neff::Float64
+    xmean_stderr_neff::T
 end
 
 function _print_block_sizes(blocksize)
@@ -65,7 +65,7 @@ function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
     print(io, chomp(
         """
         -------------------------------------------------------------------
-        $(typeof(b))
+        BlockAverageData
         -------------------------------------------------------------------
         Estimated value (mean by default) = $(b.xmean)
         Length of data series: $(length(b.x))
@@ -76,13 +76,13 @@ function Base.show(io::IO, ::MIME"text/plain", b::BlockAverageData)
 
         Deviations in last 3 blocks:
                  percentual: $((100/b.xmean)*(b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
-                   absolute: $((b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean))  
+                   absolute: [$(join(b.xmean_maxerr[max(1,lastindex(b.xmean_maxerr)-2):end] .- b.xmean, ", "))]  
 
         Characteristic time of autocorrelation decay: 
                 as fraction of series length: $(b.tau / length(b.x))
                                     absolute: $(b.tau)
 
-        Integrated tau: $(b.tau_int) - n_effective = $(b.n_effective)
+        Integrated tau: $(b.tau_int); n_effective = $(b.n_effective)
         With n_effective: SEM: $(b.xmean_stderr_neff)
         -------------------------------------------------------------------
         """
@@ -110,7 +110,7 @@ function adjust_xinput(x_input, block_size, var="max_block_size")
 
         """ _file = nothing _line = nothing
     else
-        x = x_input
+        x = x_input ./ oneunit(eltype(x_input))
     end
     return x
 end
@@ -122,13 +122,14 @@ end
         min_block_size::Integer = 1,
         max_block_size::Integer = length(x),
         lags::Union{Nothing,AbstractVector{<:Integer}} = nothing,
-    ) where {T<:Real}
+        dt::Number=1.0,
+    ) where {T<:Number}
 
-This function peforms some convergence analysis for a property computed from a series of data, typically a time-series. 
+This function performs some convergence analysis for a property computed from a series of data, typically a time-series. 
 The data is given in vector `x`, and `by` defines the property to be estimated, typically, and by default, the mean value.
 
 Two analyses are performed: a block averaging, in which the data is split in to blocks, and the mean value (or `by` value)
-in each block is computed idependently. The output will contain the worst estimate obtained for all blocks, and the
+in each block is computed independently. The output will contain the worst estimate obtained for all blocks, and the
 standard error of the estimates, as a function of the block size. 
 
 Finally, the autocorrelation function of the data is computed, and a single exponential is fitted, to obtain the
@@ -141,6 +142,8 @@ All results can be plot with a convenience function `BlockAverage.plot`
 The `lags` keyword can be tuned to define the range of intervals and length of the autocorrelation calculation, with
 important implications to the exponential fit and correlation curve shape. See the `StatsBase.autocor` help for 
 further information.
+
+`dt` provides the time-step between data points. Both data points and the time-step can have units from `Unitful.jl`.
 
 ## Example
 
@@ -177,19 +180,23 @@ julia> plot(b) # creates a plot with the results
 ```
 """
 function block_average(
-    x_input::AbstractVector{T};
+    x_input::AbstractVector{TINPUT};
     by=mean,
     min_block_size::Integer=1,
     max_block_size::Integer=length(x_input),
-    lags::Union{Nothing,AbstractVector{<:Integer}}=nothing
-) where {T<:Real}
+    lags::Union{Nothing,AbstractVector{<:Integer}}=nothing,
+    dt::Number=1.0,
+) where {TINPUT<:Number}
 
     x = adjust_xinput(x_input, max_block_size)
+    T = eltype(x)
+    dt = 1.0 * dt
+    DT = typeof(dt)
 
     n = length(x)
     xmean = by(x)
-    xmean_maxerr = Float64[]
-    xmean_stderr = Float64[]
+    xmean_maxerr = T[]
+    xmean_stderr = T[]
     blocksize = Int[]
 
     for block_size in min_block_size:max_block_size
@@ -205,7 +212,7 @@ function block_average(
         push!(xmean_stderr, zero(T))
 
         # Compute the property in each block, and keep the maximum error
-        diff_max = -Inf
+        diff_max = typemin(T)
         for i in 1:nblocks
             xblock = @view x[brange(i, block_size)]
             this_block_mean = by(xblock)
@@ -239,19 +246,19 @@ function block_average(
     tau_int = 1 + 2 * sum(auto_cor[i] for i in 2:i95-1; init=0.0)
     n_eff = n / tau_int
     xmean_stderr_neff = std(x) / sqrt(n_eff)
-
-    return BlockAverageData{T}(
+    
+    return BlockAverageData{TINPUT,DT}(
         x_input,
-        xmean,
+        xmean * oneunit(TINPUT),
         blocksize,
-        xmean_maxerr,
-        xmean_stderr,
+        xmean_maxerr * oneunit(TINPUT),
+        xmean_stderr * oneunit(TINPUT),
         lags,
-        auto_cor,
-        tau,
-        tau_int,
+        auto_cor * oneunit(TINPUT),
+        tau * oneunit(dt),
+        tau_int * oneunit(dt),
         n_eff,
-        xmean_stderr_neff,
+        xmean_stderr_neff * oneunit(TINPUT),
     )
 
 end
@@ -263,18 +270,18 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-struct BlockDistribution{N}
-    mean::Float64
-    std_of_the_mean::Float64
-    block_mean::Vector{Float64}
-    std_err_of_the_mean::Float64
+struct BlockDistribution{N,T}
+    mean::T
+    std_of_the_mean::T
+    block_mean::Vector{T}
+    std_err_of_the_mean::T
 end
 function Base.show(io::IO, ::MIME"text/plain", m::BlockDistribution)
     print(
         io,
         """
         -------------------------------------------------------------------
-        $(typeof(m))
+        BlockDistribution
         -------------------------------------------------------------------
         Number of blocks: $(length(m.block_mean))
         Estimated mean: = $(m.mean)
@@ -322,7 +329,7 @@ julia> histogram(d)
 ```
 
 """
-function block_distribution(by::Function, x_input::AbstractVector, block_size::Integer)
+function block_distribution(by::Function, x_input::AbstractVector{T}, block_size::Integer) where {T}
     if block_size < 1
         throw(ArgumentError((
             "block_size not properly defined. Use, for example: block_distribution(x; block_size=10^5)"
@@ -337,7 +344,12 @@ function block_distribution(by::Function, x_input::AbstractVector, block_size::I
         xblock = @view x[brange(i, block_size)]
         block_mean[i] = by(xblock)
     end
-    return BlockDistribution{nblocks}(mean(x), std(block_mean), block_mean, std(block_mean) / sqrt(nblocks))
+    return BlockDistribution{nblocks, T}(
+        oneunit(T) * mean(x), 
+        oneunit(T) * std(block_mean), 
+        oneunit(T) * block_mean, 
+        oneunit(T) * std(block_mean) / sqrt(nblocks)
+        )
 end
 block_distribution(x_input::AbstractVector; block_size::Integer=0) = block_distribution(mean, x_input, block_size)
 
@@ -371,11 +383,12 @@ end # module BlockAverage
 @testitem "block_averages" begin
     using MolSimToolkit
     using ShowMethodTesting
-    @test parse_show(block_average(sin.(range(0,10; length=100)));
-        repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+    using Unitful
+    x = sin.(range(0,10; length=100))
+    @test parse_show(block_average(x); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
           """
           -------------------------------------------------------------------
-          BlockAverageData{Float64}
+          BlockAverageData
           -------------------------------------------------------------------
           Estimated value (mean by default) = 0.17919314549243645
           Length of data series: 100
@@ -392,16 +405,15 @@ end # module BlockAverage
                   as fraction of series length: 0.1261996015343501
                                       absolute: 12.619960153435008
           
-          Integrated tau: 18.807525484818207 - n_effective = 5.317020576721903
+          Integrated tau: 18.807525484818207; n_effective = 5.317020576721903
           With n_effective: SEM: 0.2897251593116128
           -------------------------------------------------------------------
           """ float_match = (a, b) -> isapprox(a, b; rtol=0.1)
 
-    @test parse_show(block_distribution(sin.(range(0.0, 10.0; length=100)); block_size=2);
-        repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+    @test parse_show(block_distribution(x; block_size=2); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
           """
           -------------------------------------------------------------------
-          BlockDistribution{50}
+          BlockDistribution
           -------------------------------------------------------------------
           Number of blocks: 50
           Estimated mean: = 0.17919314549243645
@@ -413,5 +425,45 @@ end # module BlockAverage
 
     @test_logs (:warn, r"Number of data") block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=3)
     @test_throws "block_size not" block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=-1)
+
+    # Test output with units and the definition of dt
+    x = x .* 1u"cm"
+    @test parse_show(block_average(x; dt=1u"s"); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+          """
+          -------------------------------------------------------------------
+          BlockAverageData
+          -------------------------------------------------------------------
+          Estimated value (mean by default) = 0.17919314549243645 cm
+          Length of data series: 100
+          
+          Block sizes: [1, 2, ..., 50, 100]
+          
+          Maximum standard error (error, block size): (0.2639324800874966 cm, 20)
+          
+          Deviations in last 3 blocks:
+                   percentual: [-336.4364749304436, 20.95533359280619, 0.0]  
+                     absolute: [-0.6028711020117342 cm, 0.03755052141338261 cm, 0.0 cm]  
+          
+          Characteristic time of autocorrelation decay: 
+                  as fraction of series length: 0.12619872668670215 s
+                                      absolute: 12.619872668670215 s
+          
+          Integrated tau: 18.807525484818207 s; n_effective = 5.317020576721903
+          With n_effective: SEM: 0.2897251593116128 cm
+          -------------------------------------------------------------------
+          """ float_match = (a, b) -> isapprox(a, b; rtol=0.1)
+
+    @test parse_show(block_distribution(x; block_size=2); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+          """
+          -------------------------------------------------------------------
+          BlockDistribution
+          -------------------------------------------------------------------
+          Number of blocks: 50
+          Estimated mean: = 0.17919314549243645 cm
+          Standard error of the mean: 0.09481562322937186 cm
+          Standard deviation of the mean: 0.6704477014791758 cm
+          > block_mean contains the mean computed for each block.
+          -------------------------------------------------------------------
+          """
 
 end
