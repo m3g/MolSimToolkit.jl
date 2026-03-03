@@ -72,11 +72,13 @@ function plot(
     xscale=:identity,
     title=""
 )
+    tu = data.dt / oneunit(data.dt)
     l = @layout [ a{0.2h} ; b c ; d e]
     p = plot(layout=l)
     plot!(subplot=1, 
+        collect(1:length(data.x)) * data.dt,
         data.x,
-        xlabel="step",
+        xlabel="time",
         ylabel="value",
         label="",
         color=:black,
@@ -91,9 +93,9 @@ function plot(
         subplot=2,
     )
     plot!(
-        data.blocksize, data.xmean_maxerr,
+        data.dt * data.blocksize, data.xmean_maxerr,
         ylabel="worst block value",
-        xlabel=L"\textrm{block~size}",
+        xlabel="block size",
         label=nothing,
         linewidth=2,
         marker=:circle,
@@ -102,14 +104,14 @@ function plot(
         subplot=2
     )
     annotate!(
-        maximum(data.blocksize) - 0.1 * maximum(data.blocksize),
+        tu * maximum(data.blocksize) - 0.1 * tu * maximum(data.blocksize),
         (max(data.xmean_maxerr[end], maximum(data.xmean_maxerr)) - 0.1 * (maximum(data.xmean_maxerr) - minimum(data.xmean_maxerr))) / oneunit(data.xmean),
         text("mean = $(_round(data.xmean, digits=2))", "Computer Modern", 12, :right),
         subplot=2,
     )
-    plot!(data.blocksize, data.xmean_stderr,
+    plot!(data.dt * data.blocksize, data.xmean_stderr,
         ylabel=L"SD / \sqrt{N_{blocks}}",
-        xlabel=L"\textrm{block~size}",
+        xlabel="block size",
         label=nothing,
         linewidth=2,
         marker=:circle,
@@ -119,8 +121,8 @@ function plot(
     )
     # Auto correlation function
     plot!(
-        data.lags * oneunit(data.tau),
-        data.autocor,
+        data.lags * data.dt,
+        data.autocor * data.dt,
         ylabel=L"c(\Delta t)",
         xlabel=L"\Delta t",
         label=nothing,
@@ -128,12 +130,12 @@ function plot(
         color=:black,
         subplot=4
     )
-    t95 = 1.96 / sqrt(length(data.x))
+    t95 = 1.96 * tu / sqrt(length(data.x))
     hline!([t95], subplot=4, ls=:dash, label="", color=:grey)
-    exp_fit = exp.(-inv((data.tau / oneunit(data.tau))) .* data.lags) * oneunit(data.xmean)
+    exp_fit = exp.(-inv((data.tau/oneunit(data.tau))) .* tu .* data.lags ) * oneunit(data.xmean)
     plot!(
-        data.lags * oneunit(data.tau),
-        exp_fit,
+        data.lags * data.dt,
+        exp_fit * data.dt,
         label=nothing,
         linewidth=2,
         color=:black,
@@ -141,8 +143,8 @@ function plot(
         subplot=4,
     )
     annotate!(
-        (data.lags[end] - 0.2 * data.lags[end]),
-        (0.8 * max(maximum(data.autocor), maximum(exp_fit))) / oneunit(data.xmean),
+        (tu * data.lags[end] - 0.2 * tu * data.lags[end]),
+        (0.8 * tu * max(maximum(data.autocor), maximum(exp_fit))) / oneunit(data.xmean),
         text("τ = $(_round(data.tau; digits=2))", "Computer Modern", 12, :right),
         subplot=4,
     )
@@ -169,11 +171,11 @@ function plot(
     i95 = findfirst(i -> (data.autocor[i] / oneunit(data.autocor[i])) <= t95, eachindex(data.lags))
     isnothing(i95) && (i95 = length(data.lags))
     i95 -= 1
-    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\Delta t (0.95) = $(data.lags[i95] * oneunit(data.tau))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-}\\tau  = $(_round(data.tau_int; digits=4))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("N = $(length(data.x))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("N_{eff}  = $(round(Int, data.n_effective))"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("SEM(N_{eff}) = $(_round(data.xmean_stderr_neff; digits=4))"))
+    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\textrm{\\Delta t (0.95) = $(_round(data.lags[i95] * data.tau; digits=4))}"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-\\tau = $(_round(data.tau_int; digits=4))}"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N = $(length(data.x))}"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N_{eff}  = $(round(Int, data.n_effective))}"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{SEM(N_{eff}) = $(_round(data.xmean_stderr_neff; digits=4))}"))
     return p
 end
 
