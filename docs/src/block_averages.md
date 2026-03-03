@@ -21,6 +21,8 @@ N_{\textrm{eff}} = \frac{N}{\tau_{INT}}
 ```
 This allows the estimation of the effective standard error of the mean, as $$SD(data)/\sqrt{N_{\textrm{eff}}}$$.
 
+For additional information, see [Vehtari et. al](https://doi.org/10.1214/20-BA1221) - page 675.
+
 ## Data that is not time-correlated
 
 ### Compute the average of a random variable `x`:

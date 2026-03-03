@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.32.3-DEV
 --------------
+- ![INFO][badge-info]: add reference to the section about computing the number of effective samples.
 
 Version 1.32.2
 --------------
