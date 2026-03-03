@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.32.1-DEV
+Version 1.32.1
 --------------
 - ![FIX][badge-fix] all BlockAverage plots are now printed with correct time units, and the use of fractional time units (fractional delays between samples) is properly handled.
 
