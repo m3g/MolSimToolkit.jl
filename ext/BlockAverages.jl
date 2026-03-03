@@ -130,8 +130,8 @@ function plot(
         color=:black,
         subplot=4
     )
-    t95 = 1.96 * tu / sqrt(length(data.x))
-    hline!([t95], subplot=4, ls=:dash, label="", color=:grey)
+    t95 = 1.96 / sqrt(length(data.x))
+    hline!([t95 * tu], subplot=4, ls=:dash, label="", color=:grey)
     exp_fit = exp.(-inv((data.tau/oneunit(data.tau))) .* tu .* data.lags ) * oneunit(data.xmean)
     plot!(
         data.lags * data.dt,
@@ -155,8 +155,8 @@ function plot(
         fontfamily="Computer Modern",
         xlims=xlims,
         ylims=ylims,
-        leftmargin=0.1cm,
-        rightmargin=0.1cm,
+        leftmargin=0.3cm,
+        rightmargin=0.3cm,
     )
     plot!(subplot=5,
         xticks=nothing,
