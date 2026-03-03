@@ -105,7 +105,7 @@ These functions support `Unitful.jl` quantities both for the response vector and
 ```@example block_averages
 using Unitful
 xu = x .* u"Å" # assign units to the values of x
-b = block_average(xu; dt=2u"ns") # provide the time-step, in ns
+b = block_average(xu; dt=2.5u"ps") # provide the time delay between data points
 plot(b)
 ```
 
