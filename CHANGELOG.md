@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 1.32.3-DEV
+--------------
+
 Version 1.32.2
 --------------
 - ![FIX][badge-fix] fix plot of t95 data in block-average plotting extension.
