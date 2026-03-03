@@ -131,7 +131,7 @@ function plot(
         subplot=4
     )
     t95 = 1.96 / sqrt(length(data.x))
-    hline!([t95 * tu], subplot=4, ls=:dash, label="", color=:grey)
+    hline!([t95], subplot=4, ls=:dash, label="", color=:grey)
     exp_fit = exp.(-inv((data.tau/oneunit(data.tau))) .* tu .* data.lags ) * oneunit(data.xmean)
     plot!(
         data.lags * data.dt,
@@ -171,7 +171,7 @@ function plot(
     i95 = findfirst(i -> (data.autocor[i] / oneunit(data.autocor[i])) <= t95, eachindex(data.lags))
     isnothing(i95) && (i95 = length(data.lags))
     i95 -= 1
-    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\textrm{\\Delta t (0.95) = $(_round(data.lags[i95] * data.tau; digits=4))}"))
+    plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\textrm{\\Delta t (0.95) = $(_round(data.lags[i95] * data.dt; digits=4))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-\\tau = $(_round(data.tau_int; digits=4))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N = $(length(data.x))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N_{eff}  = $(round(Int, data.n_effective))}"))

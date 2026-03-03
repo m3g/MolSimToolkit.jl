@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.32.2-DEV
 --------------
+- ![FIX][badge-fix] fix plot of t95 data in block-average plotting extension.
 
 Version 1.32.1
 --------------
