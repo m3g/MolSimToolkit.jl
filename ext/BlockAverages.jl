@@ -163,7 +163,7 @@ function plot(
         legendfontsize=8,
     )
     plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\textrm{\\Delta t (0.95) = $(_round(data.lags[i95] * data.dt; digits=4))}"))
-    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-\\tau = $(_round(data.tau_int; digits=4))}"))
+    plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-\\tau = $(_round(data.tau_int; digits=4))}~~~~"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N = $(length(data.x))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N_{eff}  = $(round(Int, data.n_effective))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{SEM(N_{eff}) = $(_round(data.xmean_stderr_neff; digits=4))}"))
