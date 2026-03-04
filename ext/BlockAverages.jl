@@ -93,6 +93,7 @@ function plot(
         label=:none,
         subplot=2,
     )
+    mdigits = round(Int, abs(log10(data.xmean_stderr_neff / oneunit(data.xmean_stderr_neff))), RoundUp) + 1
     plot!(
         data.dt * data.blocksize, data.xmean_maxerr,
         ylabel="worst block value",
@@ -103,7 +104,7 @@ function plot(
         color=:black,
         xscale=xscale,
         subplot=2,
-        legendtitle="mean = $(_round(data.xmean, digits=2))",
+        legendtitle="mean = $(_round(data.xmean, digits=mdigits))",
     )
     plot!(data.dt * data.blocksize, data.xmean_stderr,
         ylabel=L"SD / \sqrt{N_{blocks}}",
