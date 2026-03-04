@@ -45,7 +45,7 @@ struct BlockAverageData{T,DT}
     xmean_maxerr::Vector{T}
     xmean_stderr::Vector{T}
     lags::AbstractVector{Int}
-    autocor::Vector{T}
+    autocor::Vector{Float64}
     tau::DT
     tau_int::DT
     n_effective::Float64
@@ -238,13 +238,13 @@ function block_average(
     if isnothing(lags)
         lags = 0:n-1
     end
-    auto_cor = autocor(x, lags)
+    _autocor = autocor(x, lags)
 
     t95 = 1.96 / sqrt(n_input)
-    i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
+    i95 = findfirst(i -> _autocor[i] <= t95, eachindex(lags))
     isnothing(i95) && (i95 = length(lags))
-    tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
-    tau_int = 1 + 2 * sum(auto_cor[i] for i in 2:i95-1; init=0.0)
+    tau = fitexp(lags[1:i95], _autocor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    tau_int = 1 + 2 * sum(_autocor[i] for i in 2:i95-1; init=0.0)
     n_eff = n / tau_int
     xmean_stderr_neff = std(x) / sqrt(n_eff)
 
@@ -255,7 +255,7 @@ function block_average(
         xmean_maxerr * oneunit(TINPUT),
         xmean_stderr * oneunit(TINPUT),
         lags,
-        auto_cor * oneunit(TINPUT),
+        _autocor,
         tau * dt,
         tau_int * dt,
         n_eff,
@@ -477,6 +477,9 @@ end # module BlockAverage
     @test b1.xmean ≈ b2.xmean
     @test b1.tau ≈ 4 * b2.tau rtol=0.05
     @test b1.tau_int ≈ 4 * b2.tau_int rtol=0.05
+    @test typeof(first(b2.autocor)) == Float64
+    @test unit(b2.xmean) == u"cm"
+    @test unit(b2.tau) == u"s"
 
     b3 = block_average(xu; dt=2u"s")
     @test b1.autocor ≈ b2.autocor
