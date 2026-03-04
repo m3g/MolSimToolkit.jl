@@ -1,14 +1,12 @@
 module MolecularMinimumDistances
 
-import TestItems: @testitem
-import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+using TestItems: @testitem
+using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-import LinearAlgebra: diag
+using LinearAlgebra: diag
+using StaticArrays: SVector
+using CellListMap: ParticleSystem, pairwise!, update_cutoff!, update_unitcell!
 import PDBTools: distance
-import StaticArrays: SVector
-import CellListMap: _uround # interal function, used for showing the unitcell
-import CellListMap: ParticleSystem, map_pairwise, map_pairwise!,
-    update_cutoff!, update_unitcell!
 
 export MinimumDistance
 export SelfPairs, CrossPairs, AllPairs
@@ -303,10 +301,7 @@ julia> @btime minimum_distances!(\$sys);
 
 """
 function minimum_distances!(sys)
-    map_pairwise!(
-        (x, y, i, j, d2, list) -> update_list!(i, j, d2, list, sys),
-        sys.system
-    )
+    pairwise!((pair, list) -> update_list!(pair, list, sys), sys.system)
     return sys.minimum_distances
 end
 

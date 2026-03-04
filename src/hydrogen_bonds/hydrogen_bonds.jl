@@ -1,6 +1,6 @@
 using Base.Threads: @threads
 using ChunkSplitters: index_chunks
-using CellListMap: CellListMap, ParticleSystem, map_pairwise!, update_unitcell!
+using CellListMap: CellListMap, ParticleSystem, pairwise!, update_unitcell!
 using OrderedCollections: OrderedDict
 
 include("./internals.jl")

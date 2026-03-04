@@ -4,6 +4,8 @@ struct AllPairs{T,F1<:Function,F2<:Function} <: SystemPairs
     ymol_indices::F2
 end
 
+_uround(x) = round(x / oneunit(x); digits = 2) * oneunit(x)
+
 import Base.show
 function Base.show(io::IO, ::MIME"text/plain", sys::AllPairs)
     print(io,chomp("""
@@ -105,18 +107,12 @@ function AllPairs(;
 end
 
 #=
-    function update_list!(
-        i, j, d2,
-        mol_indices_i::Fi,
-        mol_indices_j::Fj,
-        lists::Tuple{T,T}
-    ) where {Fi<:Function, Fj<:Function, T<:AbstractVector{<:MinimumDistance}}
-
 
 Function to update the minimum distance in the case where two lists are being constructed.
 
 =#
-function update_list!(i, j, d2, lists, system::AllPairs)
+function update_list!(pair, lists, system::AllPairs)
+    (;i, j, d2) = pair
     x_list = lists[1]
     y_list = lists[2]
     d = sqrt(d2)
