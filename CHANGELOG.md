@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.32.3-DEV
+Version 1.32.3
 --------------
 - ![FIX][badge-fix] fix units of autocorrelation plot in block average plotting.
 - ![INFO][badge-info]: add reference to the section about computing the number of effective samples.
