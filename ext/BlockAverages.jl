@@ -82,7 +82,8 @@ function plot(
         ylabel="value",
         label="",
         color=:black,
-        title=title,
+        title="\n$title",
+        topmargin=0.3cm,
     )
     hline!(
         [data.xmean],
@@ -122,7 +123,7 @@ function plot(
     # Auto correlation function
     plot!(
         data.lags * data.dt,
-        data.autocor * data.dt,
+        data.autocor,
         ylabel=L"c(\Delta t)",
         xlabel=L"\Delta t",
         label=nothing,
@@ -131,11 +132,14 @@ function plot(
         subplot=4
     )
     t95 = 1.96 / sqrt(length(data.x))
-    hline!([t95], subplot=4, ls=:dash, label="", color=:grey)
-    exp_fit = exp.(-inv((data.tau/oneunit(data.tau))) .* tu .* data.lags ) * oneunit(data.xmean)
+    i95 = findfirst(i -> data.autocor[i] <= t95, eachindex(data.lags))
+    isnothing(i95) && (i95 = length(data.lags))
+    i95 -= 1
+    hline!([data.autocor[i95]], subplot=4, ls=:dash, label="", color=:grey)
+    exp_fit = exp.(-inv((data.tau/oneunit(data.tau))) .* tu .* data.lags )
     plot!(
         data.lags * data.dt,
-        exp_fit * data.dt,
+        exp_fit,
         label=nothing,
         linewidth=2,
         color=:black,
@@ -144,7 +148,7 @@ function plot(
     )
     annotate!(
         (tu * data.lags[end] - 0.2 * tu * data.lags[end]),
-        (0.8 * tu * max(maximum(data.autocor), maximum(exp_fit))) / oneunit(data.xmean),
+        (0.8 * tu * max(maximum(data.autocor), maximum(exp_fit))),
         text("τ = $(_round(data.tau; digits=2))", "Computer Modern", 12, :right),
         subplot=4,
     )
@@ -168,9 +172,6 @@ function plot(
         legendtitle="Summary",
         legendfontsize=8,
     )
-    i95 = findfirst(i -> (data.autocor[i] / oneunit(data.autocor[i])) <= t95, eachindex(data.lags))
-    isnothing(i95) && (i95 = length(data.lags))
-    i95 -= 1
     plot!((1,1), subplot=5, lc=:white, label="\n"*latexstring("\\textrm{\\Delta t (0.95) = $(_round(data.lags[i95] * data.dt; digits=4))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{Integrated-\\tau = $(_round(data.tau_int; digits=4))}"))
     plot!((1,1), subplot=5, lc=:white, label=latexstring("\\textrm{N = $(length(data.x))}"))
