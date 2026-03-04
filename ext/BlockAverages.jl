@@ -1,6 +1,6 @@
 using LaTeXStrings
 import Plots: histogram, plot
-using Plots: plot!, histogram!, hline!, annotate!, text, @layout
+using Plots: plot!, histogram!, hline!, @layout
 using Plots.Measures: cm
 
 _round(x::Real; kargs...) = round(x; kargs...)
@@ -102,13 +102,8 @@ function plot(
         marker=:circle,
         color=:black,
         xscale=xscale,
-        subplot=2
-    )
-    annotate!(
-        tu * maximum(data.blocksize) - 0.1 * tu * maximum(data.blocksize),
-        (max(data.xmean_maxerr[end], maximum(data.xmean_maxerr)) - 0.1 * (maximum(data.xmean_maxerr) - minimum(data.xmean_maxerr))) / oneunit(data.xmean),
-        text("mean = $(_round(data.xmean, digits=2))", "Computer Modern", 12, :right),
         subplot=2,
+        legendtitle="mean = $(_round(data.xmean, digits=2))",
     )
     plot!(data.dt * data.blocksize, data.xmean_stderr,
         ylabel=L"SD / \sqrt{N_{blocks}}",
@@ -145,12 +140,7 @@ function plot(
         color=:black,
         alpha=0.5,
         subplot=4,
-    )
-    annotate!(
-        (tu * data.lags[end] - 0.2 * tu * data.lags[end]),
-        (0.8 * tu * max(maximum(data.autocor), maximum(exp_fit))),
-        text("τ = $(_round(data.tau; digits=2))", "Computer Modern", 12, :right),
-        subplot=4,
+        legendtitle="τ = $(_round(data.tau; digits=2))",
     )
     plot!(
         p,
