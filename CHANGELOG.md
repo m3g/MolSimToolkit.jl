@@ -14,7 +14,7 @@ Version 1.32.3-DEV
 --------------
 - ![FIX][badge-fix] fix units of autocorrelation plot in block average plotting.
 - ![INFO][badge-info]: add reference to the section about computing the number of effective samples.
-- ![INFO][badge-info]: add space on top of title of block average plot to improve figure.
+- ![INFO][badge-info]: add space on top of title of block average plot to improve figure, adjust the number of digits of plotted mean according to effective standard error.
 
 Version 1.32.2
 --------------
