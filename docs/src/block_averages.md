@@ -5,7 +5,7 @@ CollapsedDocStrings = true
 
 Performs an analysis of the convergence of some property (usually the mean) in a time-series. 
 
-Computes the block average of time-dependent data, to compute the standard error of the mean and, to detect sampling problems. A didactical explanation of block averaging is available [here](http://sachinashanbhag.blogspot.com/2013/08/block-averaging-estimating-uncertainty.html).  
+Computes the block average of time-dependent data, to compute the standard error of the mean and, to detect sampling problems. A didactic explanation of block averaging is available [here](http://sachinashanbhag.blogspot.com/2013/08/block-averaging-estimating-uncertainty.html).  
 
 The package also outputs the autocorrelation function of the property, and the characteristic time of the correlation decay. 
 
@@ -60,7 +60,7 @@ Several characteristics of the output indicate the poor convergence of the serie
 
 ### Properly sampled data
 
-If we increase the sampling by generating longer simulation with a greater variance between sucessive data points, the convergence analysis produces:
+If we increase the sampling by generating longer simulation with a greater variance between successive data points, the convergence analysis produces:
 ```@example block_averages
 x = BlockAverages.test_data(10^5; variance=0.1);
 b = block_average(x)
