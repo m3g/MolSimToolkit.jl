@@ -1,14 +1,11 @@
-import Pkg
-Pkg.add("Documenter")
 using Documenter
 using Plots
-push!(LOAD_PATH, "../")
-push!(LOAD_PATH, "../src/")
 using MolSimToolkit
 using MolSimToolkit.PackmolInputCreator
 using MolSimToolkitShared
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
+ENV["GKSwstype"] = "nul"
 makedocs(
     modules = [
         MolSimToolkit, MolSimToolkitShared,

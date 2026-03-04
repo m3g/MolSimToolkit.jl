@@ -10,14 +10,31 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.32.1-DEV
+Version 1.32.4-DEV
 --------------
 - ![INFO][badge-info] Requires CellListMap 0.10.0
+
+Version 1.32.3
+--------------
+- ![FIX][badge-fix] fix units of autocorrelation plot in block average plotting.
+- ![INFO][badge-info]: add reference to the section about computing the number of effective samples.
+- ![INFO][badge-info]: add space on top of title of block average plot to improve figure, adjust the number of digits of plotted mean according to effective standard error.
+
+Version 1.32.2
+--------------
+- ![FIX][badge-fix] fix plot of t95 data in block-average plotting extension.
+
+Version 1.32.1
+--------------
+- ![FIX][badge-fix] all BlockAverage plots are now printed with correct time units, and the use of fractional time units (fractional delays between samples) is properly handled.
 
 Version 1.32.0
 --------------
 - ![FEATURE][badge-feature] Support units in data values of block-average functions, and add the `dt` keyword parameter to define the time-step, also supporting units. 
-- ![ENHANCEMENT][badge-enhancement]: Add safeguard for rounding errors in angle computation in hydrogen-bonds.
+
+Version 1.31.2
+--------------
+- ![ENHANCEMENT][badge-enhancement] Add safeguard for rounding errors in angle computation in hydrogen-bonds.
 
 Version 1.31.1
 --------------

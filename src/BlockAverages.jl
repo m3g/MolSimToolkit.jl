@@ -45,11 +45,12 @@ struct BlockAverageData{T,DT}
     xmean_maxerr::Vector{T}
     xmean_stderr::Vector{T}
     lags::AbstractVector{Int}
-    autocor::Vector{T}
+    autocor::Vector{Float64}
     tau::DT
     tau_int::DT
     n_effective::Float64
     xmean_stderr_neff::T
+    dt::DT
 end
 
 function _print_block_sizes(blocksize)
@@ -154,7 +155,7 @@ julia> x = BlockAverages.test_data(10^6); # example data generator
 
 julia> b = block_average(x, lags=0:100:10^5)
 -------------------------------------------------------------------
-BlockAverageData{Float64}
+BlockAverageData
 -------------------------------------------------------------------
 Estimated value (mean by default) = -0.13673023261452855
 Length of data series: 1000000
@@ -237,16 +238,15 @@ function block_average(
     if isnothing(lags)
         lags = 0:n-1
     end
-    auto_cor = autocor(x, lags)
+    _autocor = autocor(x, lags)
 
     t95 = 1.96 / sqrt(n_input)
-    i95 = findfirst(i -> auto_cor[i] <= t95, eachindex(lags))
+    i95 = findfirst(i -> _autocor[i] <= t95, eachindex(lags))
     isnothing(i95) && (i95 = length(lags))
-    tau = fitexp(lags[1:i95], auto_cor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
-    tau_int = 1 + 2 * sum(auto_cor[i] for i in 2:i95-1; init=0.0)
+    tau = fitexp(lags[1:i95], _autocor[1:i95], c=0.0, u=upper(a=1.1), l=lower(a=0.9)).b
+    tau_int = 1 + 2 * sum(_autocor[i] for i in 2:i95-1; init=0.0)
     n_eff = n / tau_int
     xmean_stderr_neff = std(x) / sqrt(n_eff)
-    
     return BlockAverageData{TINPUT,DT}(
         x_input,
         xmean * oneunit(TINPUT),
@@ -254,11 +254,12 @@ function block_average(
         xmean_maxerr * oneunit(TINPUT),
         xmean_stderr * oneunit(TINPUT),
         lags,
-        auto_cor * oneunit(TINPUT),
-        tau * oneunit(dt),
-        tau_int * oneunit(dt),
+        _autocor,
+        tau * dt,
+        tau_int * dt,
         n_eff,
         xmean_stderr_neff * oneunit(TINPUT),
+        dt,
     )
 
 end
@@ -427,8 +428,9 @@ end # module BlockAverage
     @test_throws "block_size not" block_distribution(sin.(range(0.0, 10.0; length=10)); block_size=-1)
 
     # Test output with units and the definition of dt
-    x = x .* 1u"cm"
-    @test parse_show(block_average(x; dt=1u"s"); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+    xu = x .* 1u"cm"
+    b1 = block_average(xu; dt=1u"s")
+    @test parse_show(b1; repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
           """
           -------------------------------------------------------------------
           BlockAverageData
@@ -453,7 +455,7 @@ end # module BlockAverage
           -------------------------------------------------------------------
           """ float_match = (a, b) -> isapprox(a, b; rtol=0.1)
 
-    @test parse_show(block_distribution(x; block_size=2); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
+    @test parse_show(block_distribution(xu; block_size=2); repl=Dict("MolSimToolkit." => "", "BlockAverages." => "")) ≈
           """
           -------------------------------------------------------------------
           BlockDistribution
@@ -465,5 +467,24 @@ end # module BlockAverage
           > block_mean contains the mean computed for each block.
           -------------------------------------------------------------------
           """
+
+    # Test output with fractional unit of dt
+    xu = x .* 1u"cm"
+    b2 = block_average(xu; dt=0.25u"s")
+    @test b1.autocor ≈ b2.autocor
+    @test b1.n_effective ≈ b2.n_effective
+    @test b1.xmean ≈ b2.xmean
+    @test b1.tau ≈ 4 * b2.tau rtol=0.05
+    @test b1.tau_int ≈ 4 * b2.tau_int rtol=0.05
+    @test typeof(first(b2.autocor)) == Float64
+    @test unit(b2.xmean) == u"cm"
+    @test unit(b2.tau) == u"s"
+
+    b3 = block_average(xu; dt=2u"s")
+    @test b1.autocor ≈ b2.autocor
+    @test b1.n_effective ≈ b2.n_effective
+    @test b1.xmean ≈ b2.xmean
+    @test b3.tau ≈ 8 * b2.tau rtol=0.05
+    @test b3.tau_int ≈ 8 * b2.tau_int rtol=0.05
 
 end
