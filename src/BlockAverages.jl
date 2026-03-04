@@ -477,6 +477,9 @@ end # module BlockAverage
     @test b1.xmean ≈ b2.xmean
     @test b1.tau ≈ 4 * b2.tau rtol=0.05
     @test b1.tau_int ≈ 4 * b2.tau_int rtol=0.05
+    @test typeof(first(b2.autocor)) == Float64
+    @test unit(b2.xmean) == u"cm"
+    @test unit(b2.tau) == u"s"
 
     b3 = block_average(xu; dt=2u"s")
     @test b1.autocor ≈ b2.autocor
