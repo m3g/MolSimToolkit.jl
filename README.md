@@ -4,6 +4,11 @@
 [![codecov](https://codecov.io/gh/m3g/MolSimToolkit.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/MolSimToolkit.jl)
 [![Aqua QA](https://JuliaTesting.github.io/Aqua.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
+# MyDevMolSimToolkit
+
+[MolSimToolkit.jl](https://github.com/m3g/MolSimToolkit.jl) provides a set of tools to 
+analyse molecular dynamics simulations, and a framework for the development of custom
+analysis tools. This repository is a experimental version of the package for Work in Progress functionalities
 # MolSimToolkit.jl
 
 **MolSimToolkit.jl** is a Julia package for analyzing molecular dynamics (MD) simulations. It provides fast, flexible tools for trajectory analysis, structural alignment, secondary structure mapping, and more. The toolkit is designed to be lightweight and extensible, making it easy to build custom analysis workflows.
