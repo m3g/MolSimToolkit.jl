@@ -14,6 +14,7 @@ Version 1.33.0-DEV
 --------------
 - ![FEATURE][badge-feature] Introduce the option to compute the RMSD of a structure, given the alignment of other structure (or parts of); i. e. the `rmsd_indices` option of `rmsd`. 
 - ![FEATURE][badge-feature] Support string selections in `rmsd` and `rmsd_matrix` functions.
+- ![ENHANCEMENT][badge-enhancement] Reconstruct polymer and complex structure before computing rmsds, to avoid issues with broken molecule coordinates through PBCs.
 
 Version 1.32.3
 --------------
