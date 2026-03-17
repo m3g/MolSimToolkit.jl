@@ -147,8 +147,8 @@ end
 """
     rmsd(
         simulation::Simulation, 
-        indices::AbstractVector{<:Integer}; 
-        rmsd_indices::AbstractVector{<:Integer} = indices,
+        indices::AbstractVector{<:Integer}; # or sel::AbstractString 
+        rmsd_of::AbstractVector{<:Integer} = indices, # or sel::AbstractString
         mass = nothing, 
         reference_frame = nothing, 
         show_progress = true
@@ -160,10 +160,12 @@ Computes the root mean square deviation (RMSD) between two sets of points in alo
 
 - `indices`: vector with indices of all the atoms of the structure to be aligned (i. e. the protein or polymer). 
   By default, they are also the atoms for which the rmsd will be computed.
+or
+- `sel`: Selection string, following PDBTools.jl syntax, to define the atoms to be considered.
 
 # Optional keyword arguments
 
-- `rmsd_indices`: indices of the atoms for which the rmsd will be computed, considering the alignment of the
+- `rmsd_of`: indices of the atoms for which the rmsd will be computed, considering the alignment of the
   atoms defined in `indices`.
 - `mass` argument can be used to provide the mass of the atoms if they are not the same.
 - `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
@@ -180,13 +182,9 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using PDBTools
 
-julia> atoms = readPDB(Testing.namd_pdb);
-
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> cas = findall(sel"name CA", atoms); # CA indices
-
-julia> rmsd(simulation, cas; show_progress=false)
+julia> rmsd(simulation, "protein and name CA"; show_progress=false)
 5-element Vector{Float64}:
  0.0
  2.8388710154609034
@@ -194,7 +192,7 @@ julia> rmsd(simulation, cas; show_progress=false)
  2.4621444212469483
  3.8035683196100796
 
-julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
+julia> rmsd(simulation, "protein and name CA"; reference_frame=:average, show_progress=false)
 5-element Vector{Float64}:
  1.8995986972454748
  2.1512244220536973
@@ -206,7 +204,7 @@ julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
 """
 function rmsd(
     simulation::Simulation, indices::AbstractVector{<:Integer};
-    rmsd_indices::AbstractVector{<:Integer}=indices,
+    rmsd_of::AbstractVector{<:Integer}=indices,
     mass=nothing,
     reference_frame=nothing,
     show_progress=true,
@@ -218,7 +216,7 @@ function rmsd(
 
     # Define reference of the alignment
     xalign_ref, xrmsd_ref = 
-        _reference_coordinates(simulation, reference_frame, indices, rmsd_indices, mass; show_progress)
+        _reference_coordinates(simulation, reference_frame, indices, rmsd_of, mass; show_progress)
 
     rmsds = Float64[]
     prg = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
@@ -226,16 +224,32 @@ function rmsd(
         next!(prg)
         p, uc = positions(frame), unitcell(frame)
         _reconstruct_structure!(p, indices, uc.matrix)
-        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        _reconstruct_complex!(p, indices, rmsd_of, uc.matrix)
         # Obtain the transformation that aligns atoms of `indices`
         xalign = @view(p[indices])
         xcm, xref_cm, u = alignment_movements(xalign, xalign_ref; mass, xm, xp)
-        # Apply transformation to atoms in rmsd_indices
-        xrmsd = @view(p[rmsd_indices])
+        # Apply transformation to atoms in rmsd_of
+        xrmsd = @view(p[rmsd_of])
         apply_alignment_transformation!(xrmsd, xcm, xref_cm, u)
         push!(rmsds, rmsd(xrmsd, xrmsd_ref))
     end
     return rmsds
+end
+
+function rmsd(
+    simulation::Simulation, sel::AbstractStringh;
+    rmsd_of::AbstractString=sel,
+    mass=nothing,
+    reference_frame=nothing,
+    show_progress=true,
+)
+    indices = findall(PDBTools.Select(sel), atoms(sim))
+    rmsd_indices = if rmsd_of === sel
+        indices
+    else
+        findall(PDBTools.Select(rmsd_of), atoms(sim))
+    end
+    rmsd(simulation, indices; rmsd_of=rmsd_indices, mass, reference_frame, show_progress)
 end
 
 @testitem "rmsd" begin
@@ -290,7 +304,9 @@ end
 
     cas = findall(Select("name CA"), atoms)
     @test rmsd(simulation, cas) ≈ rmsd_aligned
+    @test rmsd(simulation, "name CA") ≈ rmsd_aligned
     @test rmsd(simulation, cas; mass=mass.(atoms[cas])) ≈ rmsd_aligned
+    @test rmsd(simulation, "name CA"; mass=mass.(atoms[cas])) ≈ rmsd_aligned
     @test rmsd(simulation, cas; reference_frame=5) ≈ [3.8035683196100787, 4.680280207599843, 3.4614944346303917, 2.97835421429809, 0.0]
 
     # Average structure
@@ -306,7 +322,7 @@ end
 """
     rmsd_matrix(
         simulation::Simulation, 
-        indices::AbstractVector{<:Integer}; 
+        indices::AbstractVector{<:Integer} or sel::AbstractString; 
         mass::Union{AbstractVector{<:Integer}, Nothing} = nothing,
         align::Bool = true,
         show_progress = true,
@@ -314,11 +330,18 @@ end
 
 Computes the RMSD matrix for a set of atoms along a trajectory.
 
-The `indices` vector contains the indices of the atoms to be considered. 
-The `mass` argument can be used to provide the mass of the atoms if they are not the same.
-The `align` argument can be used to align the frames before computing the RMSD.
+# Positional arguments
 
-The `show_progress` argument can be used to show a progress bar.
+- `simulation`: The Simulation object. 
+- `indices`: vector contains the indices of the atoms to be considered. 
+or
+- `sel`: A selection string, e. g. "name CA", defining the atoms to be considered.
+
+# Optional keyword arguments
+
+- `mass`: optional mass of the atoms if they are not the same.
+- `align`: align the frames before computing the RMSD.
+- `show_progress`: show or not a progress bar.
 
 # Returns 
 
@@ -333,13 +356,9 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using PDBTools
 
-julia> atoms = readPDB(Testing.namd_pdb);
-
-julia> cas = findall(Select("name CA"), atoms); # CA indices
-
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> rmsd_matrix(simulation, cas; show_progress=false)
+julia> rmsd_matrix(simulation, "protein and name CA"; show_progress=false)
 5×5 Matrix{Float64}:
  0.0      2.83887  2.9777   2.46214  3.80357
  2.83887  0.0      2.35492  2.64463  4.68028
@@ -381,6 +400,18 @@ function rmsd_matrix(
     return rmsd_matrix
 end
 
+function rmsd_matrix(
+    simulation::Simulation,
+    sel::AbstractString;
+    mass::Union{AbstractVector{<:Integer},Nothing}=nothing,
+    align::Bool=true,
+    show_progress::Bool=true,
+)
+    ats = atoms(simulation)
+    indices = findall(PDBTools.Select(sel), ats)
+    rmsd_matrix(simulation, indices; mass, align, show_progress)
+end
+
 @testitem "rmsd_matrix" begin
     using MolSimToolkit, MolSimToolkit.Testing
     using PDBTools
@@ -395,6 +426,9 @@ end
         2.46214 2.64463 2.08246 0.0 2.97835
         3.80357 4.68028 3.46149 2.97835 0.0
     ] .< 1e-3)
+
+    msel = rmsd_matrix(simulation, "protein and name CA")
+    @test msel ≈ m
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
 end
