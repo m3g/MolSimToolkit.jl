@@ -35,9 +35,9 @@ function _reconstruct_complex!(
     # Find atom in indices2 that is closer to indices1, considering PBCs
     # If an very close atom is found, use it and avoid the full double loop
     id, jd, d = 0, 0, +Inf
-    for i in indices1
+    for i in eachindex(indices1)
         x1 = x[indices1[i]]
-        for j in indices2
+        for j in eachindex(indices2)
             x2 = wrap(x[indices2[j]], x1, unitcell)
             dsq = sum(abs2, x2 - x1)
             if dsq < d
@@ -316,6 +316,11 @@ end
     @test_throws "index 6 is not in frame range" rmsd(simulation, cas; reference_frame=6)
     simulation = Simulation(namd_pdb, namd_traj; step=2)
     @test_throws "index 2 is not in frame range" rmsd(simulation, cas; reference_frame=2)
+
+    # Test rmsd using rmsd_of
+    r_expected = [4.782562070489359e-17, 2.383157150961262, 2.016995295094623, 1.2936259143528597, 1.6782044794091227, 1.4561259303589944, 1.8725268913794244, 2.1419325487817344, 3.055806849195156, 2.7914291413904566, 2.3027060849001626, 4.099998830641137, 3.558595497478691, 3.412962337347324, 4.685408093153975, 3.6144080835882413, 3.807043696380331, 6.217853448234399, 4.677065083960004, 4.460039973437796]
+    r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53")
+    
 
 end
 
