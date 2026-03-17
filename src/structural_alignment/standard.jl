@@ -327,7 +327,7 @@ end
     # Test with :average reference (this test is weak, not compared to a reference)
     r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53", reference_frame=:average)
     r_expected = [3.9399443319320473, 4.033526124094138, 4.14241791220504, 3.706840579105693, 3.4744894549615526, 3.752341297472445, 3.171958741785707, 3.3091658448472425, 3.6970582271206522, 3.458804341856055, 3.355020639111263, 3.2681251061187027, 3.3584150605657452, 3.250167010371905, 3.7688706682877764, 3.0829037964839388, 3.2793987265786897, 4.930089024112391, 3.6277822605047407, 3.714044966130123]
-    @teset r ≈ r_expected
+    @test r ≈ r_expected
 
     # Test trying that closest atom is not first (compared to VMD)
     r = rmsd(simulation, "protein and resnum 2 to 21"; rmsd_of="protein and resnum 51 to 61")
