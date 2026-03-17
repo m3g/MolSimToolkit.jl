@@ -5,20 +5,23 @@ import PDBTools
 import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
-# Names and functions shared between different packages, or fundamental operations
+# Names and functions shared between different packages and that are extended here
 import MolSimToolkitShared: center_of_mass, 
                             distances,
                             coordination_number,
                             bulk_coordination,
                             wrap,
-                            wrap_to_first,
-                            align, 
-                            align!, 
-                            alignment_movements, 
-                            apply_alignment_transformation!,
-                            rmsd,
-                            dihedral,
-                            dihedrals
+                            rmsd
+
+# These are only used within this package, not extended
+using MolSimToolkitShared: alignment_movements, 
+                           apply_alignment_transformation!,
+                           wrap_to_first,
+                           align,
+                           align!,
+                           dihedral,
+                           dihedrals
+
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MVector

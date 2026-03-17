@@ -23,7 +23,7 @@ end
 # boundaries. This function assumes that atoms that are close in the sequence of the structure 
 # are also close in space.
 # 
-# The function reconstruct a complex, by finding first the closest atom berween the two structures,
+# The function reconstruct a complex, by finding first the closest atom between the two structures,
 # and wrapping the coordinates of the second structure around that closest atom.
 #
 function _reconstruct_complex!(
@@ -351,7 +351,7 @@ or
 
 # Returns 
 
-A symetric matrix with the RMSD values between each pair of frames. For example, in 
+A symmetric matrix with the RMSD values between each pair of frames. For example, in 
 a trajectory with 5 frames, the matrix will be a 5x5 matrix with the RMSD values
 between the structures of each pair of frames.
 
