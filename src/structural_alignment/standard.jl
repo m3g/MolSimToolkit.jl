@@ -237,17 +237,17 @@ function rmsd(
 end
 
 function rmsd(
-    simulation::Simulation, sel::AbstractStringh;
+    simulation::Simulation, sel::AbstractString;
     rmsd_of::AbstractString=sel,
     mass=nothing,
     reference_frame=nothing,
     show_progress=true,
 )
-    indices = findall(PDBTools.Select(sel), atoms(sim))
+    indices = findall(PDBTools.Select(sel), atoms(simulation))
     rmsd_indices = if rmsd_of === sel
         indices
     else
-        findall(PDBTools.Select(rmsd_of), atoms(sim))
+        findall(PDBTools.Select(rmsd_of), atoms(simulation))
     end
     rmsd(simulation, indices; rmsd_of=rmsd_indices, mass, reference_frame, show_progress)
 end
