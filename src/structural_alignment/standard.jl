@@ -260,7 +260,7 @@ end
     using Rotations: RotMatrix3
 
     # Load two structures
-    atoms = readPDB(namd_pdb)
+    atoms = read_pdb(namd_pdb)
     x = coor(atoms, "name CA")
 
     # test RMSD function
@@ -318,9 +318,10 @@ end
     @test_throws "index 2 is not in frame range" rmsd(simulation, cas; reference_frame=2)
 
     # Test rmsd using rmsd_of
+    simulation = Simulation(MolSimToolkit.Testing.namd2_pdb, MolSimToolkit.Testing.namd2_traj)
     r_expected = [4.782562070489359e-17, 2.383157150961262, 2.016995295094623, 1.2936259143528597, 1.6782044794091227, 1.4561259303589944, 1.8725268913794244, 2.1419325487817344, 3.055806849195156, 2.7914291413904566, 2.3027060849001626, 4.099998830641137, 3.558595497478691, 3.412962337347324, 4.685408093153975, 3.6144080835882413, 3.807043696380331, 6.217853448234399, 4.677065083960004, 4.460039973437796]
     r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53")
-    
+    @test r ≈ r_expected
 
 end
 
