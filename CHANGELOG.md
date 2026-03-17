@@ -12,7 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 1.33.0-DEV
 --------------
-- ![FEATURE][badge-feature] Introduce the option to compute the RMSD of a structure, given the alignment of other structure (or parts of); i. e. the `rmsd_of` option of `rmsd` and `rmsf` functions. 
+- ![FEATURE][badge-feature] Introduce the option to compute the RMSD of a structure, given the alignment of other structure (or parts of); i. e. the `rmsd_indices` option of `rmsd`. 
 
 Version 1.32.3
 --------------

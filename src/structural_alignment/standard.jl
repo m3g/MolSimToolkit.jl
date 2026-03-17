@@ -1,40 +1,90 @@
 #
-# Functio to reconstruct the structure of the protein/polymer, to avoid
+# Function to reconstruct the structure of the protein/polymer, to avoid
 # periodic boundary conditions issues with molecule breaking through the
 # boundaries. This function assumes that atoms that are close in the 
 # sequence of the structure are also close in space.
 #
 function _reconstruct_structure!(
-    x::AbstractVector{<:AbstractVector}, 
+    x::AbstractVector{<:AbstractVector},
     indices::AbstractVector{<:Integer},
     unitcell::AbstractMatrix
 )
     xlast = x[first(indices)]
     for i in indices
-        x[i] = wrap(x[i], xlast, unitcell) 
+        x[i] = wrap(x[i], xlast, unitcell)
         xlast = x[i]
     end
     return x
 end
 
 #
+# This function reconstructs the structure of the complex formed by the two sets of indices,
+# to avoid periodic boundary conditions issues with molecule breaking through the
+# boundaries. This function assumes that atoms that are close in the sequence of the structure 
+# are also close in space.
+# 
+# The function reconstruct a complex, by finding first the closest atom berween the two structures,
+# and wrapping the coordinates of the second structure around that closest atom.
+#
+function _reconstruct_complex!(
+    x::AbstractVector{<:AbstractVector},
+    indices1::AbstractVector{<:Integer},
+    indices2::AbstractVector{<:Integer},
+    unitcell::AbstractMatrix
+)
+    # Find atom in indices2 that is closer to indices1, considering PBCs
+    # If an very close atom is found, use it and avoid the full double loop
+    id, jd, d = 0, 0, +Inf
+    for i in indices1
+        x1 = x[indices1[i]]
+        for j in indices2
+            x2 = wrap(x[indices2[j]], x1, unitcell)
+            dsq = sum(abs2, x2 - x1)
+            if dsq < d
+                id = i
+                jd = j
+                d = dsq
+                d < 4.0 && break
+            end
+        end
+        d < 4.0 && break
+    end
+    # Reconstruct structure defined by indices2, starting from
+    # atom jd, and moving backwards and forward
+    x[indices2[jd]] = wrap(x[indices2[jd]], x[indices1[id]], unitcell)
+    xlast = x[indices2[jd]]
+    for j in jd-1:-1:firstindex(indices2)
+        x[indices2[j]] = wrap(x[indices2[j]], xlast, unitcell)
+        xlast = x[indices2[j]]
+    end
+    xlast = x[indices2[jd]]
+    for j in jd+1:lastindex(indices2)
+        x[indices2[j]] = wrap(x[indices2[j]], xlast, unitcell)
+        xlast = x[indices2[j]]
+    end
+    return x
+end
+
+#
 # Function to read the reference coordinates from the trajectory.
-# returns the coordinates, reconstructured by _reconstruct_structure,
-# which is useful in general.
+# returns the coordinates, reconstructured by _reconstruct_structure!,
+# and _reconstruct_complex!
 #
 function _reference_coordinates(
-    simulation, 
+    simulation,
     reference_frame,
     indices,
-    align_indices,
     rmsd_indices,
-    mass,
+    mass;
+    show_progress,
 )
-    xref, yref = if isnothing(reference_frame)
+    xalign, xrmsd = if isnothing(reference_frame)
         first_frame!(simulation)
         frame = current_frame(simulation)
-        x = _reconstruct_structure(positions(frame), indices, unitcell(frame))
-        x[align_indices], x[rmsd_indices]
+        p, uc = positions(frame), unitcell(frame)
+        _reconstruct_structure!(p, indices, uc.matrix)
+        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        p[indices], p[rmsd_indices]
     elseif reference_frame isa Integer
         if !(reference_frame in frame_range(simulation))
             throw(ArgumentError("""\n
@@ -48,31 +98,41 @@ function _reference_coordinates(
             next_frame!(simulation)
         end
         frame = current_frame(simulation)
-        x = _reconstruct_structure(positions(frame), indices, unitcell(frame))
-        x[align_indices], x[rmsd_indices]
+        p, uc = positions(frame), unitcell(frame)
+        _reconstruct_structure!(p, indices, uc.matrix)
+        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        p[indices], p[rmsd_indices]
     elseif reference_frame == :average
-        xm = zeros(Point3D, length(align_indices))
-        xp = zeros(Point3D, length(align_indices))
-        yref = zeros(Point3D, length(align_indices))
-        p = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
+        xm = zeros(3, length(indices))
+        xp = zeros(3, length(indices))
+        xalign_ref = zeros(Point3D, length(indices))
+        xrmsd_ref = zeros(Point3D, length(indices))
+        prg = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
         for (iframe, frame) in enumerate(simulation)
-            next!(p)
-            p = positions(frame)
-            x = @view(p[indices])
-            y = @view(p[align_indices])
-            z = @view(p[rmsd_indices])
-            _reconstruct_structure(x, 1:length(x), unitcell(frame))
+            next!(prg)
+            p, uc = positions(frame), unitcell(frame)
+            _reconstruct_structure!(p, indices, uc.matrix)
+            _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
             if iframe == 1
-                yref .= y
+                xalign_ref .= @view(p[indices])
+                xrmsd_ref .= @view(p[rmsd_indices])
             else
-                ycm, yref_cm, u = align_movements(y, yref; mass, xm, xp)
-                apply_alignment_transformation!(y, ycm, yref_cm, u)
-                # voltar: not working. Do we need to align rmsd_indices here?
-                apply_alignment_transformation!(z, ycm, yref_cm, u)
-                @. yref = (yref * (iframe - 1) + y) / iframe
+                # Align atoms to reference
+                xalign = @view(p[indices])
+                xcm, xref_cm, u = alignment_movements(xalign, xalign_ref; mass, xm, xp)
+                apply_alignment_transformation!(xalign, xcm, xref_cm, u)
+                @. xalign_ref = (xalign_ref * (iframe - 1) + xalign) / iframe
+                if !(indices === rmsd_indices)
+                    # Move rmsd atoms with same transformation
+                    xrmsd = @view(p[rmsd_indices])
+                    apply_alignment_transformation!(xrmsd, xcm, xref_cm, u)
+                    @. xrmsd_ref = (xrmsd_ref * (iframe - 1) + xalign) / iframe
+                else
+                    xrmsd_ref = xalign_ref
+                end
             end
         end
-        yref
+        xalign_ref, xrmsd_ref
     else
         throw(ArgumentError("""\n
 
@@ -81,14 +141,13 @@ function _reference_coordinates(
         """))
     end
     restart!(simulation)
-    return xref
+    return xalign, xrmsd
 end
 
 """
     rmsd(
         simulation::Simulation, 
         indices::AbstractVector{<:Integer}; 
-        align_indices::AbstractVector{<:Integer} = indices,
         rmsd_indices::AbstractVector{<:Integer} = indices,
         mass = nothing, 
         reference_frame = nothing, 
@@ -99,12 +158,13 @@ Computes the root mean square deviation (RMSD) between two sets of points in alo
 
 # Positional arguments
 
-- `indices` vector contains the indices of all the atom of the structure of interest (i. e. the protein or polymer). By default,  the atoms to be considered for alignment and for computing the rmsd.
+- `indices`: vector with indices of all the atoms of the structure to be aligned (i. e. the protein or polymer). 
+  By default, they are also the atoms for which the rmsd will be computed.
 
 # Optional keyword arguments
 
-- `align_indices`: indices of the atoms to be aligned. 
-- `rmsd_indices`: indices of the atoms for which the rmsd will be computed.
+- `rmsd_indices`: indices of the atoms for which the rmsd will be computed, considering the alignment of the
+  atoms defined in `indices`.
 - `mass` argument can be used to provide the mass of the atoms if they are not the same.
 - `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
     - If `reference_frame == nothing`, the first frame will be used (default behavior).
@@ -146,30 +206,34 @@ julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
 """
 function rmsd(
     simulation::Simulation, indices::AbstractVector{<:Integer};
-    align_indices::AbstractVector{<:Integer} = indices,
-    rmsd_indices::AbstractVector{<:Integer} = indices,
+    rmsd_indices::AbstractVector{<:Integer}=indices,
     mass=nothing,
     reference_frame=nothing,
     show_progress=true,
 )
 
     # Auxiliary arrays for the alignment
-    xm = zeros(3, length(align_indices))
-    xp = zeros(3, length(align_indices))
+    xm = zeros(3, length(indices))
+    xp = zeros(3, length(indices))
 
     # Define reference of the alignment
-    xref, yref = _reference_coordinates(simulation, reference_frame, indices, align_indices, rmsd_indices, mass)
+    xalign_ref, xrmsd_ref = 
+        _reference_coordinates(simulation, reference_frame, indices, rmsd_indices, mass; show_progress)
 
     rmsds = Float64[]
-    p = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
+    prg = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
     for frame in simulation
-        next!(p)
-        x = @view(positions(frame)[indices])
-        _reconstruct_structure!(x, indices, unitcell(frame))
-        xcm, xref_cm, u = align_movements(x, xref; mass, xm, xp)
-        y = @view(positions(frame)[rmsd_indices])
-        apply_alignment_transformation!(y, xcm, xref_cm, u)
-        push!(rmsds, rmsd(y, yref))
+        next!(prg)
+        p, uc = positions(frame), unitcell(frame)
+        _reconstruct_structure!(p, indices, uc.matrix)
+        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        # Obtain the transformation that aligns atoms of `indices`
+        xalign = @view(p[indices])
+        xcm, xref_cm, u = alignment_movements(xalign, xalign_ref; mass, xm, xp)
+        # Apply transformation to atoms in rmsd_indices
+        xrmsd = @view(p[rmsd_indices])
+        apply_alignment_transformation!(xrmsd, xcm, xref_cm, u)
+        push!(rmsds, rmsd(xrmsd, xrmsd_ref))
     end
     return rmsds
 end
@@ -233,9 +297,9 @@ end
     @test rmsd(simulation, cas; reference_frame=:average, show_progress=false) ≈ [1.8995986972454748, 2.1512244220536973, 1.5081703191869376, 1.1651111324544219, 2.757039151265317]
 
     # Input errors
-    @test_throws ArgumentError rmsd(simulation, cas; reference_frame=6)
+    @test_throws "index 6 is not in frame range" rmsd(simulation, cas; reference_frame=6)
     simulation = Simulation(namd_pdb, namd_traj; step=2)
-    @test_throws ArgumentError rmsd(simulation, cas; reference_frame=2)
+    @test_throws "index 2 is not in frame range" rmsd(simulation, cas; reference_frame=2)
 
 end
 
