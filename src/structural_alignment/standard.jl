@@ -106,7 +106,7 @@ function _reference_coordinates(
         xm = zeros(3, length(indices))
         xp = zeros(3, length(indices))
         xalign_ref = zeros(Point3D, length(indices))
-        xrmsd_ref = zeros(Point3D, length(indices))
+        xrmsd_ref = zeros(Point3D, length(rmsd_indices))
         prg = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
         for (iframe, frame) in enumerate(simulation)
             next!(prg)
@@ -126,7 +126,7 @@ function _reference_coordinates(
                     # Move rmsd atoms with same transformation
                     xrmsd = @view(p[rmsd_indices])
                     apply_alignment_transformation!(xrmsd, xcm, xref_cm, u)
-                    @. xrmsd_ref = (xrmsd_ref * (iframe - 1) + xalign) / iframe
+                    @. xrmsd_ref = (xrmsd_ref * (iframe - 1) + xrmsd) / iframe
                 else
                     xrmsd_ref = xalign_ref
                 end
@@ -316,11 +316,22 @@ end
     @test_throws "index 6 is not in frame range" rmsd(simulation, cas; reference_frame=6)
     simulation = Simulation(namd_pdb, namd_traj; step=2)
     @test_throws "index 2 is not in frame range" rmsd(simulation, cas; reference_frame=2)
+    @test_throws "must be an integer" rmsd(simulation, cas; reference_frame='a')
 
-    # Test rmsd using rmsd_of
+    # Test rmsd using rmsd_of (compared to output of VMD)
     simulation = Simulation(MolSimToolkit.Testing.namd2_pdb, MolSimToolkit.Testing.namd2_traj)
     r_expected = [4.782562070489359e-17, 2.383157150961262, 2.016995295094623, 1.2936259143528597, 1.6782044794091227, 1.4561259303589944, 1.8725268913794244, 2.1419325487817344, 3.055806849195156, 2.7914291413904566, 2.3027060849001626, 4.099998830641137, 3.558595497478691, 3.412962337347324, 4.685408093153975, 3.6144080835882413, 3.807043696380331, 6.217853448234399, 4.677065083960004, 4.460039973437796]
     r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53")
+    @test r ≈ r_expected
+
+    # Test with :average reference (this test is weak, not compared to a reference)
+    r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53", reference_frame=:average)
+    r_expected = [3.9399443319320473, 4.033526124094138, 4.14241791220504, 3.706840579105693, 3.4744894549615526, 3.752341297472445, 3.171958741785707, 3.3091658448472425, 3.6970582271206522, 3.458804341856055, 3.355020639111263, 3.2681251061187027, 3.3584150605657452, 3.250167010371905, 3.7688706682877764, 3.0829037964839388, 3.2793987265786897, 4.930089024112391, 3.6277822605047407, 3.714044966130123]
+    @teset r ≈ r_expected
+
+    # Test trying that closest atom is not first (compared to VMD)
+    r = rmsd(simulation, "protein and resnum 2 to 21"; rmsd_of="protein and resnum 51 to 61")
+    r_expected = [7.076072742448697e-16, 2.213844930795668, 2.277059122546429, 1.991206478988441, 2.038849169791055, 1.6148629582035468, 2.4500843431718997, 1.7215090898320655, 1.9269152419232003, 1.9522321208462048, 2.6279449804206774, 3.1972399610209674, 3.193977658189353, 2.644193744743235, 3.4094503793329403, 3.172588996098775, 3.722390992410695, 3.820539452015499, 3.3358362828365897, 3.625876855303902]
     @test r ≈ r_expected
 
 end
