@@ -1,11 +1,110 @@
+#
+# Functio to reconstruct the structure of the protein/polymer, to avoid
+# periodic boundary conditions issues with molecule breaking through the
+# boundaries. This function assumes that atoms that are close in the 
+# sequence of the structure are also close in space.
+#
+function _reconstruct_structure!(
+    x::AbstractVector{<:AbstractVector}, 
+    indices::AbstractVector{<:Integer},
+    unitcell::AbstractMatrix
+)
+    xlast = x[first(indices)]
+    for i in indices
+        x[i] = wrap(x[i], xlast, unitcell) 
+        xlast = x[i]
+    end
+    return x
+end
+
+#
+# Function to read the reference coordinates from the trajectory.
+# returns the coordinates, reconstructured by _reconstruct_structure,
+# which is useful in general.
+#
+function _reference_coordinates(
+    simulation, 
+    reference_frame,
+    indices,
+    align_indices,
+    rmsd_indices,
+    mass,
+)
+    xref, yref = if isnothing(reference_frame)
+        first_frame!(simulation)
+        frame = current_frame(simulation)
+        x = _reconstruct_structure(positions(frame), indices, unitcell(frame))
+        x[align_indices], x[rmsd_indices]
+    elseif reference_frame isa Integer
+        if !(reference_frame in frame_range(simulation))
+            throw(ArgumentError("""\n
+
+                reference_frame index $reference_frame is not in frame range of the simulation: $(frame_range(simulation))
+
+            """))
+        end
+        restart!(simulation)
+        for _ in 1:reference_frame
+            next_frame!(simulation)
+        end
+        frame = current_frame(simulation)
+        x = _reconstruct_structure(positions(frame), indices, unitcell(frame))
+        x[align_indices], x[rmsd_indices]
+    elseif reference_frame == :average
+        xm = zeros(Point3D, length(align_indices))
+        xp = zeros(Point3D, length(align_indices))
+        yref = zeros(Point3D, length(align_indices))
+        p = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
+        for (iframe, frame) in enumerate(simulation)
+            next!(p)
+            p = positions(frame)
+            x = @view(p[indices])
+            y = @view(p[align_indices])
+            z = @view(p[rmsd_indices])
+            _reconstruct_structure(x, 1:length(x), unitcell(frame))
+            if iframe == 1
+                yref .= y
+            else
+                ycm, yref_cm, u = align_movements(y, yref; mass, xm, xp)
+                apply_alignment_transformation!(y, ycm, yref_cm, u)
+                # voltar: not working. Do we need to align rmsd_indices here?
+                apply_alignment_transformation!(z, ycm, yref_cm, u)
+                @. yref = (yref * (iframe - 1) + y) / iframe
+            end
+        end
+        yref
+    else
+        throw(ArgumentError("""\n
+
+            reference_frame must be an integer, nothing or :average
+            
+        """))
+    end
+    restart!(simulation)
+    return xref
+end
+
 """
-    rmsd(simulation::Simulation, indices::AbstractVector{<:Integer}; mass = nothing, reference_frame = nothing, show_progress = true)
+    rmsd(
+        simulation::Simulation, 
+        indices::AbstractVector{<:Integer}; 
+        align_indices::AbstractVector{<:Integer} = indices,
+        rmsd_indices::AbstractVector{<:Integer} = indices,
+        mass = nothing, 
+        reference_frame = nothing, 
+        show_progress = true
+    )
 
 Computes the root mean square deviation (RMSD) between two sets of points in along a trajectory.
 
-# Arguments
+# Positional arguments
 
-- `indices` vector contains the indices of the atoms to be considered. 
+- `indices` vector contains the indices of all the atom of the structure of interest (i. e. the protein or polymer). By default,  the atoms to be considered for alignment and for computing the rmsd.
+
+# Optional keyword arguments
+
+- `align_indices`: indices of the atoms to be aligned. 
+- `rmsd_indices`: indices of the atoms for which the rmsd will be computed.
 - `mass` argument can be used to provide the mass of the atoms if they are not the same.
 - `reference_frame` argument can be used to provide a reference frame to align the trajectory to:
     - If `reference_frame == nothing`, the first frame will be used (default behavior).
@@ -47,57 +146,30 @@ julia> rmsd(simulation, cas; reference_frame=:average, show_progress=false)
 """
 function rmsd(
     simulation::Simulation, indices::AbstractVector{<:Integer};
+    align_indices::AbstractVector{<:Integer} = indices,
+    rmsd_indices::AbstractVector{<:Integer} = indices,
     mass=nothing,
     reference_frame=nothing,
     show_progress=true,
 )
 
     # Auxiliary arrays for the alignment
-    xm = zeros(3, length(indices))
-    xp = zeros(3, length(indices))
+    xm = zeros(3, length(align_indices))
+    xp = zeros(3, length(align_indices))
 
     # Define reference of the alignment
-    xref = if isnothing(reference_frame)
-        first_frame!(simulation)
-        positions(current_frame(simulation))[indices]
-    elseif reference_frame isa Integer
-        if !(reference_frame in frame_range(simulation))
-            throw(ArgumentError("""\n
+    xref, yref = _reference_coordinates(simulation, reference_frame, indices, align_indices, rmsd_indices, mass)
 
-                reference_frame index $reference_frame is not in frame range of the simulation: $(frame_range(simulation))
-
-            """))
-        end
-        restart!(simulation)
-        for _ in 1:reference_frame
-            next_frame!(simulation)
-        end
-        positions(current_frame(simulation))[indices]
-    elseif reference_frame == :average
-        xref = fill(zero(Point3D), length(indices))
-        p = Progress(length(simulation); enabled=show_progress, desc="Computing average structure:")
-        for (iframe, frame) in enumerate(simulation)
-            next!(p)
-            x = @view(positions(frame)[indices])
-            align!(x, xref; mass, xm, xp)
-            @. xref = (xref * (iframe - 1) + x) / iframe
-        end
-        xref
-    else
-        throw(ArgumentError("""\n
-
-            reference_frame must be an integer, nothing or :average
-            
-        """))
-    end
-    restart!(simulation)
     rmsds = Float64[]
     p = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
     for frame in simulation
         next!(p)
         x = @view(positions(frame)[indices])
-        align!(x, xref; mass, xm, xp)
-        push!(rmsds, rmsd(x, xref))
+        _reconstruct_structure!(x, indices, unitcell(frame))
+        xcm, xref_cm, u = align_movements(x, xref; mass, xm, xp)
+        y = @view(positions(frame)[rmsd_indices])
+        apply_alignment_transformation!(y, xcm, xref_cm, u)
+        push!(rmsds, rmsd(y, yref))
     end
     return rmsds
 end

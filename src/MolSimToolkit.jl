@@ -5,7 +5,7 @@ import PDBTools
 import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
-# Names, shared between different packages
+# Names and functions shared between different packages, or fundamental operations
 import MolSimToolkitShared: center_of_mass, 
                             distances,
                             coordination_number,
@@ -14,6 +14,8 @@ import MolSimToolkitShared: center_of_mass,
                             wrap_to_first,
                             align, 
                             align!, 
+                            align_movements, 
+                            apply_alignment_transformation!,
                             rmsd,
                             dihedral,
                             dihedrals
