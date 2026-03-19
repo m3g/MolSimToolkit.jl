@@ -261,7 +261,7 @@ end
 
     # Load two structures
     atoms = read_pdb(namd_pdb)
-    x = coor(atoms, "name CA")
+    x = positions(atoms, "name CA")
 
     # test RMSD function
     y = x .+ Ref(SVector{3}(1, 1, 1))

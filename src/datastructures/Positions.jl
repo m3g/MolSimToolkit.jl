@@ -20,7 +20,7 @@ Point3D(x::Vector{T}) where {T} = Point3D{T}(x[1], x[2], x[3])
 
 Container for the positions of a set of atoms. The positions are stored in a matrix,
 where each column corresponds to the coordinates of an atom. The container is used
-such that using the coodinates from a `Chemfiles.Frame` is transparent to the user,
+such that using the coordinates from a `Frame` is transparent to the user,
 and the coordinates can be accessed as `p[i]` where `i` is the index of the
 atom. 
 
@@ -81,7 +81,7 @@ struct FramePositions{T,P<:Point3D{T},M<:AbstractArray{T}} <: AbstractVector{P}
     positions::M
 end
 FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T,Point3D{T},typeof(m)}(m)
-FramePositions(f::Chemfiles.Frame) = positions(Chemfiles.positions(f))
+FramePositions(f::Frame) = positions(Chemfiles.positions(f.frame))
 FramePositions(x::FramePositions{T,P}) where {T,P} = FramePositions{T,P,typeof(x.positions)}(x.positions)
 
 Base.getindex(x::FramePositions, i::Integer) = Point3D(@view(x.positions[:, i]))
@@ -95,9 +95,9 @@ Base.size(x::FramePositions) = (length(x),)
 
 
 """
-    positions(frame::Chemfiles.Frame)
+    positions(frame::Frame)
 
-Return the positions of the atoms in a `Chemfiles.Frame` as a `FramePositions` object.
+Return the positions of the atoms in a `Frame` as a `FramePositions` object.
 
 This is the default way to access the positions of the atoms in a simulation.
 
@@ -118,8 +118,8 @@ julia> p[1].x
 ```
 
 """
-function positions(f::Chemfiles.Frame)
-    p = Chemfiles.positions(f)
+function positions(f::Frame)
+    p = Chemfiles.positions(f.frame)
     return FramePositions{eltype(p),Point3D{eltype(p)},typeof(p)}(p)
 end
 

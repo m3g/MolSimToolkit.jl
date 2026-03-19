@@ -13,7 +13,7 @@ const replace_aa_code = Dict{String,String}(
 )
 function _ss_frame!(
     atoms::AbstractVector{<:PDBTools.Atom},
-    frame::Chemfiles.Frame;
+    frame::Frame;
     ss_method::F=stride_run,
     reconstruct_structure=true,
 ) where {F<:Function}
@@ -26,11 +26,11 @@ function _ss_frame!(
             if iat == 1
                 PDBTools.set_position!(at, p[iatom])
             else
-                PDBTools.set_position!(at, wrap(p[iatom], PDBTools.coor(atoms[iat-1]), uc))
+                PDBTools.set_position!(at, wrap(p[iatom], PDBTools.position(atoms[iat-1]), uc))
             end
         end
     end
-    # This is very bad: we are writting temporary files twice for each frame
+    # This is very bad: we are writing temporary files twice for each frame
     # one here, one in the ss_method function, to adjust the PDB header
     tmpfile = tempname()*".pdb"
     PDBTools.writePDB(atoms, tmpfile)
@@ -144,14 +144,14 @@ Calculates the mean secondary structure class content of the trajectory, given t
 The secondary structure class to be considered must be defined by the `class` keyword argument.
 
 `class` can be either a string, a character, or an integer, or a set of values, setting the class(es) 
-of secondary structure to be consdiered. For example, for `alpha helix`, use "H". It can also be a vector of classes, 
+of secondary structure to be considered. For example, for `alpha helix`, use "H". It can also be a vector of classes, 
 such as `class=["H", "E"]`.
 
 The mean can be calculated along the residues (default) or along the frames, by setting the `dims` keyword argument.
 
-- `dims=nothing` (default) calculates the mean occurence of `ss_class` of the whole matrix.
-- `dims=1` calculates the mean occurence of `ss_class` along the frames, for each residue.
-- `dims=2` calculates the mean occurence of `ss_class` along the residues, for each frame.
+- `dims=nothing` (default) calculates the mean occurrence of `ss_class` of the whole matrix.
+- `dims=1` calculates the mean occurrence of `ss_class` along the frames, for each residue.
+- `dims=2` calculates the mean occurrence of `ss_class` along the residues, for each frame.
 
 The classes can be found in the ProteinSecondaryStructures.jl package documentation.
 

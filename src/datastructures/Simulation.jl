@@ -1,4 +1,6 @@
 export Simulation
+export Trajectory
+export Frame
 export UnitCell
 export frame_range
 export frame_index
@@ -16,6 +18,22 @@ export path_pdb
 export path_trajectory
 export get_frame
 
+# These are wrappers to avoid type-piracy and eventually support additional features.
+struct Frame{T<:Chemfiles.Frame}
+    frame::T
+end
+Base.show(io, ::MIME: f::Frame) = "Frame{Chemfiles.Frame}"
+
+struct Trajectory{T<:Chemfiles.Trajectory}
+    trajectory::T
+end
+Trajectory(filename::String) = Trajectory(Chemfiles.Trajectory(filename))
+Base.length(t::Trajectory) = Chemfiles.length(t.trajectory)
+Base.read(t::Trajectory) = Chemfiles.read(t.trajectory)
+Base.close(t::Trajectory) = Chemfiles.close(t.trajectory)
+path_trajectory(t::Trajectory) = normpath(Chemfiles.path(t.trajectory))
+raw_length(t::Trajectory) = Int(Chemfiles.length(t.trajectory))
+read_step!(t::Trajectory, i_next_frame::Int, f::Frame) = Chemfiles.read_step!(t.trajectory, i_next_frame - 1, f.frame)
 
 """
     Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5])
@@ -105,8 +123,8 @@ julia> for (i, frame) in enumerate(simulation)
 mutable struct Simulation{
     AtomType,
     V<:Vector{<:AtomType},
-    F<:Chemfiles.Frame,
-    T<:Chemfiles.Trajectory,
+    F<:Frame,
+    T<:Trajectory,
     L<:ReentrantLock
 }
     pdb_file::Union{Nothing,String}
@@ -187,7 +205,7 @@ end
 
 #=
 
-Creates a new Simulation object from a Chemfiles.Trajectory. If `frame_range` is not
+Creates a new Simulation object from a Trajectory. If `frame_range` is not
 specified, the Simulation will iterate over all frames in the file. If `frame_range`
 is specified, the Simulation will iterate over the frames in the range.
 
@@ -197,11 +215,11 @@ This function is not supposed to be called directly. Use the Simulation(file) fu
 function Simulation(
     pdb_file::Union{Nothing,String},
     atoms::AbstractVector{AtomType},
-    trajectory::Chemfiles.Trajectory,
+    trajectory::Trajectory,
     frames, first, last, step
 ) where {AtomType}
     frame_range = _set_range(trajectory, frames, first, last, step)
-    frame = Chemfiles.read(trajectory)
+    frame = Frame(Chemfiles.read(trajectory))
     read_lock = ReentrantLock()
     frame_index = nothing
     simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
@@ -222,14 +240,14 @@ function Simulation(
     frames=nothing, first=nothing, last=nothing, step=nothing
 )
     atoms = PDBTools.readPDB(pdb_file)
-    return Simulation(pdb_file, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
+    return Simulation(pdb_file, atoms, Trajectory(trajectory_file), frames, first, last, step)
 end
 
 function Simulation(
     atoms::AbstractVector{AtomType}, trajectory_file::String; 
     frames=nothing, first=nothing, last=nothing, step=nothing
 ) where {AtomType}
-    return Simulation(nothing, atoms, Chemfiles.Trajectory(trajectory_file), frames, first, last, step)
+    return Simulation(nothing, atoms, Trajectory(trajectory_file), frames, first, last, step)
 end
 
 """
@@ -255,7 +273,7 @@ frame_index(simulation::Simulation) = simulation.frame_index
 Closes the trajectory file.
 
 """
-Base.close(simulation::Simulation) = Chemfiles.close(simulation.trajectory)
+Base.close(simulation::Simulation) = close(simulation.trajectory)
 
 """
     raw_length(simulation::Simulation)
@@ -263,7 +281,7 @@ Base.close(simulation::Simulation) = Chemfiles.close(simulation.trajectory)
 Returns the number of frames in the trajectory file.
 
 """
-raw_length(simulation::Simulation) = Int(Chemfiles.length(simulation.trajectory))
+raw_length(simulation::Simulation) = raw_length(simulation.trajectory)
 
 """
     length(simulation::Simulation)
@@ -296,7 +314,7 @@ path_pdb(simulation::Simulation) = isnothing(simulation.pdb_file) ? nothing : no
 Returns the path to the trajectory file of the simulation.
 
 """
-path_trajectory(simulation::Simulation) = normpath(Chemfiles.path(simulation.trajectory))
+path_trajectory(simulation::Simulation) = path_trajectory(simulation.trajectory)
 
 """
     restart!(simulation::Simulation)
@@ -308,7 +326,7 @@ function restart!(simulation::Simulation)
     lock(simulation) do
         trajectory_file = path_trajectory(simulation)
         close(simulation)
-        simulation.trajectory = Chemfiles.Trajectory(trajectory_file)
+        simulation.trajectory = Trajectory(trajectory_file)
         simulation.frame_index = nothing
     end # release lock
     return simulation
@@ -379,7 +397,7 @@ function next_frame!(simulation::Simulation)
             """))
         end
         i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
-        Chemfiles.read_step!(simulation.trajectory, i_next_frame - 1, simulation.frame)
+        read_step!(simulation.trajectory, i_next_frame, simulation.frame)
         simulation.frame_index = i_next_frame
     end
     return current_frame(simulation)
@@ -429,13 +447,13 @@ end
 end
 
 """
-    unitcell(frame::Chemfiles.Frame)
+    unitcell(frame::Frame)
 
 Returns the unit cell of the current frame in the trajectory.
 
 """
-function unitcell(f::Chemfiles.Frame; tol=1e-10) 
-    mat = unitcell(Chemfiles.UnitCell(f))
+function unitcell(f::Frame; tol=1e-10) 
+    mat = SMatrix{3,3,Float64,9}(transpose((Chemfiles.matrix(Chemfiles.UnitCell(f.frame)))))
     if all(==(0), mat)
         @warn """\n
             Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
@@ -450,7 +468,6 @@ function unitcell(f::Chemfiles.Frame; tol=1e-10)
     orthorhombic = all(abs(mat[i, j]) < tol * s for i in 1:3, j in 1:3 if i != j)
     return UnitCell(mat, valid, orthorhombic)
 end
-unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.matrix(u)))
 
 @testitem "unitcell" begin
     using MolSimToolkit
@@ -459,7 +476,7 @@ unitcell(u::Chemfiles.UnitCell) = SMatrix{3,3,Float64,9}(transpose(Chemfiles.mat
     import Chemfiles
     traj = Chemfiles.Trajectory(Testing.namd_traj)
     frame = Chemfiles.read(traj)
-    uc = unitcell(frame)
+    uc = unitcell(Frame(frame))
     @test uc.valid == true
     @test uc.orthorhombic == true
     @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
@@ -517,7 +534,7 @@ julia> frame4 = get_frame(sim, 4)
    20464  SOD     SOD     S       14     4375  -34.214   38.148   55.179  1.00  0.00     1     SOD     20464
    20465  SOD     SOD     S       15     4376    7.220  -52.702   66.223  1.00  0.00     1     SOD     20465
 
-julia> writePDB(frame4, "frame4.pdb")
+julia> write_pdb(frame4, "frame4.pdb")
 ```
 
 !!! note
@@ -538,10 +555,11 @@ function get_frame(simulation::Simulation, iframe::Integer)
     while frame_index(simulation) != iframe
         next_frame!(simulation)
     end
-    p = positions(current_frame(simulation))
-    ats = atoms(simulation)
-    PDBTools.set_position!.(ats, p)
-    return ats
+    return current_frame(simulation)
+#    p = positions(current_frame(simulation))
+#    ats = atoms(simulation)
+#    PDBTools.set_position!.(ats, p)
+#    return ats
 end
 
 @testitem "Simulation" begin
@@ -587,18 +605,18 @@ end
     using MolSimToolkit, MolSimToolkit.Testing, PDBTools
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
     frames = [ copy(positions(frame)) for frame in sim ]
-    @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
-    @test coor(get_frame(sim, 5)) ≈ frames[5]
-    @test coor(get_frame(sim, 1)) ≈ frames[1]
-    @test coor(get_frame(sim, 2)) ≈ frames[2]
+    @test all(positions(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
+    @test positions(get_frame(sim, 5)) ≈ frames[5]
+    @test positions(get_frame(sim, 1)) ≈ frames[1]
+    @test positions(get_frame(sim, 2)) ≈ frames[2]
     ats = readPDB(Testing.namd_pdb)
     sim = Simulation(ats, Testing.namd_traj)
-    @test all(coor(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
+    @test all(positions(get_frame(sim, i)) ≈ frames[i] for i in eachindex(sim))
     @test_throws ArgumentError get_frame(sim, 100)
     sim2 = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[1,2,5])
-    @test coor(get_frame(sim2, 1)) ≈ frames[1]
-    @test coor(get_frame(sim2, 2)) ≈ frames[2]
-    @test coor(get_frame(sim2, 5)) ≈ frames[5]
+    @test positions(get_frame(sim2, 1)) ≈ frames[1]
+    @test positions(get_frame(sim2, 2)) ≈ frames[2]
+    @test positions(get_frame(sim2, 5)) ≈ frames[5]
     @test_throws ArgumentError get_frame(sim2, 4)
     first_frame!(sim2)
     @test frame_index(sim2) == 1

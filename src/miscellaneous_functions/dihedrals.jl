@@ -92,7 +92,7 @@ end
     cAs = select(atoms, "name CA and residue < 5")
     r1b = select(atoms, "residue 1 and backbone")
     inds = [ index.(cAs), index.(r1b) ]
-    v4 = [coor(cAs[1]), coor(cAs[2]), coor(cAs[3]), coor(cAs[4])]
+    v4 = [position(cAs[1]), position(cAs[2]), position(cAs[3]), position(cAs[4])]
     init = zeros(eltype(eltype(eltype(v4))), length(inds))
     MolSimToolkit._sum_dihedrals!(inds, p1, init)
     @test init ≈ [-168.41887, -55.351723] atol = 1e-3
