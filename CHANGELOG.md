@@ -14,6 +14,7 @@ Version 2.0.0-DEV
 --------------
 - ![BREAKING][badge-breaking] `atoms` function was removed in favor of `get_atoms`.
 - ![BREAKING][badge-breaking] `get_frame` returns a `Frame` object, not anymore a vector of atoms. Use `get_atoms` instead.
+- ![INFO][badge-info] The internal representation of frames and trajectories is done by new `MolSimToolkit` structs `Frame` and `Trajectory`. `Chemfiles` objects are not exposed anymore to the user. 
 
 Version 1.33.0
 --------------
