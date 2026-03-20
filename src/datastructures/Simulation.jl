@@ -18,22 +18,6 @@ export path_pdb
 export path_trajectory
 export get_frame
 
-# These are wrappers to avoid type-piracy and eventually support additional features.
-struct Frame{T<:Chemfiles.Frame}
-    frame::T
-end
-Base.show(io, ::MIME: f::Frame) = "Frame{Chemfiles.Frame}"
-
-struct Trajectory{T<:Chemfiles.Trajectory}
-    trajectory::T
-end
-Trajectory(filename::String) = Trajectory(Chemfiles.Trajectory(filename))
-Base.length(t::Trajectory) = Chemfiles.length(t.trajectory)
-Base.read(t::Trajectory) = Chemfiles.read(t.trajectory)
-Base.close(t::Trajectory) = Chemfiles.close(t.trajectory)
-path_trajectory(t::Trajectory) = normpath(Chemfiles.path(t.trajectory))
-raw_length(t::Trajectory) = Int(Chemfiles.length(t.trajectory))
-read_step!(t::Trajectory, i_next_frame::Int, f::Frame) = Chemfiles.read_step!(t.trajectory, i_next_frame - 1, f.frame)
 
 """
     Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5])
@@ -102,9 +86,9 @@ julia> for frame in simulation
            @show positions(frame)[1].x
        end
 frame_index(simulation) = 2
-((positions(frame))[1]).x = 5.912472724914551
+((positions(frame))[1]).x = 2.001203775405884
 frame_index(simulation) = 4
-((positions(frame))[1]).x = 7.346549034118652
+((positions(frame))[1]).x = -0.39684221148490906 
 
 julia> for (i, frame) in pairs(simulation)
            @show i, frame_index(simulation)
@@ -167,11 +151,11 @@ end
 import Base: lock
 lock(f::F, simulation::Simulation) where {F<:Function} = lock(f, simulation.read_lock)
 
-function _set_range(trajectory, frames, first, last, step)
+function _set_range(trajectory::Trajectory, frames, first, last, step)
     if isnothing(frames)
         isnothing(first) && (first = 1)
         isnothing(step) && (step = 1)
-        isnothing(last) && (last = Int(Chemfiles.length(trajectory)))
+        isnothing(last) && (last = length(trajectory))
         frame_range = first:step:last
     else
         if any(!isnothing, (first, last, step))
@@ -219,7 +203,7 @@ function Simulation(
     frames, first, last, step
 ) where {AtomType}
     frame_range = _set_range(trajectory, frames, first, last, step)
-    frame = Frame(Chemfiles.read(trajectory))
+    frame = read(trajectory)
     read_lock = ReentrantLock()
     frame_index = nothing
     simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
@@ -239,7 +223,7 @@ function Simulation(
     pdb_file::String, trajectory_file::String; 
     frames=nothing, first=nothing, last=nothing, step=nothing
 )
-    atoms = PDBTools.readPDB(pdb_file)
+    atoms = PDBTools.read_pdb(pdb_file)
     return Simulation(pdb_file, atoms, Trajectory(trajectory_file), frames, first, last, step)
 end
 
@@ -348,31 +332,27 @@ end
 """
     first_frame!(simulation::Simulation)
 
-Restarts the trajectory buffer, and places the current frame at the first frame in the trajectory.
+Restarts the trajectory buffer, and places the current frame at the first frame in the simulation frame range.
 
 # Example
 
 ```julia-repl
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first=3);
+julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first=3); # note first=3
 
 julia> first_frame!(simulation) 
-Simulation 
-    Atom type: Atom{Nothing}
-    PDB file: /test/data/namd/protein_in_popc_membrane/structure.pdb
-    Trajectory file: /test/data/namd/protein_in_popc_membrane/trajectory.dcd
-    Total number of frames: 5
-    Frames to consider: 1, 2, 3, 4, 5
-    Number of frames to consider: 5
-    Current frame: 3
+Frame{Chemfiles.Frame} - first atom position: [7.346549034118652, 2.396179437637329, 40.05739974975586]
 
+julia> frame_index(simulation)
+3
 ```
+
 """
 function first_frame!(simulation::Simulation)
     restart!(simulation)
     next_frame!(simulation)
-    return simulation
+    return simulation.frame
 end
 
 """
@@ -446,49 +426,6 @@ end
     """
 end
 
-"""
-    unitcell(frame::Frame)
-
-Returns the unit cell of the current frame in the trajectory.
-
-"""
-function unitcell(f::Frame; tol=1e-10) 
-    mat = SMatrix{3,3,Float64,9}(transpose((Chemfiles.matrix(Chemfiles.UnitCell(f.frame)))))
-    if all(==(0), mat)
-        @warn """\n
-            Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
-            Wrapping of coordinates will be disabled for current frame.
-            
-        """ _file = nothing _line = nothing
-        valid = false
-    else
-        valid = true
-    end
-    s = abs(minimum(diag(mat))) # minimum diagonal element
-    orthorhombic = all(abs(mat[i, j]) < tol * s for i in 1:3, j in 1:3 if i != j)
-    return UnitCell(mat, valid, orthorhombic)
-end
-
-@testitem "unitcell" begin
-    using MolSimToolkit
-    using MolSimToolkit.Testing
-    using StaticArrays
-    import Chemfiles
-    traj = Chemfiles.Trajectory(Testing.namd_traj)
-    frame = Chemfiles.read(traj)
-    uc = unitcell(Frame(frame))
-    @test uc.valid == true
-    @test uc.orthorhombic == true
-    @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
-    sim = Simulation(Testing.short_nopbc_pdb, Testing.short_nopbc_traj)
-    first_frame!(sim)
-    f = current_frame(sim)
-    uc = unitcell(f)
-    @test all(==(0), uc.matrix)
-    @test uc.valid == false
-    @test uc.orthorhombic == false
-end
-
 import Base: firstindex, lastindex
 firstindex(simulation::Simulation) = first(frame_range(simulation))
 lastindex(simulation::Simulation) = last(frame_range(simulation))
@@ -546,7 +483,7 @@ julia> write_pdb(frame4, "frame4.pdb")
 """
 function get_frame(simulation::Simulation, iframe::Integer)
     if !(iframe in frame_range(simulation))
-        throw(ArgumentError("get_frame: Index $iframe selected frames: $(frame_range(simulation))."))
+        throw(ArgumentError("get_frame: Index $iframe selected, but available frames are: $(frame_range(simulation))."))
     end
     i_current_frame = frame_index(simulation)
     if isnothing(i_current_frame) || (iframe < i_current_frame)
@@ -556,10 +493,6 @@ function get_frame(simulation::Simulation, iframe::Integer)
         next_frame!(simulation)
     end
     return current_frame(simulation)
-#    p = positions(current_frame(simulation))
-#    ats = atoms(simulation)
-#    PDBTools.set_position!.(ats, p)
-#    return ats
 end
 
 @testitem "Simulation" begin
@@ -629,6 +562,12 @@ end
     @test frame_range(sim2) == [1,2,3]
     set_frame_range!(sim2; first=2, last=4)
     @test frame_range(sim2) == [2,3,4]
+
+    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first = 2, step = 2, last = 4)
+    @test first(positions(get_frame(simulation, 2))) ≈ [2.001203775405884, 7.035768985748291, 43.27251434326172]
+    @test first(positions(get_frame(simulation, 4))) ≈ [-0.39684221148490906, 12.047886848449707, 37.44126892089844]
+    @test_throws "get_frame: Index 1 selected, but available frames are: [2, 4]" get_frame(simulation, 1)
+
 end
 
 @testitem "Simulation - show" begin

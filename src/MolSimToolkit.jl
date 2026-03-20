@@ -60,6 +60,8 @@ const version = pkgversion(@__MODULE__)
 include("../test/Testing.jl")
 
 # Data structures
+include("./datastructures/Frame.jl")
+include("./datastructures/Trajectory.jl")
 include("./datastructures/Simulation.jl")
 include("./datastructures/Positions.jl")
 
