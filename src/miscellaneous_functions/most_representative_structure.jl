@@ -114,7 +114,7 @@ end
 @testitem "most_representative_structure" begin
     using MolSimToolkit, MolSimToolkit.Testing, PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    calphas = select(atoms(simulation), "name CA")
+    calphas = select(get_atoms(simulation), "name CA")
     imin, rmsdmin = most_representative_structure(simulation)
     @test imin == 4
     @test rmsdmin ≈ 1.1681514813293536

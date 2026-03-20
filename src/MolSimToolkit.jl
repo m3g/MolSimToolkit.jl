@@ -12,7 +12,8 @@ import MolSimToolkitShared: center_of_mass,
                             bulk_coordination,
                             wrap,
                             rmsd,
-                            positions
+                            positions,
+                            get_atoms
 
 # These are only used within this package, not extended
 using MolSimToolkitShared: alignment_movements, 

@@ -59,7 +59,7 @@ function _write_temporary_trajectory(simulation::Simulation, maxframes)
     # write the temporary PDB file with the frames to be considered, to run the mdlovofit executable
     #
     # Atoms to be considered (could be generalized with the -atomsfile option of mdlovofit)
-    cA = filter(at -> PDBTools.isprotein(at) && PDBTools.name(at) == "CA", atoms(simulation))
+    cA = filter(at -> PDBTools.isprotein(at) && PDBTools.name(at) == "CA", get_atoms(simulation))
     cA_inds = PDBTools.index.(cA)
     tmp_trajectory_file = tempname() * "_mdlovofit_trajectory.pdb"
     for (iframe, frame) in enumerate(simulation)

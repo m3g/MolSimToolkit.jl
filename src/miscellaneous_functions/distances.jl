@@ -80,9 +80,10 @@ end
 
 @testitem "distances" begin
     using PDBTools
+    using MolSimToolkit
     using MolSimToolkit.Testing
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    i1 = findall(sel"protein and residue 1", atoms(sim))
+    i1 = findall(sel"protein and residue 1", get_atoms(sim))
     i2 = findall(sel"protein and residue 15", atoms(sim))
     proof = [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
     @test distances(sim, i1, i2; silent=true) ≈ proof

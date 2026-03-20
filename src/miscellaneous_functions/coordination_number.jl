@@ -96,7 +96,7 @@ end
 @testitem "coordination_number" begin
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
-    protein = select(atoms(sim), "protein")
+    protein = select(get_atoms(sim), "protein")
     tmao = select(atoms(sim), "resname TMAO")
     cn = coordination_number(
         sim, protein, tmao; 

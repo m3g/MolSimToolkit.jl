@@ -101,7 +101,7 @@ function ss_map(
     show_progress=true,
     reconstruct_structure=true,
 ) where {F<:Function}
-    sel = PDBTools.select(atoms(simulation), selection)
+    sel = PDBTools.select(get_atoms(simulation), selection)
     for iat in eachindex(sel)
         if haskey(replace_aa_code, PDBTools.resname(sel[iat]))
             sel[iat].resname = replace_aa_code[sel[iat].resname]
@@ -285,7 +285,7 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
 
-julia> protein = select(atoms(simulation), "protein");
+julia> protein = select(get_atoms(simulation), "protein");
 
 julia> ss_heatmap(ssmap; scalex=0.1, xlabel="time / ns", yticks=residue_ticks(prot; stride=5))
 ```

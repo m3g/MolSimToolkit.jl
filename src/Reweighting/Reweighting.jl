@@ -20,7 +20,7 @@ end #Module Reweighting
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_one_frame.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+    i1 = PDBTools.selindex(get_atoms(simulation), "resname TFE and name O")
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 11")
 
@@ -35,7 +35,7 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
+    i1 = PDBTools.selindex(get_atoms(simulation), "index 97 or index 106")
 
     i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
 
@@ -55,7 +55,7 @@ end
 
     simulation = Simulation("$testdir/Testing_reweighting.pdb", "$testdir/Testing_reweighting_10_frames_trajectory.xtc")
 
-    i1 = PDBTools.selindex(atoms(simulation), "resname TFE and name O")
+    i1 = PDBTools.selindex(get_atoms(simulation), "resname TFE and name O")
 
     i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
 

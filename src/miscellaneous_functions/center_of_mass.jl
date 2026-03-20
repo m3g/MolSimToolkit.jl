@@ -66,7 +66,7 @@ end
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     first_frame!(simulation)
-    protein_indices = PDBTools.selindex(atoms(simulation), "protein")
+    protein_indices = PDBTools.selindex(get_atoms(simulation), "protein")
     coor = positions(current_frame(simulation))
     @test center_of_mass(protein_indices, simulation, coor) ≈
           [-3.7290442807974906, -1.5339226637687564, 1.960640754560446]
