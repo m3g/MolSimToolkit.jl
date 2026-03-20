@@ -12,12 +12,11 @@ export first_frame!
 export current_frame
 export next_frame!
 export set_frame_range!
-export atoms
 export unitcell
 export path_pdb
 export path_trajectory
 export get_frame
-
+export get_atoms
 
 """
     Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5])
@@ -50,7 +49,7 @@ functions:
 - `frame_index(::Simulation)`: the index of the current frame in the trajectory
 - `length(::Simulation)`: the number of frames to be iterated over in the trajectory file, considering the current range
 - `raw_length(::Simulation)`: the number of frames in the trajectory file
-- `atoms(::Simulation)`: the atoms in the simulation
+- `get_atoms(::Simulation; frame=nothing)`: get vector of atoms of the simulation, `frame=nothing`, the positions of the current frame will be returned. 
 
 The Simulation object can also be manipulated by the following functions:
 
@@ -277,12 +276,31 @@ considering the current frame range.
 Base.length(simulation::Simulation) = length(simulation.frame_range)
 
 """
-    atoms(simulation::Simulation)
+    get_atoms(simulation::Simulation; frame=nothing)
 
 Returns the atoms in the simulation.
 
 """
-atoms(simulation::Simulation) = simulation.atoms
+function get_atoms(simulation::Simulation; frame::Union{Nothing,Int}=nothing)
+    f = if isnothing(frame)
+        current_frame(simulation)
+    else
+        get_frame(simulation, frame)
+    end
+    ats = copy.(simulation.atoms)
+    PDBTools.set_position!.(ats, positions(f))
+    return ats
+end
+
+@testitem "get_atoms" begin
+    using MolSimToolkit
+    using MolSimToolkit.Testing
+    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first = 2, step = 2, last = 4)
+    ats = get_atoms(simulation; frame=2)
+    @test position(ats[1]) ≈ [2.0012038, 7.035769, 43.272514]
+    ats = get_atoms(simulation; frame=4)
+    @test position(ats[1]) ≈ [-0.3968422, 12.047887, 37.44127] 
+end
 
 """
     path_pdb(simulation::Simulation)
