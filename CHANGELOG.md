@@ -10,8 +10,10 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 1.33.1-DEV
+Version 2.0.0-DEV
 --------------
+- ![BREAKING][badge-breaking] `atoms` function was removed in favor of `get_atoms`.
+- ![BREAKING][badge-breaking] `get_frame` returns a `Frame` object, not anymore a vector of atoms. Use `get_atoms` instead.
 
 Version 1.33.0
 --------------
