@@ -16,6 +16,7 @@ Version 2.0.0-DEV
 - ![BREAKING][badge-breaking] `get_frame` returns a `Frame` object, not anymore a vector of atoms. Use `get_atoms` instead.
 - ![INFO][badge-info] The internal representation of frames and trajectories is done by new `MolSimToolkit` structs `Frame` and `Trajectory`. `Chemfiles` objects are not exposed anymore to the user. 
 - ![INFO][badge-info] Import `get_atoms` from `MolSimToolkitShared`. 
+- ![INFO][badge-info] Require PDBTools v3.21.0.
 
 Version 1.33.0
 --------------
