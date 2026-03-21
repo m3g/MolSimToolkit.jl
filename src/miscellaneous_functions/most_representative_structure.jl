@@ -50,7 +50,7 @@ julia> most_representative_structure(simulation) # atoms == nothing (all alpha-c
 julia> most_representative_structure(simulation; atoms = "protein and name CA") # atoms is a String
 (4, 1.1681526249035976)
 
-julia> calphas = select(atoms(simulation), "name CA");
+julia> calphas = select(get_atoms(simulation), "name CA");
 
 julia> most_representative_structure(simulation; atoms = calphas) # atoms is an Vector{PDBTools.Atom}
 (4, 1.1681526249035976)
@@ -65,7 +65,7 @@ julia> most_representative_structure(simulation; atoms = ica) # atoms is an vect
 function most_representative_structure(simulation::Simulation; atoms = nothing)
     if isnothing(atoms)
         indices = PDBTools.index.(
-            PDBTools.select(MolSimToolkit.atoms(simulation), "protein and name CA")
+            PDBTools.select(MolSimToolkit.get_atoms(simulation), "protein and name CA")
         )
     else
         if atoms isa AbstractVector{<:PDBTools.Atom}
@@ -74,7 +74,7 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
             indices = atoms
         elseif atoms isa AbstractString
             indices = PDBTools.index.(
-                PDBTools.select(MolSimToolkit.atoms(simulation), atoms)
+                PDBTools.select(MolSimToolkit.get_atoms(simulation), atoms)
             )
         else
             throw(ArgumentError("atoms must be a selection string, an array of PDBTools.Atom's or vector of integers with atom indices."))

@@ -21,7 +21,7 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> protein_indices = findall(sel"protein", atoms(simulation));
+julia> protein_indices = findall(sel"protein", get_atoms(simulation));
 
 julia> first_frame!(simulation); # move simulation to the first frame
 
@@ -49,7 +49,7 @@ function center_of_mass(
     totmass = 0.0
     cm = MVector{3}(0.0, 0.0, 0.0)
     for i in indices
-        m = PDBTools.atomic_mass(atoms(simulation)[i])
+        m = PDBTools.atomic_mass(simulation.atoms[i])
         x = if !isnothing(iref)
             MolSimToolkit.wrap(p[i], xref, uc)
         else

@@ -98,7 +98,7 @@ julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
 julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
 
-julia> protein = select(atoms(simulation), "protein");
+julia> protein = select(get_atoms(simulation), "protein");
 
 julia> ss_heatmap(ssmap; scalex=0.1, xlabel="time / ns", yticks=residue_ticks(prot; stride=5))
 ```
@@ -184,7 +184,7 @@ This can be plotted, for example, with:
 ```julia-repl
 julia> using Plots, PDBTools
 
-julia> ticks = residue_ticks(select(atoms(simulation), "protein"); stride=5)
+julia> ticks = residue_ticks(select(get_atoms(simulation), "protein"); stride=5)
 (1:5:41, ["I211", "G216", "I221", "S226", "F231", "L236", "C241", "K246", "I251"])
 
 julia> plot(MolSimStyle, h, 

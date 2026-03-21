@@ -37,9 +37,9 @@ julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
 julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; frames=1:5);
 
-julia> protein = select(atoms(sim), "protein");
+julia> protein = select(get_atoms(sim), "protein");
 
-julia> tmao = select(atoms(sim), "resname TMAO");
+julia> tmao = select(get_atoms(sim), "resname TMAO");
 
 julia> coordination_number(sim, protein, tmao; solvent_natomspermol=14, cutoff=3.0, show_progress=false)
 5-element Vector{Int64}:
@@ -97,7 +97,7 @@ end
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
     protein = select(get_atoms(sim), "protein")
-    tmao = select(atoms(sim), "resname TMAO")
+    tmao = select(get_atoms(sim), "resname TMAO")
     cn = coordination_number(
         sim, protein, tmao; 
         solvent_natomspermol=14, cutoff=3.0,

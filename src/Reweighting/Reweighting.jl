@@ -22,7 +22,7 @@ end #Module Reweighting
 
     i1 = PDBTools.selindex(get_atoms(simulation), "resname TFE and name O")
 
-    i2 = PDBTools.selindex(atoms(simulation), "residue 11")
+    i2 = PDBTools.selindex(get_atoms(simulation), "residue 11")
 
     sum_of_dist = reweight(simulation, (i,j,r) -> r, [i1[239]], i2; cutoff = 25.0)
     @test sum_of_dist.energy ≈ [7.4295543149]
@@ -37,7 +37,7 @@ end
 
     i1 = PDBTools.selindex(get_atoms(simulation), "index 97 or index 106")
 
-    i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
+    i2 = PDBTools.selindex(get_atoms(simulation), "residue 15 and name HB3")
 
     sum_of_dist = reweight(simulation, (i,j,r) -> r, i1, i2, cutoff = 25.0)
     @test sum_of_dist.energy ≈ [
@@ -57,7 +57,7 @@ end
 
     i1 = PDBTools.selindex(get_atoms(simulation), "resname TFE and name O")
 
-    i2 = PDBTools.selindex(atoms(simulation), "protein and name O")
+    i2 = PDBTools.selindex(get_atoms(simulation), "protein and name O")
 
     α = 5.e-3
 

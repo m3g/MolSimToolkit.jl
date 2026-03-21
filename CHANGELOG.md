@@ -12,10 +12,14 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.0-DEV
 --------------
+--------------
+- ![FEATURE][badge-feature] `get_atoms` has a `frame`keyword parameter (`get_atoms(sim; frame::Int=...)`) for retrieving a vector of coordiantes of a specific frame. 
 - ![BREAKING][badge-breaking] `atoms` function was removed in favor of `get_atoms`.
 - ![BREAKING][badge-breaking] `get_frame` returns a `Frame` object, not anymore a vector of atoms. Use `get_atoms` instead.
+- ![BREAKING][badge-breaking] PDBTools 3.21.0 renames `coor` to `positions`/`position` — all MolSimToolkit functions and documentation now use the new names.
+- ![BREAKING][badge-breaking] `first_frame!` returns the `Frame` object, not a `Simulation` object, as before. It mutates, as before, the `Simulation` object, to place it in the first frame.
 - ![INFO][badge-info] The internal representation of frames and trajectories is done by new `MolSimToolkit` structs `Frame` and `Trajectory`. `Chemfiles` objects are not exposed anymore to the user. 
-- ![INFO][badge-info] Import `get_atoms` from `MolSimToolkitShared`. 
+- ![INFO][badge-info] Import `get_atoms` and `positions` from `MolSimToolkitShared`. 
 - ![INFO][badge-info] Require PDBTools v3.21.0.
 
 Version 1.33.0

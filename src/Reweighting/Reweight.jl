@@ -59,12 +59,12 @@ Simulation
     Number of frames in range: 10
     Current frame: nothing
 
-julia> i1 = PDBTools.selindex(atoms(simulation), "index 97 or index 106")
+julia> i1 = PDBTools.selindex(get_atoms(simulation), "index 97 or index 106")
 2-element AbstractVector{<:Integer}:
   97
  106
 
-julia> i2 = PDBTools.selindex(atoms(simulation), "residue 15 and name HB3")
+julia> i2 = PDBTools.selindex(get_atoms(simulation), "residue 15 and name HB3")
 1-element AbstractVector{<:Integer}:
  171
 
