@@ -3,6 +3,11 @@
 
 Structure that contains the data of a trajectory frame.
 
+Current methods:
+
+- `positions(::Frame)`: returns an array of positions of atoms in the frame.
+- `unitcell(::Frame)`: returns the `UnitCell` object of the frame.
+
 """
 struct Frame{T<:Chemfiles.Frame}
     frame::T

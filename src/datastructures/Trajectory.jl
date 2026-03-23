@@ -1,7 +1,8 @@
 """
     Trajectory
 
-Structure that contains the data stream of trajectory file.
+Structure that contains the data stream of trajectory file. All methods dispatching on
+`Trajectory` are considered internal.
 
 """
 struct Trajectory{T<:Chemfiles.Trajectory}
