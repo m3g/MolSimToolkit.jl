@@ -8,7 +8,7 @@ CollapsedDocStrings = true
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "datastructures/Simulation.jl" ]
+Pages = [ "datastructures/Simulation.jl", "datastructures/Trajectory.jl", "datastructures/Frame.jl" ]
 Filter = (f) -> !(nameof(f) === :unitcell)
 ```
 
@@ -24,7 +24,7 @@ Order = [ :function, :type ]
 
 ```@autodocs
 Modules = [ MolSimToolkit ]
-Pages = [ "datastructures/Simulation.jl" ]
+Pages = [ "datastructures/Frame.jl" ]
 Filter = (f) -> (nameof(f) === :unitcell)
 ```
 

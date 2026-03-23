@@ -94,7 +94,7 @@ function _reference_coordinates(
             """))
         end
         restart!(simulation)
-        for _ in 1:reference_frame
+        for _ in 1:reference_frame-1
             next_frame!(simulation)
         end
         frame = current_frame(simulation)

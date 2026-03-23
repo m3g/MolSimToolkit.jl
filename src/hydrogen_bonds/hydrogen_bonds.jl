@@ -73,9 +73,9 @@ function PDBTools.hydrogen_bonds(
     selection_pairs = process_selections(selections)
 
     # Initialize trajectory and get first frame data
-    first_frame!(sim)
-    uc_first_frame = unitcell(current_frame(sim))
-    p_first_frame = positions(current_frame(sim))
+    f = first_frame!(sim)
+    uc_first_frame = unitcell(f)
+    p_first_frame = positions(f)
 
     # Initialize results and process selections
     hbonds, selection_data = initialize_hbonds_data(
@@ -101,12 +101,15 @@ function PDBTools.hydrogen_bonds(
         )
         for _ in frame_inds
             lock(sim) do
-                next_frame!(sim)
-                current_positions .= positions(current_frame(sim))
-                uc = unitcell(current_frame(sim))
+                f = current_frame(sim)
+                current_positions .= positions(f)
+                uc = unitcell(f)
                 iframe += 1
                 index_current_frame = iframe
                 next!(prg)
+                if frame_index(sim) < last(frame_range(sim))
+                    next_frame!(sim)
+                end
             end
             for selection_pair in selection_pairs
                 sel1, sel2 = first(selection_pair), last(selection_pair)

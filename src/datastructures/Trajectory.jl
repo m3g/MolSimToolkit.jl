@@ -1,3 +1,9 @@
+"""
+    Trajectory
+
+Structure that contains the data stream of trajectory file.
+
+"""
 struct Trajectory{T<:Chemfiles.Trajectory}
     trajectory::T
 end

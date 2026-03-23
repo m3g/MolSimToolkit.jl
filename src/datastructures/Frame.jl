@@ -1,12 +1,20 @@
+"""
+    Frame
+
+Structure that contains the data of a trajectory frame.
+
+"""
 struct Frame{T<:Chemfiles.Frame}
     frame::T
 end
 Base.show(io::IO, f::Frame) = print(io, "Frame{Chemfiles.Frame} - first atom position: $(positions(f)[1])")
 
 """
-    unitcell(frame::Frame)
+    unitcell(frame::Frame; tol=1e-10)
 
-Returns the unit cell of the current frame in the trajectory.
+Returns the unit cell of the current frame in the trajectory. The tolerance defines the relative 
+size of off-diagonal elements that can be ignored to consider the cell as orthorhombic, relative
+the minimum diagonal element.
 
 """
 function unitcell(f::Frame; tol=1e-10) 
@@ -58,5 +66,4 @@ end
     @test parse_show(f) ≈ "Frame{Chemfiles.Frame} - first atom position: [-6.46804666519165, -10.306520462036133, 14.48043441772461]"
     f = current_frame(sim)
     @test parse_show(f) ≈ "Frame{Chemfiles.Frame} - first atom position: [-6.46804666519165, -10.306520462036133, 14.48043441772461]"
-
 end
