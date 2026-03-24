@@ -2,7 +2,7 @@
     center_of_mass(
         indices::AbstractVector{Int};
         simulation::Simulation,
-        positions::FramePositions,
+        positions::AbstractVector{<:Point3D},
         iref::Union{Nothing,Int} = max(1, div(length(indices),2)),
     )
 
@@ -41,7 +41,7 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
 function center_of_mass(
     indices::AbstractVector{<:Integer},
     simulation::Simulation,
-    p::FramePositions;
+    p::AbstractVector{<:Point3D};
     iref::Union{Nothing,<:Integer}=max(1, div(length(indices), 2)),
 )
     xref = isnothing(iref) ? nothing : p[iref] 

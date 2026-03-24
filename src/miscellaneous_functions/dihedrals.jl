@@ -1,6 +1,6 @@
 function _sum_dihedrals!(
     vinds::AbstractVector{<:AbstractVector{<:Integer}},
-    positions::FramePositions,
+    positions::AbstractVector{<:Point3D},
     init::AbstractVector{<:Real}; 
     degrees=true,
 )

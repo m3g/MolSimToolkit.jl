@@ -26,7 +26,7 @@ using MolSimToolkitShared: alignment_movements,
 
 
 using TestItems: @testitem
-using StaticArrays: FieldVector, SMatrix, MVector
+using StaticArrays: FieldVector, SMatrix, MMatrix, MVector
 using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
@@ -64,7 +64,6 @@ include("../test/Testing.jl")
 include("./datastructures/Frame.jl")
 include("./datastructures/Trajectory.jl")
 include("./datastructures/Simulation.jl")
-include("./datastructures/Positions.jl")
 
 # Structural properties
 include("./miscellaneous_functions/distances.jl")

@@ -94,7 +94,8 @@ function PDBTools.hydrogen_bonds(
     @threads for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
         local uc
         local index_current_frame
-        local current_positions = copy(p_first_frame)
+        local current_positions
+        current_positions = copy(p_first_frame)
         systems = setup_particle_systems(
             selection_pairs, selection_data,
             uc_first_frame, donnor_acceptor_distance, parallel
