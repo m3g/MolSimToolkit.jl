@@ -80,9 +80,8 @@ julia> @view(coor[1:2])
 struct FramePositions{T,P<:Point3D{T},M<:AbstractArray{T}} <: AbstractVector{P}
     positions::M
 end
+FramePositions(f::Frame) = positions(f)
 FramePositions(m::AbstractMatrix{T}) where {T} = FramePositions{T,Point3D{T},typeof(m)}(m)
-FramePositions(f::Frame) = positions(Chemfiles.positions(f.frame))
-FramePositions(x::FramePositions{T,P}) where {T,P} = FramePositions{T,P,typeof(x.positions)}(x.positions)
 
 Base.getindex(x::FramePositions, i::Integer) = Point3D(@view(x.positions[:, i]))
 Base.getindex(x::FramePositions, r::AbstractUnitRange) = FramePositions(x.positions[:, r])
@@ -134,8 +133,9 @@ import Base: view
 view(positions::FramePositions, r::AbstractUnitRange) = FramePositions(@view(positions.positions[:, r]))
 view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePositions(@view(positions.positions[:, ivec]))
 
-
 @testitem "FramePositions" begin
+    using MolSimToolkit
+    using MolSimToolkit.Testing
     using BenchmarkTools
 
     m = rand(3, 10)
@@ -153,5 +153,9 @@ view(positions::FramePositions, ivec::AbstractVector{<:Integer}) = FramePosition
     @test p[inds] == FramePositions(m[:, inds])
     @test @view(p[inds]) == FramePositions(m[:, inds])
     @test iszero(@ballocated @view($p[$inds]))
+
+    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    f = first_frame!(sim)
+    @test FramePositions(f) == positions(f)
 
 end
