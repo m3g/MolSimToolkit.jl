@@ -179,13 +179,15 @@ end
 """
     set_frame_range!(simulation::Simulation; first=1, last=nothing, step=1)
 
-Resets the frame range to be iterated over. This function will restart the
-iteration of the simulation trajectory.
+Resets the frame range to be iterated over. This function will restart the iteration of the simulation trajectory.
 
 """
 function set_frame_range!(simulation::Simulation; frames=nothing, first=nothing, last=nothing, step=nothing)
-    simulation.frame_range = _set_range(simulation.trajectory, frames, first, last, step)
-    restart!(simulation)
+    lock(simulation) do
+        simulation.frame_range = _set_range(simulation.trajectory, frames, first, last, step)
+        restart!(simulation)
+    end
+    return simulation
 end
 
 #=
@@ -347,7 +349,7 @@ Similar to `restart!`, but returning the `Frame` object.
 
 # Example
 
-```julia-repl
+```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first=3); # note first=3
