@@ -13,7 +13,6 @@ struct Point3D{T} <: FieldVector{3,T}
     y::T
     z::T
 end
-Point3D(x::Vector{T}) where {T} = Point3D{T}(x[1], x[2], x[3])
 
 """
     Frame
