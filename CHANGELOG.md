@@ -19,7 +19,7 @@ Version 2.0.0-DEV
 - ![BREAKING][badge-breaking] `first_frame!` returns the `Frame` object, not a `Simulation` object, as before. It mutates, as before, the `Simulation` object, to place it in the first frame.
 - ![BREAKING][badge-breaking] The `frame_index` of a simulation is always an integer now (`nothing` is not possible anymore), corresponding to the frame in the `simulation.frame` buffer.
 - ![BREAKING][badge-breaking] `FramePositions` object was removed, and the positions are stored in the `Frame` object and returned as a `Vector{Point3D}`.
-- ![FIX][badge-fix] fix possible concurrency of Chemfiles C-pointers of coordinates, by storing positions and unitcell copies of data in the `Frame` object.
+- ![ENHANCEMEMENT][badge-enhancement] fix possible concurrency of Chemfiles C-pointers of coordinates, by storing positions and unitcell copies of data in the `Frame` object.
 - ![INFO][badge-info] The internal representation of frames and trajectories is done by new `MolSimToolkit` structs `Frame` and `Trajectory`. `Chemfiles` objects are not exposed anymore to the user. 
 - ![INFO][badge-info] Import `get_atoms` and `positions` from `MolSimToolkitShared`. 
 - ![INFO][badge-info] Require PDBTools v3.21.0.
