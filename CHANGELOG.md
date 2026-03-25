@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.0.1-DEV
+--------------
+
 Version 2.0.0
 --------------
 - ![FEATURE][badge-feature] `goto_frame!(sim, iframe)` function goes to the desired frame and returns the `Simulation` object.
