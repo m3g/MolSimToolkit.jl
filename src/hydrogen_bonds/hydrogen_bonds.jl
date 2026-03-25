@@ -73,9 +73,9 @@ function PDBTools.hydrogen_bonds(
     selection_pairs = process_selections(selections)
 
     # Initialize trajectory and get first frame data
-    first_frame!(sim)
-    uc_first_frame = unitcell(current_frame(sim))
-    p_first_frame = positions(current_frame(sim))
+    f = first_frame!(sim)
+    uc_first_frame = unitcell(f)
+    p_first_frame = positions(f)
 
     # Initialize results and process selections
     hbonds, selection_data = initialize_hbonds_data(
@@ -94,19 +94,23 @@ function PDBTools.hydrogen_bonds(
     @threads for frame_inds in index_chunks(1:length(sim); n=parallel ? Threads.nthreads() : 1)
         local uc
         local index_current_frame
-        local current_positions = copy(p_first_frame)
+        local current_positions
+        current_positions = copy(p_first_frame)
         systems = setup_particle_systems(
             selection_pairs, selection_data,
             uc_first_frame, donnor_acceptor_distance, parallel
         )
         for _ in frame_inds
             lock(sim) do
-                next_frame!(sim)
-                current_positions .= positions(current_frame(sim))
-                uc = unitcell(current_frame(sim))
+                f = current_frame(sim)
+                current_positions .= positions(f)
+                uc = unitcell(f)
                 iframe += 1
                 index_current_frame = iframe
                 next!(prg)
+                if frame_index(sim) < last(frame_range(sim))
+                    next_frame!(sim)
+                end
             end
             for selection_pair in selection_pairs
                 sel1, sel2 = first(selection_pair), last(selection_pair)

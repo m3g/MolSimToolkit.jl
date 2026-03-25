@@ -10,7 +10,7 @@ To understand the utility and purpose of this package, consider the image below:
 
 ![nearest.png](./images/molecular_minimum_distances/nearest.png)
 
-Here, there is one *blue* molecule, with 6 atoms, and several *red* molecules, with 2 atoms each. The package has identified which are the molecules of the *red* set that have at leat one atom within a cutoff from the atoms of the *blue* molecule, and annotated the corresponding atoms and the distances.
+Here, there is one *blue* molecule, with 6 atoms, and several *red* molecules, with 2 atoms each. The package has identified which are the molecules of the *red* set that have at least one atom within a cutoff from the atoms of the *blue* molecule, and annotated the corresponding atoms and the distances.
 
 ## Features
 
@@ -41,7 +41,7 @@ julia> atoms = MolSimToolkit.MolecularMinimumDistances.download_example()
 Next, we extract the protein coordinates, and the TMAO coordinates:
 
 ```julia-repl
-julia> protein = coor(atoms,"protein")
+julia> protein = positions(atoms,"protein")
 1463-element Vector{SVector{3, Float64}}:
  [-9.229, -14.861, -5.481]
  [-10.048, -15.427, -5.569]
@@ -50,7 +50,7 @@ julia> protein = coor(atoms,"protein")
  [6.408, -12.034, -8.343]
  [6.017, -10.967, -9.713]
 
-julia> tmao = coor(atoms,"resname TMAO")
+julia> tmao = positions(atoms,"resname TMAO")
 2534-element Vector{SVector{3, Float64}}:
  [-23.532, -9.347, 19.545]
  [-23.567, -7.907, 19.381]
@@ -93,7 +93,7 @@ Thus, 33 TMAO molecules are within the cutoff distance from the protein, and the
 
 This package exists because this computation is fast. For example, let us choose the water molecules instead, and benchmark the time required to compute this set of distances:
 ```julia-repl
-julia> water = coor(atoms,"resname TIP3")
+julia> water = positions(atoms,"resname TIP3")
 58014-element Vector{SVector{3, Float64}}:
  [-28.223, 19.92, -27.748]
  [-27.453, 20.358, -27.476]
@@ -188,7 +188,7 @@ These coordinates belong to a snapshot of a simulation which was performed with 
 The coordinates of each of the types of molecules can be extracted from the `system` array of atoms with (using `PDBTools` - `v0.13` or greater):
 
 ```julia-repl
-julia> protein = coor(system,"protein")
+julia> protein = positions(system,"protein")
 1463-element Vector{StaticArrays.SVector{3, Float64}}:
  [-9.229, -14.861, -5.481]
  [-10.048, -15.427, -5.569]
@@ -197,7 +197,7 @@ julia> protein = coor(system,"protein")
  [6.408, -12.034, -8.343]
  [6.017, -10.967, -9.713]
 
-julia> tmao = coor(system,"resname TMAO")
+julia> tmao = positions(system,"resname TMAO")
 2534-element Vector{StaticArrays.SVector{3, Float64}}:
  [-23.532, -9.347, 19.545]
  [-23.567, -7.907, 19.381]
@@ -206,7 +206,7 @@ julia> tmao = coor(system,"resname TMAO")
  [13.564, -16.517, 12.419]
  [12.4, -17.811, 12.052]
 
-julia> water = coor(system,"water")
+julia> water = positions(system,"water")
 58014-element Vector{StaticArrays.SVector{3, Float64}}:
  [-28.223, 19.92, -27.748]
  [-27.453, 20.358, -27.476]
@@ -348,9 +348,9 @@ julia> using MolSimToolkit, PDBTools
 
 julia> system = MolecularMinimumDistances.download_example();
 
-julia> protein = coor(system, "protein");
+julia> protein = positions(system, "protein");
 
-julia> water = coor(system, "water");
+julia> water = positions(system, "water");
 ```
 
 We now build the `CrossPairs`  type of system, instead of calling the `minimum_distances` function directly:
@@ -511,7 +511,7 @@ Let us mix water and TMAO molecules in the same set, and use a general function 
 ```julia-repl
 julia> system = MolecularMinimumDistances.download_example();
 
-julia> protein = coor(system, "protein");
+julia> protein = positions(system, "protein");
 
 julia> tmao_and_water = select(system, "resname TMAO or resname TIP3")
    Array{Atoms,1} with 60548 atoms with fields:
@@ -531,7 +531,7 @@ julia> findfirst(at -> at.resname == "TIP3", tmao_and_water)
 Thus, the `tmao_and_water` atom array has two different types of molecules, TMAO with 14 atoms, and water with 3 atoms. 
 The first atom of a water molecule is atom `2535` of the array. We extract the coordinates of the atoms with:
 ```julia-repl
-julia> solvent = coor(tmao_and_water)
+julia> solvent = positions(tmao_and_water)
 60548-element Vector{SVector{3, Float64}}:
  [-23.532, -9.347, 19.545]
  [-23.567, -7.907, 19.381]
@@ -583,7 +583,7 @@ to obtain the solvation of the protein by both TMAO and water in a single run:
 
 ```julia-repl
 julia> sys = CrossPairs(
-           xpositions=solvent, # solvent = coor(tmao_and_water)
+           xpositions=solvent, # solvent = positions(tmao_and_water)
            ypositions=protein, # solute
            xmol_indices = mol_indices,
            cutoff=12.0,
@@ -599,7 +599,7 @@ unitcell: [84.48, 0.0, 0.0, 0.0, 84.48, 0.0, 0.0, 0.0, 84.48]
 ```
 
 As we can see, the number of molecules is correct (the sum of the number of water and tmao
-molecules). And the list of minimum distances will retrive the information of the closest
+molecules). And the list of minimum distances will retrieve the information of the closest
 protein atom to all solvent molecules of the set:
 
 ```julia-repl

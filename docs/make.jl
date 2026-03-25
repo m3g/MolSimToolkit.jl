@@ -15,6 +15,7 @@ makedocs(
     doctest=false,
     pages=[
         "Home" => "index.md",
+        "Simulation" => "simulation.md",
         "Structural analyses" => Any[
             "Hydrogen bonds" => "hydrogen_bonds.md",
             "Distances and misc." => "Structural_properties.md",
@@ -35,7 +36,7 @@ makedocs(
         ],
         "System setup" => "system_setup.md",
         "Plotting style" => "plotting_style.md",
-        "Developer zone" => "Developer.md",
+#        "Developer zone" => "Developer.md",
         "Experimental" => Any[
             "Simulation Reweighting" => "Reweighting.md",
             "Cluster submission management" => "Coaraci.md",

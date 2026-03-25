@@ -11,7 +11,9 @@ import MolSimToolkitShared: center_of_mass,
                             coordination_number,
                             bulk_coordination,
                             wrap,
-                            rmsd
+                            rmsd,
+                            positions,
+                            get_atoms
 
 # These are only used within this package, not extended
 using MolSimToolkitShared: alignment_movements, 
@@ -24,7 +26,7 @@ using MolSimToolkitShared: alignment_movements,
 
 
 using TestItems: @testitem
-using StaticArrays: FieldVector, SMatrix, MVector
+using StaticArrays: FieldVector, SMatrix, MMatrix, MVector
 using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
@@ -59,8 +61,9 @@ const version = pkgversion(@__MODULE__)
 include("../test/Testing.jl")
 
 # Data structures
+include("./datastructures/Frame.jl")
+include("./datastructures/Trajectory.jl")
 include("./datastructures/Simulation.jl")
-include("./datastructures/Positions.jl")
 
 # Structural properties
 include("./miscellaneous_functions/distances.jl")

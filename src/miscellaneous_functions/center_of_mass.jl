@@ -2,7 +2,7 @@
     center_of_mass(
         indices::AbstractVector{Int};
         simulation::Simulation,
-        positions::FramePositions,
+        positions::AbstractVector{<:Point3D},
         iref::Union{Nothing,Int} = max(1, div(length(indices),2)),
     )
 
@@ -21,7 +21,7 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> protein_indices = findall(sel"protein", atoms(simulation));
+julia> protein_indices = findall(sel"protein", get_atoms(simulation));
 
 julia> first_frame!(simulation); # move simulation to the first frame
 
@@ -41,7 +41,7 @@ julia> cm = center_of_mass(protein_indices, simulation, coor)
 function center_of_mass(
     indices::AbstractVector{<:Integer},
     simulation::Simulation,
-    p::FramePositions;
+    p::AbstractVector{<:Point3D};
     iref::Union{Nothing,<:Integer}=max(1, div(length(indices), 2)),
 )
     xref = isnothing(iref) ? nothing : p[iref] 
@@ -49,7 +49,7 @@ function center_of_mass(
     totmass = 0.0
     cm = MVector{3}(0.0, 0.0, 0.0)
     for i in indices
-        m = PDBTools.atomic_mass(atoms(simulation)[i])
+        m = PDBTools.atomic_mass(simulation.atoms[i])
         x = if !isnothing(iref)
             MolSimToolkit.wrap(p[i], xref, uc)
         else
@@ -66,7 +66,7 @@ end
     import PDBTools
     simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
     first_frame!(simulation)
-    protein_indices = PDBTools.selindex(atoms(simulation), "protein")
+    protein_indices = PDBTools.selindex(get_atoms(simulation), "protein")
     coor = positions(current_frame(simulation))
     @test center_of_mass(protein_indices, simulation, coor) ≈
           [-3.7290442807974906, -1.5339226637687564, 1.960640754560446]

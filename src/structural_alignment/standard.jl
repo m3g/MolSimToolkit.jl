@@ -94,7 +94,7 @@ function _reference_coordinates(
             """))
         end
         restart!(simulation)
-        for _ in 1:reference_frame
+        for _ in 1:reference_frame-1
             next_frame!(simulation)
         end
         frame = current_frame(simulation)
@@ -243,11 +243,11 @@ function rmsd(
     reference_frame=nothing,
     show_progress=true,
 )
-    indices = findall(PDBTools.Select(sel), atoms(simulation))
+    indices = findall(PDBTools.Select(sel), get_atoms(simulation))
     rmsd_indices = if rmsd_of === sel
         indices
     else
-        findall(PDBTools.Select(rmsd_of), atoms(simulation))
+        findall(PDBTools.Select(rmsd_of), get_atoms(simulation))
     end
     rmsd(simulation, indices; rmsd_of=rmsd_indices, mass, reference_frame, show_progress)
 end
@@ -261,7 +261,7 @@ end
 
     # Load two structures
     atoms = read_pdb(namd_pdb)
-    x = coor(atoms, "name CA")
+    x = position.(select(atoms, "name CA"))
 
     # test RMSD function
     y = x .+ Ref(SVector{3}(1, 1, 1))
@@ -424,7 +424,7 @@ function rmsd_matrix(
     align::Bool=true,
     show_progress::Bool=true,
 )
-    ats = atoms(simulation)
+    ats = get_atoms(simulation)
     indices = findall(PDBTools.Select(sel), ats)
     rmsd_matrix(simulation, indices; mass, align, show_progress)
 end

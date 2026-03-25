@@ -66,7 +66,7 @@ function Plots.plot(
     )
     hline!(plt, [1.0 2.0 3.0]; label="", color=:black, linestyle=:dash, linewidth=1, alpha=0.2, subplot=1)
     xticks2 = residue_ticks(
-                filter(at -> isprotein(at) && name(at) == "CA", atoms(md.simulation));
+                filter(at -> isprotein(at) && name(at) == "CA", get_atoms(md.simulation));
                 serial=true,
                 stride= isnothing(stride) ? max(1, div(length(md.rmsf), 20)) : stride,
     )

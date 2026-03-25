@@ -63,8 +63,7 @@ sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
 # We are interested only in protein atoms
 protein = PDBTools.read_pdb(Testing.namd_pdb, "protein")
 # Lets get the positions of the first frame for reference
-firstframe!(sim)
-p_ref = positions(current_frame(sim))[PDBTools.index.(protein)]
+p_ref = positions(first_frame!(sim))[PDBTools.index.(protein)]
 PDBTools.set_position!.(protein, p_ref) # note the dot
 # Run the mvalues-traj function
 m = mvalue_traj(sim, protein)

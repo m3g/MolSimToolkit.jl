@@ -153,7 +153,7 @@ function initialize_hbonds_data(
 
         for sel in selection_pair
             if !haskey(selection_data, sel)
-                ats_sel = PDBTools.select(atoms(sim), sel)
+                ats_sel = PDBTools.select(get_atoms(sim), sel)
                 inds_sel = PDBTools.index.(ats_sel)
                 polar_bonds = find_hbond_donnors(
                     ats_sel;

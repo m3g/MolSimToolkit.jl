@@ -18,7 +18,7 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
 
-julia> ats = atoms(sim);
+julia> ats = get_atoms(sim);
 
 julia> i1 = findall(sel"protein and residue 1", ats); # indices
 
@@ -80,14 +80,15 @@ end
 
 @testitem "distances" begin
     using PDBTools
+    using MolSimToolkit
     using MolSimToolkit.Testing
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
-    i1 = findall(sel"protein and residue 1", atoms(sim))
-    i2 = findall(sel"protein and residue 15", atoms(sim))
+    i1 = findall(sel"protein and residue 1", get_atoms(sim))
+    i2 = findall(sel"protein and residue 15", get_atoms(sim))
     proof = [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
     @test distances(sim, i1, i2; silent=true) ≈ proof
-    s1 = filter(sel"protein and residue 1", atoms(sim))
-    s2 = filter(sel"protein and residue 15", atoms(sim))
+    s1 = filter(sel"protein and residue 1", get_atoms(sim))
+    s2 = filter(sel"protein and residue 15", get_atoms(sim))
     @test distances(sim, s1, s2; silent=true) ≈ proof
     sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=2, last=4)
     @test distances(sim, s1, s2; silent=true) ≈ proof[2:2:4]
