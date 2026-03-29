@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.1-DEV
 --------------
+- ![INFO][badge-info] Requires CellListMap 0.10.0
 
 Version 2.0.0
 --------------

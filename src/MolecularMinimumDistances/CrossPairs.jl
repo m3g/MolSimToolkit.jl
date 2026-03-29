@@ -96,8 +96,8 @@ end
 # Functions that return the atoms of the second set that are closer to
 # each molecule of the first set (only one list is returned).
 #
-function update_list!(i, j, d2, list, system::CrossPairs)
-    d = sqrt(d2)
+function update_list!(pair, list, system::CrossPairs)
+    (; i, j, d) = pair
     imol = system.mol_indices(i)
     if d < list[imol].d
         list[imol] = MinimumDistance(true, i, j, d)
