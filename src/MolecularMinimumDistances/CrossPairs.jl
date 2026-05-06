@@ -38,7 +38,7 @@ more general `mol_indices` function, which, for each atomic index, returns the
 corresponding
 molecular index (which is `mol_indices(i) = (i-1)%n + 1` where `n` is the
 number of atoms per molecule if all molecules have the same number of
-atoms and are continously stored in the array of positions). 
+atoms and are continuously stored in the array of positions). 
 
 # Examples
 
@@ -131,9 +131,9 @@ end
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
         local uc = unitcell(frame)
-        sys.xpositions .= @view(pos[popc])
-        sys.ypositions .= @view(pos[protein])
-        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.xpositions .= @view(pos[popc])
+        sys.system.ypositions .= @view(pos[protein])
+        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         md_count[iframe] = count(p -> p.within_cutoff, md)
         # Test direct (out-of-place) call
@@ -143,7 +143,7 @@ end
                 ypositions = xsolute,
                 xn_atoms_per_molecule = 134,
                 cutoff = 6.0,
-                unitcell = sys.unitcell
+                unitcell = sys.system.unitcell
             )
             @test all(md_out .≈ md)
         end

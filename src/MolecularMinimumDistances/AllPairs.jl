@@ -155,9 +155,9 @@ end
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
         local uc = unitcell(current_frame(simulation))
-        sys.xpositions .= @view(pos[popc])
-        sys.ypositions .= @view(pos[protein])
-        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.xpositions .= @view(pos[popc])
+        sys.system.ypositions .= @view(pos[protein])
+        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])

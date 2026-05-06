@@ -33,7 +33,7 @@ more general `mol_indices` function, which, for each atomic index, returns the
 corresponding
 molecular index (which is `mol_indices(i) = (i-1)%n + 1` where `n` is the
 number of atoms per molecule if all molecules have the same number of
-atoms and are continously stored in the array of positions). 
+atoms and are continuously stored in the array of positions). 
 
 # Examples
 
@@ -84,7 +84,7 @@ function SelfPairs(;
 end
 
 #
-# This file containst the functions for single-sets, that is for those cases where
+# This file contains the functions for single-sets, that is for those cases where
 # the list of minimum-distances is between the molecules of a single component.
 #
 function update_list!(pair, list::List, system::SelfPairs)
@@ -126,8 +126,8 @@ end
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
         local uc = unitcell(frame)
-        sys.xpositions .= @view(pos[popc])
-        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.xpositions .= @view(pos[popc])
+        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         md_min[iframe] = minimum(p -> p.d, md)
         # Test direct (out-of-place) call
@@ -136,7 +136,7 @@ end
                 xpositions = xsolvent,
                 xn_atoms_per_molecule = 134,
                 cutoff = 6.0,
-                unitcell = sys.unitcell
+                unitcell = sys.system.unitcell
             )
             @test all(md_out .≈ md)
         end
