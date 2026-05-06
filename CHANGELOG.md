@@ -12,7 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.1-DEV
 --------------
-- ![INFO][badge-info] Requires CellListMap 0.10.0
+- ![INFO][badge-info] Requires CellListMap 0.10.0 (and thus PDBTools 3.25.2)
 
 Version 2.0.0
 --------------
