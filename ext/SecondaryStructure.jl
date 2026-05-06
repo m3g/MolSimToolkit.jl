@@ -24,7 +24,7 @@ end
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     plt = ss_heatmap(ssmap; scalex=0.1, xlabel="time / ns")
     @test plt isa Plots.Plot{Plots.GRBackend}
-    prot = select(atoms(simulation), isprotein)
+    prot = select(get_atoms(simulation), isprotein)
     plt = ss_heatmap(ssmap; yticks=residue_ticks(prot; stride = 5))
     @test plt isa Plots.Plot{Plots.GRBackend}
 end

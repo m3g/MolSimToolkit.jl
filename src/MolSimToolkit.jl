@@ -5,21 +5,28 @@ import PDBTools
 import OffsetArrays
 import LaTeXStrings # only because Aqua complains: used in the Plotting extensions
 
-# Names, shared between different packages
+# Names and functions shared between different packages and that are extended here
 import MolSimToolkitShared: center_of_mass, 
                             distances,
                             coordination_number,
                             bulk_coordination,
                             wrap,
-                            wrap_to_first,
-                            align, 
-                            align!, 
                             rmsd,
-                            dihedral,
-                            dihedrals
+                            positions,
+                            get_atoms
+
+# These are only used within this package, not extended
+using MolSimToolkitShared: alignment_movements, 
+                           apply_alignment_transformation!,
+                           wrap_to_first,
+                           align,
+                           align!,
+                           dihedral,
+                           dihedrals
+
 
 using TestItems: @testitem
-using StaticArrays: FieldVector, SMatrix, MVector
+using StaticArrays: FieldVector, SMatrix, MMatrix, MVector
 using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
@@ -54,8 +61,9 @@ const version = pkgversion(@__MODULE__)
 include("../test/Testing.jl")
 
 # Data structures
+include("./datastructures/Frame.jl")
+include("./datastructures/Trajectory.jl")
 include("./datastructures/Simulation.jl")
-include("./datastructures/Positions.jl")
 
 # Structural properties
 include("./miscellaneous_functions/distances.jl")

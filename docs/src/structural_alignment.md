@@ -7,29 +7,58 @@ CollapsedDocStrings = true
 MolSimToolkit.jl provides tools to perform rigid-body structural alignment throughout 
 trajectories.
 
-Two types of alignments are avaialble: the "standard" rigid-body alignment, frequently
+Two types of alignments are available: the "standard" rigid-body alignment, frequently
 used to compute RMSDs and RMSFs in MD trajectories, and a **robust** structural alignment
 method, `mdlovofit`. The robust alignment method provides better alignments of the
 rigid (or core) fractions of the structures, while magnifying the variability of the
-flexibile regions.
+flexible regions.
 
 ## Conventional rigid-body alignment
 
-Conventional rigid-body aligments routines are:
+To compute the RMSD or matrix of RMSDs throughout a trajectory, use:
 
 ```@docs
-rmsd
+rmsd(::Simulation, ::AbstractVector{<:Integer})
 rmsd_matrix
-center_of_mass
-align
-align!
+```
+
+The `rmsd` routine has the option to compute the `rmsd` of a set of atoms, while aligning another subset. For example, here we compute the RMSD of all atoms of a loop, while aligning the full protein CA backbone:
+
+```@example rmsd_of
+using MolSimToolkit
+using Plots
+sim = Simulation(
+    MolSimToolkit.Testing.namd2_pdb, # pdb file
+    MolSimToolkit.Testing.namd2_traj, # trajectory file
+)
+r = rmsd(sim, "protein and name CA"; rmsd_of="protein and residue 47 to 53")
+plot(MolSimStyle, r, xlabel="frame", ylabel="rmsd of 47 to 53")
+```
+
+The aligned and `rmsd_of` groups may or may not overlap. For example, `rmsd_of` can be a ligand, or another protein structure. 
+
+!!! note 
+    The `rmsd` routine use periodic boundary conditions, but they **reconstruct** the structures to guarantee that the molecules are not broken because of the periodic boundaries during alignment. 
+    This reconstruction assumes that atoms that are close in the sequence of the file are also close 
+    to each other in space. This must be true, independently, for the aligned and `rmsd_of` selections.
+    The `rmsd_of` selection is reconstructed close to the aligned selection, by identifying the shortest distance between both sets. 
+
+Other routines that allow advanced and fine-tuned structural alignment analyses or implementations, are:
+
+```@docs
+MolSimToolkitShared.rmsd(::AbstractVector{<:AbstractVector}, ::AbstractVector{<:AbstractVector})
+MolSimToolkitShared.center_of_mass
+MolSimToolkitShared.align
+MolSimToolkitShared.align!
+MolSimToolkitShared.alignment_movements
+MolSimToolkitShared.apply_alignment_transformation!
 ```
 
 ## Robust rigid-body alignment
 
 MDLovoFit is a package for the analysis of the mobility and structural fluctuation in Molecular Dynamics simulations. It allows the automatic identification of rigid and mobile regions of protein structures.
 
-For example, it is possible to automatically identifiy a stable region of a protein in simulation in which the protein displays high structural flexibility, as illustrated in the example. The regions of low mobility are automatically detected by the method.
+For example, it is possible to automatically identify a stable region of a protein in simulation in which the protein displays high structural flexibility, as illustrated in the example. The regions of low mobility are automatically detected by the method.
 
 The software provides, as output, the Root-Mean-Square Deviations of the conserved structures, and of the divergent structures. A trajectory PDB file is output for the visualization of the results. 
 
@@ -102,7 +131,7 @@ plot(::MDLovoFitResult)
 ```
 
 Continuing with the above example, now we will call the `mdlovofit` function, to obtain
-the best aligment of 80% of the atoms in each frame relative to the first frame:
+the best alignment of 80% of the atoms in each frame relative to the first frame:
 
 ```@example mdlovofit
 md = mdlovofit(sim; fraction=0.8, output_name="mysim")
@@ -132,7 +161,7 @@ The PDB file created by `mdlovofit` contains the frames aligned to the reference
 according to the robust alignment based on the least mobile substructure (determined
 by `fraction`). The file contains multiple models, separated by the `END` keyword.
 
-The `occupancy` field of the atoms determines if the atom was used in the aligment,
+The `occupancy` field of the atoms determines if the atom was used in the alignment,
 thus if it was found among the least mobile atoms of the simulation. The `beta` field
 contains the RMSF of the atom, in each frame. 
 
@@ -142,8 +171,8 @@ overview of the mobility of the structure:
 
 ![mdlovofit.png](./assets/mdlovofit.png)
 
-This structural superposition and the associated colors are correlatd with the 
-RMSF plot above. Red atoms were not used for the aligment and display high
+This structural superposition and the associated colors are correlated with the 
+RMSF plot above. Red atoms were not used for the alignment and display high
 mobility, and blue atoms represent the stable core of the structure and
 were aligned.
 
