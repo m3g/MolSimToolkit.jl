@@ -44,7 +44,7 @@ more general `xmol_indices` and/or `ymol_indices` functions,
 which, for each atomic index, returns the corresponding
 molecular index (which is `mol_indices(i) = (i-1)%n + 1` where `n` is the
 number of atoms per molecule if all molecules have the same number of
-atoms and are continously stored in the array of positions). 
+atoms and are continuously stored in the array of positions). 
 
 # Examples
 
@@ -137,11 +137,11 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    first_frame!(simulation)
-    p = positions(current_frame(simulation))
-    uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(p), length(popc))
-    xsolute = zeros(eltype(p), length(protein))
+    f = first_frame!(simulation)
+    p = positions(f)
+    uc = unitcell(f)
+    xsolvent = p[popc]    
+    xsolute = p[protein]
     sys = AllPairs(
         xpositions = xsolvent,
         ypositions = xsolute,
@@ -164,8 +164,8 @@ end
         # Test direct (out-of-place) call
         if iframe == 1
             md_out = minimum_distances(
-                xpositions = sys.xpositions,
-                ypositions = sys.ypositions,
+                xpositions = xsolvent,
+                ypositions = xsolute,
                 xn_atoms_per_molecule = 134,
                 yn_atoms_per_molecule = length(protein),
                 cutoff = 6.0,

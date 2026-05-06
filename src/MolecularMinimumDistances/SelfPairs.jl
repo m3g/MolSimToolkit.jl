@@ -112,10 +112,10 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    first_frame!(simulation)
-    p = positions(current_frame(simulation))
-    uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(p), length(popc))
+    f = first_frame!(simulation)
+    p = positions(f)
+    uc = unitcell(f)
+    xsolvent = p[popc]
     sys = SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
@@ -133,7 +133,7 @@ end
         # Test direct (out-of-place) call
         if iframe == 1
             md_out = minimum_distances(
-                xpositions = sys.xpositions,
+                xpositions = xsolvent,
                 xn_atoms_per_molecule = 134,
                 cutoff = 6.0,
                 unitcell = sys.unitcell

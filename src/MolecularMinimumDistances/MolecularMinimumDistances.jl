@@ -5,7 +5,7 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 using LinearAlgebra: diag
 using StaticArrays: SVector
-using CellListMap: ParticleSystem, pairwise!, update_cutoff!, update_unitcell!
+using CellListMap: ParticleSystem, pairwise!, update!
 import PDBTools: distance
 
 export MinimumDistance
@@ -492,8 +492,8 @@ propertynames(sys::SystemPairs, private::Bool) =
 
 import Base: setproperty!
 setproperty!(sys::SystemPairs, s::Symbol, value) = setproperty!(sys, Val(s), value)
-setproperty!(sys::SystemPairs, ::Val{:cutoff}, cutoff) = update_cutoff!(sys.system, cutoff)
-setproperty!(sys::SystemPairs, ::Val{:unitcell}, unitcell) = update_unitcell!(sys.system, unitcell)
+setproperty!(sys::SystemPairs, ::Val{:cutoff}, cutoff) = update!(sys.system; cutoff=cutoff)
+setproperty!(sys::SystemPairs, ::Val{:unitcell}, unitcell) = update!(sys.system; unitcell=unitcell)
 setproperty!(sys::SystemPairs, ::Val{:parallel}, parallel) = sys.system.parallel = parallel
 
 #
