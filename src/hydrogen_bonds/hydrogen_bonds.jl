@@ -1,6 +1,6 @@
 using Base.Threads: @threads
 using ChunkSplitters: index_chunks
-using CellListMap: CellListMap, ParticleSystem, map_pairwise!, update_unitcell!
+using CellListMap: CellListMap, ParticleSystem, pairwise!, update!
 using OrderedCollections: OrderedDict
 
 include("./internals.jl")
@@ -119,7 +119,7 @@ function PDBTools.hydrogen_bonds(
                 if sel1 == sel2
                     s1 = selection_data[sel1]
                     sys.xpositions .= @view(current_positions[s1.inds])
-                    update_unitcell!(sys, uc.matrix)
+                    update!(sys; unitcell=uc.matrix)
                     number_of_hbonds = count_hbonds(
                         sys, s1, angle_cutoff, electronegative_elements
                     )
@@ -128,7 +128,7 @@ function PDBTools.hydrogen_bonds(
                     s2 = selection_data[sel2]
                     sys.xpositions .= @view(current_positions[s1.inds])
                     sys.ypositions .= @view(current_positions[s2.inds])
-                    update_unitcell!(sys, uc.matrix)
+                    update!(sys; unitcell=uc.matrix)
                     number_of_hbonds = count_hbonds(
                         sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements
                     )

@@ -247,7 +247,6 @@ function block_average(
     tau_int = 1 + 2 * sum(_autocor[i] for i in 2:i95-1; init=0.0)
     n_eff = n / tau_int
     xmean_stderr_neff = std(x) / sqrt(n_eff)
-
     return BlockAverageData{TINPUT,DT}(
         x_input,
         xmean * oneunit(TINPUT),

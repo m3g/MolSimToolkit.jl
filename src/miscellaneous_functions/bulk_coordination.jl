@@ -140,9 +140,9 @@ function bulk_coordination(
         p = positions(frame)
         uc = unitcell(frame)
         # Compute all the minimum-distances between the reference molecule and the solute
-        sys1.xpositions .= @view(p[solute_indices])
-        sys1.ypositions .= @view(p[reference_solute_indices])
-        sys1.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys1.system.xpositions .= @view(p[solute_indices])
+        sys1.system.ypositions .= @view(p[reference_solute_indices])
+        sys1.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         reference_list = minimum_distances!(sys1)
         # Now, we will run over the reference_list, and for each distances
         # to the reference, find the number of solvent atoms that are closer 
@@ -151,9 +151,9 @@ function bulk_coordination(
         for (imol, md) in enumerate(reference_list)
             !(md.within_cutoff) && continue
             imol_atoms = _imol_atoms(imol, n_atoms_per_molecule_solute, solute_indices)
-            sys2.xpositions .= @view(p[solvent_indices])
-            sys2.ypositions .= @view(p[imol_atoms])
-            sys2.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+            sys2.system.xpositions .= @view(p[solvent_indices])
+            sys2.system.ypositions .= @view(p[imol_atoms])
+            sys2.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
             solvent_distances = minimum_distances!(sys2)
             bin = max(1, ceil(Int, md.d / bin_size))
             nmols_in_bin[bin] += 1

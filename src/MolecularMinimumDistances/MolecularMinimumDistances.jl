@@ -1,14 +1,12 @@
 module MolecularMinimumDistances
 
-import TestItems: @testitem
-import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+using TestItems: @testitem
+using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-import LinearAlgebra: diag
+using LinearAlgebra: diag
+using StaticArrays: SVector
+using CellListMap: ParticleSystem, pairwise!, update!
 import PDBTools: distance
-import StaticArrays: SVector
-import CellListMap: _uround # interal function, used for showing the unitcell
-import CellListMap: ParticleSystem, map_pairwise, map_pairwise!,
-    update_cutoff!, update_unitcell!
 
 export MinimumDistance
 export SelfPairs, CrossPairs, AllPairs
@@ -205,7 +203,7 @@ julia> init_list(x, i -> (i-1)÷2 + 1)
 
 ```
 
-The above annonymous function `i -> (i-1)÷2 + 1` is equivalent to `i -> mol_indices(i,2)`,
+The above anonymous function `i -> (i-1)÷2 + 1` is equivalent to `i -> mol_indices(i,2)`,
 and can be generalized if the the number of atoms of each molecule is not the same.
 
 =#
@@ -231,7 +229,7 @@ init_list(::Type{T}, n::Integer) where {T} = fill(zero(MinimumDistance{T}), n)
 # Note that we have two types of output variables here: List, and a tuple of List.
 # The List is simply an array of `MinimumDistance{T}`, and we have defined above
 # `copy` and `zero` methods for this type, such that we only need to define 
-# that reseting this variable consists of returing its zero, and set up the reducer.
+# that resetting this variable consists of returning its zero, and set up the reducer.
 # The methods for abstract arrays will take care of the rest.
 #
 # For the Tuple of lists, we need to be more explicit, and define appropriate copy_output,
@@ -263,7 +261,7 @@ end
 Function that computes the minimum distances for an initialized system,
 of `SelfPairs`, `CrossPairs`, or `AllPairs` types. 
 
-The function returs a `Vector{MinimumDistance}` cor `SelfPairs` and `CrossPairs`
+The function returns a `Vector{MinimumDistance}` cor `SelfPairs` and `CrossPairs`
 inputs, and a Tuple of two of such vectors for the `AllPairs` input types.
 
 This function is used as an advanced alternative from preallocated system inputs. Only a few allocations 
@@ -303,10 +301,7 @@ julia> @btime minimum_distances!(\$sys);
 
 """
 function minimum_distances!(sys)
-    map_pairwise!(
-        (x, y, i, j, d2, list) -> update_list!(i, j, d2, list, sys),
-        sys.system
-    )
+    pairwise!((pair, list) -> update_list!(pair, list, sys), sys.system)
     return sys.minimum_distances
 end
 
@@ -482,24 +477,12 @@ abstract type SystemPairs end
 
 import Base: getproperty, propertynames
 getproperty(sys::SystemPairs, s::Symbol) = getproperty(sys, Val(s))
+getproperty(sys::SystemPairs, ::Val{:minimum_distances}) = sys.system.output
 getproperty(sys::SystemPairs, ::Val{:system}) = getfield(sys, :system)
 getproperty(sys::SystemPairs, ::Val{:mol_indices}) = getfield(sys, :mol_indices)
 getproperty(sys::SystemPairs, ::Val{:xmol_indices}) = getfield(sys, :xmol_indices)
 getproperty(sys::SystemPairs, ::Val{:ymol_indices}) = getfield(sys, :ymol_indices)
-getproperty(sys::SystemPairs, ::Val{:minimum_distances}) = sys.system.output
-getproperty(sys::SystemPairs, ::Val{:xpositions}) = sys.system.xpositions
-getproperty(sys::SystemPairs, ::Val{:ypositions}) = sys.system.ypositions
-getproperty(sys::SystemPairs, ::Val{:cutoff}) = sys.system.cutoff
-getproperty(sys::SystemPairs, ::Val{:unitcell}) = sys.system.unitcell
-getproperty(sys::SystemPairs, ::Val{:parallel}) = sys.system.parallel
-propertynames(sys::SystemPairs, private::Bool) =
-    (:system, :mol_indices, :minimum_distances, :xpositions, :ypositions, :unitcell, :cutoff)
-
-import Base: setproperty!
-setproperty!(sys::SystemPairs, s::Symbol, value) = setproperty!(sys, Val(s), value)
-setproperty!(sys::SystemPairs, ::Val{:cutoff}, cutoff) = update_cutoff!(sys.system, cutoff)
-setproperty!(sys::SystemPairs, ::Val{:unitcell}, unitcell) = update_unitcell!(sys.system, unitcell)
-setproperty!(sys::SystemPairs, ::Val{:parallel}, parallel) = sys.system.parallel = parallel
+propertynames(sys::SystemPairs, private::Bool) = (:system, :minimum_distances)
 
 #
 # Functions for when the lists of minimum-distances is that of a single

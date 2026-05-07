@@ -83,9 +83,9 @@ function coordination_number(
     for (iframe, frame) in enumerate(sim)
         p = positions(frame)
         uc = unitcell(current_frame(sim))
-        sys.xpositions .= @view(p[inds_solvent])
-        sys.ypositions .= @view(p[inds_solute])
-        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.xpositions .= @view(p[inds_solvent])
+        sys.system.ypositions .= @view(p[inds_solute])
+        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md_list = minimum_distances!(sys)
         cn[iframe] = count(md -> md.within_cutoff, md_list)
         next!(prg)

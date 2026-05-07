@@ -4,6 +4,8 @@ struct AllPairs{T,F1<:Function,F2<:Function} <: SystemPairs
     ymol_indices::F2
 end
 
+_uround(x) = round(x / oneunit(x); digits = 2) * oneunit(x)
+
 import Base.show
 function Base.show(io::IO, ::MIME"text/plain", sys::AllPairs)
     print(io,chomp("""
@@ -42,7 +44,7 @@ more general `xmol_indices` and/or `ymol_indices` functions,
 which, for each atomic index, returns the corresponding
 molecular index (which is `mol_indices(i) = (i-1)%n + 1` where `n` is the
 number of atoms per molecule if all molecules have the same number of
-atoms and are continously stored in the array of positions). 
+atoms and are continuously stored in the array of positions). 
 
 # Examples
 
@@ -105,18 +107,12 @@ function AllPairs(;
 end
 
 #=
-    function update_list!(
-        i, j, d2,
-        mol_indices_i::Fi,
-        mol_indices_j::Fj,
-        lists::Tuple{T,T}
-    ) where {Fi<:Function, Fj<:Function, T<:AbstractVector{<:MinimumDistance}}
-
 
 Function to update the minimum distance in the case where two lists are being constructed.
 
 =#
-function update_list!(i, j, d2, lists, system::AllPairs)
+function update_list!(pair, lists, system::AllPairs)
+    (;i, j, d2) = pair
     x_list = lists[1]
     y_list = lists[2]
     d = sqrt(d2)
@@ -141,11 +137,11 @@ end
         MolSimToolkit.Testing.namd_pdb,
         MolSimToolkit.Testing.namd_traj,
     )
-    first_frame!(simulation)
-    p = positions(current_frame(simulation))
-    uc = unitcell(current_frame(simulation))
-    xsolvent = zeros(eltype(p), length(popc))
-    xsolute = zeros(eltype(p), length(protein))
+    f = first_frame!(simulation)
+    p = positions(f)
+    uc = unitcell(f)
+    xsolvent = p[popc]    
+    xsolute = p[protein]
     sys = AllPairs(
         xpositions = xsolvent,
         ypositions = xsolute,
@@ -159,17 +155,17 @@ end
     for (iframe, frame) in enumerate(simulation)
         pos = positions(frame)
         local uc = unitcell(current_frame(simulation))
-        sys.xpositions .= @view(pos[popc])
-        sys.ypositions .= @view(pos[protein])
-        sys.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.xpositions .= @view(pos[popc])
+        sys.system.ypositions .= @view(pos[protein])
+        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])
         # Test direct (out-of-place) call
         if iframe == 1
             md_out = minimum_distances(
-                xpositions = sys.xpositions,
-                ypositions = sys.ypositions,
+                xpositions = xsolvent,
+                ypositions = xsolute,
                 xn_atoms_per_molecule = 134,
                 yn_atoms_per_molecule = length(protein),
                 cutoff = 6.0,
