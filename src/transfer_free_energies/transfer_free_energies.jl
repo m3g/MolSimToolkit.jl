@@ -65,13 +65,13 @@ julia> tfe.tot   # total transfer free energy averaged over frames
 - Moeser & Horinek: https://doi.org/10.1021/jp409934q
 """
 function PDBTools.transfer_free_energy(
-    sim::Simulation, 
+    sim::Simulation,
     cosolvent="urea";
     model=PDBTools.AutonBolen,
     protein::AbstractVector{<:PDBTools.Atom}=PDBTools.select(get_atoms(sim), "protein"),
-    backbone::F = PDBTools.isbackbone,
-    sidechain::G = PDBTools.issidechain,
-    reconstruct_protein::Bool = true,
+    backbone::F=PDBTools.isbackbone,
+    sidechain::G=PDBTools.issidechain,
+    reconstruct_protein::Bool=true,
 ) where {F<:Function,G<:Function}
     # indices of the protein atoms, to fetch frame coordinates
     inds_protein = PDBTools.index.(protein)
@@ -83,8 +83,8 @@ function PDBTools.transfer_free_energy(
     tot = 0.f0
     bb = 0.f0
     sc = 0.f0
-    residue_contributions_bb = zeros(Float32,nres)
-    residue_contributions_sc = zeros(Float32,nres)
+    residue_contributions_bb = zeros(Float32, nres)
+    residue_contributions_sc = zeros(Float32, nres)
     for frame in sim
         # fetch protein coordinates and unitcell
         p = @view(positions(frame)[inds_protein])
@@ -135,7 +135,7 @@ end
     protein = select(ats, "protein")
     tfe_ref = transfer_free_energy(protein, "urea")
 
-    @test tfe.tot ≈ tfe_ref.tot 
+    @test tfe.tot ≈ tfe_ref.tot
     @test tfe.bb ≈ tfe_ref.bb
     @test tfe.sc ≈ tfe_ref.sc
     @test all(tfe.residue_contributions_bb .≈ tfe_ref.residue_contributions_bb)
