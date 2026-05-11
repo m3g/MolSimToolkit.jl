@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.2-DEV
 --------------
+- ![FEATURE][badge-experimental] Add `transfer_free_energy` function to compute the average transfer free energy throughout a simulation.
 
 Version 2.0.1
 --------------

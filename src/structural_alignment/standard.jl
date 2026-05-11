@@ -7,7 +7,7 @@
 function _reconstruct_structure!(
     x::AbstractVector{<:AbstractVector},
     indices::AbstractVector{<:Integer},
-    unitcell::AbstractMatrix
+    unitcell::Union{UnitCell,AbstractMatrix}
 )
     xlast = x[first(indices)]
     for i in indices
@@ -30,7 +30,7 @@ function _reconstruct_complex!(
     x::AbstractVector{<:AbstractVector},
     indices1::AbstractVector{<:Integer},
     indices2::AbstractVector{<:Integer},
-    unitcell::AbstractMatrix
+    unitcell::Union{UnitCell,AbstractMatrix}
 )
     # Find atom in indices2 that is closer to indices1, considering PBCs
     # If an very close atom is found, use it and avoid the full double loop
