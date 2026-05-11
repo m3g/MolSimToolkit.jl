@@ -79,6 +79,7 @@ include("./miscellaneous_functions/intermittent_correlation.jl")
 # Solvation and interactions
 include("./miscellaneous_functions/bulk_coordination.jl")
 include("./miscellaneous_functions/coordination_number.jl")
+include("./transfer_free_energies/transfer_free_energies.jl")
 
 #  Structural alignment
 include("./structural_alignment/standard.jl")

@@ -2,11 +2,29 @@
 CollapsedDocStrings = true
 ```
 
-# [m-values (protein transfer free energy) calculator](@id mvalues)
+# [Protein transfer free energy calculator](@id mvalues)
 
 !!! warning
     This is an experimental feature. Breaking changes may occur without 
     a breaking package release.
+
+## Transfer free energies throughout a simulation
+
+The `transfer_free_energy` function computes the transfer free energy of a protein (in kcal/mol at 1M cosolvent),
+averaged over all frames of a simulation, using the Tanford transfer model:
+
+```@example tfe
+using MolSimToolkit, MolSimToolkit.Testing
+import PDBTools # to choose transfer model
+sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+tfe = transfer_free_energy(sim, "urea"; model=PDBTools.MoeserHorinek)
+```
+
+Per-residue contributions are available in `tfe.residue_contributions_bb` and `tfe.residue_contributions_sc`.
+
+```@docs
+transfer_free_energy(::Simulation, ::String)
+```
 
 ## Computing m-values for single structure pairs
 
