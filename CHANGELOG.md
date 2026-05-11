@@ -21,7 +21,7 @@ Version 2.0.1
 Version 2.0.0
 --------------
 - ![FEATURE][badge-feature] `goto_frame!(sim, iframe)` function goes to the desired frame and returns the `Simulation` object.
-- ![BREAKING][badge-breaking] `atoms` function was removed in favor of `get_atoms`. Use `get_atoms(goto_frame!(sim, 5))` for example to retrive the vector of atoms with positions of frame 5.
+- ![BREAKING][badge-breaking] `atoms` function was removed in favor of `get_atoms`. Use `get_atoms(goto_frame!(sim, 5))` for example to retrieve the vector of atoms with positions of frame 5.
 - ![BREAKING][badge-breaking] `get_frame` was renamed `get_frame!` and returns a `Frame` object, not anymore a vector of atoms. Use `get_atoms` instead.
 - ![BREAKING][badge-breaking] PDBTools 3.21.0 renames `coor` to `positions`/`position` — all MolSimToolkit functions and documentation now use the new names.
 - ![BREAKING][badge-breaking] `first_frame!` returns the `Frame` object, not a `Simulation` object, as before. It mutates, as before, the `Simulation` object, to place it in the first frame.
@@ -90,7 +90,7 @@ Version 1.29.14
 Version 1.29.13
 ---------------
 - ![FEATURE][badge-experimental] Support for PBCs in `delta_sasa_per_residue` with the `unitcell` keyword.
-- ![FEATURE][badge-experimental] Changed interface of `mvalue` functions: the funcions now receive vectors of atoms, and thus the keyword `pdbname`  was renamed to `atoms`. 
+- ![FEATURE][badge-experimental] Changed interface of `mvalue` functions: the functions now receive vectors of atoms, and thus the keyword `pdbname`  was renamed to `atoms`. 
 
 Version 1.29.12
 ---------------
@@ -130,7 +130,7 @@ Version 1.29.5
 
 Version 1.29.4
 -------------
-- ![FEATURE][badge-experimental] Support for the AutoBolen model of mvalue calcuation.
+- ![FEATURE][badge-experimental] Support for the AutoBolen model of mvalue calculation.
 - ![FEATURE][badge-experimental] Code support for other cosolvents than urea in the calculation of m-values.
 - ![INFO][badge-info] removed `atomic_mass` overload (with piracy) of PDBTools function.
 
