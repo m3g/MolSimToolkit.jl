@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.0.3-DEV
+--------------
+
 Version 2.0.2
 --------------
 - ![FEATURE][badge-experimental] Add `transfer_free_energy` function to compute the average transfer free energy throughout a simulation.
