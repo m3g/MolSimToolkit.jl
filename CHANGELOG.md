@@ -13,6 +13,8 @@ MolSimToolkit.jl Changelog
 Version 2.0.3
 --------------
 - ![FEATURE][badge-experimental] Add `transfer_free_energy_frames` function to compute the transfer free energy throughout a simulation, frame by frame.
+- ![FIX][badge-fix] fix the protein reconstruction in `transfer_free_energy` when the protein is a non-contiguous subset of atoms.
+- ![INFO][badge-info] Defaults to `protein and not element H` in the selection of atoms of transfer free energy calculations. 
 - ![INFO][badge-info] Simplify `mvalue` example code.
 
 Version 2.0.2
