@@ -12,6 +12,8 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.3-DEV
 --------------
+- ![FEATURE][badge-experimental] Add `transfer_free_energy_frames` function to compute the transfer free energy throughout a simulation, frame by frame.
+- ![INFO][badge-info] Simplify `mvalue` example code.
 
 Version 2.0.2
 --------------
