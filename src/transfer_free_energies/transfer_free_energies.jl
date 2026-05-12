@@ -251,22 +251,13 @@ function transfer_free_energy_frames(
     inds_protein = PDBTools.index.(protein)
     # Create a copy to update coordinates at each frame
     protein_at_frame = copy.(protein)
-    # Number of residues
-    nres = length(PDBTools.eachresidue(protein))
     # Totals and contributions
     tfe_frames = TransferFreeEnergyFrames{model}(Vector{PDBTools.TransferFreeEnergy{model}}[])
     for frame in sim
-        # fetch protein coordinates and unitcell
-        p = positions(frame)
-        uc = unitcell(frame)
-        # Reconstruct the protein structure, which might be broken by the PBCs
-        if reconstruct_protein
-            _reconstruct_structure!(p, inds_protein, uc)
-        end
-        # update coordinates (note the dot for broadcast)
-        PDBTools.set_position!.(protein_at_frame, @view(p[inds_protein]))
-        # Compute the transfer free energy
-        tfe = PDBTools.transfer_free_energy(protein_at_frame, cosolvent; model, backbone, sidechain)
+        tfe = _tfe_frame(
+            frame, protein_at_frame, cosolvent, model, inds_protein, 
+            reconstruct_protein, backbone, sidechain
+        )
         # push total, backbone and sidechain mvalues to arrays
         push!(tfe_frames._frames, tfe)
     end
