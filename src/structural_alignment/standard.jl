@@ -9,10 +9,10 @@ function _reconstruct_structure!(
     indices::AbstractVector{<:Integer},
     unitcell::Union{UnitCell,AbstractMatrix}
 )
-    xlast = x[first(indices)]
+    xprev = x[first(indices)]
     for i in indices
-        x[i] = wrap(x[i], xlast, unitcell)
-        xlast = x[i]
+        x[i] = wrap(x[i], xprev, unitcell)
+        xprev = x[i]
     end
     return x
 end
