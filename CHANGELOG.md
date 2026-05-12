@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.0.4-DEV
+--------------
+
 Version 2.0.3
 --------------
 - ![FEATURE][badge-experimental] Add `transfer_free_energy_frames` function to compute the transfer free energy throughout a simulation, frame by frame.
