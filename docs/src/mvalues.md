@@ -43,8 +43,8 @@ tfe_frames[1].tot  # total TFE of the first frame
 tot_per_frame = [ t.tot for t in tfe_frames ]
 ```
 
-Note that the contribution of each residue, at each frame, is stored in `tfe_frames[i].residue_contributions_bb` (or `sc`), for
-backbone and side-chains separately, and thus this array might require a significant amount of memory. But, for example, to 
+Note that the contributions of each residue, at each frame, are stored in `tfe_frames[i].residue_contributions_bb` (or `_sc`), for
+backbone and side-chains, and thus this array might require a significant amount of memory. But, for example, to 
 obtain the contributions to the transfer free energies of a subset of the protein, at each frame, do:
 
 ```@example tfe
@@ -68,8 +68,8 @@ sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
 
 First, we compute TFE of the reference structure (first frame):
 ```@example mvalues
-protein_ref = PDBTools.select(get_atoms(sim), "protein and not element H")
-PDBTools.set_position!.(protein_ref, positions(first_frame!(sim))[PDBTools.index.(protein_ref)])
+atoms = get_atoms(sim)
+protein_ref = PDBTools.select(atoms, "protein and not element H")
 tfe_ref = PDBTools.transfer_free_energy(protein_ref, "urea")
 ```
 
@@ -99,7 +99,7 @@ bar!(plt, [1  2  3],
     [mean(m.tot)  mean(m.bb)  mean(m.sc)],
     yerr=[std(m.tot)/5  std(m.bb)/5  std(m.sc)/5], # just illustrative
     xticks=([1,2,3],["Total","Backbone","Sidechain"]),
-    sp=2, label="", xlabel="", ylims=(-0.08,0),
+    sp=2, label="", xlabel="",
     ylabel="m-value (kJ/mol)",
 )
 ```
