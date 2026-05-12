@@ -10,6 +10,11 @@ CollapsedDocStrings = true
 
 ## Transfer free energies throughout a simulation
 
+```@docs
+transfer_free_energy(::Simulation, ::String)
+transfer_free_energy_frames
+```
+
 The `transfer_free_energy` function computes the transfer free energy of a protein (in kcal/mol at 1M cosolvent),
 averaged over all frames of a simulation, using the Tanford transfer model:
 
@@ -22,73 +27,66 @@ tfe = transfer_free_energy(sim, "urea"; model=PDBTools.MoeserHorinek)
 
 Per-residue contributions are available in `tfe.residue_contributions_bb` and `tfe.residue_contributions_sc`.
 
-```@docs
-transfer_free_energy(::Simulation, ::String)
+To obtain the transfer free energy for each frame individually (rather than an average),
+use `transfer_free_energy_frames`. It returns a `TransferFreeEnergyFrames` object that
+supports indexing and iteration:
+
+```@example tfe
+tfe_frames = transfer_free_energy_frames(sim, "urea"; model=PDBTools.MoeserHorinek)
 ```
 
-## Computing m-values for single structure pairs
+```@example tfe
+tfe_frames[1].tot  # total TFE of the first frame
+```
 
-The core infrastructure to compute *m*-values was moved to [PDBTools.jl](https://m3g.github.io/PDBTools.jl/stable/mvalue/). 
-Here we import the relevant functions of PDBTools.jl to compute *m*-values along a trajectory:
+```@example tfe
+tot_per_frame = [ t.tot for t in tfe_frames ]
+```
+
+Note that the contributions of each residue, at each frame, are stored in `tfe_frames[i].residue_contributions_bb` (or `_sc`), for
+backbone and side-chains, and thus this array might require a significant amount of memory. But, for example, to 
+obtain the contributions to the transfer free energies of a subset of the protein, at each frame, do:
+
+```@example tfe
+tfe_10_15 = [ 
+    sum(t.residue_contributions_bb[10:15]) + sum(t.residue_contributions_sc[10:15]) 
+    for t in tfe_frames
+] 
+```
+
+## Computing m-values 
+
+The *m*-value of a frame relative to a reference structure is the difference in transfer free energy
+between that frame and the reference. Using `transfer_free_energy_frames` together with a reference
+TFE computed for the first frame via `PDBTools.transfer_free_energy`, this is straightforward:
 
 ```@example mvalues
-using MolSimToolkit
+using MolSimToolkit, MolSimToolkit.Testing
 import PDBTools
-# explicit use of the SASA and mvalue functions
-using PDBTools: sasa_particles, sasa, mvalue 
+sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
 ```
 
-Here we show an example of how to compute m-values along a trajectory. 
-We define a function to iterate over the simulation frames, and compute the m-values
-for each frame, considering the first frame as the reference state:
-
+First, we compute TFE of the reference structure (first frame):
 ```@example mvalues
-function mvalue_traj(sim::Simulation, protein_ref::AbstractVector{<:PDBTools.Atom})
-    # indices of the protein atoms, to fetch frame coordinates
-    inds_protein = PDBTools.index.(protein_ref)
-    # Create a copy to update coordinates at each frame
-    protein_at_frame = copy.(protein_ref)
-    # Create arrays to store total and bb and sc contributions
-    tot = Float32[]
-    bb = Float32[]
-    sc = Float32[]
-    sasa_reference = sasa_particles(protein_ref)
-    for frame in sim
-        # fetch protein coordinates and unitcell 
-        p = positions(frame)[inds_protein] 
-        uc = unitcell(frame)
-        # update coordinates (note the dot for broadcast)
-        PDBTools.set_position!.(protein_at_frame, p)
-        # Compute SASA of the protein in this frame
-        sasa_frame = sasa_particles(protein_at_frame; unitcell=uc.matrix) 
-        # Compute mvalue
-        m = mvalue(sasa_reference, sasa_frame, "urea")
-        # push total, backbone and sidechain mvalues to arrays
-        push!(tot, m.tot)
-        push!(bb, m.bb)
-        push!(sc, m.sc)
-    end
-    return (tot=tot, bb=bb, sc=sc)
-end
+atoms = get_atoms(sim)
+protein_ref = PDBTools.select(atoms, "protein and not element H")
+tfe_ref = PDBTools.transfer_free_energy(protein_ref, "urea")
 ```
 
-Running the above function over a trajectory can be done with:
-
+Now, compute TFE for each frame of the trajectory:
 ```@example mvalues
-using MolSimToolkit.Testing # to load test files
-# Build Simulation object
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj) 
-# We are interested only in protein atoms
-protein = PDBTools.read_pdb(Testing.namd_pdb, "protein")
-# Lets get the positions of the first frame for reference
-p_ref = positions(first_frame!(sim))[PDBTools.index.(protein)]
-PDBTools.set_position!.(protein, p_ref) # note the dot
-# Run the mvalues-traj function
-m = mvalue_traj(sim, protein)
+tfe_frames = transfer_free_energy_frames(sim, "urea")
+```
+The m-values are difference in TFE between each frame and the reference
+```@example mvalues
+m = (
+    tot = [ t.tot - tfe_ref.tot for t in tfe_frames ],
+    bb  = [ t.bb  - tfe_ref.bb  for t in tfe_frames ],
+    sc  = [ t.sc  - tfe_ref.sc  for t in tfe_frames ],
+)
 ```
 
-Plotting the results, we obtain the $\Delta_{\textrm{ref}\rightarrow\textrm{target}}\Delta G^{T}$, the difference in transfer free energy
-from water to urea at 1M, of the target structure at each frame relative to the reference structure:
+Plotting the results, we obtain the $\Delta_{\textrm{ref}\rightarrow\textrm{target}}\Delta G^{T}$, the difference in transfer free energy from water to urea at 1M, of the target structure at each frame relative to the reference structure:
 
 ```@example mvalues
 using Plots, Statistics
@@ -101,7 +99,7 @@ bar!(plt, [1  2  3],
     [mean(m.tot)  mean(m.bb)  mean(m.sc)],
     yerr=[std(m.tot)/5  std(m.bb)/5  std(m.sc)/5], # just illustrative
     xticks=([1,2,3],["Total","Backbone","Sidechain"]),
-    sp=2, label="", xlabel="", ylims=(-0.08,0),
+    sp=2, label="", xlabel="",
     ylabel="m-value (kJ/mol)",
 )
 ```

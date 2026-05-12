@@ -26,12 +26,12 @@ using MolSimToolkitShared: alignment_movements,
 
 
 using TestItems: @testitem
-using StaticArrays: FieldVector, SMatrix, MMatrix, MVector
+using StaticArrays: FieldVector, SMatrix, MMatrix, MVector, SVector
 using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
 using Statistics: mean
-using Printf: @sprintf
+using Printf: @sprintf, @printf
 
 export wrap, wrap_to_first
 export distances

@@ -40,7 +40,7 @@ makedocs(
         "Experimental" => Any[
             "Simulation Reweighting" => "Reweighting.md",
             "Cluster submission management" => "Coaraci.md",
-            "m-value calculator" => "mvalues.md",
+            "Transfer free energies" => "mvalues.md",
         ], 
     ],
 )
