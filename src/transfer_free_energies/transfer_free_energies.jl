@@ -27,7 +27,7 @@ end
         sim::Simulation,
         cosolvent="urea";
         model=PDBTools.AutonBolen,
-        protein::AbstractVector{<:PDBTools.Atom}=PDBTools.select(get_atoms(sim), "protein and not elmement H"),
+        protein::AbstractVector{<:PDBTools.Atom}=PDBTools.select(get_atoms(sim), "protein and not element H"),
         backbone::Function=PDBTools.isbackbone,
         sidechain::Function=PDBTools.issidechain,
         reconstruct_protein::Bool=true,
