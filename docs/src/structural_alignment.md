@@ -43,6 +43,12 @@ The aligned and `rmsd_of` groups may or may not overlap. For example, `rmsd_of` 
     to each other in space. This must be true, independently, for the aligned and `rmsd_of` selections.
     The `rmsd_of` selection is reconstructed close to the aligned selection, by identifying the shortest distance between both sets. 
 
+The structure-reconstruction step used internally by `rmsd` is also available as a standalone function:
+
+```@docs
+reconstruct_structure!
+```
+
 Other routines that allow advanced and fine-tuned structural alignment analyses or implementations, are:
 
 ```@docs

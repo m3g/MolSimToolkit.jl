@@ -20,3 +20,4 @@ aligned_aligned.pdb
 aligned_rmsd.dat
 aligned_rmsf.dat
 typos.toml
+test/Manifest.toml

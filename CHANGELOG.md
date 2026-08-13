@@ -12,6 +12,8 @@ MolSimToolkit.jl Changelog
 
 Version 2.0.4-DEV
 --------------
+- ![FEATURE][badge-experimental] `reconstruct_structure!` is an exported function now.
+- ![ENHANCEMEMENT][badge-enhancement] new tree-based implementation of `reconstruct_structure!` that is robbuts for non-continuous chains. 
 
 Version 2.0.3
 --------------

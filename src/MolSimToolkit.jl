@@ -37,6 +37,7 @@ export wrap, wrap_to_first
 export distances
 export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
+export reconstruct_structure!
 export intermittent_correlation
 export bulk_coordination
 export coordination_number
