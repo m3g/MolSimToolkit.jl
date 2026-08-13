@@ -530,8 +530,111 @@ end
 
 @testitem "reconstruct_structure!" begin
     using MolSimToolkit
+    using MolSimToolkit.Testing
     using PDBTools
+    using StaticArrays: SVector
+    using LinearAlgebra: norm
 
+    box = 30.0
+    mat = hcat(SVector(box, 0.0, 0.0), SVector(0.0, box, 0.0), SVector(0.0, 0.0, box))
 
+    # A single, already-contiguous chain: reconstruction must not move any atom
+    # relative to its neighbors.
+    chain = [SVector(1.0 * i, 0.0, 0.0) for i in 0:4]
+    x = deepcopy(chain)
+    reconstruct_structure!(x, collect(1:5), mat)
+    @test x ≈ chain
 
+    # A chain broken by a single periodic image jump (no real branch needed,
+    # since consecutive atoms are still close once wrapped).
+    x = [p + SVector(0.0, 0.0, 0.0) for p in chain]
+    x[end] += SVector(3 * box, -2 * box, box)
+    reconstruct_structure!(x, collect(1:5), mat)
+    @test all(norm(x[i+1] - x[i]) ≈ 1.0 for i in 1:4)
+
+    # Single branch: two chains concatenated (e.g. a dimer), stored with an
+    # arbitrary periodic offset between them.
+    chainA = [SVector(1.0 * i, 0.0, 0.0) for i in 0:4]
+    chainB = [SVector(5.0 + 1.0 * i + 3 * box, 0.0, 0.0) for i in 0:4]
+    x = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    reconstruct_structure!(x, collect(1:10), mat)
+    @test all(norm(x[i+1] - x[i]) < 2.0 for i in 1:9)
+
+    # Multiple branches: three chains concatenated, each with a different offset.
+    cA = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    cB = [SVector(5.0 + 1.0 * i + 3 * box, 0.0, 0.0) for i in 0:3]
+    cC = [SVector(10.0 + 1.0 * i - 5 * box, 2 * box, -2 * box) for i in 0:3]
+    x = Vector{SVector{3,Float64}}(vcat(cA, cB, cC))
+    reconstruct_structure!(x, collect(1:12), mat)
+    @test all(norm(x[i+1] - x[i]) < 2.0 for i in 1:11)
+
+    # Nested branch: within the atoms skipped over by a branch, there is a
+    # further break that must, itself, be resolved by branching.
+    A = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    B1_true, B2_true, B3_true = SVector(9.0, 10.0, 0.0), SVector(10.0, 10.0, 0.0), SVector(11.0, 10.0, 0.0)
+    B4_true = SVector(4.0, 0.0, 0.0) # close to A4 = (3, 0, 0)
+    B1 = B1_true + SVector(2 * box, -3 * box, 5 * box)
+    B2 = B2_true + SVector(-4 * box, 6 * box, -2 * box)
+    B3 = B3_true + SVector(1 * box, 1 * box, 1 * box)
+    B4 = B4_true + SVector(-2 * box, 4 * box, 3 * box)
+    x = Vector{SVector{3,Float64}}(vcat(A, [B1, B2, B3, B4]))
+    reconstruct_structure!(x, collect(1:8), mat)
+    @test norm(x[6] - x[5]) ≈ 1.0 atol = 1e-6 # B1-B2
+    @test norm(x[7] - x[6]) ≈ 1.0 atol = 1e-6 # B2-B3
+    @test norm(x[7] - x[5]) ≈ 2.0 atol = 1e-6 # B1-B3
+
+    # Cross-boundary branch: an atom skipped over by one branch (Z) truly belongs,
+    # spatially, with a chain that only appears later in the index sequence (C),
+    # not with the chain it was jumped to (B). The search pool for filling a gap
+    # must therefore include atoms from both sides of a branch point.
+    A = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    Z_true = SVector(20.0, 0.0, 0.0)
+    B_true = [SVector(4.0 + 1.0 * i, 0.0, 0.0) for i in 0:3]
+    C_true = [SVector(19.0 + 1.0 * i, 0.0, 0.0) for i in 0:3]
+    Z = Z_true + SVector(3 * box, -2 * box, 4 * box)
+    B = [p + SVector(-3 * box, 5 * box, -box) for p in B_true]
+    C = [p + SVector(2 * box, box, -4 * box) for p in C_true]
+    x = Vector{SVector{3,Float64}}(vcat(A, [Z], B, C))
+    reconstruct_structure!(x, collect(1:13), mat)
+    @test norm(x[10] - x[5]) ≈ 1.0 atol = 1e-6 # Z-C1
+
+    # The `dmax` keyword controls the branch search. With an overly large
+    # `dmax`, the search is never triggered, so the cross-boundary case above
+    # (Z-C1) degenerates to the naive, sequence-only wrap and gets it wrong.
+    x = Vector{SVector{3,Float64}}(vcat(A, [Z], B, C))
+    reconstruct_structure!(x, collect(1:13), mat; dmax=1000.0)
+    @test !isapprox(norm(x[10] - x[5]), 1.0; atol=1e-6)
+
+    # Conversely, an artificially tiny `dmax` forces a branch search at every
+    # single step; the result must still be correct.
+    x = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    reconstruct_structure!(x, collect(1:10), mat; dmax=1e-3)
+    @test all(norm(x[i+1] - x[i]) ≈ 1.0 for i in 1:9)
+
+    # A single index (or none) is a no-op.
+    x = [SVector(0.0, 0.0, 0.0)]
+    reconstruct_structure!(x, [1], mat)
+    @test x == [SVector(0.0, 0.0, 0.0)]
+
+    # Reusing a preallocated `aux_inds` buffer across repeated calls gives the
+    # same result as the default, freshly-allocated buffer.
+    aux_inds = similar(collect(1:10))
+    x1 = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    x2 = deepcopy(x1)
+    reconstruct_structure!(x1, collect(1:10), mat)
+    reconstruct_structure!(x2, collect(1:10), mat; aux_inds)
+    @test x1 == x2
+
+    # Integration test on a real trajectory: reconstructing the whole system
+    # (thousands of unrelated water/lipid atoms, so many branches are expected)
+    # must not error, and does not touch atoms outside of `indices`.
+    simulation = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    first_frame!(simulation)
+    frame = current_frame(simulation)
+    p = positions(frame)
+    p_before = deepcopy(p)
+    reconstruct_structure!(p, 1:length(p), unitcell(frame))
+    @test length(p) == length(p_before)
+    protein = findall(Select("protein and name CA"), get_atoms(simulation))
+    @test all(norm(p[protein[i+1]] - p[protein[i]]) < 10.0 for i in 1:length(protein)-1)
 end
