@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.1.1-DEV
+--------------
+
 Version 2.1.0
 --------------
 - ![FEATURE][badge-feature] `reconstruct_structure!` is an exported function now.
