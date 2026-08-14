@@ -13,22 +13,18 @@ const replace_aa_code = Dict{String,String}(
 )
 function _ss_frame!(
     atoms::AbstractVector{<:PDBTools.Atom},
-    frame::Frame;
+    frame::Frame,
+    indices::AbstractVector{<:Integer};
     ss_method::F=stride_run,
     reconstruct_structure=true,
+    aux_inds::AbstractVector{<:Integer}=similar(indices),
 ) where {F<:Function}
     p = positions(frame)
-    uc = unitcell(frame)
+    if reconstruct_structure
+        reconstruct_structure!(p, indices, unitcell(frame); aux_inds)
+    end
     for (iat, at) in enumerate(atoms)
-        iatom = PDBTools.index(at)
-        PDBTools.set_position!(at, p[iatom])
-        if reconstruct_structure
-            if iat == 1
-                PDBTools.set_position!(at, p[iatom])
-            else
-                PDBTools.set_position!(at, wrap(p[iatom], PDBTools.position(atoms[iat-1]), uc))
-            end
-        end
+        PDBTools.set_position!(at, p[indices[iat]])
     end
     # This is very bad: we are writing temporary files twice for each frame
     # one here, one in the ss_method function, to adjust the PDB header
@@ -107,10 +103,12 @@ function ss_map(
             sel[iat].resname = replace_aa_code[sel[iat].resname]
         end
     end
+    sel_indices = PDBTools.index.(sel)
+    aux_inds = similar(sel_indices)
     ss_map = zeros(Int, length(PDBTools.eachresidue(sel)), length(simulation))
     p = Progress(length(simulation); enabled=show_progress)
     for (iframe, frame) in enumerate(simulation)
-        ss = _ss_frame!(sel, frame; ss_method, reconstruct_structure)
+        ss = _ss_frame!(sel, frame, sel_indices; ss_method, reconstruct_structure, aux_inds)
         for (i, ssdata) in pairs(ss)
             ss_map[i, iframe] = ss_number(ssdata)
         end

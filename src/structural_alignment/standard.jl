@@ -1,74 +1,150 @@
-#
-# Function to reconstruct the structure of the protein/polymer, to avoid
-# periodic boundary conditions issues with molecule breaking through the
-# boundaries. This function assumes that atoms that are close in the 
-# sequence of the structure are also close in space.
-#
-function _reconstruct_structure!(
+"""
+    reconstruct_structure!(
+        x::AbstractVector{<:AbstractVector},
+        indices::AbstractVector{<:Integer},
+        unitcell::Union{UnitCell,AbstractMatrix};
+        dmax::Real = minimum(norm.(eachcol(unitcell isa UnitCell ? unitcell.matrix : unitcell))) / 3,
+        aux_inds::AbstractVector{<:Integer} = similar(indices),
+    )
+
+Reconstructs, in place, the structure formed by the atoms of `x` with indices given by
+`indices`, undoing the breaks caused by periodic boundary conditions. The atoms are assumed
+to be ordered such that atoms that are close in the sequence of `indices` are also close in
+space, which is typically the case for the atoms of a protein or polymer, taken in sequence.
+
+The reconstruction walks `indices` in order, wrapping each atom around the previous one. If
+the next atom in the sequence is farther than `dmax` from the previous one (e.g. a chain
+break, or the transition from one molecule to another when `indices` was built by
+concatenating more than one structure), the remaining, not yet reconstructed atoms (both those
+skipped over and those still ahead in the sequence) are searched for the one closest to the
+last reconstructed position, and the walk branches to it. The atoms skipped over are then
+reconstructed backwards from that branch point, before resuming towards the atoms that were
+still ahead. This search-and-branch step is applied recursively to whatever remains
+unreconstructed at each point, so nested or repeated breaks (in either direction) are all
+resolved the same way, and an atom skipped over by one branch can still be picked up by a
+later one. This makes the function robust to structures formed by more than one chain (e.g. a
+dimer, or a set of indices obtained by concatenating a structure and a separate complex), for
+which a single branch is typically enough to reconnect the chains.
+
+# Arguments
+
+- `x`: the coordinates of the atoms, modified in place.
+- `indices`: the indices, within `x`, of the atoms to be reconstructed, in sequence.
+- `unitcell`: the unit cell of the simulation box, as an `UnitCell` object or a matrix of
+  unit cell vectors.
+
+# Optional keyword arguments
+
+- `dmax`: maximum distance, between consecutive atoms of `indices`, below which no branch
+  search is triggered. Defaults to one third of the smallest unit cell vector length.
+- `aux_inds`: a preallocated buffer, with the same axes and element type as `indices`, used
+  internally to avoid repeated allocations when this function is called repeatedly (e.g.
+  once per trajectory frame).
+
+# Example
+
+```jldoctest
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> frame = first_frame!(sim);
+
+julia> x = positions(frame);
+
+julia> reconstruct_structure!(x, 1:length(x), unitcell(frame));
+
+```
+
+"""
+function reconstruct_structure!(
     x::AbstractVector{<:AbstractVector},
     indices::AbstractVector{<:Integer},
-    unitcell::Union{UnitCell,AbstractMatrix}
+    unitcell::Union{UnitCell,AbstractMatrix};
+    dmax::Real=minimum(norm.(eachcol(unitcell isa UnitCell ? unitcell.matrix : unitcell))) / 3,
+    aux_inds::AbstractVector{<:Integer}=similar(indices),
 )
-    xprev = x[first(indices)]
-    for i in indices
-        x[i] = wrap(x[i], xprev, unitcell)
-        xprev = x[i]
-    end
+    length(indices) <= 1 && return x
+    aux_inds .= indices
+    xanchor = x[aux_inds[firstindex(aux_inds)]]
+    seq = @view aux_inds[firstindex(aux_inds)+1:lastindex(aux_inds)]
+    _reconstruct_walk!(x, seq, xanchor, unitcell, dmax)
     return x
 end
 
 #
-# This function reconstructs the structure of the complex formed by the two sets of indices,
-# to avoid periodic boundary conditions issues with molecule breaking through the
-# boundaries. This function assumes that atoms that are close in the sequence of the structure 
-# are also close in space.
-# 
-# The function reconstruct a complex, by finding first the closest atom between the two structures,
-# and wrapping the coordinates of the second structure around that closest atom.
+# Reconstructs, in place, the atoms of `x` whose indices are given by `seq`, anchoring the
+# first one to `xprev`. `seq` is entirely the pool of atoms not yet reconstructed. At each
+# step, if the atom at the front of the pool is within `dmax` of the last reconstructed
+# position, it is accepted and the walk simply moves on to the next one. Otherwise, the
+# whole of the pool is searched for the atom closest to that position, which becomes the
+# branch point; the atoms that were skipped over are merged, in reverse (so that they are
+# visited backwards from the branch point), with the atoms that were still ahead, and this
+# combined list becomes the new pool.
 #
-function _reconstruct_complex!(
+# Because the pool considered at every step always contains every not-yet-reconstructed
+# atom -- both the ones skipped by a branch and the ones still ahead in the original
+# sequence -- an atom left over from one branch remains a valid candidate for a later one,
+# however many breaks are nested or chained together. The pool is only ever rebuilt (by
+# `vcat`) when an actual branch occurs, which is expected to be rare, so this stays an
+# in-place loop rather than a recursion over one call per atom (which would, for large
+# structures, overflow the call stack).
+#
+function _reconstruct_walk!(
     x::AbstractVector{<:AbstractVector},
-    indices1::AbstractVector{<:Integer},
-    indices2::AbstractVector{<:Integer},
-    unitcell::Union{UnitCell,AbstractMatrix}
+    seq::AbstractVector{<:Integer},
+    xprev,
+    unitcell::Union{UnitCell,AbstractMatrix},
+    dmax::Real,
 )
-    # Find atom in indices2 that is closer to indices1, considering PBCs
-    # If an very close atom is found, use it and avoid the full double loop
-    id, jd, d = 0, 0, +Inf
-    for i in eachindex(indices1)
-        x1 = x[indices1[i]]
-        for j in eachindex(indices2)
-            x2 = wrap(x[indices2[j]], x1, unitcell)
-            dsq = sum(abs2, x2 - x1)
-            if dsq < d
-                id = i
-                jd = j
-                d = dsq
-                d < 4.0 && break
+    k = firstindex(seq)
+    while k <= lastindex(seq)
+        xk = wrap(x[seq[k]], xprev, unitcell)
+        if norm(xk - xprev) < dmax
+            x[seq[k]] = xk
+            xprev = xk
+            k += 1
+            continue
+        end
+        # Gap: search the remaining atoms of the pool for the one closest to xprev
+        kmin, dmin, xmin = k, norm(xk - xprev), xk
+        for kk in k+1:lastindex(seq)
+            xkk = wrap(x[seq[kk]], xprev, unitcell)
+            dkk = norm(xkk - xprev)
+            if dkk < dmin
+                kmin, dmin, xmin = kk, dkk, xkk
             end
         end
-        d < 4.0 && break
+        x[seq[kmin]] = xmin
+        # Keep the skipped atoms (to be visited backwards from the branch point) and the
+        # atoms still ahead in a single pool, so that a gap in either can still be bridged
+        # by an atom from the other.
+        seq = vcat(@view(seq[kmin-1:-1:k]), @view(seq[kmin+1:lastindex(seq)]))
+        xprev = xmin
+        k = firstindex(seq)
     end
-    # Reconstruct structure defined by indices2, starting from
-    # atom jd, and moving backwards and forward
-    x[indices2[jd]] = wrap(x[indices2[jd]], x[indices1[id]], unitcell)
-    xlast = x[indices2[jd]]
-    for j in jd-1:-1:firstindex(indices2)
-        x[indices2[j]] = wrap(x[indices2[j]], xlast, unitcell)
-        xlast = x[indices2[j]]
-    end
-    xlast = x[indices2[jd]]
-    for j in jd+1:lastindex(indices2)
-        x[indices2[j]] = wrap(x[indices2[j]], xlast, unitcell)
-        xlast = x[indices2[j]]
-    end
-    return x
+    return nothing
+end
+
+#
+# Builds the sequence of indices used to jointly reconstruct `indices` and
+# `rmsd_indices`: `indices` followed by the atoms of `rmsd_indices` that are
+# not already part of it. Reconstructing this combined sequence with
+# `reconstruct_structure!` reconnects `rmsd_indices` to `indices` (branching
+# from the closest atom, as it does for chain breaks within a single
+# structure), avoiding the need for a separate complex-reconstruction step.
+#
+function _reconstruction_indices(indices::AbstractVector{<:Integer}, rmsd_indices::AbstractVector{<:Integer})
+    rmsd_indices === indices && return indices
+    indices_set = Set(indices)
+    extra = filter(!in(indices_set), rmsd_indices)
+    isempty(extra) && return indices
+    return vcat(indices, extra)
 end
 
 #
 # Function to read the reference coordinates from the trajectory.
-# returns the coordinates, reconstructured by _reconstruct_structure!,
-# and _reconstruct_complex!
+# returns the coordinates, reconstructed by reconstruct_structure!.
 #
 function _reference_coordinates(
     simulation,
@@ -78,12 +154,13 @@ function _reference_coordinates(
     mass;
     show_progress,
 )
+    combined_indices = _reconstruction_indices(indices, rmsd_indices)
+    aux_inds = similar(combined_indices)
     xalign, xrmsd = if isnothing(reference_frame)
         first_frame!(simulation)
         frame = current_frame(simulation)
         p, uc = positions(frame), unitcell(frame)
-        _reconstruct_structure!(p, indices, uc.matrix)
-        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
         p[indices], p[rmsd_indices]
     elseif reference_frame isa Integer
         if !(reference_frame in frame_range(simulation))
@@ -99,8 +176,7 @@ function _reference_coordinates(
         end
         frame = current_frame(simulation)
         p, uc = positions(frame), unitcell(frame)
-        _reconstruct_structure!(p, indices, uc.matrix)
-        _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
         p[indices], p[rmsd_indices]
     elseif reference_frame == :average
         xm = zeros(3, length(indices))
@@ -111,8 +187,7 @@ function _reference_coordinates(
         for (iframe, frame) in enumerate(simulation)
             next!(prg)
             p, uc = positions(frame), unitcell(frame)
-            _reconstruct_structure!(p, indices, uc.matrix)
-            _reconstruct_complex!(p, indices, rmsd_indices, uc.matrix)
+            reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
             if iframe == 1
                 xalign_ref .= @view(p[indices])
                 xrmsd_ref .= @view(p[rmsd_indices])
@@ -215,16 +290,19 @@ function rmsd(
     xp = zeros(3, length(indices))
 
     # Define reference of the alignment
-    xalign_ref, xrmsd_ref = 
+    xalign_ref, xrmsd_ref =
         _reference_coordinates(simulation, reference_frame, indices, rmsd_of, mass; show_progress)
+
+    # Indices and auxiliary buffer used to jointly reconstruct `indices` and `rmsd_of`
+    combined_indices = _reconstruction_indices(indices, rmsd_of)
+    aux_inds = similar(combined_indices)
 
     rmsds = Float64[]
     prg = Progress(length(simulation); enabled=show_progress, desc="Computing RMSDs for each frame:")
     for frame in simulation
         next!(prg)
         p, uc = positions(frame), unitcell(frame)
-        _reconstruct_structure!(p, indices, uc.matrix)
-        _reconstruct_complex!(p, indices, rmsd_of, uc.matrix)
+        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
         # Obtain the transformation that aligns atoms of `indices`
         xalign = @view(p[indices])
         xcm, xref_cm, u = alignment_movements(xalign, xalign_ref; mass, xm, xp)
@@ -448,4 +526,115 @@ end
     @test msel ≈ m
 
     @test_throws ArgumentError rmsd_matrix(simulation, cas; mass=[1, 2, 3, 4, 5])
+end
+
+@testitem "reconstruct_structure!" begin
+    using MolSimToolkit
+    using MolSimToolkit.Testing
+    using PDBTools
+    using StaticArrays: SVector
+    using LinearAlgebra: norm
+
+    box = 30.0
+    mat = hcat(SVector(box, 0.0, 0.0), SVector(0.0, box, 0.0), SVector(0.0, 0.0, box))
+
+    # A single, already-contiguous chain: reconstruction must not move any atom
+    # relative to its neighbors.
+    chain = [SVector(1.0 * i, 0.0, 0.0) for i in 0:4]
+    x = deepcopy(chain)
+    reconstruct_structure!(x, collect(1:5), mat)
+    @test x ≈ chain
+
+    # A chain broken by a single periodic image jump (no real branch needed,
+    # since consecutive atoms are still close once wrapped).
+    x = [p + SVector(0.0, 0.0, 0.0) for p in chain]
+    x[end] += SVector(3 * box, -2 * box, box)
+    reconstruct_structure!(x, collect(1:5), mat)
+    @test all(norm(x[i+1] - x[i]) ≈ 1.0 for i in 1:4)
+
+    # Single branch: two chains concatenated (e.g. a dimer), stored with an
+    # arbitrary periodic offset between them.
+    chainA = [SVector(1.0 * i, 0.0, 0.0) for i in 0:4]
+    chainB = [SVector(5.0 + 1.0 * i + 3 * box, 0.0, 0.0) for i in 0:4]
+    x = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    reconstruct_structure!(x, collect(1:10), mat)
+    @test all(norm(x[i+1] - x[i]) < 2.0 for i in 1:9)
+
+    # Multiple branches: three chains concatenated, each with a different offset.
+    cA = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    cB = [SVector(5.0 + 1.0 * i + 3 * box, 0.0, 0.0) for i in 0:3]
+    cC = [SVector(10.0 + 1.0 * i - 5 * box, 2 * box, -2 * box) for i in 0:3]
+    x = Vector{SVector{3,Float64}}(vcat(cA, cB, cC))
+    reconstruct_structure!(x, collect(1:12), mat)
+    @test all(norm(x[i+1] - x[i]) < 2.0 for i in 1:11)
+
+    # Nested branch: within the atoms skipped over by a branch, there is a
+    # further break that must, itself, be resolved by branching.
+    A = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    B1_true, B2_true, B3_true = SVector(9.0, 10.0, 0.0), SVector(10.0, 10.0, 0.0), SVector(11.0, 10.0, 0.0)
+    B4_true = SVector(4.0, 0.0, 0.0) # close to A4 = (3, 0, 0)
+    B1 = B1_true + SVector(2 * box, -3 * box, 5 * box)
+    B2 = B2_true + SVector(-4 * box, 6 * box, -2 * box)
+    B3 = B3_true + SVector(1 * box, 1 * box, 1 * box)
+    B4 = B4_true + SVector(-2 * box, 4 * box, 3 * box)
+    x = Vector{SVector{3,Float64}}(vcat(A, [B1, B2, B3, B4]))
+    reconstruct_structure!(x, collect(1:8), mat)
+    @test norm(x[6] - x[5]) ≈ 1.0 atol = 1e-6 # B1-B2
+    @test norm(x[7] - x[6]) ≈ 1.0 atol = 1e-6 # B2-B3
+    @test norm(x[7] - x[5]) ≈ 2.0 atol = 1e-6 # B1-B3
+
+    # Cross-boundary branch: an atom skipped over by one branch (Z) truly belongs,
+    # spatially, with a chain that only appears later in the index sequence (C),
+    # not with the chain it was jumped to (B). The search pool for filling a gap
+    # must therefore include atoms from both sides of a branch point.
+    A = [SVector(1.0 * i, 0.0, 0.0) for i in 0:3]
+    Z_true = SVector(20.0, 0.0, 0.0)
+    B_true = [SVector(4.0 + 1.0 * i, 0.0, 0.0) for i in 0:3]
+    C_true = [SVector(19.0 + 1.0 * i, 0.0, 0.0) for i in 0:3]
+    Z = Z_true + SVector(3 * box, -2 * box, 4 * box)
+    B = [p + SVector(-3 * box, 5 * box, -box) for p in B_true]
+    C = [p + SVector(2 * box, box, -4 * box) for p in C_true]
+    x = Vector{SVector{3,Float64}}(vcat(A, [Z], B, C))
+    reconstruct_structure!(x, collect(1:13), mat)
+    @test norm(x[10] - x[5]) ≈ 1.0 atol = 1e-6 # Z-C1
+
+    # The `dmax` keyword controls the branch search. With an overly large
+    # `dmax`, the search is never triggered, so the cross-boundary case above
+    # (Z-C1) degenerates to the naive, sequence-only wrap and gets it wrong.
+    x = Vector{SVector{3,Float64}}(vcat(A, [Z], B, C))
+    reconstruct_structure!(x, collect(1:13), mat; dmax=1000.0)
+    @test !isapprox(norm(x[10] - x[5]), 1.0; atol=1e-6)
+
+    # Conversely, an artificially tiny `dmax` forces a branch search at every
+    # single step; the result must still be correct.
+    x = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    reconstruct_structure!(x, collect(1:10), mat; dmax=1e-3)
+    @test all(norm(x[i+1] - x[i]) ≈ 1.0 for i in 1:9)
+
+    # A single index (or none) is a no-op.
+    x = [SVector(0.0, 0.0, 0.0)]
+    reconstruct_structure!(x, [1], mat)
+    @test x == [SVector(0.0, 0.0, 0.0)]
+
+    # Reusing a preallocated `aux_inds` buffer across repeated calls gives the
+    # same result as the default, freshly-allocated buffer.
+    aux_inds = similar(collect(1:10))
+    x1 = Vector{SVector{3,Float64}}(vcat(chainA, chainB))
+    x2 = deepcopy(x1)
+    reconstruct_structure!(x1, collect(1:10), mat)
+    reconstruct_structure!(x2, collect(1:10), mat; aux_inds)
+    @test x1 == x2
+
+    # Integration test on a real trajectory: reconstructing the whole system
+    # (thousands of unrelated water/lipid atoms, so many branches are expected)
+    # must not error, and does not touch atoms outside of `indices`.
+    simulation = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    first_frame!(simulation)
+    frame = current_frame(simulation)
+    p = positions(frame)
+    p_before = deepcopy(p)
+    reconstruct_structure!(p, 1:length(p), unitcell(frame))
+    @test length(p) == length(p_before)
+    protein = findall(Select("protein and name CA"), get_atoms(simulation))
+    @test all(norm(p[protein[i+1]] - p[protein[i]]) < 10.0 for i in 1:length(protein)-1)
 end
