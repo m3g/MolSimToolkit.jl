@@ -82,6 +82,39 @@ plot(MolSimStyle,
 )
 ```
 
+### Characteristic residence time
+
+In this case, the decay of the intermittent correlation function can be fit to a single
+exponential, $$c(\delta) = a\exp(-\delta/\tau)$$, using `EasyFit.fitexp`
+(already a dependency of MolSimToolkit.jl), to extract a characteristic
+residence time $$\tau$$, in units of frames:
+
+```@example occupancy
+using EasyFit
+
+fit = fitexp(collect(0:4), parent(c); c=0.0, u=upper(a=1.1), l=lower(a=0.9))
+tau = fit.b
+```
+
+The constant term is set to zero (correlation at long times) and the initial value
+is constrained to be in `[0.9,1.1]` because it is expected to be `1.0`. 
+
+```@example occupancy
+plot(MolSimStyle,
+    0:4, parent(c),
+    seriestype=:scatter,
+    xlabel="Delta (frames)", ylabel="Probability",
+    marker=:circle,
+    label="TMAO at protein surface",
+)
+plot!(fit.x, fit.y, linewidth=2, label="Exponential fit (τ = $(round(tau, digits=2)) frames)")
+```
+
+Here the trajectory is very short (20 frames), so this characteristic time is
+shown only for illustration: with longer, production-quality trajectories,
+$$\tau$$ provides a quantitative estimate of how long a solvent molecule
+typically remains bound to the site.
+
 ## Reference functions
 
 ```@autodocs
