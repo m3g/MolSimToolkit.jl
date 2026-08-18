@@ -163,4 +163,10 @@ end
     @test length.(occ.list) == [7, 3, 4, 5, 6, 5, 7, 7, 10, 5, 4, 4, 5, 6, 2, 9, 4, 5, 2, 6]
     @test all(imol -> 1 <= imol <= occ.n_solvent_molecules, reduce(vcat, occ.list))
     @test mean(occ) ≈ 5.3
+
+    @test_throws "not a multiple" occupancy(
+        sim, protein, tmao;
+        solvent_natomspermol=13, cutoff=3.0,
+        show_progress=false
+    )
 end
