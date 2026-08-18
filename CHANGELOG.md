@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.2.1-DEV
 --------------
+- ![ENHANCEMEMENT][badge-enhancement] Implement show method for `Occupancy` object.
 
 Version 2.2.0
 --------------
