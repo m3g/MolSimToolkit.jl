@@ -32,7 +32,8 @@ makedocs(
             "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         ],
         "Time-dependent properties" => Any[
-            "Intermittent correlation" => "intermittent_correlation.md",
+            "Site occupancy" => "time_dependent/occupancy.md",
+            "Intermittent correlation" => "time_dependent/intermittent_correlation.md",
         ],
         "System setup" => "system_setup.md",
         "Plotting style" => "plotting_style.md",

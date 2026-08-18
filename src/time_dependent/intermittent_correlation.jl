@@ -129,3 +129,117 @@ end
     @test intermittent_correlation(data; types=x -> x == 1) == OffsetArray([1.0, 0.5], 0:1)
     @test_throws ArgumentError intermittent_correlation(data; maxdelta=5)
 end
+
+"""
+    intermittent_correlation(
+        occupancy::Occupancy;
+        maxdelta::Integer = length(occupancy.list) ÷ 10,
+        show_progress::Bool = true,
+    )
+
+Calculate the intermittent correlation function of the occupancy of a binding
+site, as computed by the [`occupancy`](@ref) function. That is, computes the
+probability of finding a solvent molecule at the site at frame `i + delta`,
+given that it was found at the site at frame `i`, for each solvent molecule
+independently.
+
+Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
+`0` is `1.0`, corresponding to the normalized count of events.
+
+# Arguments
+
+- `occupancy::Occupancy`: The result of the `occupancy` function.
+- `maxdelta::Integer`: The maximum delta-step to be considered. Defaults to
+  `length(occupancy.list) ÷ 10`.
+- `show_progress::Bool`: Show progress bar. Defaults to `true`.
+
+# Example
+
+```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+
+julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+
+julia> protein = select(get_atoms(sim), "protein");
+
+julia> tmao = select(get_atoms(sim), "resname TMAO");
+
+julia> occ = occupancy(sim, protein, tmao; solvent_natomspermol=14, cutoff=3.0, show_progress=false);
+
+julia> c = intermittent_correlation(occ; maxdelta=4, show_progress=false);
+
+julia> c
+5-element OffsetArray(::Vector{Float64}, 0:4) with eltype Float64 with indices 0:4:
+ 1.0
+ 0.39
+ 0.23469387755102042
+ 0.12903225806451613
+ 0.033707865168539325
+
+```
+
+"""
+function intermittent_correlation(
+    occ::Occupancy;
+    maxdelta::Integer=max(1, length(occ.list) ÷ 10),
+    show_progress::Bool=true,
+)
+    data = occ.list
+    ndata = length(data)
+    if maxdelta > ndata - 1
+        throw(ArgumentError("maxdelta must be less than the length of the data minus 1"))
+    end
+    counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
+    chances = copy(counts)
+    np_all = 0
+    for imol in 1:occ.n_solvent_molecules
+        np = count(list -> imol in list, data)
+        np_all += (np * (np - 1)) ÷ 2
+    end
+    p = Progress(np_all; enabled=show_progress)
+    for imol in 1:occ.n_solvent_molecules
+        positions = findall(list -> imol in list, data)
+        np = length(positions)
+        for i in 1:np
+            delta = 0
+            while positions[i] + delta <= ndata
+                chances[delta] += 1
+                delta += 1
+                delta > maxdelta && break
+            end
+            for j in i:np
+                delta = positions[j] - positions[i]
+                if delta <= maxdelta
+                    counts[delta] += 1
+                end
+                next!(p)
+            end
+        end
+    end
+    # Convert counts to probabilities
+    counts ./= chances
+    return counts
+end
+
+@testitem "intermittent_correlation - Occupancy" begin
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using OffsetArrays
+
+    # Equivalence with the scalar-type version, for a series with a single
+    # solvent molecule occupying the site at each frame
+    data = [1, 0, 1, 0, 1]
+    occ = Occupancy([[v + 1] for v in data], 2)
+    c = intermittent_correlation(occ; maxdelta=4, show_progress=false)
+    @test c == intermittent_correlation(data; maxdelta=4, show_progress=false)
+    @test c == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
+
+    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    protein = select(get_atoms(sim), "protein")
+    tmao = select(get_atoms(sim), "resname TMAO")
+    occ2 = occupancy(sim, protein, tmao; solvent_natomspermol=14, cutoff=3.0, show_progress=false)
+    c2 = intermittent_correlation(occ2; maxdelta=4, show_progress=false)
+    @test c2[0] == 1.0
+    @test length(c2) == 5
+    @test all(x -> 0.0 <= x <= 1.0, c2)
+    @test_throws ArgumentError intermittent_correlation(occ2; maxdelta=length(occ2.list))
+end

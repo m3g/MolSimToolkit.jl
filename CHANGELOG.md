@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.1.1-DEV
 --------------
+- ![FEATURE][badge-feature] Provide `occupancy`, `mean(::Occupancy)` and `intermitent_correlation(::Occupancy)` functions.
 
 Version 2.1.0
 --------------

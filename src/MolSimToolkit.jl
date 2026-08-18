@@ -30,7 +30,7 @@ using StaticArrays: FieldVector, SMatrix, MMatrix, MVector, SVector
 using LinearAlgebra: norm, cross, dot, diag
 using Reexport: @reexport
 using ProgressMeter: Progress, next!, @showprogress
-using Statistics: mean
+import Statistics: mean
 using Printf: @sprintf, @printf
 
 export wrap, wrap_to_first
@@ -39,6 +39,8 @@ export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export reconstruct_structure!
 export intermittent_correlation
+export occupancy, Occupancy
+export mean
 export bulk_coordination
 export coordination_number
 export center_of_mass
@@ -75,7 +77,8 @@ include("./secondary_structure/secondary_structure.jl")
 include("./hydrogen_bonds/hydrogen_bonds.jl")
 
 # Time-dependent properties
-include("./miscellaneous_functions/intermittent_correlation.jl")
+include("./time_dependent/occupancy.jl")
+include("./time_dependent/intermittent_correlation.jl")
 
 # Solvation and interactions
 include("./miscellaneous_functions/bulk_coordination.jl")
