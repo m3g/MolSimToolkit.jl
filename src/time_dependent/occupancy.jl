@@ -18,6 +18,21 @@ struct Occupancy
     n_solvent_molecules::Int
 end
 
+function Base.show(io::IO, ::MIME"text/plain", occ::Occupancy)
+    print(io, chomp(
+        """
+        -------------------------------------------------------------------
+        Occupancy data:
+        -------------------------------------------------------------------
+        Total number of solvent molecules: $(occ.n_solvent_molecules)
+        Mean occupancy: $(mean(occ))
+        Minimum occupancy: $(minimum(length(l) for l in occ.list))
+        Maximum occupancy: $(maximum(length(l) for l in occ.list))
+        -------------------------------------------------------------------
+        """
+    ))
+end
+
 """
     mean(occupancy::Occupancy)
 
@@ -149,6 +164,8 @@ end
 
 @testitem "occupancy" begin
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using ShowMethodTesting
+
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
@@ -164,9 +181,21 @@ end
     @test all(imol -> 1 <= imol <= occ.n_solvent_molecules, reduce(vcat, occ.list))
     @test mean(occ) ≈ 5.3
 
+    @test parse_show(occ) ≈ """ 
+    -------------------------------------------------------------------
+    Occupancy data:
+    -------------------------------------------------------------------
+    Total number of solvent molecules: 181
+    Mean occupancy: 5.3
+    Minimum occupancy: 2
+    Maximum occupancy: 10
+    -------------------------------------------------------------------
+    """
+
     @test_throws "not a multiple" occupancy(
         sim, protein, tmao;
         solvent_natomspermol=13, cutoff=3.0,
         show_progress=false
     )
+
 end
