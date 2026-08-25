@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.2.3-DEV
+--------------
+
 Version 2.2.2
 --------------
 - ![ENHANCEMEMENT][badge-enhancement] Remove temporary PDB file created on `_ss_frame!` after computation.
