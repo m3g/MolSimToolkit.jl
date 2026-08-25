@@ -30,7 +30,11 @@ function _ss_frame!(
     # one here, one in the ss_method function, to adjust the PDB header
     tmpfile = tempname()*".pdb"
     PDBTools.writePDB(atoms, tmpfile)
-    return ss_method(tmpfile; adjust_pdb=true)
+    try
+        return ss_method(tmpfile; adjust_pdb=true)
+    finally
+        rm(tmpfile; force=true)
+    end
 end
 
 """
