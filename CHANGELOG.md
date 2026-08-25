@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.2.2-DEV
 --------------
+- ![ENHANCEMEMENT][badge-enhancement] Remove temporary PDB file created on `_ss_frame!` after computation.
 - ![INFO][badge-info] Require EasyFit.jl v1 to compute `fitexpdecay` in the example of intermittent correlation functions.
 
 Version 2.2.1
