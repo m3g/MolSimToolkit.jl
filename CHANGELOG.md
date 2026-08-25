@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.2.2-DEV
 --------------
+- ![INFO][badge-info] Require EasyFit.jl v1 to compute `fitexpdecay` in the example of intermittent correlation functions.
 
 Version 2.2.1
 --------------
