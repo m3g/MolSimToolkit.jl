@@ -1,6 +1,6 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-version = "2.2.2-DEV"
+version = "2.2.2"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
 
 [deps]
@@ -43,7 +43,7 @@ Dates = "1.10"
 DelimitedFiles = "1.9"
 DocStringExtensions = "0.9"
 Documenter = "1.3"
-EasyFit = "0.6.8, 0.7.1"
+EasyFit = "1"
 LaTeXStrings = "1.3"
 LinearAlgebra = "1.10"
 MDLovoFit_jll = "20.1"

@@ -70,12 +70,12 @@ decays as molecules exchange between the site and the bulk solvent, and can
 be used to characterize the residence time of the solvent at the site:
 
 ```@example occupancy
-c = intermittent_correlation(occ; maxdelta=4, show_progress=false)
+ic = intermittent_correlation(occ; maxdelta=4, show_progress=false)
 ```
 
 ```@example occupancy
 plot(MolSimStyle,
-    0:4, parent(c), # parent(c) is required for c is an OffsetArray.
+    0:4, parent(ic), # parent(c) is required for c is an OffsetArray.
     xlabel="Delta (frames)", ylabel="Probability",
     linewidth=2, marker=:circle,
     label="TMAO at protein surface",
@@ -84,30 +84,31 @@ plot(MolSimStyle,
 
 ### Characteristic residence time
 
-In this case, the decay of the intermittent correlation function can be fit to a single
-exponential, $$c(\delta) = a\exp(-\delta/\tau)$$, using `EasyFit.fitexp`
+In this case, the decay of the intermittent correlation function can be fit to a double 
+exponential, $$c(\delta) = a\exp(-\delta/\tau)$$, using `EasyFit.fitexpdecay`
 (already a dependency of MolSimToolkit.jl), to extract a characteristic
 residence time $$\tau$$, in units of frames:
 
 ```@example occupancy
-using EasyFit
+using EasyFit 
+using JuMP, Ipopt # required for constrained non-linear fitting
 
-fit = fitexp(collect(0:4), parent(c); c=0.0, u=upper(a=1.1), l=lower(a=0.9))
+fit = fitexpdecay(ic; n=2, c=mean(occ)/occ.n_solvent_molecules)
 tau = fit.b
 ```
 
-The constant term is set to zero (correlation at long times) and the initial value
-is constrained to be in `[0.9,1.1]` because it is expected to be `1.0`. 
+The constant term is set to the ratio of the mean coordination number and
+the total number of solvent molecules (correlation at long times).
 
 ```@example occupancy
 plot(MolSimStyle,
-    0:4, parent(c),
+    0:4, parent(ic),
     seriestype=:scatter,
     xlabel="Delta (frames)", ylabel="Probability",
     marker=:circle,
     label="TMAO at protein surface",
 )
-plot!(fit.x, fit.y, linewidth=2, label="Exponential fit (τ = $(round(tau, digits=2)) frames)")
+plot!(fit.x, fit.y, linewidth=2, label="Bi-Exponential fit")
 ```
 
 Here the trajectory is very short (20 frames), so this characteristic time is
