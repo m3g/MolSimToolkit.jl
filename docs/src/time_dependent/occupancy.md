@@ -93,7 +93,7 @@ residence time $$\tau$$, in units of frames:
 using EasyFit 
 using JuMP, Ipopt # required for constrained non-linear fitting
 
-fit = fitexpdecay(c; n=2, c=mean(occ)/occ.n_solvent_molecules)
+fit = fitexpdecay(ic; n=2, c=mean(occ)/occ.n_solvent_molecules)
 tau = fit.b
 ```
 
@@ -102,7 +102,7 @@ the total number of solvent molecules (correlation at long times).
 
 ```@example occupancy
 plot(MolSimStyle,
-    0:4, parent(c),
+    0:4, parent(ic),
     seriestype=:scatter,
     xlabel="Delta (frames)", ylabel="Probability",
     marker=:circle,
