@@ -106,6 +106,169 @@ function count_hbonds2(i, x, y, polar_bonds, positions, unitcell, ang)
     return number_of_hbonds
 end
 
+"""
+    HBond
+
+Identifies a single hydrogen bond by the (global) atom indices of the
+donnor, polar hydrogen, and acceptor atoms involved. Two `HBond`s compare
+equal (and hash equally) if, and only if, all three atom indices match.
+
+"""
+struct HBond
+    donnor::Int32
+    hydrogen::Int32
+    acceptor::Int32
+end
+Base.:(==)(a::HBond, b::HBond) = a.donnor == b.donnor && a.hydrogen == b.hydrogen && a.acceptor == b.acceptor
+Base.isequal(a::HBond, b::HBond) = a == b
+Base.hash(a::HBond, h::UInt) = hash((HBond, a.donnor, a.hydrogen, a.acceptor), h)
+
+#=
+    HBondList
+
+CellListMap output type used to accumulate, for a single frame, the list of
+hydrogen bonds found.
+=#
+struct HBondList
+    bonds::Vector{HBond}
+end
+CellListMap.copy_output(x::HBondList) = HBondList(copy(x.bonds))
+function CellListMap.reset_output!(x::HBondList)
+    empty!(x.bonds)
+    return x
+end
+function CellListMap.reducer!(x::HBondList, y::HBondList)
+    append!(x.bonds, y.bonds)
+    return x
+end
+
+#=
+    record_hbonds!(hblist, donnor_global, acceptor_global, donnor_ats, i, x, y, polar_bonds, positions, unitcell, ang)
+
+Same logic as `count_hbonds`/`count_hbonds2`, but instead of counting matches,
+pushes the `HBond` identified by the donnor, polar hydrogen, and acceptor
+global atom indices into `hblist` once per matching polar hydrogen.
+`donnor_ats` is the vector of atoms of the selection the donnor (and its
+bonded polar hydrogens) belongs to, used to translate the local hydrogen
+index `iH` into a global atom index.
+=#
+function record_hbonds!(hblist::HBondList, donnor_global, acceptor_global, donnor_ats, i, x, y, polar_bonds, positions, unitcell, ang)
+    ii = searchsortedfirst(polar_bonds.D, i)
+    ii > length(polar_bonds.D) && return hblist
+    while polar_bonds.D[ii] == i
+        iH = polar_bonds.H[ii]
+        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], x, unitcell)
+        hbond_ang = hbond_angle(x, xH, y)
+        if hbond_ang <= ang
+            push!(hblist.bonds, HBond(donnor_global, PDBTools.index(donnor_ats[iH]), acceptor_global))
+        end
+        ii += 1
+        ii > length(polar_bonds.D) && break
+    end
+    return hblist
+end
+
+#=
+    list_hbonds(sys, s1, angle_cutoff, electronegative_elements) -> HBondList
+
+Same as `count_hbonds(sys::ParticleSystem1, ...)`, but returns the list of
+hydrogen bonds (as donnor/hydrogen/acceptor global atom index triplets) found in the
+frame, instead of just their count.
+=#
+function list_hbonds(sys::CellListMap.ParticleSystem1, s1, angle_cutoff, electronegative_elements)
+    hblist = pairwise!(sys) do pair, hblist
+        (;x, y, i, j) = pair
+        el_i = PDBTools.element(s1.ats[i])
+        el_j = PDBTools.element(s1.ats[j])
+        if (el_i in electronegative_elements) & (el_j in electronegative_elements)
+            gi = PDBTools.index(s1.ats[i])
+            gj = PDBTools.index(s1.ats[j])
+            record_hbonds!(hblist, gi, gj, s1.ats, i, x, y, s1.polar_bonds, sys.positions, sys.unitcell, angle_cutoff)
+            record_hbonds!(hblist, gj, gi, s1.ats, j, y, x, s1.polar_bonds, sys.positions, sys.unitcell, angle_cutoff)
+        end
+        return hblist
+    end
+    return hblist
+end
+
+#=
+    list_hbonds(sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements) -> HBondList
+
+Same as `count_hbonds(sys::ParticleSystem2, ...)`, but returns the list of
+hydrogen bonds (as donnor/hydrogen/acceptor global atom index triplets) found in the
+frame, instead of just their count.
+=#
+function list_hbonds(sys::CellListMap.ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
+    hblist = pairwise!(sys) do pair, hblist
+        (;x, y, i, j) = pair
+        at_i = s1.ats[i]
+        at_j = s2.ats[j]
+        if PDBTools.index(at_i) == PDBTools.index(at_j)
+            throw(ArgumentError("""\n
+                Different selections cannot overlap. Detected atom $(PDBTools.index(at_i)) in both selections \"$sel1\" and \"$sel2\".
+                """))
+        end
+        el_i = PDBTools.element(at_i)
+        el_j = PDBTools.element(at_j)
+        if (el_i in electronegative_elements) & (el_j in electronegative_elements)
+            gi = PDBTools.index(at_i)
+            gj = PDBTools.index(at_j)
+            record_hbonds!(hblist, gi, gj, s1.ats, i, x, y, s1.polar_bonds, sys.xpositions, sys.unitcell, angle_cutoff)
+            record_hbonds!(hblist, gj, gi, s2.ats, j, y, x, s2.polar_bonds, sys.ypositions, sys.unitcell, angle_cutoff)
+        end
+        return hblist
+    end
+    return hblist
+end
+
+#=
+    setup_hbond_list_particle_systems(selection_pairs, selection_data, uc_first_frame, donnor_acceptor_distance, parallel)
+        -> Dict{String,Union{ParticleSystem1,ParticleSystem2}}
+
+Same as `setup_particle_systems`, but the particle systems accumulate an
+`HBondList` (the identities of the hydrogen bonds found), instead of just
+their count.
+=#
+function setup_hbond_list_particle_systems(
+    selection_pairs,
+    selection_data,
+    uc_first_frame,
+    donnor_acceptor_distance,
+    parallel
+)
+    systems = Dict{String,Union{CellListMap.ParticleSystem1,CellListMap.ParticleSystem2}}()
+
+    for selection_pair in selection_pairs
+        sel1, sel2 = first(selection_pair), last(selection_pair)
+        key = _key_name(sel1, sel2)
+
+        if sel1 == sel2
+            s1 = selection_data[sel1]
+            systems[key] = ParticleSystem(
+                positions=PDBTools.coor.(s1.ats),
+                unitcell=uc_first_frame.matrix,
+                cutoff=donnor_acceptor_distance,
+                output=HBondList(HBond[]),
+                parallel=parallel,
+                output_name=:hbond_list
+            )
+        else
+            s1, s2 = selection_data[sel1], selection_data[sel2]
+            systems[key] = ParticleSystem(
+                xpositions=PDBTools.coor.(s1.ats),
+                ypositions=PDBTools.coor.(s2.ats),
+                unitcell=uc_first_frame.matrix,
+                cutoff=donnor_acceptor_distance,
+                output=HBondList(HBond[]),
+                parallel=parallel,
+                output_name=:hbond_list
+            )
+        end
+    end
+
+    return systems
+end
+
 struct SelectionData{A<:PDBTools.Atom,}
     ats::Vector{A}
     inds::Vector{Int32}

@@ -49,6 +49,7 @@ export dihedral, dihedrals
 # PDBTools.hydrogen_bonds is overloaded and reexported here
 import PDBTools.hydrogen_bonds
 export hydrogen_bonds
+export hydrogen_bond_occupancy, HydrogenBondOccupancy, HBond
 
 # Reexported from ProteinSecondaryStructures for convenience
 using ProteinSecondaryStructures: dssp_run, stride_run, 
