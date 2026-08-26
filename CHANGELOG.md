@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.2.3-DEV
 --------------
+- ![FEATURE][badge-feature] Implement `hydrogen_bond_occupancy` and corresponding intermmitent correlation function to compute the survival probability of hbonds. 
 
 Version 2.2.2
 --------------
