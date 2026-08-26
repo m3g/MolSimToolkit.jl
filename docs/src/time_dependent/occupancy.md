@@ -82,7 +82,7 @@ plot(MolSimStyle,
 )
 ```
 
-### Characteristic residence time
+### [Characteristic residence time](@id occupancy-residence-time)
 
 In this case, the decay of the intermittent correlation function can be fit to a double 
 exponential, $$c(\delta) = a\exp(-\delta/\tau)$$, using `EasyFit.fitexpdecay`

@@ -184,7 +184,26 @@ function intermittent_correlation(
     maxdelta::Integer=max(1, length(occ.list) ÷ 10),
     show_progress::Bool=true,
 )
-    data = occ.list
+    return _list_intermittent_correlation(occ.list, 1:occ.n_solvent_molecules; maxdelta, show_progress)
+end
+
+#=
+    _list_intermittent_correlation(data, identities; maxdelta, show_progress) -> OffsetArray
+
+Shared implementation behind `intermittent_correlation(occ::Occupancy)` and
+`intermittent_correlation(hbo::HydrogenBondOccupancy)`. `data` is a vector
+with, for each frame, the list of identities present in that frame (solvent
+molecule indices, for `Occupancy`; `HBond`s, for `HydrogenBondOccupancy`).
+`identities` is the collection of all distinct identities to consider. Only
+`==` (and a consistent `hash`) is required from the identity type, since
+membership is tested with `in`.
+=#
+function _list_intermittent_correlation(
+    data::AbstractVector,
+    identities;
+    maxdelta::Integer=max(1, length(data) ÷ 10),
+    show_progress::Bool=true,
+)
     ndata = length(data)
     if maxdelta > ndata - 1
         throw(ArgumentError("maxdelta must be less than the length of the data minus 1"))
@@ -192,13 +211,13 @@ function intermittent_correlation(
     counts = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     chances = copy(counts)
     np_all = 0
-    for imol in 1:occ.n_solvent_molecules
-        np = count(list -> imol in list, data)
+    for id in identities
+        np = count(list -> id in list, data)
         np_all += (np * (np - 1)) ÷ 2
     end
     p = Progress(np_all; enabled=show_progress)
-    for imol in 1:occ.n_solvent_molecules
-        positions = findall(list -> imol in list, data)
+    for id in identities
+        positions = findall(list -> id in list, data)
         np = length(positions)
         for i in 1:np
             delta = 0
@@ -219,6 +238,84 @@ function intermittent_correlation(
     # Convert counts to probabilities
     counts ./= chances
     return counts
+end
+
+"""
+    intermittent_correlation(
+        hbo::HydrogenBondOccupancy;
+        maxdelta::Integer = length(hbo.list) ÷ 10,
+        show_progress::Bool = true,
+    )
+
+Calculate the intermittent correlation function of the hydrogen bonds found
+by the [`hydrogen_bond_occupancy`](@ref) function. That is, computes the
+probability of finding a given hydrogen bond (the same donnor, polar
+hydrogen, and acceptor atoms) present at frame `i + delta`, given that it was
+present at frame `i`, for each hydrogen bond independently. The hydrogen
+bond does not need to remain present in every frame in between: it may break
+and reform within the interval (that is what makes this correlation
+function "intermittent", as opposed to "continuous").
+
+Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
+`0` is `1.0`, corresponding to the normalized count of events.
+
+# Arguments
+
+- `hbo::HydrogenBondOccupancy`: The result of the `hydrogen_bond_occupancy` function.
+- `maxdelta::Integer`: The maximum delta-step to be considered. Defaults to
+  `length(hbo.list) ÷ 10`.
+- `show_progress::Bool`: Show progress bar. Defaults to `true`.
+
+# Example
+
+```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
+julia> using MolSimToolkit, MolSimToolkit.Testing
+
+julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+
+julia> hbo = hydrogen_bond_occupancy(sim, "protein", show_progress=false)["protein => protein"];
+
+julia> c = intermittent_correlation(hbo; maxdelta=4, show_progress=false);
+
+julia> c[0]
+1.0
+
+```
+
+"""
+function intermittent_correlation(
+    hbo::HydrogenBondOccupancy;
+    maxdelta::Integer=max(1, length(hbo.list) ÷ 10),
+    show_progress::Bool=true,
+)
+    return _list_intermittent_correlation(hbo.list, unique_hbonds(hbo); maxdelta, show_progress)
+end
+
+@testitem "intermittent_correlation - HydrogenBondOccupancy" begin
+    using MolSimToolkit, MolSimToolkit.Testing
+    using OffsetArrays
+
+    # A hydrogen bond present in every frame must have full correlation
+    b = HBond(1, 2, 3)
+    hbo = HydrogenBondOccupancy([[b], [b], [b], [b], [b]])
+    c = intermittent_correlation(hbo; maxdelta=4, show_progress=false)
+    @test c == OffsetArray([1.0, 1.0, 1.0, 1.0, 1.0], 0:4)
+
+    # A different bridging hydrogen counts as a different bond: alternating
+    # between the two behaves like the [1, 0, 1, 0, 1] scalar case
+    b1 = HBond(1, 2, 3)
+    b2 = HBond(1, 4, 3)
+    hbo2 = HydrogenBondOccupancy([[b1], [b2], [b1], [b2], [b1]])
+    c2 = intermittent_correlation(hbo2; maxdelta=4, show_progress=false)
+    @test c2 == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
+
+    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    hbo3 = hydrogen_bond_occupancy(sim, "protein"; show_progress=false)["protein => protein"]
+    c3 = intermittent_correlation(hbo3; maxdelta=4, show_progress=false)
+    @test c3[0] == 1.0
+    @test length(c3) == 5
+    @test all(x -> 0.0 <= x <= 1.0, c3)
+    @test_throws ArgumentError intermittent_correlation(hbo3; maxdelta=length(hbo3.list))
 end
 
 @testitem "intermittent_correlation - Occupancy" begin
