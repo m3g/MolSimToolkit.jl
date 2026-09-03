@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.4.0-DEV
 --------------
+- ![FEATURE][badge-feature] `mean_square_displacement` computes the mean square displacement of the centers of mass of a set of molecules, reconstructing (per molecule) the unwrapped trajectory across periodic boundary crossings by choosing, at each frame, the periodic image closest to that molecule's position in the previous frame. `self_diffusion_coefficient` estimates the self-diffusion coefficient from the linear regime of that curve, via the Einstein relation.
 - ![FEATURE][badge-feature] `intermittent_correlation_profile` computes the intermittent correlation function of a site `occupancy` resolved by the distance between the site and the solvent molecules, using overlapping distance bins of width `delta_r` displaced by `step_r`.
 - ![FEATURE][badge-feature] `residence_time` returns the time at which an intermittent correlation function falls below a threshold (by default `0.5`, thus the 50% residence time). Applied to a `CorrelationProfile`, it returns the residence time as a function of the distance to the site.
 - ![ENHANCEMEMENT][badge-enhancement] The `Occupancy` object now stores, in the `distances` field, the minimum distance between the site and each of the solvent molecules found at the site, and, in the `dmax` field, the cutoff used in the calculation.
