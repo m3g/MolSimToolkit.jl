@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 2.4.0-DEV
+Version 2.4.0
 --------------
 - ![FEATURE][badge-feature] `mean_square_displacement` computes the mean square displacement of the centers of mass of a set of molecules, reconstructing (per molecule) the unwrapped trajectory across periodic boundary crossings by choosing, at each frame, the periodic image closest to that molecule's position in the previous frame. `self_diffusion_coefficient` estimates the self-diffusion coefficient from the linear regime of that curve, via the Einstein relation.
 - ![FEATURE][badge-feature] `intermittent_correlation_profile` computes the intermittent correlation function of a site `occupancy` resolved by the distance between the site and the solvent molecules, using overlapping distance bins of width `delta_r` displaced by `step_r`.
