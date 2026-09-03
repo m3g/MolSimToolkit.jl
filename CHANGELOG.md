@@ -10,8 +10,11 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 2.3.1-DEV
+Version 2.4.0-DEV
 --------------
+- ![FEATURE][badge-feature] `intermittent_correlation_profile` computes the intermittent correlation function of a site `occupancy` resolved by the distance between the site and the solvent molecules, using overlapping distance bins of width `delta_r` displaced by `step_r`.
+- ![FEATURE][badge-feature] `residence_time` returns the time at which an intermittent correlation function falls below a threshold (by default `0.5`, thus the 50% residence time). Applied to a `CorrelationProfile`, it returns the residence time as a function of the distance to the site.
+- ![ENHANCEMEMENT][badge-enhancement] The `Occupancy` object now stores, in the `distances` field, the minimum distance between the site and each of the solvent molecules found at the site, and, in the `dmax` field, the cutoff used in the calculation.
 
 Version 2.3.0
 --------------

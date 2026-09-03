@@ -39,6 +39,8 @@ export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export reconstruct_structure!
 export intermittent_correlation
+export intermittent_correlation_profile, CorrelationProfile
+export residence_time
 export occupancy, Occupancy
 export mean
 export bulk_coordination
