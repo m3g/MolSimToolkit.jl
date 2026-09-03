@@ -10,13 +10,36 @@ Structure that wraps the result of the `occupancy` function.
   of the indices (relative to the solvent molecules, that is, `1` is the
   first solvent molecule, `2` the second, etc.) of the solvent molecules
   found within the cutoff distance of the binding site.
+- `distances::Vector{Vector{T}}`: for each frame of the simulation, the
+  minimum distance between the site and each of the solvent molecules
+  listed in `list`. `distances[iframe][i]` is the distance associated to
+  the solvent molecule `list[iframe][i]`.
 - `n_solvent_molecules::Int`: the total number of solvent molecules considered.
+- `dmax::T`: the cutoff distance used in the calculation, that is, the
+  maximum distance for which a solvent molecule is considered to be at
+  the site. All values in `distances` are smaller than `dmax`.
+
+!!! compat
+    The `distances` and `dmax` fields were added in version 2.4.0 of MolSimToolkit.
 
 """
-struct Occupancy
+struct Occupancy{T<:Real}
     list::Vector{Vector{Int}}
+    distances::Vector{Vector{T}}
     n_solvent_molecules::Int
+    dmax::T
 end
+
+#=
+    Occupancy(list, n_solvent_molecules)
+
+Convenience constructor for occupancy data for which the site-solvent
+distances are not available. The `distances` are filled with `NaN` and
+`dmax` is set to `NaN`, such that the functions that require the distances
+(as `intermittent_correlation_profile`) throw an informative error.
+=#
+Occupancy(list::AbstractVector{<:AbstractVector{<:Integer}}, n_solvent_molecules::Integer) =
+    Occupancy(list, [fill(NaN, length(l)) for l in list], n_solvent_molecules, NaN)
 
 function Base.show(io::IO, ::MIME"text/plain", occ::Occupancy)
     print(io, chomp(
@@ -25,6 +48,7 @@ function Base.show(io::IO, ::MIME"text/plain", occ::Occupancy)
         Occupancy data:
         -------------------------------------------------------------------
         Total number of solvent molecules: $(occ.n_solvent_molecules)
+        Maximum distance to the site (dmax): $(occ.dmax)
         Mean occupancy: $(mean(occ))
         Minimum occupancy: $(minimum(length(l) for l in occ.list))
         Maximum occupancy: $(maximum(length(l) for l in occ.list))
@@ -92,11 +116,13 @@ within `cutoff` of the binding `site`.
 # Returns
 
 - `Occupancy`: an object wrapping, for each frame, the list of solvent
-  molecules found within `cutoff` of the site.
+  molecules found within `cutoff` of the site, and the corresponding
+  site-solvent minimum distances. The `cutoff` is stored in the `dmax`
+  field of the returned object.
 
 # Example
 
-```jldoctest
+```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
 julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; frames=1:5);
@@ -114,6 +140,15 @@ julia> length.(occ.list)
  4
  5
  6
+
+julia> occ.dmax
+3.0
+
+julia> occ.distances[2] # distances of the molecules of occ.list[2]
+3-element Vector{Float64}:
+ 1.9506459897129325
+ 2.8333266769863195
+ 2.899149006265755
 
 ```
 
@@ -148,6 +183,7 @@ function occupancy(
     )
 
     list = Vector{Vector{Int}}(undef, length(sim))
+    dists = Vector{Vector{Float64}}(undef, length(sim))
     prg = Progress(length(sim); enabled=show_progress)
     for (iframe, frame) in enumerate(sim)
         p = positions(frame)
@@ -156,15 +192,18 @@ function occupancy(
         sys.system.ypositions .= @view(p[inds_site])
         sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
         md_list = minimum_distances!(sys)
-        list[iframe] = findall(md -> md.within_cutoff, md_list)
+        imols = findall(md -> md.within_cutoff, md_list)
+        list[iframe] = imols
+        dists[iframe] = [Float64(md_list[imol].d) for imol in imols]
         next!(prg)
     end
-    return Occupancy(list, n_solvent_molecules)
+    return Occupancy(list, dists, n_solvent_molecules, Float64(cutoff))
 end
 
 @testitem "occupancy" begin
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
     using ShowMethodTesting
+    using LinearAlgebra: diag
 
     sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
     protein = select(get_atoms(sim), "protein")
@@ -181,11 +220,32 @@ end
     @test all(imol -> 1 <= imol <= occ.n_solvent_molecules, reduce(vcat, occ.list))
     @test mean(occ) ≈ 5.3
 
+    # distances are stored alongside the molecule indices, and are all within dmax
+    @test occ.dmax == 3.0
+    @test length.(occ.distances) == length.(occ.list)
+    @test all(d -> 0 < d < occ.dmax, reduce(vcat, occ.distances))
+    # the stored distance must be the minimum distance between the site and the molecule
+    d, imol = findmin(occ.distances[1])
+    imol = occ.list[1][imol]
+    md = minimum_distances(
+        xpositions=positions(first_frame!(sim))[index.(tmao)],
+        ypositions=positions(current_frame(sim))[index.(protein)],
+        xn_atoms_per_molecule=14,
+        cutoff=3.0,
+        unitcell=diag(unitcell(current_frame(sim)).matrix),
+    )
+    @test md[imol].d ≈ d
+    # occupancy data without distance information
+    occ_nod = Occupancy(occ.list, occ.n_solvent_molecules)
+    @test isnan(occ_nod.dmax)
+    @test all(isnan, reduce(vcat, occ_nod.distances))
+
     @test parse_show(occ) ≈ """ 
     -------------------------------------------------------------------
     Occupancy data:
     -------------------------------------------------------------------
     Total number of solvent molecules: 181
+    Maximum distance to the site (dmax): 3.0
     Mean occupancy: 5.3
     Minimum occupancy: 2
     Maximum occupancy: 10

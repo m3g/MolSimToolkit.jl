@@ -34,6 +34,7 @@ makedocs(
         "Time-dependent properties" => Any[
             "Site occupancy" => "time_dependent/occupancy.md",
             "Intermittent correlation" => "time_dependent/intermittent_correlation.md",
+            "Self-diffusion coefficient" => "time_dependent/self_diffusion.md",
         ],
         "System setup" => "system_setup.md",
         "Plotting style" => "plotting_style.md",

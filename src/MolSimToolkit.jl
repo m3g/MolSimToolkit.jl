@@ -39,7 +39,10 @@ export dihedral, dihedrals, average_dihedrals
 export align, align!, rmsd, rmsd_matrix
 export reconstruct_structure!
 export intermittent_correlation
+export intermittent_correlation_profile, CorrelationProfile
+export residence_time
 export occupancy, Occupancy
+export mean_square_displacement, self_diffusion_coefficient
 export mean
 export bulk_coordination
 export coordination_number
@@ -80,6 +83,7 @@ include("./hydrogen_bonds/hydrogen_bonds.jl")
 # Time-dependent properties
 include("./time_dependent/occupancy.jl")
 include("./time_dependent/intermittent_correlation.jl")
+include("./time_dependent/self_diffusion.jl")
 
 # Solvation and interactions
 include("./miscellaneous_functions/bulk_coordination.jl")
