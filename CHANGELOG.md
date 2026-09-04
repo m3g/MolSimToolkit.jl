@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.4.1-DEV
 --------------
+- ![INFO][badge-info] Document the units of the output of `self_diffusion_coefficient`. 
 
 Version 2.4.0
 --------------
