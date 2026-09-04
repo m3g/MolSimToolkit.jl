@@ -187,6 +187,13 @@ The coefficient is obtained as the slope of an ordinary least-squares fit of
 `msd[delta]` against `t = delta * dt`, for `delta` in `mindelta:maxdelta`,
 divided by `2 * dim`.
 
+!!! note "Units"
+    No unit conversion is performed: `2 * dim` is a dimensionless factor, so
+    `D` comes out in `[msd units] / [dt units]`. In particular, if `msd` is
+    in Å² (as returned by `mean_square_displacement`, for coordinates in Å)
+    and `dt` is given in ps, the returned coefficient is in Å²/ps. Convert
+    it to other units (e.g. cm²/s) yourself if needed.
+
 !!! note
     Only a limited range of `delta` typically falls in the diffusive
     (linear) regime: very short times are dominated by ballistic motion, and
@@ -203,9 +210,10 @@ divided by `2 * dim`.
 # Optional keyword arguments
 
 - `dt::Real`: The time interval between consecutive frames of the trajectory
-  used to compute `msd`, used to convert `delta` (in frames) into time
-  units. Defaults to `1`, that is, `delta` is used directly, and the
-  resulting units of `D` are squared-length per frame.
+  used to compute `msd`, in whatever time unit is desired for the output
+  (e.g. ps). Used to convert `delta` (in frames) into that time unit.
+  Defaults to `1`, that is, `delta` is used directly, and the resulting
+  units of `D` are squared-length per frame.
 - `dim::Integer`: The dimensionality of the diffusion process. Defaults to
   `3` (three-dimensional diffusion).
 - `mindelta::Integer`: The smallest `delta` (in frames) included in the fit.
