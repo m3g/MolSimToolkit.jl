@@ -20,6 +20,26 @@ function _unwrap(raw::AbstractVector{T}, ucs::AbstractVector) where {T}
     return unwrapped
 end
 
+@testitem "_warn_on_large_displacements" begin
+    using MolSimToolkit: _warn_on_large_displacements
+    using StaticArrays: SMatrix
+    uc = UnitCell(SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0), true, true)
+    ucs = [uc, uc, uc]
+
+    # Small displacements: nothing to report.
+    coms = [Point3D(0.0, 0.0, 0.0) Point3D(1.0, 0.0, 0.0) Point3D(2.0, 0.0, 0.0)]
+    @test _warn_on_large_displacements(coms, ucs) == 0
+
+    # A displacement of 4.9 out of a cell vector of 10.0 is essentially at the
+    # limit above which the minimum image is not necessarily the correct one.
+    coms = [Point3D(0.0, 0.0, 0.0) Point3D(4.9, 0.0, 0.0) Point3D(9.8, 0.0, 0.0)]
+    @test (@test_logs (:warn,) _warn_on_large_displacements(coms, ucs)) == 2
+
+    # Without unit cell information there is nothing to check.
+    invalid = UnitCell(SMatrix{3,3,Float64,9}(ntuple(_ -> 0.0, 9)...), false, false)
+    @test _warn_on_large_displacements(coms, [invalid, invalid, invalid]) == 0
+end
+
 @testitem "_unwrap" begin
     using MolSimToolkit: _unwrap
     using StaticArrays: SMatrix
@@ -41,6 +61,58 @@ end
     raw3 = [Point3D(1.0, 0.0, 0.0), Point3D(9.0, 0.0, 0.0), Point3D(7.0, 0.0, 0.0)]
     unwrapped3 = _unwrap(raw3, ucs)
     @test unwrapped3 ≈ [Point3D(1.0, 0.0, 0.0), Point3D(-1.0, 0.0, 0.0), Point3D(-3.0, 0.0, 0.0)]
+end
+
+#=
+    _warn_on_large_displacements(coms::AbstractMatrix, ucs::AbstractVector)
+
+Checks whether any of the unwrapped trajectories in `coms` (one row per
+molecule, one column per frame) displaces, between two consecutive frames, by
+more than `_max_relative_displacement` times a unit cell vector.
+
+The minimum-image reconstruction performed by `_unwrap` always returns
+displacements whose components, in units of the cell vectors, are not greater
+than `0.5` in absolute value; it is only *correct* if the true displacement is
+well below that limit, since a molecule moving almost half a cell vector could
+equally well be moving in the opposite direction. A single warning is emitted
+reporting the worst case found.
+=#
+const _max_relative_displacement = 0.45
+
+function _warn_on_large_displacements(coms::AbstractMatrix, ucs::AbstractVector)
+    n_molecules, n_frames = size(coms)
+    worst = 0.0
+    worst_imol = 0
+    worst_iframe = 0
+    count = 0
+    for iframe in 2:n_frames
+        uc = ucs[iframe]
+        !uc.valid && continue
+        invmatrix = inv(uc.matrix)
+        for imol in 1:n_molecules
+            d = maximum(abs, invmatrix * (coms[imol, iframe] - coms[imol, iframe-1]))
+            d <= _max_relative_displacement && continue
+            count += 1
+            if d > worst
+                worst, worst_imol, worst_iframe = d, imol, iframe
+            end
+        end
+    end
+    if count > 0
+        @warn """\n
+            Displacements of about half a unit cell vector were found between consecutive frames.
+
+            The unwrapping of the coordinates is ambiguous in this case, and the mean square
+            displacement is likely wrong. This usually means that the frames are too far apart
+            in time for the molecules considered, or that the coordinates of each molecule are
+            not contiguous in the trajectory file.
+
+            Number of occurrences: $count (out of $(n_molecules * (n_frames - 1)) displacements)
+            Worst case: molecule $worst_imol, frame $worst_iframe, displacement of $(round(worst; digits=3)) cell vectors
+
+        """ _module = nothing _file = nothing
+    end
+    return count
 end
 
 """
@@ -68,7 +140,10 @@ is reconstructed into a continuous ("unwrapped") trajectory: at each frame,
 the periodic image closest to that same molecule's (already unwrapped)
 position at the previous frame is chosen. Since consecutive frames are
 assumed to be much closer in time than the time it takes a molecule to
-diffuse across half a box length, this reconstruction is unambiguous.
+diffuse across half a box length, this reconstruction is unambiguous. If that
+assumption is violated, that is, if some molecule is reconstructed as moving
+by about half a unit cell vector between two consecutive frames, a warning is
+emitted (once per call), since the resulting MSD is then likely meaningless.
 
 Returns an `OffsetArray` with indices `0:maxdelta`, in squared length units
 (typically Å², matching the units of the input coordinates). The value at
@@ -107,7 +182,7 @@ julia> msd[0]
 0.0
 
 julia> msd[4]
-1074.6758528050218
+878.4761526314077
 
 ```
 
@@ -155,6 +230,12 @@ function mean_square_displacement(
     for imol in 1:n_molecules
         coms[imol, :] .= _unwrap(@view(raw_coms[imol, :]), ucs)
     end
+
+    # The unwrapping above assumes that a molecule moves much less than half a
+    # unit cell vector between two consecutive frames; otherwise the closest
+    # periodic image is not necessarily the physically correct one. Check that
+    # assumption and warn once if it is violated.
+    _warn_on_large_displacements(coms, ucs)
 
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     for delta in 0:maxdelta
@@ -291,6 +372,21 @@ end
 
     @test_throws "not a multiple" mean_square_displacement(sim2, tmao; natomspermol=13, show_progress=false)
     @test_throws ArgumentError mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=length(sim2), show_progress=false)
+
+    # The center of mass of each molecule must be computed relative to an atom of
+    # that same molecule; otherwise molecules straddling the boundary of the box
+    # centered at the reference are split into different periodic images, and the
+    # resulting MSD is much larger than the true one. Computing the MSD of a single
+    # atom of each molecule bypasses that step entirely, so both must agree.
+    single = select(get_atoms(sim2), "resname TMAO and name N")
+    msd_single = mean_square_displacement(sim2, single; natomspermol=1, maxdelta=4, show_progress=false)
+    for delta in 1:4
+        @test msd2[delta] ≈ msd_single[delta] rtol = 0.2
+    end
+
+    # Frames too far apart for the unwrapping to be unambiguous must be reported
+    water = select(get_atoms(sim2), "water")
+    @test_logs (:warn,) match_mode = :any mean_square_displacement(sim2, water; natomspermol=3, maxdelta=2, show_progress=false)
 end
 
 @testitem "self_diffusion_coefficient" begin

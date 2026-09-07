@@ -42,7 +42,7 @@ function center_of_mass(
     indices::AbstractVector{<:Integer},
     simulation::Simulation,
     p::AbstractVector{<:Point3D};
-    iref::Union{Nothing,<:Integer}=max(1, div(length(indices), 2)),
+    iref::Union{Nothing,<:Integer}=indices[max(firstindex(indices), firstindex(indices) + length(indices) ÷ 2 - 1)],
 )
     xref = isnothing(iref) ? nothing : p[iref] 
     uc = unitcell(current_frame(simulation))
