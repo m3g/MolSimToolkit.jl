@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.4.2-DEV
 --------------
+- ![INFO][badge-info] Improve progress indicator for `mean_square_displacement`. 
 
 Version 2.4.1
 --------------

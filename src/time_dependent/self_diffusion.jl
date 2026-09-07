@@ -216,7 +216,7 @@ function mean_square_displacement(
     raw_coms = Matrix{com_type}(undef, n_molecules, n_frames)
     ucs = Vector{UnitCell}(undef, n_frames)
 
-    prg = Progress(n_frames; enabled=show_progress)
+    prg = Progress(n_frames; enabled=show_progress, desc="Computing displacements:")
     for (iframe, frame) in enumerate(sim)
         p = positions(frame)
         ucs[iframe] = unitcell(frame)
@@ -238,6 +238,11 @@ function mean_square_displacement(
     _warn_on_large_displacements(coms, ucs)
 
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
+    # The work per `delta` is proportional to `(n_frames - delta) * n_molecules`, so
+    # count the progress in units of inner iterations for a bar that advances evenly.
+    # The counter is only bumped once per `delta`, to keep `next!` out of the hot loop.
+    ninner = n_molecules * ((maxdelta + 1) * n_frames - (maxdelta * (maxdelta + 1)) ÷ 2)
+    prg = Progress(ninner; enabled=show_progress, desc="Averaging per frame:")
     for delta in 0:maxdelta
         s = 0.0
         n = 0
@@ -247,6 +252,7 @@ function mean_square_displacement(
             n += 1
         end
         msd[delta] = s / n
+        next!(prg; step=n)
     end
     return msd
 end
