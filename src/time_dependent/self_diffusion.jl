@@ -124,6 +124,7 @@ end
         selection::AbstractVector{<:PDBTools.Atom};
         natomspermol::Integer,
         maxdelta::Integer = length(sim) ÷ 10,
+        unwrap::Bool = true,
         parallel::Bool = true,
         show_progress::Bool = true,
     )
@@ -149,6 +150,11 @@ assumption is violated, that is, if some molecule is reconstructed as moving
 by about half a unit cell vector between two consecutive frames, a warning is
 emitted (once per call), since the resulting MSD is then likely meaningless.
 
+Some trajectories are already stored with continuous (unwrapped) coordinates.
+For those, set `unwrap=false`: the centers of mass are then used exactly as
+they are read, and neither the reconstruction nor the associated warning is
+performed.
+
 Returns an `OffsetArray` with indices `0:maxdelta`, in squared length units
 (typically Å², matching the units of the input coordinates). The value at
 `delta` is the average, over all molecules and all pairs of frames separated
@@ -169,8 +175,13 @@ coefficient from the linear (diffusive) regime of the resulting curve.
 - `natomspermol::Integer`: Number of atoms of each molecule. Required.
 - `maxdelta::Integer`: The maximum delta-step to be considered. Defaults to
   `length(sim) ÷ 10`.
-- `parallel::Bool`: Defines if the averaging over time lags is run in
-  parallel. Defaults to `true`. Requires starting Julia with multi-threading.
+- `unwrap::Bool`: Defines if the centers of mass are unwrapped before the
+  displacements are computed. Defaults to `true`. Set it to `false` for
+  trajectories whose coordinates are already continuous, so that they are used
+  exactly as they are stored.
+- `parallel::Bool`: Defines if the unwrapping and the averaging over time lags
+  are run in parallel. Defaults to `true`. Requires starting Julia with
+  multi-threading.
 - `show_progress::Bool`: Show progress bar. Defaults to `true`.
 
 # Example
@@ -201,6 +212,7 @@ function mean_square_displacement(
     selection::AbstractVector{<:PDBTools.Atom};
     natomspermol::Integer,
     maxdelta::Integer=max(1, length(sim) ÷ 10),
+    unwrap::Bool=true,
     parallel::Bool=true,
     show_progress::Bool=true,
 )
@@ -233,16 +245,30 @@ function mean_square_displacement(
         next!(prg)
     end
 
-    coms = similar(raw_coms)
-    for imol in 1:n_molecules
-        coms[imol, :] .= _unwrap(@view(raw_coms[imol, :]), ucs)
+    if unwrap
+        # Each molecule is unwrapped independently (the reconstruction is sequential
+        # in the frames, but not across molecules), and every molecule costs the same,
+        # so a plain consecutive split among the threads balances the work.
+        coms = similar(raw_coms)
+        prg = Progress(n_molecules; enabled=show_progress, desc="Unwrapping coordinates:")
+        next!(prg; step=0, force=true)
+        nchunks = parallel ? Threads.nthreads() : 1
+        @threads for imols in chunks(1:n_molecules; n=nchunks)
+            for imol in imols
+                coms[imol, :] .= _unwrap(@view(raw_coms[imol, :]), ucs)
+                next!(prg)
+            end
+        end
+        # The unwrapping above assumes that a molecule moves much less than half a
+        # unit cell vector between two consecutive frames; otherwise the closest
+        # periodic image is not necessarily the physically correct one. Check that
+        # assumption and warn once if it is violated.
+        _warn_on_large_displacements(coms, ucs)
+    else
+        # The trajectory is taken as already unwrapped: the centers of mass are used
+        # as they are, and no check on the size of the displacements applies.
+        coms = raw_coms
     end
-
-    # The unwrapping above assumes that a molecule moves much less than half a
-    # unit cell vector between two consecutive frames; otherwise the closest
-    # periodic image is not necessarily the physically correct one. Check that
-    # assumption and warn once if it is violated.
-    _warn_on_large_displacements(coms, ucs)
 
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     # The work per `delta` is proportional to `(n_frames - delta) * n_molecules`, so
@@ -402,6 +428,25 @@ end
     @test msd2[0] == 0.0
     @test length(msd2) == 5
     @test all(>=(0), msd2)
+
+    # The parallel and serial paths must agree exactly: each time lag is summed
+    # entirely by one thread, so no floating point reduction is reordered.
+    msd2_serial = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, parallel=false, show_progress=false)
+    @test msd2_serial == msd2
+
+    # `unwrap=false` must use the centers of mass exactly as read, and skip the
+    # check on the size of the displacements along with the reconstruction.
+    msd2_nounwrap = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, show_progress=false)
+    @test msd2_nounwrap[0] == 0.0
+    @test all(>=(0), msd2_nounwrap)
+    @test msd2_nounwrap == mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, parallel=false, show_progress=false)
+    inds2 = [PDBTools.index.(tmao)[(i-1)*14+1:i*14] for i in 1:(length(tmao) ÷ 14)]
+    raw = [center_of_mass(m, sim2, positions(frame)) for m in inds2, frame in sim2]
+    for delta in 1:4
+        expected = sum(sum(abs2, raw[i, t+delta] - raw[i, t]) for t in 1:(size(raw, 2)-delta), i in axes(raw, 1)) /
+                   ((size(raw, 2) - delta) * size(raw, 1))
+        @test msd2_nounwrap[delta] ≈ expected
+    end
 
     @test_throws "not a multiple" mean_square_displacement(sim2, tmao; natomspermol=13, show_progress=false)
     @test_throws ArgumentError mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=length(sim2), show_progress=false)
