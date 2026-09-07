@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.4.2-DEV
+--------------
+
 Version 2.4.1
 --------------
 - ![BUGFIX][badge-bugfix] The default reference atom of `center_of_mass` was taken as a *position within* the `indices` vector instead of an atom index, thus using an arbitrary atom of the system as the reference for the minimum-image wrapping. Molecules straddling the boundary of the box centered at that atom were split into different periodic images, resulting in wrong centers of mass. This affected, in particular, `mean_square_displacement` and the resulting `self_diffusion_coefficient`, which could be overestimated by an order of magnitude.
