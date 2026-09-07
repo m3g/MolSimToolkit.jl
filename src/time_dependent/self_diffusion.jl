@@ -245,48 +245,51 @@ function mean_square_displacement(
         next!(prg)
     end
 
-    if unwrap
+    # `coms` is assigned only once, by the value of the `if` block, and not in each
+    # branch separately: it is captured by the closure of the `@threads` loop below,
+    # and a captured variable that is assigned more than once becomes a `Core.Box`,
+    # which would make every access to it in that loop dynamically dispatched.
+    coms = if unwrap
         # Each molecule is unwrapped independently (the reconstruction is sequential
         # in the frames, but not across molecules), and every molecule costs the same,
         # so a plain consecutive split among the threads balances the work.
-        coms = similar(raw_coms)
-        prg = Progress(n_molecules; enabled=show_progress, desc="Unwrapping coordinates:")
-        next!(prg; step=0, force=true)
-        nchunks = parallel ? Threads.nthreads() : 1
-        @threads for imols in chunks(1:n_molecules; n=nchunks)
+        unwrapped = similar(raw_coms)
+        prg_unwrap = Progress(n_molecules; enabled=show_progress, desc="Unwrapping coordinates:")
+        next!(prg_unwrap; step=0, force=true)
+        @threads for imols in chunks(1:n_molecules; n=parallel ? Threads.nthreads() : 1)
             for imol in imols
-                coms[imol, :] .= _unwrap(@view(raw_coms[imol, :]), ucs)
-                next!(prg)
+                unwrapped[imol, :] .= _unwrap(@view(raw_coms[imol, :]), ucs)
+                next!(prg_unwrap)
             end
         end
         # The unwrapping above assumes that a molecule moves much less than half a
         # unit cell vector between two consecutive frames; otherwise the closest
         # periodic image is not necessarily the physically correct one. Check that
         # assumption and warn once if it is violated.
-        _warn_on_large_displacements(coms, ucs)
+        _warn_on_large_displacements(unwrapped, ucs)
+        unwrapped
     else
         # The trajectory is taken as already unwrapped: the centers of mass are used
         # as they are, and no check on the size of the displacements applies.
-        coms = raw_coms
+        raw_coms
     end
 
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     # The work per `delta` is proportional to `(n_frames - delta) * n_molecules`, so
     # count the progress in units of inner iterations for a bar that advances evenly.
     ninner = n_molecules * ((maxdelta + 1) * n_frames - (maxdelta * (maxdelta + 1)) ÷ 2)
-    prg = Progress(ninner; enabled=show_progress, desc="Averaging per delta:")
+    prg_msd = Progress(ninner; enabled=show_progress, desc="Averaging per delta:")
     # A single `delta` can take a long time, so the counter is advanced from within
     # the loop over `t` rather than once per `delta`; otherwise the bar sits blank
     # and then jumps. Flushing in blocks of about 1/500 of the total keeps the
     # display smooth while leaving `next!` (which takes a lock) out of the hot loop.
     flush_every = max(n_molecules, ninner ÷ 500)
-    next!(prg; step=0, force=true) # paint the bar at 0% before any work is done
+    next!(prg_msd; step=0, force=true) # paint the bar at 0% before any work is done
     # Each `delta` is independent and writes to a single, distinct entry of `msd`,
     # so the loop can be split among threads without any reduction. The cost per
     # `delta` decreases with `delta`, hence the round-robin split, which gives every
     # chunk a similar mix of cheap and expensive time lags.
-    nchunks = parallel ? Threads.nthreads() : 1
-    @threads for deltas in chunks(0:maxdelta; n=nchunks, split=RoundRobin())
+    @threads for deltas in chunks(0:maxdelta; n=parallel ? Threads.nthreads() : 1, split=RoundRobin())
         for delta in deltas
             s = 0.0
             n = 0
@@ -299,12 +302,12 @@ function mean_square_displacement(
                 n += n_molecules
                 nsince += n_molecules
                 if nsince >= flush_every
-                    next!(prg; step=nsince)
+                    next!(prg_msd; step=nsince)
                     nsince = 0
                 end
             end
             msd[delta] = s / n
-            nsince > 0 && next!(prg; step=nsince)
+            nsince > 0 && next!(prg_msd; step=nsince)
         end
     end
     return msd
