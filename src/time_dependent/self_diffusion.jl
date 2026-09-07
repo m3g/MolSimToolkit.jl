@@ -1,3 +1,6 @@
+using Base.Threads: @threads
+using ChunkSplitters: chunks, RoundRobin
+
 #=
     _unwrap(raw::AbstractVector, ucs::AbstractVector) -> Vector
 
@@ -121,6 +124,7 @@ end
         selection::AbstractVector{<:PDBTools.Atom};
         natomspermol::Integer,
         maxdelta::Integer = length(sim) ÷ 10,
+        parallel::Bool = true,
         show_progress::Bool = true,
     )
 
@@ -165,6 +169,8 @@ coefficient from the linear (diffusive) regime of the resulting curve.
 - `natomspermol::Integer`: Number of atoms of each molecule. Required.
 - `maxdelta::Integer`: The maximum delta-step to be considered. Defaults to
   `length(sim) ÷ 10`.
+- `parallel::Bool`: Defines if the averaging over time lags is run in
+  parallel. Defaults to `true`. Requires starting Julia with multi-threading.
 - `show_progress::Bool`: Show progress bar. Defaults to `true`.
 
 # Example
@@ -195,6 +201,7 @@ function mean_square_displacement(
     selection::AbstractVector{<:PDBTools.Atom};
     natomspermol::Integer,
     maxdelta::Integer=max(1, length(sim) ÷ 10),
+    parallel::Bool=true,
     show_progress::Bool=true,
 )
     if length(selection) % natomspermol != 0
@@ -240,19 +247,39 @@ function mean_square_displacement(
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     # The work per `delta` is proportional to `(n_frames - delta) * n_molecules`, so
     # count the progress in units of inner iterations for a bar that advances evenly.
-    # The counter is only bumped once per `delta`, to keep `next!` out of the hot loop.
     ninner = n_molecules * ((maxdelta + 1) * n_frames - (maxdelta * (maxdelta + 1)) ÷ 2)
-    prg = Progress(ninner; enabled=show_progress, desc="Averaging per frame:")
-    for delta in 0:maxdelta
-        s = 0.0
-        n = 0
-        for t in 1:(n_frames-delta), imol in 1:n_molecules
-            d = coms[imol, t+delta] - coms[imol, t]
-            s += sum(abs2, d)
-            n += 1
+    prg = Progress(ninner; enabled=show_progress, desc="Averaging per delta:")
+    # A single `delta` can take a long time, so the counter is advanced from within
+    # the loop over `t` rather than once per `delta`; otherwise the bar sits blank
+    # and then jumps. Flushing in blocks of about 1/500 of the total keeps the
+    # display smooth while leaving `next!` (which takes a lock) out of the hot loop.
+    flush_every = max(n_molecules, ninner ÷ 500)
+    next!(prg; step=0, force=true) # paint the bar at 0% before any work is done
+    # Each `delta` is independent and writes to a single, distinct entry of `msd`,
+    # so the loop can be split among threads without any reduction. The cost per
+    # `delta` decreases with `delta`, hence the round-robin split, which gives every
+    # chunk a similar mix of cheap and expensive time lags.
+    nchunks = parallel ? Threads.nthreads() : 1
+    @threads for deltas in chunks(0:maxdelta; n=nchunks, split=RoundRobin())
+        for delta in deltas
+            s = 0.0
+            n = 0
+            nsince = 0
+            for t in 1:(n_frames-delta)
+                for imol in 1:n_molecules
+                    d = coms[imol, t+delta] - coms[imol, t]
+                    s += sum(abs2, d)
+                end
+                n += n_molecules
+                nsince += n_molecules
+                if nsince >= flush_every
+                    next!(prg; step=nsince)
+                    nsince = 0
+                end
+            end
+            msd[delta] = s / n
+            nsince > 0 && next!(prg; step=nsince)
         end
-        msd[delta] = s / n
-        next!(prg; step=n)
     end
     return msd
 end
