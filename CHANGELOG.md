@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.5.1-DEV
+--------------
+
 Version 2.5.0
 --------------
 - ![FEATURE][badge-feature] `unwrap` is a now a keyword parameter for `mean_square_displacement`, `true` by default, but that can be skipped if the coordinates are already unwrapped. 
