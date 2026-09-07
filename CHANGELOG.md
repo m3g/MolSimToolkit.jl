@@ -12,6 +12,9 @@ MolSimToolkit.jl Changelog
 
 Version 2.4.2-DEV
 --------------
+- ![FEATURE][badge-feature] `unwrap` is a now a keyword parameter for `mean_square_displacement`, `true` by default, but that can be skipped if the coordinates are already unwrapped. 
+- ![ENHANCEMEMENT][badge-enhancement] Parallelize more steps of `mean_square_displacement`.
+- ![INFO][badge-info] Improve progress indicator for `mean_square_displacement`. 
 
 Version 2.4.1
 --------------
