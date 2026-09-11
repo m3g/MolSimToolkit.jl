@@ -47,7 +47,7 @@ Version 2.2.1
 
 Version 2.2.0
 --------------
-- ![FEATURE][badge-feature] Provide `occupancy`, `mean(::Occupancy)` and `intermitent_correlation(::Occupancy)` functions.
+- ![FEATURE][badge-feature] Provide `occupancy`, `mean(::Occupancy)` and `intermittent_correlation(::Occupancy)` functions.
 
 Version 2.1.0
 --------------
