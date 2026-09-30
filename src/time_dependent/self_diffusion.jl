@@ -24,7 +24,7 @@ function _unwrap(raw::AbstractVector{T}, ucs::AbstractVector) where {T}
 end
 
 @testitem "_warn_on_large_displacements" begin
-    using MolSimToolkit: _warn_on_large_displacements
+    using MolSimToolkit: _warn_on_large_displacements, UnitCell, Point3D
     using StaticArrays: SMatrix
     uc = UnitCell(SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0), true, true)
     ucs = [uc, uc, uc]
@@ -44,7 +44,7 @@ end
 end
 
 @testitem "_unwrap" begin
-    using MolSimToolkit: _unwrap
+    using MolSimToolkit: _unwrap, UnitCell, Point3D
     using StaticArrays: SMatrix
     mat = SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0)
     uc = UnitCell(mat, true, true)
@@ -125,6 +125,7 @@ end
         natomspermol::Integer,
         maxdelta::Integer = length(sim) ÷ 10,
         unwrap::Bool = true,
+        subtract_system_com::Bool = true,
         parallel::Bool = true,
         show_progress::Bool = true,
     )
@@ -155,6 +156,19 @@ For those, set `unwrap=false`: the centers of mass are then used exactly as
 they are read, and neither the reconstruction nor the associated warning is
 performed.
 
+By default, the motion of the center of mass of the complete system (all atoms
+of the simulation, not only those of `selection`) is subtracted from the
+centers of mass of the molecules at each frame, so that a drift of the whole
+system (for instance, due to the accumulation of numerical errors in the
+integration of the equations of motion) does not contribute to the MSD. With
+`unwrap=true`, the displacement of the system's center of mass between two
+consecutive frames is computed as the mass-weighted average of the
+minimum-image displacements of all atoms, since the center of mass of the
+wrapped coordinates is itself discontinuous. With `unwrap=false`, it is
+computed directly from the coordinates as they are stored. Set
+`subtract_system_com=false` to use the centers of mass of the molecules
+without this correction.
+
 Returns an `OffsetArray` with indices `0:maxdelta`, in squared length units
 (typically Å², matching the units of the input coordinates). The value at
 `delta` is the average, over all molecules and all pairs of frames separated
@@ -179,6 +193,9 @@ coefficient from the linear (diffusive) regime of the resulting curve.
   displacements are computed. Defaults to `true`. Set it to `false` for
   trajectories whose coordinates are already continuous, so that they are used
   exactly as they are stored.
+- `subtract_system_com::Bool`: Defines if the motion of the center of mass of
+  the complete system is subtracted from the centers of mass of the molecules
+  at each frame. Defaults to `true`.
 - `parallel::Bool`: Defines if the unwrapping and the averaging over time lags
   are run in parallel. Defaults to `true`. Requires starting Julia with
   multi-threading.
@@ -199,12 +216,13 @@ julia> msd[0]
 0.0
 
 julia> msd[4]
-878.4761526314077
+878.552065472022
 
 ```
 
 !!! compat
     This function was added in version 2.4.0 of MolSimToolkit.
+    The `subtract_system_com` option was added in version 2.5.1.
 
 """
 function mean_square_displacement(
@@ -213,6 +231,7 @@ function mean_square_displacement(
     natomspermol::Integer,
     maxdelta::Integer=max(1, length(sim) ÷ 10),
     unwrap::Bool=true,
+    subtract_system_com::Bool=true,
     parallel::Bool=true,
     show_progress::Bool=true,
 )
@@ -235,12 +254,34 @@ function mean_square_displacement(
     raw_coms = Matrix{com_type}(undef, n_molecules, n_frames)
     ucs = Vector{UnitCell}(undef, n_frames)
 
+    # Center of mass of the complete system at each frame, to be subtracted from the
+    # centers of mass of the molecules. With wrapped coordinates, the center of mass
+    # of the positions as stored jumps whenever an atom crosses a periodic boundary,
+    # so it is accumulated instead from the minimum-image displacements of all atoms
+    # between consecutive frames. The frame is overwritten by the iteration, hence
+    # the copy of the previous positions.
+    system_coms = Vector{com_type}(undef, subtract_system_com ? n_frames : 0)
+    masses = subtract_system_com ? PDBTools.atomic_mass.(sim.atoms) : Float64[]
+    total_mass = sum(masses; init=0.0)
+    prev_p = copy(positions(f))
+
     prg = Progress(n_frames; enabled=show_progress, desc="Computing displacements:")
     for (iframe, frame) in enumerate(sim)
         p = positions(frame)
         ucs[iframe] = unitcell(frame)
         for imol in 1:n_molecules
             raw_coms[imol, iframe] = center_of_mass(mol_indices[imol], sim, p)
+        end
+        if subtract_system_com
+            if !unwrap
+                system_coms[iframe] = sum(masses[i] * p[i] for i in eachindex(p, masses)) / total_mass
+            elseif iframe == 1
+                system_coms[iframe] = zero(com_type)
+            else
+                system_coms[iframe] = system_coms[iframe-1] +
+                    sum(masses[i] * (wrap(p[i], prev_p[i], ucs[iframe]) - prev_p[i]) for i in eachindex(p, masses)) / total_mass
+                copyto!(prev_p, p)
+            end
         end
         next!(prg)
     end
@@ -273,6 +314,8 @@ function mean_square_displacement(
         # as they are, and no check on the size of the displacements applies.
         raw_coms
     end
+    # In place, so that `coms` is still assigned only once (see above).
+    subtract_system_com && (coms .-= permutedims(system_coms))
 
     msd = OffsetArrays.OffsetArray(zeros(maxdelta + 1), 0:maxdelta)
     # The work per `delta` is proportional to `(n_frames - delta) * n_molecules`, so
@@ -411,8 +454,9 @@ end
     # A single "molecule" (the whole protein): delta=0 must be exactly zero,
     # and the result must match a naive, non-unwrapped computation, since a
     # protein's center of mass does not cross the periodic boundary within
-    # this short test trajectory.
-    msd = mean_square_displacement(sim, protein; natomspermol=length(protein), maxdelta=3, show_progress=false)
+    # this short test trajectory. The motion of the system's center of mass is not
+    # subtracted here, to compare with the plain centers of mass.
+    msd = mean_square_displacement(sim, protein; natomspermol=length(protein), maxdelta=3, subtract_system_com=false, show_progress=false)
     @test msd isa OffsetVector
     @test msd[0] == 0.0
     @test all(>=(0), msd)
@@ -439,16 +483,48 @@ end
 
     # `unwrap=false` must use the centers of mass exactly as read, and skip the
     # check on the size of the displacements along with the reconstruction.
-    msd2_nounwrap = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, show_progress=false)
+    msd2_nounwrap = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, subtract_system_com=false, show_progress=false)
     @test msd2_nounwrap[0] == 0.0
     @test all(>=(0), msd2_nounwrap)
-    @test msd2_nounwrap == mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, parallel=false, show_progress=false)
+    @test msd2_nounwrap == mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, subtract_system_com=false, parallel=false, show_progress=false)
     inds2 = [PDBTools.index.(tmao)[(i-1)*14+1:i*14] for i in 1:(length(tmao) ÷ 14)]
     raw = [center_of_mass(m, sim2, positions(frame)) for m in inds2, frame in sim2]
     for delta in 1:4
         expected = sum(sum(abs2, raw[i, t+delta] - raw[i, t]) for t in 1:(size(raw, 2)-delta), i in axes(raw, 1)) /
                    ((size(raw, 2) - delta) * size(raw, 1))
         @test msd2_nounwrap[delta] ≈ expected
+    end
+
+    # Subtraction of the motion of the center of mass of the complete system. Without
+    # unwrapping, it is the center of mass of the coordinates as stored.
+    masses = PDBTools.atomic_mass.(get_atoms(sim2))
+    syscom = [sum(masses .* positions(frame)) / sum(masses) for frame in sim2]
+    raw_sub = raw .- permutedims(syscom)
+    msd2_nounwrap_sub = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, unwrap=false, show_progress=false)
+    for delta in 1:4
+        expected = sum(sum(abs2, raw_sub[i, t+delta] - raw_sub[i, t]) for t in 1:(size(raw, 2)-delta), i in axes(raw, 1)) /
+                   ((size(raw, 2) - delta) * size(raw, 1))
+        @test msd2_nounwrap_sub[delta] ≈ expected
+    end
+    # With unwrapping, it is accumulated from the minimum-image displacements of all atoms.
+    msd2_nosub = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, subtract_system_com=false, show_progress=false)
+    ps = [copy(positions(frame)) for frame in sim2]
+    ucs = [unitcell(frame) for frame in sim2]
+    syscom_unwrapped = [zero(eltype(ps[1]))]
+    for t in 2:length(ps)
+        d = sum(masses[i] * (MolSimToolkit.wrap(ps[t][i], ps[t-1][i], ucs[t]) - ps[t-1][i]) for i in eachindex(masses)) / sum(masses)
+        push!(syscom_unwrapped, syscom_unwrapped[end] + d)
+    end
+    inds_single = [[i] for i in PDBTools.index.(select(get_atoms(sim2), "resname TMAO and name N"))]
+    msd_n = mean_square_displacement(sim2, select(get_atoms(sim2), "resname TMAO and name N"); natomspermol=1, maxdelta=4, show_progress=false)
+    msd_n_nosub = mean_square_displacement(sim2, select(get_atoms(sim2), "resname TMAO and name N"); natomspermol=1, maxdelta=4, subtract_system_com=false, show_progress=false)
+    @test msd2_nosub != msd2
+    @test msd_n != msd_n_nosub
+    unw = [MolSimToolkit._unwrap([ps[t][m[1]] for t in eachindex(ps)], ucs) for m in inds_single]
+    for delta in 1:4
+        expected = sum(sum(abs2, (u[t+delta] - syscom_unwrapped[t+delta]) - (u[t] - syscom_unwrapped[t])) for t in 1:(length(ps)-delta), u in unw) /
+                   ((length(ps) - delta) * length(unw))
+        @test msd_n[delta] ≈ expected
     end
 
     @test_throws "not a multiple" mean_square_displacement(sim2, tmao; natomspermol=13, show_progress=false)
