@@ -24,7 +24,7 @@ function _unwrap(raw::AbstractVector{T}, ucs::AbstractVector) where {T}
 end
 
 @testitem "_warn_on_large_displacements" begin
-    using MolSimToolkit: _warn_on_large_displacements, UnitCell
+    using MolSimToolkit: _warn_on_large_displacements, UnitCell, Point3D
     using StaticArrays: SMatrix
     uc = UnitCell(SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0), true, true)
     ucs = [uc, uc, uc]
@@ -44,7 +44,7 @@ end
 end
 
 @testitem "_unwrap" begin
-    using MolSimToolkit: _unwrap, UnitCell
+    using MolSimToolkit: _unwrap, UnitCell, Point3D
     using StaticArrays: SMatrix
     mat = SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0)
     uc = UnitCell(mat, true, true)
