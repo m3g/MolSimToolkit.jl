@@ -21,6 +21,12 @@ of that curve, using the Einstein relation.
     much closer in time than the time it takes a molecule to diffuse across
     half a box length, which is the usual case.
 
+!!! note
+    By default, the motion of the center of mass of the complete system is
+    subtracted from the centers of mass of the molecules at each frame, so
+    that a drift of the whole system does not contribute to the MSD. Use
+    `subtract_system_com=false` to disable this correction.
+
 ```@docs
 mean_square_displacement
 self_diffusion_coefficient
