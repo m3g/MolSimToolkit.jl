@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.6.1-DEV
+--------------
+
 Version 2.6.0
 --------------
 - ![FEATURE][badge-feature] `mean_square_displacement` now subtracts, at each frame, the motion of the center of mass of the complete system from the centers of mass of the molecules. This is controlled by the new `subtract_system_com` keyword, `true` by default.
