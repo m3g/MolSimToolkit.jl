@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.7.1-DEV
+--------------
+
 Version 2.7.0
 --------------
 - ![FEATURE][badge-feature] `read_namd_pressure_tensor` reads the pressure tensors printed in NAMD log files (with `outputPressure`), and `green_kubo_viscosity` computes the shear viscosity from their autocorrelations using the Green-Kubo relation.
