@@ -81,7 +81,7 @@ include("./miscellaneous_functions/most_representative_structure.jl")
 include("./secondary_structure/secondary_structure.jl")
 include("./hydrogen_bonds/hydrogen_bonds.jl")
 
-# Time-dependent properties
+# Dynamical properties
 include("./time_dependent/occupancy.jl")
 include("./time_dependent/intermittent_correlation.jl")
 include("./time_dependent/self_diffusion.jl")

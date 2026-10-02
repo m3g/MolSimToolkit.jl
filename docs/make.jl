@@ -31,7 +31,7 @@ makedocs(
             "Coordination numbers" => "Solvation_and_interactions.md",
             "Molecular Minimum Distances" => "molecular_minimum_distances.md",
         ],
-        "Time-dependent properties" => Any[
+        "Dynamical properties" => Any[
             "Site occupancy" => "time_dependent/occupancy.md",
             "Intermittent correlation" => "time_dependent/intermittent_correlation.md",
             "Self-diffusion coefficient" => "time_dependent/self_diffusion.md",
