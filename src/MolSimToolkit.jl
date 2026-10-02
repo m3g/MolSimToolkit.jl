@@ -43,6 +43,7 @@ export intermittent_correlation_profile, CorrelationProfile
 export residence_time
 export occupancy, Occupancy
 export mean_square_displacement, self_diffusion_coefficient
+export read_namd_pressure_tensor, green_kubo_viscosity
 export mean
 export bulk_coordination
 export coordination_number
@@ -80,10 +81,11 @@ include("./miscellaneous_functions/most_representative_structure.jl")
 include("./secondary_structure/secondary_structure.jl")
 include("./hydrogen_bonds/hydrogen_bonds.jl")
 
-# Time-dependent properties
+# Dynamical properties
 include("./time_dependent/occupancy.jl")
 include("./time_dependent/intermittent_correlation.jl")
 include("./time_dependent/self_diffusion.jl")
+include("./time_dependent/viscosity.jl")
 
 # Solvation and interactions
 include("./miscellaneous_functions/bulk_coordination.jl")
