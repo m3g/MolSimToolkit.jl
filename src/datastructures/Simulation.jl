@@ -107,7 +107,7 @@ julia> for (i, frame) in enumerate(simulation)
 """
 mutable struct Simulation{
     AtomType,
-    V<:Vector{<:AtomType},
+    V<:AbstractVector{<:AtomType},
     F<:Frame,
     T<:Trajectory,
     L<:ReentrantLock
@@ -568,7 +568,7 @@ end
 @testitem "no-pdb construct" begin
     import PDBTools
     using MolSimToolkit.Testing, LazyArtifacts
-    pdb = PDBTools.readPDB(test_file("popc_membrane.pdb"))
+    pdb = PDBTools.read_pdb(test_file("popc_membrane.pdb"))
     simulation = Simulation(pdb, test_file("popc_membrane.dcd"))
     first_frame!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
@@ -620,7 +620,7 @@ end
     # replacement to avoid errors associated to type names
     repl = Dict(
         "MolSimToolkit." => "", 
-        "PDBTools." => "",
+        r"PDBTools(Base)?\." => "",
         r"(PDB file:).*" => s"\1",
         r"(Trajectory file:).*" => s"\1",
     )

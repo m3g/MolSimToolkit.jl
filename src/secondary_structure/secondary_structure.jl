@@ -29,7 +29,7 @@ function _ss_frame!(
     # This is very bad: we are writing temporary files twice for each frame
     # one here, one in the ss_method function, to adjust the PDB header
     tmpfile = tempname()*".pdb"
-    PDBTools.writePDB(atoms, tmpfile)
+    PDBTools.write_pdb(tmpfile, atoms)
     try
         return ss_method(tmpfile; adjust_pdb=true)
     finally

@@ -510,7 +510,7 @@ end
 @testitem "rmsd_matrix" begin
     using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
-    atoms = readPDB(test_file("popc_membrane.pdb"))
+    atoms = read_pdb(test_file("popc_membrane.pdb"))
     cas = findall(Select("name CA"), atoms) # CA indices
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     m = rmsd_matrix(simulation, cas)
