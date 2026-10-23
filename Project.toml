@@ -41,7 +41,7 @@ PDBTools = {url = "https://github.com/m3g/PDBTools.jl", rev = "pdbtoolsbase"}
 PDBToolsBase = {url = "https://github.com/m3g/PDBToolsBase.jl", rev = "main"}
 
 [compat]
-Aqua = "0.8.13"
+Aqua = "0.8.18"
 BenchmarkTools = "1.6.1"
 CellListMap = "0.10.0"
 Chemfiles = "0.10.31"
@@ -49,7 +49,7 @@ ChunkSplitters = "3.1.1"
 Dates = "1.11"
 DelimitedFiles = "1.9"
 DocStringExtensions = "0.9"
-Documenter = "1.3"
+Documenter = "1.11.1"
 EasyFit = "1"
 LaTeXStrings = "1.3"
 LazyArtifacts = "1.11"
