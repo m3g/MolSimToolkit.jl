@@ -44,9 +44,9 @@ which a single branch is typically enough to reconnect the chains.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> frame = first_frame!(sim);
 
@@ -253,11 +253,11 @@ or
 ## Computing the rmsd along a trajectory
 
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> rmsd(simulation, "protein and name CA"; show_progress=false)
 5-element Vector{Float64}:
@@ -332,13 +332,13 @@ end
 
 @testitem "rmsd" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing: namd_pdb, namd_traj
+    using MolSimToolkit.Testing, LazyArtifacts
     using StaticArrays: SVector
     using PDBTools
     using Rotations: RotMatrix3
 
     # Load two structures
-    atoms = read_pdb(namd_pdb)
+    atoms = read_pdb(test_file("popc_membrane.pdb"))
     x = position.(select(atoms, "name CA"))
 
     # test RMSD function
@@ -353,7 +353,7 @@ end
     @test rmsd(z, y) ≈ 0.0 atol = 1e-5
 
     # same test, but with coordinates obtained from a simulation frame
-    simulation = Simulation(namd_pdb, namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     first_frame!(simulation)
     cas = findall(Select("name CA"), atoms)
     x = positions(current_frame(simulation))[cas]
@@ -392,12 +392,12 @@ end
 
     # Input errors
     @test_throws "index 6 is not in frame range" rmsd(simulation, cas; reference_frame=6)
-    simulation = Simulation(namd_pdb, namd_traj; step=2)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); step=2)
     @test_throws "index 2 is not in frame range" rmsd(simulation, cas; reference_frame=2)
     @test_throws "must be an integer" rmsd(simulation, cas; reference_frame='a')
 
     # Test rmsd using rmsd_of (compared to output of VMD)
-    simulation = Simulation(MolSimToolkit.Testing.namd2_pdb, MolSimToolkit.Testing.namd2_traj)
+    simulation = Simulation(MolSimToolkit.Testing.test_file("protein_tmao.pdb"), MolSimToolkit.Testing.test_file("protein_tmao.dcd"))
     r_expected = [4.782562070489359e-17, 2.383157150961262, 2.016995295094623, 1.2936259143528597, 1.6782044794091227, 1.4561259303589944, 1.8725268913794244, 2.1419325487817344, 3.055806849195156, 2.7914291413904566, 2.3027060849001626, 4.099998830641137, 3.558595497478691, 3.412962337347324, 4.685408093153975, 3.6144080835882413, 3.807043696380331, 6.217853448234399, 4.677065083960004, 4.460039973437796]
     r = rmsd(simulation, "protein and name CA"; rmsd_of="residue 47 to 53")
     @test r ≈ r_expected
@@ -447,11 +447,11 @@ between the structures of each pair of frames.
 # Example
 
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> rmsd_matrix(simulation, "protein and name CA"; show_progress=false)
 5×5 Matrix{Float64}:
@@ -508,11 +508,11 @@ function rmsd_matrix(
 end
 
 @testitem "rmsd_matrix" begin
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
-    atoms = readPDB(Testing.namd_pdb)
+    atoms = readPDB(test_file("popc_membrane.pdb"))
     cas = findall(Select("name CA"), atoms) # CA indices
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     m = rmsd_matrix(simulation, cas)
     @test all(m .- [
         0.0 2.83887 2.9777 2.46214 3.80357
@@ -530,7 +530,7 @@ end
 
 @testitem "reconstruct_structure!" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
     using StaticArrays: SVector
     using LinearAlgebra: norm
@@ -628,7 +628,7 @@ end
     # Integration test on a real trajectory: reconstructing the whole system
     # (thousands of unrelated water/lipid atoms, so many branches are expected)
     # must not error, and does not touch atoms outside of `indices`.
-    simulation = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    simulation = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     first_frame!(simulation)
     frame = current_frame(simulation)
     p = positions(frame)

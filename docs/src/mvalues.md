@@ -19,9 +19,9 @@ The `transfer_free_energy` function computes the transfer free energy of a prote
 averaged over all frames of a simulation, using the Tanford transfer model:
 
 ```@example tfe
-using MolSimToolkit, MolSimToolkit.Testing
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 import PDBTools # to choose transfer model
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 tfe = transfer_free_energy(sim, "urea"; model=PDBTools.MoeserHorinek)
 ```
 
@@ -61,9 +61,9 @@ between that frame and the reference. Using `transfer_free_energy_frames` togeth
 TFE computed for the first frame via `PDBTools.transfer_free_energy`, this is straightforward:
 
 ```@example mvalues
-using MolSimToolkit, MolSimToolkit.Testing
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 import PDBTools
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 ```
 
 First, we compute TFE of the reference structure (first frame):

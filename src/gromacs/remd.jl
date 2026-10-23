@@ -20,8 +20,6 @@ struct GromacsREMDlog
     exchange_matrix::Matrix{Int}
     probability_matrix::Matrix{Float64}
 end
-const gmx2019_4_log = "$(@__DIR__)" * "/../../test/data/remd/gmx-2019.4.log"
-const gmx5_0_4_log = "$(@__DIR__)" * "/../../test/data/remd/gmx-5.0.4.log"
 
 """
     remd_data(log::String)
@@ -42,9 +40,9 @@ Tested with log files of Gromacs versions:
 First obtaina the REMD data from the log file:
 
 ```julia-repl
-julia> using MolSimToolkit
+julia> using MolSimToolkit, LazyArtifacts
 
-julia> data = remd_data(MolSimToolkit.gmx2019_9_log)
+julia> data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-2019.4.log"))
 ```
 
 Then plot the exchange matrix, which will provide a visual inspection of the exchange process:
@@ -114,8 +112,8 @@ remd_replica_path(data::GromacsREMDlog, replica::Integer; stride::Integer=1) =
 
 @testitem "REMD" begin
     using MolSimToolkit
-    using MolSimToolkit: gmx2019_4_log, gmx5_0_4_log
-    data = remd_data(gmx2019_4_log)
+    using MolSimToolkit.Testing, LazyArtifacts
+    data = remd_data(test_file("remd_gmx-2019.4.log"))
     @test size(data.exchange_matrix) == (251, 10)
     @test size(data.probability_matrix) == (10, 10)
     @test all(≈(1), sum(data.probability_matrix, dims=1))
@@ -126,7 +124,7 @@ remd_replica_path(data::GromacsREMDlog, replica::Integer; stride::Integer=1) =
     @test length(path1) == 251
     path1 = remd_replica_path(data, 1; stride=10)
     @test length(path1) == 26
-    data = remd_data(gmx5_0_4_log)
+    data = remd_data(test_file("remd_gmx-5.0.4.log"))
     @test size(data.exchange_matrix) == (201, 16)
     @test size(data.probability_matrix) == (16, 16)
     @test all(≈(1), sum(data.probability_matrix, dims=1))

@@ -18,9 +18,9 @@ end
 
 @testitem "ss_heatmap" begin
     using Plots
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     plt = ss_heatmap(ssmap; scalex=0.1, xlabel="time / ns")
     @test plt isa Plots.Plot{Plots.GRBackend}

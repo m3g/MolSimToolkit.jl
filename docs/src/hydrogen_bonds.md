@@ -14,10 +14,10 @@ hydrogen_bonds
 
 ```@example hbonds
 using MolSimToolkit, PDBTools
-using MolSimToolkit.Testing # to load test files
+using MolSimToolkit.Testing, LazyArtifacts # to load test files
 using Plots
 # Build Simulation object
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj) 
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd")) 
 # Compute h-bonds of the protein with itself
 hbs_prot = hydrogen_bonds(sim, "protein")
 # Compute h-bonds between protein and water
@@ -73,9 +73,9 @@ mean(::HydrogenBondOccupancy)
 ### Example
 
 ```@example hbond_occupancy
-using MolSimToolkit, MolSimToolkit.Testing, Plots
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, Plots
 
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
 hbo = hydrogen_bond_occupancy(sim, 
     "protein", 

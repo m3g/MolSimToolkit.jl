@@ -19,9 +19,9 @@ of replicas, or `probability_type=:absolute` to plot the probability matrix with
 # Example
 
 ```julia-repl
-julia> using MolSimToolkit, Plots
+julia> using MolSimToolkit, Plots, LazyArtifacts
 
-julia> data = remd_data(MolSimToolkit.gmx2019_4_log)
+julia> data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-2019.4.log"))
 
 julia> heatmap(data)
 ```
@@ -82,9 +82,9 @@ end
 
 @testitem "REMD" begin
     using MolSimToolkit
-    using Plots
+    using Plots, LazyArtifacts
     ENV["GKSwstype"] = "nul"
-    data = remd_data(MolSimToolkit.gmx2019_4_log)
+    data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-2019.4.log"))
     @test remd_replica_path(data, 0; stride=50) == [0, 0, 4, 5, 3, 1]
     @test remd_replica_path(data, 9; stride=50) == [9, 5, 1, 6, 6, 0]
     plt = heatmap(data; probability_type=:relative)
@@ -94,7 +94,7 @@ end
     plt = heatmap(data; probability_type=:absolute)
     savefig(plt, tmp)
     @test isfile(tmp)
-    data = remd_data(MolSimToolkit.gmx5_0_4_log)
+    data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
     plt = heatmap(data; probability_type=:relative)
     savefig(plt, tmp)
     @test isfile(tmp)

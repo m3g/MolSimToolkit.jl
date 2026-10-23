@@ -69,9 +69,9 @@ the unit cell boundaries.
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", show_progress=false)
 6×5 Matrix{Int64}:
@@ -123,9 +123,9 @@ end
 
 @testitem "ss_map" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     import PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
@@ -160,9 +160,9 @@ The classes can be found in the ProteinSecondaryStructures.jl package documentat
 ## Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; # 5 frames 
                    selection="residue >= 30 and residue <= 35", # 6 residues
@@ -213,10 +213,10 @@ end
 
 @testitem "secondary structure" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using Statistics: mean
     using PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
@@ -279,11 +279,11 @@ to modify properties of the plot. In particular:
 ## Example
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using Plots, PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
 

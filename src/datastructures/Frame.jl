@@ -51,9 +51,9 @@ This is the default way to access the positions of the atoms in a simulation.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> positions(first_frame!(simulation))[1]
 3-element Point3D{Float64} with indices SOneTo(3):
@@ -93,16 +93,16 @@ end
 
 @testitem "unitcell" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using StaticArrays
     import Chemfiles
-    traj = Chemfiles.Trajectory(Testing.namd_traj)
+    traj = Chemfiles.Trajectory(test_file("popc_membrane.dcd"))
     frame = Chemfiles.read(traj)
     uc = unitcell(Frame(frame))
     @test uc.valid == true
     @test uc.orthorhombic == true
     @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
-    sim = Simulation(Testing.short_nopbc_pdb, Testing.short_nopbc_traj)
+    sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
     first_frame!(sim)
     f = current_frame(sim)
     uc = unitcell(f)
@@ -113,10 +113,10 @@ end
 
 @testitem "Frame" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using ShowMethodTesting
 
-    sim = Simulation(Testing.short_nopbc_pdb, Testing.short_nopbc_traj)
+    sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
     f = first_frame!(sim)
     @test parse_show(f) ≈ "Frame{Chemfiles.Frame} - first atom position: [-5.189000129699707, -4.394999980926514, 13.395999908447266]"
     f = next_frame!(sim)

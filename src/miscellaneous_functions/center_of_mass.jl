@@ -17,9 +17,9 @@ center of mass is calculated without wrapping the coordinates.
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using PDBTools 
 
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> protein_indices = findall(sel"protein", get_atoms(simulation));
 
@@ -62,9 +62,9 @@ function center_of_mass(
 end
 
 @testitem "center_of_mass" begin
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     import PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     first_frame!(simulation)
     protein_indices = PDBTools.selindex(get_atoms(simulation), "protein")
     coor = positions(current_frame(simulation))

@@ -20,9 +20,9 @@ ss_map
 A complete example for computing a secondary structure map is shown below:
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", show_progress=false)
 6×5 Matrix{Int64}:
@@ -90,11 +90,11 @@ For example:
 
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using Plots, PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
 

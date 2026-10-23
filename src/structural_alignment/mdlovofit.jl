@@ -140,13 +140,13 @@ Keyword arguments:
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> mf = map_fractions(sim)
 -------------------------------------------------------------------
-MapFractionsResult: Simulation(structure.pdb, trajectory.dcd)
+MapFractionsResult: Simulation(popc_membrane.pdb, popc_membrane.dcd)
 
 -------------------------------------------------------------------
 Fields: 
@@ -279,13 +279,13 @@ and the output files:
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> md = mdlovofit(sim, fraction=0.7, output_name="mdlovofit_50")
 -------------------------------------------------------------------
-MDLovoFitResult: Simulation(structure.pdb, trajectory.dcd)
+MDLovoFitResult: Simulation(popc_membrane.pdb, popc_membrane.dcd)
 
 -------------------------------------------------------------------
 
@@ -359,9 +359,9 @@ end
 
 @testitem "map_fractions" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"))
     mf = map_fractions(sim)
     @test length(mf.frame_indices) == 100
     @test sum(mf.frame_indices) == 7074
@@ -373,22 +373,22 @@ end
     mf = map_fractions(sim; maxframes=50)
     @test length(mf.frame_indices) == 50
     @test last(mf.frame_indices) == 122
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:70)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"); frames=1:70)
     mf = map_fractions(sim)
     @test length(mf.frame_indices) == 70
     @test sum(mf.rmsd_all) ≈ 66.11294932099999
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2, 5])
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); frames=[2, 5])
     mf = map_fractions(sim)
     @test mf.frame_indices == [2, 5]
     @test sum(mf.rmsd_low) ≈ 75.73356675900001
     @test sum(mf.rmsd_high) ≈ 769.6762035190002
 
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"))
     mf = map_fractions(sim; maxframes=50)
     @test parse_show(mf) ≈ """
     -------------------------------------------------------------------
-    MapFractionsResult: Simulation(structure.pdb, trajectory.dcd)
+    MapFractionsResult: Simulation(mdlovofit.pdb, mdlovofit.dcd)
 
     -------------------------------------------------------------------
     Fields: 
@@ -407,10 +407,10 @@ end
 
 @testitem "mdlovofit" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
 
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"))
     @test_throws UndefKeywordError mdlovofit(sim)
 
     fit = mdlovofit(sim; fraction=0.50)
@@ -420,7 +420,7 @@ end
     @test length(fit.frame_indices) == 100
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"); frames=1:50)
     fit = mdlovofit(sim; fraction=0.50, output_name="mdlovofit_50")
     @test isfile("mdlovofit_50_aligned.pdb")
     @test isfile("mdlovofit_50_rmsf.dat")
@@ -428,18 +428,18 @@ end
     @test length(fit.frame_indices) == 50
     @test sum(fit.rmsd_low) < sum(fit.rmsd_high)
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[2, 5])
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); frames=[2, 5])
     md = mdlovofit(sim; fraction=0.7)
     pdb = read_pdb(md.aligned_pdb)
     @test length(eachmodel(pdb)) == 2
     @test md.frame_indices == [2, 5]
     @test md.rmsd_low ≈ [0.0, 0.540949029]
 
-    sim = Simulation(Testing.mdlovofit_pdb, Testing.mdlovofit_traj; frames=1:50)
+    sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"); frames=1:50)
     fit = mdlovofit(sim; fraction=0.50, output_name="mdlovofit_50")
     @test parse_show(fit) ≈ """
      -------------------------------------------------------------------
-     MDLovoFitResult: Simulation(structure.pdb, trajectory.dcd)
+     MDLovoFitResult: Simulation(mdlovofit.pdb, mdlovofit.dcd)
      
      -------------------------------------------------------------------
      

@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.7.1-DEV
 --------------
+- ![INFO][badge-info] The test files are no longer part of the package installation: they are lazy artifacts (from [MolSimTestFiles](https://github.com/m3g/MolSimTestFiles)), downloaded when needed. They are accessed with `test_file(name)`, exported by `MolSimToolkit.Testing` and available after `using LazyArtifacts` (a package extension, so LazyArtifacts is not loaded with the package). It replaces the path variables of that module (e.g. `Testing.namd_pdb` is now `test_file("popc_membrane.pdb")`; the files are listed in `test/Testing.jl`). The `MolSimToolkit.gmx2019_4_log` and `MolSimToolkit.gmx5_0_4_log` constants are replaced by `test_file("remd_gmx-2019.4.log")` and `test_file("remd_gmx-5.0.4.log")`.
 
 Version 2.7.0
 --------------

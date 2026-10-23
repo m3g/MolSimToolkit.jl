@@ -36,9 +36,9 @@ If two selections of a pair are different, their atoms must not overlap (an erro
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> hbs = hydrogen_bonds(sim, "protein")
 OrderedCollections.OrderedDict{String, Vector{Int64}} with 1 entry:
@@ -143,10 +143,10 @@ end
 
 @testitem "hydrogen bonds" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
 
     # Tested vs. gmx hbond
-    sim = Simulation(Testing.gmx_pdb, Testing.gmx_traj)
+    sim = Simulation(test_file("gromacs.pdb"), test_file("gromacs.xtc"))
 
     hbs = hydrogen_bonds(sim, "protein")
     @test hbs["protein => protein"] == [58, 60, 54, 54, 58]
@@ -264,9 +264,9 @@ Identical to those of [`hydrogen_bonds`](@ref).
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> hbo = hydrogen_bond_occupancy(sim, "protein", show_progress=false);
 
@@ -383,9 +383,9 @@ end
 
 @testitem "hydrogen_bond_occupancy" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
 
-    sim = Simulation(Testing.gmx_pdb, Testing.gmx_traj)
+    sim = Simulation(test_file("gromacs.pdb"), test_file("gromacs.xtc"))
 
     hbo = hydrogen_bond_occupancy(sim, "protein")
     hbs = hydrogen_bonds(sim, "protein")
