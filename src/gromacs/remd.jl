@@ -40,7 +40,7 @@ Tested with log files of Gromacs versions:
 First obtaina the REMD data from the log file:
 
 ```julia-repl
-julia> using MolSimToolkit
+julia> using MolSimToolkit, LazyArtifacts
 
 julia> data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-2019.4.log"))
 ```
@@ -112,7 +112,7 @@ remd_replica_path(data::GromacsREMDlog, replica::Integer; stride::Integer=1) =
 
 @testitem "REMD" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     data = remd_data(test_file("remd_gmx-2019.4.log"))
     @test size(data.exchange_matrix) == (251, 10)
     @test size(data.probability_matrix) == (10, 10)

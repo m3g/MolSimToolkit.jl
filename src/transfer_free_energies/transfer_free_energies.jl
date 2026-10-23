@@ -72,7 +72,7 @@ A `PDBTools.TransferFreeEnergy` object with the frame-averaged values:
 ## Example
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
@@ -226,7 +226,7 @@ fields:
 ## Example
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
@@ -273,7 +273,7 @@ end
 
 @testitem "transfer_free_energy" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
     using ShowMethodTesting
 

@@ -14,7 +14,7 @@ hydrogen_bonds
 
 ```@example hbonds
 using MolSimToolkit, PDBTools
-using MolSimToolkit.Testing # to load test files
+using MolSimToolkit.Testing, LazyArtifacts # to load test files
 using Plots
 # Build Simulation object
 sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd")) 
@@ -73,7 +73,7 @@ mean(::HydrogenBondOccupancy)
 ### Example
 
 ```@example hbond_occupancy
-using MolSimToolkit, MolSimToolkit.Testing, Plots
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, Plots
 
 sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 

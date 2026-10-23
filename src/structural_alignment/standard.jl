@@ -44,7 +44,7 @@ which a single branch is typically enough to reconnect the chains.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -253,7 +253,7 @@ or
 ## Computing the rmsd along a trajectory
 
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using PDBTools
 
@@ -332,7 +332,7 @@ end
 
 @testitem "rmsd" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using StaticArrays: SVector
     using PDBTools
     using Rotations: RotMatrix3
@@ -447,7 +447,7 @@ between the structures of each pair of frames.
 # Example
 
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using PDBTools
 
@@ -508,7 +508,7 @@ function rmsd_matrix(
 end
 
 @testitem "rmsd_matrix" begin
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
     atoms = readPDB(test_file("popc_membrane.pdb"))
     cas = findall(Select("name CA"), atoms) # CA indices
@@ -530,7 +530,7 @@ end
 
 @testitem "reconstruct_structure!" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
     using StaticArrays: SVector
     using LinearAlgebra: norm

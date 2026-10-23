@@ -26,7 +26,7 @@ The `rmsd` routine has the option to compute the `rmsd` of a set of atoms, while
 
 ```@example rmsd_of
 using MolSimToolkit
-using Plots
+using Plots, LazyArtifacts
 sim = Simulation(
     MolSimToolkit.Testing.test_file("protein_tmao.pdb"), # pdb file
     MolSimToolkit.Testing.test_file("protein_tmao.dcd"), # trajectory file
@@ -100,7 +100,7 @@ then obtained: the RMSD of the best aligned atoms, the RMSD of the remaining (hi
 the RMSD of all atoms. For example:
 
 ```@example mdlovofit
-using MolSimToolkit, MolSimToolkit.Testing
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 # Create Simulation object from pdb and trajectory file names
 sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))

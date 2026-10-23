@@ -39,7 +39,7 @@ a protein solvated by water and TMAO, and compute the mean square
 displacement of the TMAO molecules:
 
 ```@example self_diffusion
-using MolSimToolkit, PDBTools, MolSimToolkit.Testing, Plots
+using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts, Plots
 
 sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
 tmao = select(get_atoms(sim), "resname TMAO")

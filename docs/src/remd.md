@@ -46,7 +46,7 @@ of `remd_data`:
 
 ```@example
 using MolSimToolkit
-using Plots
+using Plots, LazyArtifacts
 data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 heatmap(data)
 ```
@@ -75,7 +75,7 @@ all levels from 0 to 12, and replica 1 appears to be trapped in leves 13 to 15.
 
 ```@example
 using MolSimToolkit
-using Plots
+using Plots, LazyArtifacts
 data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 
 # Obtain the paths
@@ -99,7 +99,7 @@ given by the probability matrix:
 
 ```@example
 using MolSimToolkit
-using Plots
+using Plots, LazyArtifacts
 data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 scatter(MolSimStyle,
     data.probability_matrix,

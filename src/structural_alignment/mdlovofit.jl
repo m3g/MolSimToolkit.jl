@@ -140,7 +140,7 @@ Keyword arguments:
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -279,7 +279,7 @@ and the output files:
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -359,7 +359,7 @@ end
 
 @testitem "map_fractions" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
     sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"))
     mf = map_fractions(sim)
@@ -407,7 +407,7 @@ end
 
 @testitem "mdlovofit" begin
     using ShowMethodTesting
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
 
     sim = Simulation(test_file("mdlovofit.pdb"), test_file("mdlovofit.dcd"))

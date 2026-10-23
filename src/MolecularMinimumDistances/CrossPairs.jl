@@ -108,6 +108,7 @@ end
 @testitem "MD - CrossPairs" begin
     using PDBTools
     using LinearAlgebra: diag
+    using LazyArtifacts
     ats = readPDB(MolSimToolkit.Testing.test_file("popc_membrane.pdb"))
     popc = selindex(ats, "resname POPC")
     protein = selindex(ats, "protein")

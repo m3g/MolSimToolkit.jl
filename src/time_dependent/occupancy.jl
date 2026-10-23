@@ -66,7 +66,7 @@ per frame.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"); frames=1:5);
 
@@ -123,7 +123,7 @@ within `cutoff` of the binding `site`.
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"); frames=1:5);
 
@@ -201,7 +201,7 @@ function occupancy(
 end
 
 @testitem "occupancy" begin
-    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
     using ShowMethodTesting
     using LinearAlgebra: diag
 

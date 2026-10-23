@@ -28,7 +28,7 @@ a protein solvated by water and TMAO, and compute the occupancy of the
 protein surface by TMAO molecules, using a 3 Å cutoff:
 
 ```@example occupancy
-using MolSimToolkit, PDBTools, MolSimToolkit.Testing, Plots
+using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts, Plots
 
 sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
 protein = select(get_atoms(sim), "protein")

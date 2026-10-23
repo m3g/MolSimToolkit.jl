@@ -20,7 +20,7 @@ ss_map
 A complete example for computing a secondary structure map is shown below:
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -90,7 +90,7 @@ For example:
 
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using Plots, PDBTools
 

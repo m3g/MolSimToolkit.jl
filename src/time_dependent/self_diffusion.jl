@@ -204,7 +204,7 @@ coefficient from the linear (diffusive) regime of the resulting curve.
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
@@ -445,7 +445,7 @@ function self_diffusion_coefficient(
 end
 
 @testitem "mean_square_displacement" begin
-    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
     using OffsetArrays
 
     sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
@@ -567,7 +567,7 @@ end
     @test_throws ArgumentError self_diffusion_coefficient(msd; mindelta=-1)
 
     # Integration with mean_square_displacement, using real trajectory data
-    using PDBTools, MolSimToolkit.Testing
+    using PDBTools, MolSimToolkit.Testing, LazyArtifacts
     sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     tmao = select(get_atoms(sim), "resname TMAO")
     msd2 = mean_square_displacement(sim, tmao; natomspermol=14, maxdelta=4, show_progress=false)

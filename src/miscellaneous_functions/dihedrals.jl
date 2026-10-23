@@ -26,7 +26,7 @@ The function returns a vector with the average dihedral angles in radians or deg
 ## Example
 
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
 
 julia> atoms = read_pdb(test_file("protein_tmao.pdb"));
 
@@ -82,7 +82,7 @@ end
 
 @testitem "average_dihedrals" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
 
     atoms = read_pdb(test_file("protein_tmao.pdb"))

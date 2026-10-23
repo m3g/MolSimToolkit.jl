@@ -73,7 +73,7 @@ The `enumerate` iterator can also be used to iterate over the frames, returning 
 # Examples
 
 ```julia-repl # to be doctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(
            test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); 
@@ -292,7 +292,7 @@ end
 
 @testitem "get_atoms" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first = 2, step = 2, last = 4)
     ats = get_atoms(goto_frame!(simulation, 2))
     @test position(ats[1]) ≈ [2.0012038, 7.035769, 43.272514]
@@ -350,7 +350,7 @@ Similar to `restart!`, but returning the `Frame` object.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=3); # note first=3
 
@@ -426,7 +426,7 @@ end
 
 @testitem "UnitCell - show" begin
     using ShowMethodTesting
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     first_frame!(sim)
     uc = unitcell(current_frame(sim))
@@ -469,7 +469,7 @@ Returns the frame at the given index in the trajectory, and places the trajector
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -508,7 +508,7 @@ Returns the simulation placed at the given index in the trajectory.
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -538,7 +538,7 @@ end
 
 @testitem "Simulation" begin
     import Chemfiles
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
 
     #
     # Test iterator by reading coordinates
@@ -567,7 +567,7 @@ end
 
 @testitem "no-pdb construct" begin
     import PDBTools
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     pdb = PDBTools.readPDB(test_file("popc_membrane.pdb"))
     simulation = Simulation(pdb, test_file("popc_membrane.dcd"))
     first_frame!(simulation)
@@ -576,7 +576,7 @@ end
 end
 
 @testitem "get_frame!" begin
-    using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
     sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     frames = [ copy(positions(frame)) for frame in sim ]
     @test all(positions(get_frame!(sim, i)) ≈ frames[i] for i in eachindex(sim))
@@ -613,7 +613,7 @@ end
 
 @testitem "Simulation - show" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using PDBTools
     using ShowMethodTesting: parse_show
     sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))

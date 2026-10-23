@@ -51,7 +51,7 @@ This is the default way to access the positions of the atoms in a simulation.
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -93,7 +93,7 @@ end
 
 @testitem "unitcell" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using StaticArrays
     import Chemfiles
     traj = Chemfiles.Trajectory(test_file("popc_membrane.dcd"))
@@ -113,7 +113,7 @@ end
 
 @testitem "Frame" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using ShowMethodTesting
 
     sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))

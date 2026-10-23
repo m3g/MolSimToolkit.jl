@@ -69,7 +69,7 @@ the unit cell boundaries.
 ## Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -123,7 +123,7 @@ end
 
 @testitem "ss_map" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     import PDBTools
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # With stride
@@ -160,7 +160,7 @@ The classes can be found in the ProteinSecondaryStructures.jl package documentat
 ## Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -213,7 +213,7 @@ end
 
 @testitem "secondary structure" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     using Statistics: mean
     using PDBTools
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
@@ -279,7 +279,7 @@ to modify properties of the plot. In particular:
 ## Example
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> using Plots, PDBTools
 

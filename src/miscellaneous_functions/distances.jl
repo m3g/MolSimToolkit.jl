@@ -14,7 +14,7 @@ Use `silent=true` to suppress the progress bar.
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using PDBTools
 
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -81,7 +81,7 @@ end
 @testitem "distances" begin
     using PDBTools
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
     sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     i1 = findall(sel"protein and residue 1", get_atoms(sim))
     i2 = findall(sel"protein and residue 15", get_atoms(sim))

@@ -36,7 +36,7 @@ If two selections of a pair are different, their atoms must not overlap (an erro
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -143,7 +143,7 @@ end
 
 @testitem "hydrogen bonds" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
 
     # Tested vs. gmx hbond
     sim = Simulation(test_file("gromacs.pdb"), test_file("gromacs.xtc"))
@@ -264,7 +264,7 @@ Identical to those of [`hydrogen_bonds`](@ref).
 # Example
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -383,7 +383,7 @@ end
 
 @testitem "hydrogen_bond_occupancy" begin
     using MolSimToolkit
-    using MolSimToolkit.Testing
+    using MolSimToolkit.Testing, LazyArtifacts
 
     sim = Simulation(test_file("gromacs.pdb"), test_file("gromacs.xtc"))
 

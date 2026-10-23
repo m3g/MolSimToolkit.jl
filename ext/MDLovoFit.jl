@@ -94,7 +94,7 @@ function Plots.plot(
 end
 
 @testitem "mdlovofit - plots" begin
-    using MolSimToolkit, PDBTools, Plots
+    using MolSimToolkit, PDBTools, Plots, LazyArtifacts
     ENV["GKSwstype"] = "nul"
     sim = Simulation(
         MolSimToolkit.Testing.test_file("popc_membrane.pdb"),

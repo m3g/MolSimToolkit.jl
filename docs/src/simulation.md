@@ -13,7 +13,7 @@ in MolSimToolkit accept a `Simulation` as their primary argument.
 The standard way to process a trajectory is to iterate over all frames with a `for` loop:
 
 ```@example simulation_iterate
-using MolSimToolkit, MolSimToolkit.Testing
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=2, step=2, last=4)
 
@@ -48,7 +48,7 @@ the C$_\alpha$ atoms of the first and last residues) across all frames, applying
 boundary conditions when wrapping the second atom position.
 
 ```@example end_to_end
-using MolSimToolkit, MolSimToolkit.Testing
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 using PDBTools
 using Plots: plot
 
@@ -139,9 +139,5 @@ Pages = [ "wrap.jl" ]
 ## Test files
 
 The examples use the test files of the package, which are obtained with the `test_file`
-function of the `MolSimToolkit.Testing` module. They are not part of the package installation:
-they are downloaded the first time they are used.
-
-```@docs
-MolSimToolkit.Testing.test_file
-```
+function of the `MolSimToolkit.Testing` module, available after `using LazyArtifacts`. They
+are not part of the package installation: they are downloaded the first time they are used.

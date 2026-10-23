@@ -106,6 +106,7 @@ end
 @testitem "MD - SelfPairs" begin
     using PDBTools
     using LinearAlgebra: diag
+    using LazyArtifacts
     ats = readPDB(MolSimToolkit.Testing.test_file("popc_membrane.pdb"))
     popc = selindex(ats, "resname POPC")
     simulation = Simulation(

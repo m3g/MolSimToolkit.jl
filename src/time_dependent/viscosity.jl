@@ -81,7 +81,7 @@ If a step is printed more than once (as happens when the input file contains mul
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
 -------------------------------------------------------------------
@@ -162,7 +162,7 @@ function read_namd_pressure_tensor(logfile::AbstractString; group_pressure::Bool
 end
 
 @testitem "read_namd_pressure_tensor" begin
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using StaticArrays: SMatrix
     p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
     @test length(p) == 2001
@@ -300,7 +300,7 @@ the trapezoidal rule.
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> p = read_namd_pressure_tensor(test_file("pressure_tensor.log"));
 
@@ -397,7 +397,7 @@ function green_kubo_viscosity(
 end
 
 @testitem "green_kubo_viscosity" begin
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using MolSimToolkit: PressureTensor
     using StaticArrays: SMatrix
     using Statistics: mean

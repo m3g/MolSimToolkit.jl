@@ -156,7 +156,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
@@ -269,7 +269,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, MolSimToolkit.Testing
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -292,7 +292,7 @@ function intermittent_correlation(
 end
 
 @testitem "intermittent_correlation - HydrogenBondOccupancy" begin
-    using MolSimToolkit, MolSimToolkit.Testing
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
     using OffsetArrays
 
     # A hydrogen bond present in every frame must have full correlation
@@ -319,7 +319,7 @@ end
 end
 
 @testitem "intermittent_correlation - Occupancy" begin
-    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
     using OffsetArrays
 
     # Equivalence with the scalar-type version, for a series with a single
@@ -441,7 +441,7 @@ the correlation function can be converted into a residence time with the
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
@@ -550,7 +550,7 @@ function _intermittent_correlation_profile(
 end
 
 @testitem "intermittent_correlation_profile" begin
-    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
     using ShowMethodTesting
 
     # A single molecule sitting still at a distance of 1.5: it is always in the
@@ -652,7 +652,7 @@ contains no data at all).
 # Example
 
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
 
 julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
@@ -698,7 +698,7 @@ function residence_time(p::CorrelationProfile; threshold::Real=0.5, dt::Real=1)
 end
 
 @testitem "residence_time" begin
-    using MolSimToolkit, PDBTools, MolSimToolkit.Testing
+    using MolSimToolkit, PDBTools, MolSimToolkit.Testing, LazyArtifacts
     using OffsetArrays
 
     # the crossing is exactly at delta = 1, no interpolation needed

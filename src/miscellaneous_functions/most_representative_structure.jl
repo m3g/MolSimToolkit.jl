@@ -40,7 +40,7 @@ The process is repeated until the structure most similar to the average is the s
 # Example
 
 ```julia-repl
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
 
 julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
@@ -112,7 +112,7 @@ function most_representative_structure(simulation::Simulation; atoms = nothing)
 end
 
 @testitem "most_representative_structure" begin
-    using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, PDBTools
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     calphas = select(get_atoms(simulation), "name CA")
     imin, rmsdmin = most_representative_structure(simulation)

@@ -48,7 +48,7 @@ for a converged estimate of the viscosity, but illustrates the use of the
 functions:
 
 ```@example viscosity
-using MolSimToolkit, MolSimToolkit.Testing, Plots
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts, Plots
 
 p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
 ```
