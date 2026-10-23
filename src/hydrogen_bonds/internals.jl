@@ -245,7 +245,7 @@ function setup_hbond_list_particle_systems(
         if sel1 == sel2
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
-                positions=PDBTools.coor.(s1.ats),
+                positions=PDBTools.position.(s1.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=HBondList(HBond[]),
@@ -255,8 +255,8 @@ function setup_hbond_list_particle_systems(
         else
             s1, s2 = selection_data[sel1], selection_data[sel2]
             systems[key] = ParticleSystem(
-                xpositions=PDBTools.coor.(s1.ats),
-                ypositions=PDBTools.coor.(s2.ats),
+                xpositions=PDBTools.position.(s1.ats),
+                ypositions=PDBTools.position.(s2.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=HBondList(HBond[]),
@@ -361,7 +361,7 @@ function setup_particle_systems(
         if sel1 == sel2
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
-                positions=PDBTools.coor.(s1.ats),
+                positions=PDBTools.position.(s1.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=0,
@@ -371,8 +371,8 @@ function setup_particle_systems(
         else
             s1, s2 = selection_data[sel1], selection_data[sel2]
             systems[key] = ParticleSystem(
-                xpositions=PDBTools.coor.(s1.ats),
-                ypositions=PDBTools.coor.(s2.ats),
+                xpositions=PDBTools.position.(s1.ats),
+                ypositions=PDBTools.position.(s2.ats),
                 unitcell=uc_first_frame.matrix,
                 cutoff=donnor_acceptor_distance,
                 output=0,

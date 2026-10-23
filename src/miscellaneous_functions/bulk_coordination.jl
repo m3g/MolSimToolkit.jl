@@ -57,7 +57,7 @@ the distance.
 ```julia-repl
 julia> using MolSimToolkit, PDBTools, LazyArtifacts
 
-julia> pdb = readPDB(MolSimToolkit.Testing.test_file("protein_tmao.pdb")); # protein-tmao-water system
+julia> pdb = read_pdb(MolSimToolkit.Testing.test_file("protein_tmao.pdb")); # protein-tmao-water system
 
 julia> trajectory = MolSimToolkit.Testing.test_file("protein_tmao.dcd");
 
@@ -169,8 +169,8 @@ end
 @testitem "bulk_coordination" begin
     using MolSimToolkit.Testing, LazyArtifacts
     using MolSimToolkit: bulk_coordination, Simulation
-    using PDBTools: select, readPDB
-    pdb = readPDB(test_file("protein_tmao.pdb")) # protein-tmao-water system
+    using PDBTools: select, read_pdb
+    pdb = read_pdb(test_file("protein_tmao.pdb")) # protein-tmao-water system
     trajectory = test_file("protein_tmao.dcd")
     simulation = Simulation(pdb, trajectory; last=1)
     r, h = bulk_coordination(
