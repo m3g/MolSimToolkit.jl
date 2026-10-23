@@ -57,15 +57,15 @@ the distance.
 ```julia-repl
 julia> using MolSimToolkit, PDBTools
 
-julia> pdb = readPDB(MolSimToolkit.Testing.namd2_pdb); # protein-tmao-water system
+julia> pdb = readPDB(MolSimToolkit.Testing.test_file("protein_tmao.pdb")); # protein-tmao-water system
 
-julia> trajectory = MolSimToolkit.Testing.namd2_traj;
+julia> trajectory = MolSimToolkit.Testing.test_file("protein_tmao.dcd");
 
 julia> simulation = Simulation(pdb, trajectory)
 Simulation 
     Atom type: Atom
     PDB file: -
-    Trajectory file: /home/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_water_tmao/trajectory.dcd
+    Trajectory file: /home/leandro/.julia/artifacts/21f7d440d222311fcbad28111ac26a395e2a7903/protein_tmao.dcd
     Total number of frames: 20
     Frame range: 1:1:20
     Number of frames in range: 20
@@ -167,10 +167,11 @@ function bulk_coordination(
 end
 
 @testitem "bulk_coordination" begin
-    using MolSimToolkit: Testing, bulk_coordination, Simulation
+    using MolSimToolkit.Testing
+    using MolSimToolkit: bulk_coordination, Simulation
     using PDBTools: select, readPDB
-    pdb = readPDB(Testing.namd2_pdb) # protein-tmao-water system
-    trajectory = Testing.namd2_traj
+    pdb = readPDB(test_file("protein_tmao.pdb")) # protein-tmao-water system
+    trajectory = test_file("protein_tmao.dcd")
     simulation = Simulation(pdb, trajectory; last=1)
     r, h = bulk_coordination(
         simulation;

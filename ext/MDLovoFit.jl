@@ -97,8 +97,8 @@ end
     using MolSimToolkit, PDBTools, Plots
     ENV["GKSwstype"] = "nul"
     sim = Simulation(
-        MolSimToolkit.Testing.namd_pdb,
-        MolSimToolkit.Testing.namd_traj,
+        MolSimToolkit.Testing.test_file("popc_membrane.pdb"),
+        MolSimToolkit.Testing.test_file("popc_membrane.dcd"),
     )
     mf = map_fractions(sim)
     tmpfile = tempname()*".png"

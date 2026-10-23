@@ -35,7 +35,7 @@ Calculate the coordination number of the solute atoms with the solvent atoms.
 ```jldoctest
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; frames=1:5);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"); frames=1:5);
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -95,7 +95,7 @@ end
 
 @testitem "coordination_number" begin
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
     cn = coordination_number(

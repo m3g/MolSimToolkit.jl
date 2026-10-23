@@ -83,7 +83,7 @@ If a step is printed more than once (as happens when the input file contains mul
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> p = read_namd_pressure_tensor(Testing.namd_pressure_log)
+julia> p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
 -------------------------------------------------------------------
 PressureTensor:
 -------------------------------------------------------------------
@@ -164,7 +164,7 @@ end
 @testitem "read_namd_pressure_tensor" begin
     using MolSimToolkit, MolSimToolkit.Testing
     using StaticArrays: SMatrix
-    p = read_namd_pressure_tensor(Testing.namd_pressure_log)
+    p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
     @test length(p) == 2001
     @test p.steps == 0:2000
     @test p.timestep == 2.0
@@ -173,13 +173,13 @@ end
     @test p.tensors[1] ≈ SMatrix{3,3}(1693.76, -483.64, -258.106, -483.637, 464.369, -144.43, -258.105, -144.419, 195.043)
     @test p.tensors[1][1, 2] == -483.637
     @test p.tensors[1][2, 1] == -483.64
-    pg = read_namd_pressure_tensor(Testing.namd_pressure_log; group_pressure=true)
+    pg = read_namd_pressure_tensor(test_file("pressure_tensor.log"); group_pressure=true)
     @test length(pg) == 2001
     @test pg.tensors[1][1, 2] == -693.43
     @test pg.tensors[1][2, 1] == -329.522
     # Repeated steps are skipped
     tmp = tempname()
-    lines = readlines(Testing.namd_pressure_log)
+    lines = readlines(test_file("pressure_tensor.log"))
     write(tmp, join(vcat(lines, filter(startswith("PRESSURE:"), lines)), "\n"))
     @test length(read_namd_pressure_tensor(tmp)) == 2001
     # Errors
@@ -302,7 +302,7 @@ the trapezoidal rule.
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> p = read_namd_pressure_tensor(Testing.namd_pressure_log);
+julia> p = read_namd_pressure_tensor(test_file("pressure_tensor.log"));
 
 julia> gk = green_kubo_viscosity(p; tmax=1.0)
 -------------------------------------------------------------------
@@ -402,7 +402,7 @@ end
     using StaticArrays: SMatrix
     using Statistics: mean
 
-    p = read_namd_pressure_tensor(Testing.namd_pressure_log)
+    p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
     gk = green_kubo_viscosity(p; tmax=1.0)
     @test length(gk.time) == 501
     @test gk.time[1] == 0.0

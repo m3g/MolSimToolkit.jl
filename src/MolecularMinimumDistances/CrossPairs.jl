@@ -108,12 +108,12 @@ end
 @testitem "MD - CrossPairs" begin
     using PDBTools
     using LinearAlgebra: diag
-    ats = readPDB(MolSimToolkit.Testing.namd_pdb)
+    ats = readPDB(MolSimToolkit.Testing.test_file("popc_membrane.pdb"))
     popc = selindex(ats, "resname POPC")
     protein = selindex(ats, "protein")
     simulation = Simulation(
-        MolSimToolkit.Testing.namd_pdb,
-        MolSimToolkit.Testing.namd_traj,
+        MolSimToolkit.Testing.test_file("popc_membrane.pdb"),
+        MolSimToolkit.Testing.test_file("popc_membrane.dcd"),
     )
     f = first_frame!(simulation)
     p = positions(f)

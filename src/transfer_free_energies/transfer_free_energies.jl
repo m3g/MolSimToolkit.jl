@@ -74,7 +74,7 @@ A `PDBTools.TransferFreeEnergy` object with the frame-averaged values:
 ```julia-repl
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
 julia> tfe = transfer_free_energy(sim, "urea")
 
@@ -228,7 +228,7 @@ fields:
 ```julia-repl
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
 julia> tfe_frames = transfer_free_energy_frames(sim, "urea")
 
@@ -278,7 +278,7 @@ end
     using ShowMethodTesting
 
     # First frame only
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=1, last=1)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=1, last=1)
     tfe = transfer_free_energy(sim, "urea")
 
     ats = get_atoms(sim)
@@ -294,7 +294,7 @@ end
     @test all(tfe.residue_contributions_sc .≈ tfe_ref.residue_contributions_sc)
 
     # Average of first and second frame
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=1, last=2)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=1, last=2)
     f = get_frame!(sim, 2)
     set_position!.(ats, positions(f))
     protein = select(ats, "protein")
@@ -308,7 +308,7 @@ end
     @test all(tfe.residue_contributions_sc .≈ 0.5 * (tfe_ref.residue_contributions_sc + tfe_ref2.residue_contributions_sc))
 
     # test for time-dependent TFE computation
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=1, last=2)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=1, last=2)
     tfe_frames = transfer_free_energy_frames(sim, "urea")
     @test length(tfe_frames) == 2
     @test firstindex(tfe_frames) == 1

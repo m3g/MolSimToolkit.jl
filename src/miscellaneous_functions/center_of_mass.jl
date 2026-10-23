@@ -19,7 +19,7 @@ julia> using PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> protein_indices = findall(sel"protein", get_atoms(simulation));
 
@@ -64,7 +64,7 @@ end
 @testitem "center_of_mass" begin
     using MolSimToolkit.Testing
     import PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     first_frame!(simulation)
     protein_indices = PDBTools.selindex(get_atoms(simulation), "protein")
     coor = positions(current_frame(simulation))

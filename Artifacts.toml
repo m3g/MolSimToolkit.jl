@@ -1,0 +1,17 @@
+# Test files, from https://github.com/m3g/MolSimTestFiles (downloaded only when needed)
+[molsimtoolkit_test_files]
+git-tree-sha1 = "86db7e8c748e1097601a090dcc7304f11dc08e7a"
+lazy = true
+
+    [[molsimtoolkit_test_files.download]]
+    url = "https://github.com/m3g/MolSimTestFiles/releases/download/molsimtoolkit-v1/molsimtoolkit.tar.gz"
+    sha256 = "7e780bc53c3ed412e5cf29b9f572d3ce42eabe9bb9c68fcab4e42c33182cec25"
+
+# Shared with ComplexMixtures.jl
+[protein_tmao_test_files]
+git-tree-sha1 = "21f7d440d222311fcbad28111ac26a395e2a7903"
+lazy = true
+
+    [[protein_tmao_test_files.download]]
+    url = "https://github.com/m3g/MolSimTestFiles/releases/download/protein_tmao-v1/protein_tmao.tar.gz"
+    sha256 = "0391800c69a72732f2c537381dd164b8c94177a2b417e2e883b9a39efc642ea1"

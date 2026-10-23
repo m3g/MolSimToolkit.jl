@@ -68,7 +68,7 @@ per frame.
 ```jldoctest
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; frames=1:5);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"); frames=1:5);
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -125,7 +125,7 @@ within `cutoff` of the binding `site`.
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; frames=1:5);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"); frames=1:5);
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -205,7 +205,7 @@ end
     using ShowMethodTesting
     using LinearAlgebra: diag
 
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
     occ = occupancy(

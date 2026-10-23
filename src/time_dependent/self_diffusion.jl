@@ -206,7 +206,7 @@ coefficient from the linear (diffusive) regime of the resulting curve.
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
 julia> tmao = select(get_atoms(sim), "resname TMAO");
 
@@ -448,7 +448,7 @@ end
     using MolSimToolkit, PDBTools, MolSimToolkit.Testing
     using OffsetArrays
 
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     protein = select(get_atoms(sim), "protein")
 
     # A single "molecule" (the whole protein): delta=0 must be exactly zero,
@@ -469,7 +469,7 @@ end
     end
 
     # Multiple molecules: TMAO, using the namd2 trajectory
-    sim2 = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim2 = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     tmao = select(get_atoms(sim2), "resname TMAO")
     msd2 = mean_square_displacement(sim2, tmao; natomspermol=14, maxdelta=4, show_progress=false)
     @test msd2[0] == 0.0
@@ -568,7 +568,7 @@ end
 
     # Integration with mean_square_displacement, using real trajectory data
     using PDBTools, MolSimToolkit.Testing
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     tmao = select(get_atoms(sim), "resname TMAO")
     msd2 = mean_square_displacement(sim, tmao; natomspermol=14, maxdelta=4, show_progress=false)
     D = self_diffusion_coefficient(msd2)

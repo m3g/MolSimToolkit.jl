@@ -16,7 +16,7 @@ julia> using PDBTools
 
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ats = get_atoms(sim);
 
@@ -82,7 +82,7 @@ end
     using PDBTools
     using MolSimToolkit
     using MolSimToolkit.Testing
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     i1 = findall(sel"protein and residue 1", get_atoms(sim))
     i2 = findall(sel"protein and residue 15", get_atoms(sim))
     proof = [23.433267858947584, 30.13791365033211, 28.48617683945202, 27.92740141686934, 23.235012287435566]
@@ -90,13 +90,13 @@ end
     s1 = filter(sel"protein and residue 1", get_atoms(sim))
     s2 = filter(sel"protein and residue 15", get_atoms(sim))
     @test distances(sim, s1, s2; silent=true) ≈ proof
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=2, last=4)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=2, step=2, last=4)
     @test distances(sim, s1, s2; silent=true) ≈ proof[2:2:4]
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=1, last=5)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=2, step=1, last=5)
     @test distances(sim, s1, s2; silent=true) ≈ proof[2:5]
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[3,5])
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); frames=[3,5])
     @test distances(sim, s1, s2; silent=true) ≈ [proof[3], proof[5]]
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[5,3])
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); frames=[5,3])
     @test distances(sim, s1, s2; silent=true) ≈ [proof[3], proof[5]]
 end
 

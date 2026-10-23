@@ -42,7 +42,7 @@ The process is repeated until the structure most similar to the average is the s
 ```julia-repl
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> most_representative_structure(simulation) # atoms == nothing (all alpha-carbons in proteins)
 (4, 1.1681526249035976)
@@ -113,7 +113,7 @@ end
 
 @testitem "most_representative_structure" begin
     using MolSimToolkit, MolSimToolkit.Testing, PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     calphas = select(get_atoms(simulation), "name CA")
     imin, rmsdmin = most_representative_structure(simulation)
     @test imin == 4

@@ -30,7 +30,7 @@ protein surface by TMAO molecules, using a 3 Å cutoff:
 ```@example occupancy
 using MolSimToolkit, PDBTools, MolSimToolkit.Testing, Plots
 
-sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
 protein = select(get_atoms(sim), "protein")
 tmao = select(get_atoms(sim), "resname TMAO")
 

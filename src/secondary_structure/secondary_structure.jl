@@ -71,7 +71,7 @@ the unit cell boundaries.
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; selection="residue >= 30 and residue <= 35", show_progress=false)
 6×5 Matrix{Int64}:
@@ -125,7 +125,7 @@ end
     using MolSimToolkit
     using MolSimToolkit.Testing
     import PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
@@ -162,7 +162,7 @@ The classes can be found in the ProteinSecondaryStructures.jl package documentat
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; # 5 frames 
                    selection="residue >= 30 and residue <= 35", # 6 residues
@@ -216,7 +216,7 @@ end
     using MolSimToolkit.Testing
     using Statistics: mean
     using PDBTools
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # With stride
     ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false)
     @test size(ssmap) == (43, 5)
@@ -283,7 +283,7 @@ julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> using Plots, PDBTools
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> ssmap = ss_map(simulation; ss_method=stride_run, show_progress=false);
 

@@ -76,7 +76,7 @@ The `enumerate` iterator can also be used to iterate over the frames, returning 
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
 julia> simulation = Simulation(
-           Testing.namd_pdb, Testing.namd_traj; 
+           test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); 
            first = 2, step = 2, last = 4,
            # or frames = [2,4]
        );
@@ -293,7 +293,7 @@ end
 @testitem "get_atoms" begin
     using MolSimToolkit
     using MolSimToolkit.Testing
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first = 2, step = 2, last = 4)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first = 2, step = 2, last = 4)
     ats = get_atoms(goto_frame!(simulation, 2))
     @test position(ats[1]) ≈ [2.0012038, 7.035769, 43.272514]
     ats = get_atoms(goto_frame!(simulation, 4))
@@ -352,7 +352,7 @@ Similar to `restart!`, but returning the `Frame` object.
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first=3); # note first=3
+julia> simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=3); # note first=3
 
 julia> first_frame!(simulation) 
 Frame{Chemfiles.Frame} - first atom position: [7.346549034118652, 2.396179437637329, 40.05739974975586]
@@ -426,8 +426,8 @@ end
 
 @testitem "UnitCell - show" begin
     using ShowMethodTesting
-    using MolSimToolkit: Testing
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    using MolSimToolkit.Testing
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     first_frame!(sim)
     uc = unitcell(current_frame(sim))
     @test parse_show(uc; repl = ["MolSimToolkit." => ""] ) ≈ """
@@ -471,7 +471,7 @@ Returns the frame at the given index in the trajectory, and places the trajector
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> frame4 = get_frame!(sim, 4)
 Frame{Chemfiles.Frame} - first atom position: [-0.39684221148490906, 12.047886848449707, 37.44126892089844]
@@ -510,13 +510,13 @@ Returns the simulation placed at the given index in the trajectory.
 ```jldoctest
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> goto_frame!(sim, 4)
 Simulation 
     Atom type: Atom{Nothing}
-    PDB file: /Users/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/structure.pdb
-    Trajectory file: /Users/leandro/.julia/dev/MolSimToolkit/test/data/namd/protein_in_popc_membrane/trajectory.dcd
+    PDB file: /home/leandro/.julia/artifacts/86db7e8c748e1097601a090dcc7304f11dc08e7a/popc_membrane.pdb
+    Trajectory file: /home/leandro/.julia/artifacts/86db7e8c748e1097601a090dcc7304f11dc08e7a/popc_membrane.dcd
     Total number of frames: 5
     Frames to consider: 1, 2, 3, 4, 5
     Number of frames to consider: 5
@@ -545,7 +545,7 @@ end
     #
 
     # Read coordinates with Chemfiles interface
-    t = Chemfiles.Trajectory(Testing.namd_traj)
+    t = Chemfiles.Trajectory(test_file("popc_membrane.dcd"))
     c = zeros(Chemfiles.length(t))
     f = Chemfiles.read(t)
     c = [Chemfiles.positions(f)[1, 1]]
@@ -556,7 +556,7 @@ end
     Chemfiles.close(t)
 
     # Read coordinates with the Simulation interface
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     c2 = Float64[]
     for frame in simulation
         push!(c2, positions(frame)[1].x)
@@ -568,8 +568,8 @@ end
 @testitem "no-pdb construct" begin
     import PDBTools
     using MolSimToolkit.Testing
-    pdb = PDBTools.readPDB(Testing.namd_pdb)
-    simulation = Simulation(pdb, Testing.namd_traj)
+    pdb = PDBTools.readPDB(test_file("popc_membrane.pdb"))
+    simulation = Simulation(pdb, test_file("popc_membrane.dcd"))
     first_frame!(simulation)
     @test positions(current_frame(simulation))[1].x == 5.912472724914551
     @test isnothing(path_pdb(simulation))
@@ -577,17 +577,17 @@ end
 
 @testitem "get_frame!" begin
     using MolSimToolkit, MolSimToolkit.Testing, PDBTools
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     frames = [ copy(positions(frame)) for frame in sim ]
     @test all(positions(get_frame!(sim, i)) ≈ frames[i] for i in eachindex(sim))
     @test positions(get_frame!(sim, 5)) ≈ frames[5]
     @test positions(get_frame!(sim, 1)) ≈ frames[1]
     @test positions(get_frame!(sim, 2)) ≈ frames[2]
-    ats = read_pdb(Testing.namd_pdb)
-    sim = Simulation(ats, Testing.namd_traj)
+    ats = read_pdb(test_file("popc_membrane.pdb"))
+    sim = Simulation(ats, test_file("popc_membrane.dcd"))
     @test all(positions(get_frame!(sim, i)) ≈ frames[i] for i in eachindex(sim))
     @test_throws ArgumentError get_frame!(sim, 100)
-    sim2 = Simulation(Testing.namd_pdb, Testing.namd_traj; frames=[1,2,5])
+    sim2 = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); frames=[1,2,5])
     @test positions(get_frame!(sim2, 1)) ≈ frames[1]
     @test positions(get_frame!(sim2, 2)) ≈ frames[2]
     @test positions(get_frame!(sim2, 5)) ≈ frames[5]
@@ -604,7 +604,7 @@ end
     set_frame_range!(sim2; first=2, last=4)
     @test frame_range(sim2) == [2,3,4]
 
-    simulation = Simulation(Testing.namd_pdb, Testing.namd_traj; first = 2, step = 2, last = 4)
+    simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first = 2, step = 2, last = 4)
     @test first(positions(get_frame!(simulation, 2))) ≈ [2.001203775405884, 7.035768985748291, 43.27251434326172]
     @test first(positions(get_frame!(simulation, 4))) ≈ [-0.39684221148490906, 12.047886848449707, 37.44126892089844]
     @test_throws "get_frame!: Index 1 selected, but available frames are: [2, 4]" get_frame!(simulation, 1)
@@ -616,7 +616,7 @@ end
     using MolSimToolkit.Testing
     using PDBTools
     using ShowMethodTesting: parse_show
-    sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
     # replacement to avoid errors associated to type names
     repl = Dict(
         "MolSimToolkit." => "", 
@@ -634,5 +634,5 @@ end
     Number of frames to consider: 5
     Current frame: 1
     """
-    @test parse_show(repr(sim; context= :compact => true), repl=repl) ≈ "Simulation(structure.pdb, trajectory.dcd)"
+    @test parse_show(repr(sim; context= :compact => true), repl=repl) ≈ "Simulation(popc_membrane.pdb, popc_membrane.dcd)"
 end

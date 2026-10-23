@@ -158,7 +158,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -271,7 +271,7 @@ Returns an `OffsetArray` with indices `0:maxdelta`, where the value at position
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd_pdb, Testing.namd_traj);
+julia> sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"));
 
 julia> hbo = hydrogen_bond_occupancy(sim, "protein", show_progress=false)["protein => protein"];
 
@@ -309,7 +309,7 @@ end
     c2 = intermittent_correlation(hbo2; maxdelta=4, show_progress=false)
     @test c2 == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
 
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     hbo3 = hydrogen_bond_occupancy(sim, "protein"; show_progress=false)["protein => protein"]
     c3 = intermittent_correlation(hbo3; maxdelta=4, show_progress=false)
     @test c3[0] == 1.0
@@ -330,7 +330,7 @@ end
     @test c == intermittent_correlation(data; maxdelta=4, show_progress=false)
     @test c == OffsetArray([1.0, 0.0, 1.0, 0.0, 1.0], 0:4)
 
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
     occ2 = occupancy(sim, protein, tmao; solvent_natomspermol=14, cutoff=3.0, show_progress=false)
@@ -443,7 +443,7 @@ the correlation function can be converted into a residence time with the
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -578,7 +578,7 @@ end
     @test all(isnan, p.correlations[2])
     @test parent(p.correlations[3]) == [1.0, 0.0, 1.0, 0.0, 1.0]
 
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
     occ = occupancy(sim, protein, tmao; solvent_natomspermol=14, cutoff=6.0, show_progress=false)
@@ -654,7 +654,7 @@ contains no data at all).
 ```jldoctest ;filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using MolSimToolkit, PDBTools, MolSimToolkit.Testing
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
 julia> protein = select(get_atoms(sim), "protein");
 
@@ -718,7 +718,7 @@ end
     # works on 1-based vectors as well
     @test residence_time([1.0, 0.5, 0.0]) ≈ 1.0
 
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     protein = select(get_atoms(sim), "protein")
     tmao = select(get_atoms(sim), "resname TMAO")
     occ = occupancy(sim, protein, tmao; solvent_natomspermol=14, cutoff=6.0, show_progress=false)

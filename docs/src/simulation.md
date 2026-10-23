@@ -15,7 +15,7 @@ The standard way to process a trajectory is to iterate over all frames with a `f
 ```@example simulation_iterate
 using MolSimToolkit, MolSimToolkit.Testing
 
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj; first=2, step=2, last=4)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first=2, step=2, last=4)
 
 for frame in sim
     @show frame_index(sim)
@@ -52,7 +52,7 @@ using MolSimToolkit, MolSimToolkit.Testing
 using PDBTools
 using Plots: plot
 
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
 # Indices of the Cα atoms of the first and last residues
 ats = get_atoms(sim)
@@ -135,4 +135,13 @@ unitcell
 ```@autodocs
 Modules = [ MolSimToolkitShared ]
 Pages = [ "wrap.jl" ]
+```
+## Test files
+
+The examples use the test files of the package, which are obtained with the `test_file`
+function of the `MolSimToolkit.Testing` module. They are not part of the package installation:
+they are downloaded the first time they are used.
+
+```@docs
+MolSimToolkit.Testing.test_file
 ```

@@ -28,7 +28,7 @@ The function returns a vector with the average dihedral angles in radians or deg
 ```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
 julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
 
-julia> atoms = read_pdb(Testing.namd2_pdb);
+julia> atoms = read_pdb(test_file("protein_tmao.pdb"));
 
 julia> cAs = select(atoms, "name CA and residue < 5"); # 4 atoms
 
@@ -36,7 +36,7 @@ julia> r1b = select(atoms, "residue 1 and backbone"); # 4 atoms
 
 julia> inds = [ index.(cAs), index.(r1b) ]; # List of vector of indices
 
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
+julia> sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"));
 
 julia> ds = average_dihedrals(sim, inds)
 2-element Vector{Float64}:
@@ -85,8 +85,8 @@ end
     using MolSimToolkit.Testing
     using PDBTools
 
-    atoms = read_pdb(Testing.namd2_pdb)
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    atoms = read_pdb(test_file("protein_tmao.pdb"))
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     first_frame!(sim)
     p1 = positions(current_frame(sim))
     cAs = select(atoms, "name CA and residue < 5")
@@ -100,7 +100,7 @@ end
     @test init ≈ 2 * [-168.41887, -55.351723] atol = 1e-3
 
     inds = [ index.(cAs), index.(r1b) ]
-    sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj)
+    sim = Simulation(test_file("protein_tmao.pdb"), test_file("protein_tmao.dcd"))
     ds = average_dihedrals(sim, inds)
     @test ds ≈ [-60.12860673875001, -0.3398274578758668] atol = 1e-5
 

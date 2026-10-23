@@ -28,8 +28,8 @@ The `rmsd` routine has the option to compute the `rmsd` of a set of atoms, while
 using MolSimToolkit
 using Plots
 sim = Simulation(
-    MolSimToolkit.Testing.namd2_pdb, # pdb file
-    MolSimToolkit.Testing.namd2_traj, # trajectory file
+    MolSimToolkit.Testing.test_file("protein_tmao.pdb"), # pdb file
+    MolSimToolkit.Testing.test_file("protein_tmao.dcd"), # trajectory file
 )
 r = rmsd(sim, "protein and name CA"; rmsd_of="protein and residue 47 to 53")
 plot(MolSimStyle, r, xlabel="frame", ylabel="rmsd of 47 to 53")
@@ -103,7 +103,7 @@ the RMSD of all atoms. For example:
 using MolSimToolkit, MolSimToolkit.Testing
 
 # Create Simulation object from pdb and trajectory file names
-sim = Simulation(Testing.namd_pdb, Testing.namd_traj)
+sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
 
 # Run map_fractions
 mf = map_fractions(sim)

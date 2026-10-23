@@ -47,7 +47,7 @@ of `remd_data`:
 ```@example
 using MolSimToolkit
 using Plots
-data = remd_data(MolSimToolkit.gmx5_0_4_log)
+data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 heatmap(data)
 ```
 
@@ -76,7 +76,7 @@ all levels from 0 to 12, and replica 1 appears to be trapped in leves 13 to 15.
 ```@example
 using MolSimToolkit
 using Plots
-data = remd_data(MolSimToolkit.gmx5_0_4_log)
+data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 
 # Obtain the paths
 path0 = remd_replica_path(data, 0; stride = 1)
@@ -100,7 +100,7 @@ given by the probability matrix:
 ```@example
 using MolSimToolkit
 using Plots
-data = remd_data(MolSimToolkit.gmx5_0_4_log)
+data = remd_data(MolSimToolkit.Testing.test_file("remd_gmx-5.0.4.log"))
 scatter(MolSimStyle,
     data.probability_matrix,
     labels= Ref("Replica ") .* string.((0:15)'),

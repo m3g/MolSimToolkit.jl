@@ -50,7 +50,7 @@ functions:
 ```@example viscosity
 using MolSimToolkit, MolSimToolkit.Testing, Plots
 
-p = read_namd_pressure_tensor(Testing.namd_pressure_log)
+p = read_namd_pressure_tensor(test_file("pressure_tensor.log"))
 ```
 
 ```@example viscosity
