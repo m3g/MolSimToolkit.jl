@@ -16,6 +16,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [sources]
+MolSimToolkit = {path = ".."}
 # Until PDBToolsBase and PDBTools 4 are registered
 PDBTools = {url = "https://github.com/m3g/PDBTools.jl", rev = "pdbtoolsbase"}
 PDBToolsBase = {url = "https://github.com/m3g/PDBToolsBase.jl", rev = "main"}
