@@ -132,8 +132,15 @@ unitcell
 
 ## Periodic boundary conditions
 
+The functions for periodic boundary conditions (and other functions shared by the packages of
+the ecosystem, such as `center_of_mass`, `rmsd` and `align`) are defined in `PDBToolsBase`:
+
+```@docs
+PDBToolsBase
+```
+
 ```@autodocs
-Modules = [ MolSimToolkitShared ]
+Modules = [ PDBToolsBase ]
 Pages = [ "wrap.jl" ]
 ```
 ## Test files

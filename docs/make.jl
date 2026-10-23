@@ -2,15 +2,20 @@ using Documenter
 using Plots
 using MolSimToolkit
 using MolSimToolkit.PackmolInputCreator
-using MolSimToolkitShared
+using PDBToolsBase
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
 ENV["GKSwstype"] = "nul"
 makedocs(
     modules = [
-        MolSimToolkit, MolSimToolkitShared,
+        MolSimToolkit, PDBToolsBase,
         isdefined(Base, :get_extension) ? Base.get_extension(MolSimToolkit, :Plotting) : MolSimToolkit.Plotting
     ],
+    # PDBToolsBase is listed for the docstrings of the shared functions used here; it exports
+    # nothing, so checking only the exported names does not require all its docstrings
+    checkdocs=:exports,
+    # Source links of the docstrings of PDBToolsBase
+    remotes=Dict(pkgdir(PDBToolsBase) => (Documenter.Remotes.GitHub("m3g", "PDBToolsBase.jl"), "main")),
     sitename="MolSimToolkit.jl",
     doctest=false,
     pages=[

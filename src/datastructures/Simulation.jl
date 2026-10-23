@@ -107,7 +107,7 @@ julia> for (i, frame) in enumerate(simulation)
 """
 mutable struct Simulation{
     AtomType,
-    V<:Vector{<:AtomType},
+    V<:AbstractVector{<:AtomType},
     F<:Frame,
     T<:Trajectory,
     L<:ReentrantLock
@@ -620,7 +620,7 @@ end
     # replacement to avoid errors associated to type names
     repl = Dict(
         "MolSimToolkit." => "", 
-        "PDBTools." => "",
+        r"PDBTools(Base)?\." => "",
         r"(PDB file:).*" => s"\1",
         r"(Trajectory file:).*" => s"\1",
     )
