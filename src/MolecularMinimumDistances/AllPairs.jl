@@ -147,7 +147,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell = uc,
         xn_atoms_per_molecule = 134,
         yn_atoms_per_molecule = length(protein),
     )
@@ -158,7 +158,7 @@ end
         local uc = unitcell(current_frame(simulation))
         sys.system.xpositions .= @view(pos[popc])
         sys.system.ypositions .= @view(pos[protein])
-        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.unitcell = uc
         md = minimum_distances!(sys)
         xmd_min[iframe] = minimum(p -> p.d, md[1])
         ymd_indices[iframe] = minimum(p -> p.i, md[2])
@@ -170,7 +170,7 @@ end
                 xn_atoms_per_molecule = 134,
                 yn_atoms_per_molecule = length(protein),
                 cutoff = 6.0,
-                unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+                unitcell = uc,
             )
             @test all(md_out[1] .≈ md[1])
             @test all(md_out[2] .≈ md[2])
@@ -183,7 +183,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell = uc,
         xn_atoms_per_molecule = 124,
         yn_atoms_per_molecule = length(protein),
     )
@@ -192,7 +192,7 @@ end
         xpositions = xsolvent,
         ypositions = xsolute,
         cutoff = 6.0,
-        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell = uc,
         xn_atoms_per_molecule = 134,
         yn_atoms_per_molecule = length(protein) + 1,
     )

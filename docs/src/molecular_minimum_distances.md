@@ -446,11 +446,6 @@ Cutoff: 10.0
 unitcell: [84.4, 0.0, 0.0, 0.0, 84.4, 0.0, 0.0, 0.0, 84.4]
 ```
 
-!!! note
-    It is not possible to update the `unitcell` from a Orthorhombic to a general Triclinic cell. If the system
-    will be Triclinic at any moment, the `unitcell` must be initialized with the full matrix instead of a 
-    vector of sides.
-
 ### Index of molecules
 
 Additionally, the low level interface allows the definition of more general groups of particles, in the sense that "molecule" can have different number of atoms in the same set. Therefore, one needs to provide *a function* that returns the index of the molecule of each atom, given the index of the atom. 

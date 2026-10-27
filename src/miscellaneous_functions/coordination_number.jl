@@ -77,7 +77,7 @@ function coordination_number(
         ypositions=p[inds_solute],
         xn_atoms_per_molecule=solvent_natomspermol,
         cutoff=cutoff,
-        unitcell= uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell= uc,
     )
     prg = Progress(length(sim); enabled=show_progress)
     for (iframe, frame) in enumerate(sim)
@@ -85,7 +85,7 @@ function coordination_number(
         uc = unitcell(current_frame(sim))
         sys.system.xpositions .= @view(p[inds_solvent])
         sys.system.ypositions .= @view(p[inds_solute])
-        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.unitcell = uc
         md_list = minimum_distances!(sys)
         cn[iframe] = count(md -> md.within_cutoff, md_list)
         next!(prg)

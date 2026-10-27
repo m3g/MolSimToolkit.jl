@@ -24,6 +24,8 @@ using PDBToolsBase: alignment_movements,
                     dihedral,
                     dihedrals
 
+# The unit cell and structure types of PDBTools (UnitCell is reexported)
+using PDBToolsBase: UnitCell, Structure
 
 using TestItems: @testitem
 using StaticArrays: FieldVector, SMatrix, MMatrix, MVector, SVector

@@ -246,7 +246,7 @@ function setup_hbond_list_particle_systems(
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
                 positions=PDBTools.position.(s1.ats),
-                unitcell=uc_first_frame.matrix,
+                unitcell=uc_first_frame,
                 cutoff=donnor_acceptor_distance,
                 output=HBondList(HBond[]),
                 parallel=parallel,
@@ -257,7 +257,7 @@ function setup_hbond_list_particle_systems(
             systems[key] = ParticleSystem(
                 xpositions=PDBTools.position.(s1.ats),
                 ypositions=PDBTools.position.(s2.ats),
-                unitcell=uc_first_frame.matrix,
+                unitcell=uc_first_frame,
                 cutoff=donnor_acceptor_distance,
                 output=HBondList(HBond[]),
                 parallel=parallel,
@@ -269,8 +269,8 @@ function setup_hbond_list_particle_systems(
     return systems
 end
 
-struct SelectionData{A<:PDBTools.Atom,}
-    ats::Vector{A}
+struct SelectionData{A<:PDBTools.Atom,V<:AbstractVector{A}}
+    ats::V
     inds::Vector{Int32}
     polar_bonds::HPolarBonds
 end
@@ -322,7 +322,7 @@ function initialize_hbonds_data(
                 polar_bonds = find_hbond_donnors(
                     ats_sel;
                     positions=@view(p_first_frame[inds_sel]),
-                    unitcell=uc_first_frame.matrix,
+                    unitcell=uc_first_frame,
                     cutoff=donnor_acceptor_distance,
                     parallel=parallel,
                     electronegative_elements=electronegative_elements,
@@ -362,7 +362,7 @@ function setup_particle_systems(
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
                 positions=PDBTools.position.(s1.ats),
-                unitcell=uc_first_frame.matrix,
+                unitcell=uc_first_frame,
                 cutoff=donnor_acceptor_distance,
                 output=0,
                 parallel=parallel,
@@ -373,7 +373,7 @@ function setup_particle_systems(
             systems[key] = ParticleSystem(
                 xpositions=PDBTools.position.(s1.ats),
                 ypositions=PDBTools.position.(s2.ats),
-                unitcell=uc_first_frame.matrix,
+                unitcell=uc_first_frame,
                 cutoff=donnor_acceptor_distance,
                 output=0,
                 parallel=parallel,

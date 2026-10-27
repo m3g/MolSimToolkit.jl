@@ -10,11 +10,15 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 2.7.1-DEV
+Version 2.8.0-DEV
 --------------
 - ![FEATURE][badge-feature] A `Simulation` can be built from multiple trajectory files, which are considered sequential parts of the same simulation: `Simulation(pdb_file, traj_file1, traj_file2, ...)` or `Simulation(pdb_file, [traj_file1, traj_file2, ...])` ([#93](https://github.com/m3g/MolSimToolkit.jl/issues/93)).
+- ![FEATURE][badge-feature] A `Simulation` can hold any `AbstractVector` of atoms, such as the `Structure` returned by `read_pdb` in PDBTools 4 (which keeps its unit cell).
+- ![FEATURE][badge-feature] `get_atoms(simulation)` returns a `PDBTools.Structure` carrying the unit cell of the current frame, such that it is written by `write_pdb` and used by the PDBTools functions that accept `unitcell=true`.
+- ![FEATURE][badge-feature] The new `unitcell` keyword of the `Simulation` constructor sets a fixed unit cell for all frames, overriding that of the trajectory (e.g. for trajectories without unit cell information): `unitcell=true` uses the unit cell of the PDB file, and `unitcell=uc` the given `UnitCell` (other values are converted with `UnitCell(uc)`).
+- ![ENHANCEMENT][badge-enhancement] `UnitCell` is the unit cell type of PDBTools (`PDBToolsBase.UnitCell`), such that it no longer conflicts with the one exported by PDBTools. `unitcell(frame)` returns a `UnitCell`, or `nothing` if the frame does not have a unit cell (instead of a cell with the `valid` and `orthorhombic` fields, which were removed). Unit cells are passed as matrices to CellListMap, which requires CellListMap 0.10.7 or later. For non-periodic trajectories, `nothing` is passed as the unit cell to CellListMap, and `reconstruct_structure!` does not modify the coordinates.
+- ![INFO][badge-info] The default `model` of `transfer_free_energy(::Simulation, ...)` and `transfer_free_energy_frames` remains `PDBTools.AutonBolen`, while the default of `PDBTools.transfer_free_energy` is `PDBTools.Accessibility` since PDBTools 4.0.1. Set `model` explicitly to compare results of the two packages.
 - ![INFO][badge-info] Depends on PDBTools 4, built on [PDBToolsBase.jl](https://github.com/m3g/PDBToolsBase.jl). The shared functions (`center_of_mass`, `distances`, `coordination_number`, `wrap`, `rmsd`, `positions`, `get_atoms`, ...) are those of PDBToolsBase, instead of MolSimToolkitShared, which is no longer a dependency. `bulk_coordination` is defined in MolSimToolkit. Requires Julia 1.11 or later.
-- ![ENHANCEMENT][badge-enhancement] A `Simulation` can hold any `AbstractVector` of atoms, such as the `Structure` returned by `read_pdb` in PDBTools 4 (which keeps its unit cell).
 - ![INFO][badge-info] The test files are no longer part of the package installation: they are lazy artifacts (from [MolSimTestFiles](https://github.com/m3g/MolSimTestFiles)), downloaded when needed. They are accessed with `test_file(name)`, exported by `MolSimToolkit.Testing` and available after `using LazyArtifacts` (a package extension, so LazyArtifacts is not loaded with the package). It replaces the path variables of that module (e.g. `Testing.namd_pdb` is now `test_file("popc_membrane.pdb")`; the files are listed in `test/Testing.jl`). The `MolSimToolkit.gmx2019_4_log` and `MolSimToolkit.gmx5_0_4_log` constants are replaced by `test_file("remd_gmx-2019.4.log")` and `test_file("remd_gmx-5.0.4.log")`.
 
 Version 2.7.0

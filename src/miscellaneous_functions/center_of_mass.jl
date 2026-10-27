@@ -51,7 +51,7 @@ function center_of_mass(
     for i in indices
         m = PDBTools.atomic_mass(simulation.atoms[i])
         x = if !isnothing(iref)
-            MolSimToolkit.wrap(p[i], xref, uc)
+            _wrap(p[i], xref, uc)
         else
             p[i]
         end

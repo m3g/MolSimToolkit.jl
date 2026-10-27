@@ -179,7 +179,7 @@ function occupancy(
         ypositions=p[inds_site],
         xn_atoms_per_molecule=solvent_natomspermol,
         cutoff=cutoff,
-        unitcell=uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell=uc,
     )
 
     list = Vector{Vector{Int}}(undef, length(sim))
@@ -190,7 +190,7 @@ function occupancy(
         uc = unitcell(frame)
         sys.system.xpositions .= @view(p[inds_solvent])
         sys.system.ypositions .= @view(p[inds_site])
-        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.unitcell = uc
         md_list = minimum_distances!(sys)
         imols = findall(md -> md.within_cutoff, md_list)
         list[iframe] = imols
@@ -232,7 +232,7 @@ end
         ypositions=positions(current_frame(sim))[index.(protein)],
         xn_atoms_per_molecule=14,
         cutoff=3.0,
-        unitcell=diag(unitcell(current_frame(sim)).matrix),
+        unitcell=unitcell(current_frame(sim)),
     )
     @test md[imol].d ≈ d
     # occupancy data without distance information

@@ -20,10 +20,10 @@ export goto_frame!
 export get_atoms
 
 """
-    Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5])
-    Simulation(pdb_file::String, trajectory_file::String; frames=9:2:20)
-    Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1)
-    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1) 
+    Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5], unitcell=nothing)
+    Simulation(pdb_file::String, trajectory_file::String; frames=9:2:20, unitcell=nothing)
+    Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file1::String, trajectory_file2::String, ...; kargs...)
     Simulation(pdb_file::String, trajectory_files::AbstractVector{<:AbstractString}; kargs...)
 
@@ -49,6 +49,16 @@ The `frames` or `first`, `last`, and `step` arguments can be used to specify the
 - `first`, `last`, and `step` are Integers that specify the frames to be iterated over. 
    If `last` is not specified, the last frame in the trajectory will be used.
 
+By default, the unit cell of each frame is read from the trajectory file. The `unitcell` keyword
+sets a fixed unit cell, which will be used for all frames, ignoring the unit cell of the trajectory
+(useful for trajectories without unit cell information, of constant-volume simulations):
+
+- `unitcell=true`: use the unit cell of the PDB file (or of the `atoms`, if they are a `PDBTools.Structure` with a unit cell).
+- `unitcell=uc`: use the unit cell `uc`, a `UnitCell` object, which can be created from the sides of
+   an orthorhombic box, the matrix of lattice vectors, or the lattice parameters (see the
+   [`UnitCell` documentation of PDBTools](https://m3g.github.io/PDBTools.jl/stable/)). Other values
+   are converted with `UnitCell(uc)`, e. g. `unitcell=[10.0, 10.0, 10.0]`.
+
 A `Simulation` object contains a trajectory file and a PDB data of the atoms. It can be iterated over to
 obtain the frames in the trajectory. The `Simulation` object is a mutable struct
 that contains the following data, that can be retrieved by the corresponding
@@ -58,7 +68,8 @@ functions:
 - `frame_index(::Simulation)`: the index of the current frame in the trajectory
 - `length(::Simulation)`: the number of frames to be iterated over in the trajectory file, considering the current range
 - `raw_length(::Simulation)`: the number of frames in the trajectory file
-- `get_atoms(::Simulation; frame=nothing)`: get vector of atoms of the simulation, `frame=nothing`, the positions of the current frame will be returned. 
+- `get_atoms(::Simulation)`: get the atoms of the simulation, with the positions and unit cell of the current frame, as a `PDBTools.Structure`.
+- `unitcell(::Frame)`: the unit cell of a frame (`unitcell(current_frame(simulation))` for the current frame).
 
 The Simulation object can also be manipulated by the following functions:
 
@@ -126,6 +137,7 @@ mutable struct Simulation{
     frame::F
     frame_index::Int
     trajectory::T
+    unitcell::Union{Nothing,UnitCell}
     read_lock::L
 end
 
@@ -154,6 +166,7 @@ function show(io::IO, sim::Simulation)
             Number of frames to consider: $(length(sim))
             Current frame: $(frame_index(sim))
         """))
+        isnothing(sim.unitcell) || print(io, "\n    Fixed unit cell: $(sim.unitcell)")
     end
 end
 
@@ -219,14 +232,38 @@ function Simulation(
     pdb_file::Union{Nothing,String},
     atoms::AbstractVector{AtomType},
     trajectory::Trajectory,
-    frames, first, last, step
+    frames, first, last, step, unitcell
 ) where {AtomType}
     frame_range = _set_range(trajectory, frames, first, last, step)
     frame = read(trajectory)
     read_lock = ReentrantLock()
     frame_index = 1
-    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, read_lock)
+    uc = _fixed_unitcell(atoms, unitcell)
+    simulation = Simulation(pdb_file, atoms, frame_range, frame, frame_index, trajectory, uc, read_lock)
     restart!(simulation)
+    return simulation
+end
+
+# Fixed unit cell of the simulation, from the `unitcell` keyword of the constructor
+_fixed_unitcell(_, ::Nothing) = nothing
+function _fixed_unitcell(atoms, unitcell::Bool)
+    unitcell || return nothing
+    uc = atoms isa Structure ? atoms.unitcell : nothing
+    if isnothing(uc)
+        throw(ArgumentError("""\n
+            unitcell=true requires the atoms to have a unit cell (e. g. read from the CRYST1 field of a PDB file).
+            Provide the unit cell with `unitcell=...` instead.
+
+        """))
+    end
+    return uc
+end
+_fixed_unitcell(_, unitcell) = UnitCell(unitcell)
+
+# Replaces the unit cell read from the trajectory by the fixed unit cell, if any
+function _set_fixed_unitcell!(simulation::Simulation)
+    uc = simulation.unitcell
+    isnothing(uc) || (simulation.frame.unitcell_matrix .= uc)
     return simulation
 end
 
@@ -240,17 +277,17 @@ to be used.
 =#
 function Simulation(
     pdb_file::String, trajectory_files::AbstractVector{<:AbstractString}; 
-    frames=nothing, first=nothing, last=nothing, step=nothing
+    frames=nothing, first=nothing, last=nothing, step=nothing, unitcell=nothing
 )
     atoms = PDBTools.read_pdb(pdb_file)
-    return Simulation(pdb_file, atoms, Trajectory(trajectory_files), frames, first, last, step)
+    return Simulation(pdb_file, atoms, Trajectory(trajectory_files), frames, first, last, step, unitcell)
 end
 
 function Simulation(
-    atoms::AbstractVector{AtomType}, trajectory_files::AbstractVector{<:AbstractString}; 
-    frames=nothing, first=nothing, last=nothing, step=nothing
+    atoms::AbstractVector{AtomType}, trajectory_files::AbstractVector{<:AbstractString};
+    frames=nothing, first=nothing, last=nothing, step=nothing, unitcell=nothing
 ) where {AtomType}
-    return Simulation(nothing, atoms, Trajectory(trajectory_files), frames, first, last, step)
+    return Simulation(nothing, atoms, Trajectory(trajectory_files), frames, first, last, step, unitcell)
 end
 
 Simulation(pdb_file::String, trajectory_file::String, more_trajectory_files::String...; kargs...) = 
@@ -303,17 +340,22 @@ Base.length(simulation::Simulation) = length(simulation.frame_range)
 """
     get_atoms(simulation::Simulation)
 
-Returns the a vector of PDBTools.Atom atoms with the positions in the current frame of the simulation.
+Returns the atoms of the simulation, with the positions of the current frame, as a `PDBTools.Structure`
+carrying the unit cell of the current frame (`nothing` if the system is not periodic). 
+
+The unit cell is thus written by `PDBTools.write_pdb`, and used by the PDBTools functions that 
+support periodic boundary conditions with `unitcell=true`.
 
 """
 function get_atoms(simulation::Simulation)
     ats = copy.(simulation.atoms)
     PDBTools.set_position!.(ats, positions(current_frame(simulation)))
-    return ats
+    return Structure(ats; unitcell=unitcell(current_frame(simulation)))
 end
 
 @testitem "get_atoms" begin
     using MolSimToolkit
+    import PDBTools
     using MolSimToolkit.Testing, LazyArtifacts
     simulation = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); first = 2, step = 2, last = 4)
     ats = get_atoms(goto_frame!(simulation, 2))
@@ -322,6 +364,47 @@ end
     @test position(ats[1]) ≈ [-0.3968422, 12.047887, 37.44127] 
     ats = get_atoms(simulation)
     @test position(ats[1]) ≈ [-0.3968422, 12.047887, 37.44127] 
+    # The structure carries the unit cell of the current frame
+    @test ats isa PDBTools.Structure
+    @test ats.unitcell ≈ unitcell(current_frame(simulation))
+    sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
+    @test isnothing(get_atoms(sim).unitcell)
+end
+
+@testitem "fixed unit cell" begin
+    using MolSimToolkit
+    using MolSimToolkit.Testing, LazyArtifacts
+    using PDBTools
+    using ShowMethodTesting: parse_show
+    # Unit cell of the PDB file
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"); unitcell=true)
+    uc_pdb = read_pdb(test_file("popc_membrane.pdb")).unitcell
+    @test all(unitcell(frame) == uc_pdb for frame in sim)
+    @test get_atoms(goto_frame!(sim, 3)).unitcell == uc_pdb
+    @test parse_show(sim; repl=Dict(r"(PDB file:).*" => s"\1", r"(Trajectory file:).*" => s"\1", r"PDBTools(Base)?\." => "")) ≈ """
+    Simulation 
+    Atom type: Atom{Nothing}
+    PDB file:
+    Trajectory file:
+    Total number of frames: 5
+    Frames to consider: 1, 2, 3, 4, 5
+    Number of frames to consider: 5
+    Current frame: 3
+    Fixed unit cell: UnitCell(a=47.467, b=47.467, c=87.903, α=90.00, β=90.00, γ=90.00)
+    """
+    # The unit cell of the trajectory is used by default
+    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
+    @test !(unitcell(first_frame!(sim)) ≈ uc_pdb)
+    # Unit cell given explicitly, for a trajectory without unit cell
+    sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"); unitcell=[100.0, 100.0, 100.0])
+    @test all(unitcell(frame) == UnitCell(100.0, 100.0, 100.0) for frame in sim)
+    sim = Simulation(read_pdb(test_file("short_nopbc.pdb")), test_file("short_nopbc.dcd"); unitcell=UnitCell(100.0, 100.0, 100.0))
+    @test unitcell(first_frame!(sim)) == UnitCell(100.0, 100.0, 100.0)
+    # unitcell=true requires a unit cell in the atoms
+    ats = read_pdb(test_file("popc_membrane.pdb"))
+    ats.unitcell = nothing
+    @test_throws ArgumentError Simulation(ats, test_file("popc_membrane.dcd"); unitcell=true)
+    @test_throws ArgumentError Simulation(collect(ats), test_file("popc_membrane.dcd"); unitcell=true)
 end
 
 """
@@ -390,6 +473,7 @@ function first_frame!(simulation::Simulation)
         ifirst = first(simulation.frame_range)
         simulation.frame_index = ifirst
         read_step!(simulation.trajectory, ifirst, simulation.frame)
+        _set_fixed_unitcell!(simulation)
     end
     return simulation.frame
 end
@@ -413,52 +497,10 @@ function next_frame!(simulation::Simulation)
         end
         i_next_frame = frame_range(simulation)[i_frame_in_range + 1]
         read_step!(simulation.trajectory, i_next_frame, simulation.frame)
+        _set_fixed_unitcell!(simulation)
         simulation.frame_index = i_next_frame
     end
     return current_frame(simulation)
-end
-
-"""
-    UnitCell{T}
-
-A structure to store the unit cell of a frame in the trajectory.
-
-The `matrix` field contains the unit cell vectors as a static matrix of type `SMatrix{3,3,T,9}`.
-The `valid` field indicates whether the unit cell is valid (i.e., not all vectors are zero).
-The `orthorhombic` field indicates whether the unit cell is orthorhombic, which means that all off-diagonal elements are close to zero.
-
-"""
-struct UnitCell{T}
-    matrix::SMatrix{3,3,T,9}
-    valid::Bool
-    orthorhombic::Bool
-end
-
-function Base.show(io::IO, uc::UnitCell)
-    print(io,typeof(uc), " - Orthorhombic: ", uc.orthorhombic)
-    for i in 1:3
-        print(io, "\n")
-        print(io, @sprintf("%8.3f %8.3f %8.3f", @view(uc.matrix[i, :])...))
-    end 
-end 
-
-function wrap(y, x, uc::UnitCell)
-    !uc.valid && return y
-    wrap(y, x, uc.matrix)
-end
-
-@testitem "UnitCell - show" begin
-    using ShowMethodTesting
-    using MolSimToolkit.Testing, LazyArtifacts
-    sim = Simulation(test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd"))
-    first_frame!(sim)
-    uc = unitcell(current_frame(sim))
-    @test parse_show(uc; repl = ["MolSimToolkit." => ""] ) ≈ """
-        UnitCell{Float64} - Orthorhombic: true
-            47.411    0.000    0.000
-            0.000   47.411    0.000
-            0.000    0.000   87.798
-    """
 end
 
 import Base: firstindex, lastindex
@@ -682,6 +724,8 @@ end
     @test positions(get_frame!(sim, 10)) ≈ frames[5]
     @test_throws ArgumentError Simulation(pdb, dcd, test_file("short_nopbc.dcd"))
     @test_throws ArgumentError Simulation(pdb, String[])
+    sim = Simulation(pdb, dcd, dcd; unitcell=true)
+    @test all(unitcell(frame) == read_pdb(pdb).unitcell for frame in sim)
     repl = Dict(
         "MolSimToolkit." => "", 
         r"PDBTools(Base)?\." => "",

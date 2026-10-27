@@ -1,6 +1,6 @@
 name = "MolSimToolkit"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-version = "2.7.1-DEV"
+version = "2.8.0-DEV"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
 
 [deps]
@@ -38,7 +38,7 @@ TestFilesExt = "LazyArtifacts"
 [compat]
 Aqua = "0.8.18"
 BenchmarkTools = "1.6.1"
-CellListMap = "0.10.0"
+CellListMap = "0.10.7"
 Chemfiles = "0.10.31"
 ChunkSplitters = "3.1.1"
 Dates = "1.11"

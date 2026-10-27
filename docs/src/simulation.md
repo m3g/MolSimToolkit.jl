@@ -138,11 +138,18 @@ Base.close(::Simulation)
 Each iteration step returns a `Frame` object. The functions below give access to
 atomic positions and the unit cell from a frame.
 
+The unit cell of a frame is a `UnitCell` (the unit cell type of PDBTools), or `nothing` if
+the trajectory does not contain unit cell information. A fixed unit cell, used for all frames,
+can be set with the `unitcell` keyword of the `Simulation` constructor: `unitcell=true` uses
+the unit cell of the PDB file (`CRYST1` field), and `unitcell=uc` uses the given `UnitCell`
+(see the [PDBTools documentation](https://m3g.github.io/PDBTools.jl/stable/) for its constructors). The atoms returned by `get_atoms` are 
+a `PDBTools.Structure` carrying the unit cell of the current frame, which is thus written by 
+`write_pdb` and used by PDBTools functions that accept `unitcell=true`.
+
 ```@docs
 Frame
 Point3D
 positions
-UnitCell
 unitcell
 ```
 
