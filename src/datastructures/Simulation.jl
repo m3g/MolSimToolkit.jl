@@ -739,7 +739,7 @@ end
         "MolSimToolkit." => "", 
         r"PDBTools(Base)?\." => "",
         r"(PDB file:).*" => s"\1",
-        r"/.*/popc_membrane.dcd" => "popc_membrane.dcd",
+        r"\S*[\\/]popc_membrane\.dcd" => "popc_membrane.dcd",
     )
     sim = Simulation(pdb, dcd, dcd)
     @test parse_show(sim; repl=repl) ≈ """
