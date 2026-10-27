@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 2.8.0-DEV
 --------------
+- ![FEATURE][badge-feature] A `Simulation` can be built from multiple trajectory files, which are considered sequential parts of the same simulation: `Simulation(pdb_file, traj_file1, traj_file2, ...)` or `Simulation(pdb_file, [traj_file1, traj_file2, ...])` ([#93](https://github.com/m3g/MolSimToolkit.jl/issues/93)).
 - ![FEATURE][badge-feature] A `Simulation` can hold any `AbstractVector` of atoms, such as the `Structure` returned by `read_pdb` in PDBTools 4 (which keeps its unit cell).
 - ![FEATURE][badge-feature] `get_atoms(simulation)` returns a `PDBTools.Structure` carrying the unit cell of the current frame, such that it is written by `write_pdb` and used by the PDBTools functions that accept `unitcell=true`.
 - ![FEATURE][badge-feature] The new `unitcell` keyword of the `Simulation` constructor sets a fixed unit cell for all frames, overriding that of the trajectory (e.g. for trajectories without unit cell information): `unitcell=true` uses the unit cell of the PDB file, and `unitcell=uc` the given `UnitCell` (other values are converted with `UnitCell(uc)`).

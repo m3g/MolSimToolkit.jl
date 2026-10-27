@@ -23,17 +23,30 @@ export get_atoms
     Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5], unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file::String; frames=9:2:20, unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
-    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
+    Simulation(pdb_file::String, trajectory_file1::String, trajectory_file2::String, ...; kargs...)
+    Simulation(pdb_file::String, trajectory_files::AbstractVector{<:AbstractString}; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file1::String, trajectory_file2::String, ...; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_files::AbstractVector{<:AbstractString}; kargs...)
 
-Creates a new `Simulation` object. 
+Creates a new `Simulation` object.
 
-The first constructor creates a `Simulation` object from a PDB or mmCIF file and a trajectory file. It will use the
-`PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
-Currently, other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
-for the atom type.
+The first argument defines the atoms of the simulation, and can be:
 
-With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
-are provided by a different source than the PDB file. 
+- `pdb_file`: the name of a PDB or mmCIF file. The atoms are read with `PDBTools.read_pdb`, and
+  will be of type `PDBTools.Atom`.
+- `atoms`: a vector of atoms. This is useful when the atoms are provided by a different source than
+  a PDB file, or were modified after being read. The atom type is not restricted to `PDBTools.Atom`:
+  other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
+  for the atom type. In this case `path_pdb(simulation)` returns `nothing`.
+
+The following arguments are the trajectory files. More than one trajectory file can be provided,
+either as additional arguments or as a vector of file names. The files are considered sequential
+parts of the same simulation: frames are numbered continuously across files, in the order the files
+were given, and all analyses can be performed on the concatenated trajectory. All files must contain
+the same number of atoms.
+
+The keyword arguments `kargs...` are the same for all constructors.
 
 The `frames` or `first`, `last`, and `step` arguments can be used to specify the frames to be iterated over:
 
@@ -43,7 +56,7 @@ The `frames` or `first`, `last`, and `step` arguments can be used to specify the
 
 By default, the unit cell of each frame is read from the trajectory file. The `unitcell` keyword
 sets a fixed unit cell, which will be used for all frames, ignoring the unit cell of the trajectory
-(useful for trajectories without unit cell information, of constant-volume simulations):
+(useful for trajectories without unit cell information, or of constant-volume simulations):
 
 - `unitcell=true`: use the unit cell of the PDB file (or of the `atoms`, if they are a `PDBTools.Structure` with a unit cell).
 - `unitcell=uc`: use the unit cell `uc`, a `UnitCell` object, which can be created from the sides of
@@ -146,13 +159,13 @@ function show(io::IO, sim::Simulation)
     compact = get(io, :compact, false)::Bool
     if compact
         isnothing(path_pdb(sim)) ? pdb = "-" : pdb = basename(path_pdb(sim))
-        print(io, "Simulation($pdb, $(basename(path_trajectory(sim))))")
+        print(io, "Simulation($pdb, $(join(basename.(_trajectory_files(sim)), ", ")))")
     else
         print(io, chomp("""
         Simulation 
             Atom type: $(eltype(sim.atoms))
             PDB file: $(isnothing(sim.pdb_file) ? "-" : path_pdb(sim))
-            Trajectory file: $(path_trajectory(sim))
+            $(_print_trajectory_files(sim))
             Total number of frames: $(raw_length(sim))
             Frames to consider: $(_print_frame_range(sim))
             Number of frames to consider: $(length(sim))
@@ -160,6 +173,14 @@ function show(io::IO, sim::Simulation)
         """))
         isnothing(sim.unitcell) || print(io, "\n    Fixed unit cell: $(sim.unitcell)")
     end
+end
+
+_trajectory_files(sim::Simulation) = vcat(path_trajectory(sim))
+
+function _print_trajectory_files(sim::Simulation)
+    files = _trajectory_files(sim)
+    length(files) == 1 && return "Trajectory file: $(only(files))"
+    return "Trajectory files:\n" * join(("        " * file for file in files), "\n")
 end
 
 import Base: lock
@@ -260,19 +281,24 @@ to be used.
 
 =#
 function Simulation(
-    pdb_file::String, trajectory_file::String; 
+    pdb_file::String, trajectory_files::AbstractVector{<:AbstractString}; 
     frames=nothing, first=nothing, last=nothing, step=nothing, unitcell=nothing
 )
     atoms = PDBTools.read_pdb(pdb_file)
-    return Simulation(pdb_file, atoms, Trajectory(trajectory_file), frames, first, last, step, unitcell)
+    return Simulation(pdb_file, atoms, Trajectory(trajectory_files), frames, first, last, step, unitcell)
 end
 
 function Simulation(
-    atoms::AbstractVector{AtomType}, trajectory_file::String;
+    atoms::AbstractVector{AtomType}, trajectory_files::AbstractVector{<:AbstractString};
     frames=nothing, first=nothing, last=nothing, step=nothing, unitcell=nothing
 ) where {AtomType}
-    return Simulation(nothing, atoms, Trajectory(trajectory_file), frames, first, last, step, unitcell)
+    return Simulation(nothing, atoms, Trajectory(trajectory_files), frames, first, last, step, unitcell)
 end
+
+Simulation(pdb_file::String, trajectory_file::String, more_trajectory_files::String...; kargs...) = 
+    Simulation(pdb_file, [trajectory_file, more_trajectory_files...]; kargs...)
+Simulation(atoms::AbstractVector, trajectory_file::String, more_trajectory_files::String...; kargs...) = 
+    Simulation(atoms, [trajectory_file, more_trajectory_files...]; kargs...)
 
 """
     frame_range(simulation::Simulation)
@@ -301,7 +327,8 @@ Base.close(simulation::Simulation) = close(simulation.trajectory)
 """
     raw_length(simulation::Simulation)
 
-Returns the number of frames in the trajectory file.
+Returns the number of frames in the trajectory file (or the total number of frames, if
+the simulation was built from multiple trajectory files).
 
 """
 raw_length(simulation::Simulation) = raw_length(simulation.trajectory)
@@ -396,7 +423,8 @@ path_pdb(simulation::Simulation) = isnothing(simulation.pdb_file) ? nothing : no
 """
     path_trajectory(simulation::Simulation)
 
-Returns the path to the trajectory file of the simulation.
+Returns the path to the trajectory file of the simulation. If the simulation was built from
+multiple trajectory files, returns a vector with the paths to all files.
 
 """
 path_trajectory(simulation::Simulation) = path_trajectory(simulation.trajectory)
@@ -677,4 +705,55 @@ end
     Current frame: 1
     """
     @test parse_show(repr(sim; context= :compact => true), repl=repl) ≈ "Simulation(popc_membrane.pdb, popc_membrane.dcd)"
+end
+
+@testitem "Simulation - multiple trajectories" begin
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
+    using PDBTools
+    using ShowMethodTesting: parse_show
+    pdb, dcd = test_file("popc_membrane.pdb"), test_file("popc_membrane.dcd")
+    sim1 = Simulation(pdb, dcd)
+    frames = [copy(positions(frame)) for frame in sim1]
+    sim = Simulation(pdb, dcd, dcd)
+    @test raw_length(sim) == 10
+    @test length(sim) == 10
+    @test path_trajectory(sim) == [normpath(dcd), normpath(dcd)]
+    @test all(positions(frame) ≈ frames[mod1(i, 5)] for (i, frame) in pairs(sim))
+    @test positions(get_frame!(sim, 7)) ≈ frames[2]
+    @test positions(get_frame!(sim, 3)) ≈ frames[3]
+    sim = Simulation(pdb, [dcd, dcd, dcd]; first=4, step=3)
+    @test frame_range(sim) == [4, 7, 10, 13]
+    @test [copy(positions(frame)) for frame in sim] ≈ frames[[4, 2, 5, 3]]
+    sim = Simulation(read_pdb(pdb), dcd, dcd)
+    @test raw_length(sim) == 10
+    @test positions(get_frame!(sim, 10)) ≈ frames[5]
+    sim = Simulation(read_pdb(pdb), [dcd, dcd]; last=7)
+    @test isnothing(path_pdb(sim))
+    @test frame_range(sim) == 1:7
+    @test positions(get_frame!(sim, 7)) ≈ frames[2]
+    @test_throws ArgumentError Simulation(pdb, dcd, test_file("short_nopbc.dcd"))
+    @test_throws ArgumentError Simulation(pdb, String[])
+    sim = Simulation(pdb, dcd, dcd; unitcell=true)
+    @test all(unitcell(frame) == read_pdb(pdb).unitcell for frame in sim)
+    repl = Dict(
+        "MolSimToolkit." => "", 
+        r"PDBTools(Base)?\." => "",
+        r"(PDB file:).*" => s"\1",
+        r"\S*[\\/]popc_membrane\.dcd" => "popc_membrane.dcd",
+    )
+    sim = Simulation(pdb, dcd, dcd)
+    @test parse_show(sim; repl=repl) ≈ """
+    Simulation 
+    Atom type: Atom{Nothing}
+    PDB file:
+    Trajectory files:
+        popc_membrane.dcd
+        popc_membrane.dcd
+    Total number of frames: 10
+    Frames to consider: 1, 2, 3, ... , 8, 9, 10
+    Number of frames to consider: 10
+    Current frame: 1
+    """
+    @test parse_show(repr(sim; context= :compact => true), repl=repl) ≈ "Simulation(popc_membrane.pdb, popc_membrane.dcd, popc_membrane.dcd)"
+    close(sim)
 end

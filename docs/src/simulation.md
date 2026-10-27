@@ -89,6 +89,43 @@ Simulation
 Trajectory
 ```
 
+### Multiple trajectory files
+
+A simulation split into several trajectory files (for example, sequential runs of the
+same system) can be loaded as a single `Simulation`, by providing all files in order:
+
+```julia
+sim = Simulation("system.pdb", "run1.xtc", "run2.xtc", "run3.xtc")
+# or
+sim = Simulation("system.pdb", ["run1.xtc", "run2.xtc", "run3.xtc"])
+```
+
+The frames are numbered continuously across files, so all functions and analyses
+operate on the concatenated trajectory. The `frames`, `first`, `last`, and `step`
+keyword arguments refer to this global frame numbering. All files must contain the
+same number of atoms.
+
+### From a vector of atoms
+
+Instead of a PDB or mmCIF file name, the first argument can be a vector of atoms. This is
+useful when the atoms come from a different source, or were modified after being read
+(the atoms must be in the same order as in the trajectory files):
+
+```@example simulation_atoms
+using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
+using PDBTools
+
+atoms = read_pdb(test_file("popc_membrane.pdb"))
+sim = Simulation(atoms, test_file("popc_membrane.dcd"))
+```
+
+Multiple trajectory files can be given as well, as in `Simulation(atoms, "run1.xtc", "run2.xtc")`.
+Since there is no PDB file associated with the simulation, `path_pdb` returns `nothing`:
+
+```@example simulation_atoms
+path_pdb(sim) === nothing
+```
+
 ## Moving around the simulation
 
 The `Simulation` object keeps track of a *current frame*. The functions below
