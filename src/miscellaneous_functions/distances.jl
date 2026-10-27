@@ -58,7 +58,7 @@ function distances(
         coor = positions(frame)
         cm1 = center_of_mass(indices1, simulation, coor)
         cm2 = center_of_mass(indices2, simulation, coor)
-        cm2_wrapped = wrap(cm2, cm1, unitcell(frame))
+        cm2_wrapped = _wrap(cm2, cm1, unitcell(frame))
         d = norm(cm2_wrapped - cm1)
         distances[iframe] = d
         silent || next!(p)

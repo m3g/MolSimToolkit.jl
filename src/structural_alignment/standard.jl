@@ -2,8 +2,8 @@
     reconstruct_structure!(
         x::AbstractVector{<:AbstractVector},
         indices::AbstractVector{<:Integer},
-        unitcell::Union{UnitCell,AbstractMatrix};
-        dmax::Real = minimum(norm.(eachcol(unitcell isa UnitCell ? unitcell.matrix : unitcell))) / 3,
+        unitcell::Union{Nothing,AbstractMatrix};
+        dmax::Real = minimum(norm.(eachcol(unitcell))) / 3,
         aux_inds::AbstractVector{<:Integer} = similar(indices),
     )
 
@@ -31,7 +31,7 @@ which a single branch is typically enough to reconnect the chains.
 - `x`: the coordinates of the atoms, modified in place.
 - `indices`: the indices, within `x`, of the atoms to be reconstructed, in sequence.
 - `unitcell`: the unit cell of the simulation box, as an `UnitCell` object or a matrix of
-  unit cell vectors.
+  unit cell vectors. If `nothing` (non-periodic system), the coordinates are not modified.
 
 # Optional keyword arguments
 
@@ -60,8 +60,8 @@ julia> reconstruct_structure!(x, 1:length(x), unitcell(frame));
 function reconstruct_structure!(
     x::AbstractVector{<:AbstractVector},
     indices::AbstractVector{<:Integer},
-    unitcell::Union{UnitCell,AbstractMatrix};
-    dmax::Real=minimum(norm.(eachcol(unitcell isa UnitCell ? unitcell.matrix : unitcell))) / 3,
+    unitcell::AbstractMatrix;
+    dmax::Real=minimum(norm.(eachcol(unitcell))) / 3,
     aux_inds::AbstractVector{<:Integer}=similar(indices),
 )
     length(indices) <= 1 && return x
@@ -71,6 +71,8 @@ function reconstruct_structure!(
     _reconstruct_walk!(x, seq, xanchor, unitcell, dmax)
     return x
 end
+# Non-periodic systems: nothing to reconstruct
+reconstruct_structure!(x::AbstractVector{<:AbstractVector}, ::AbstractVector{<:Integer}, ::Nothing; kargs...) = x
 
 #
 # Reconstructs, in place, the atoms of `x` whose indices are given by `seq`, anchoring the
@@ -94,7 +96,7 @@ function _reconstruct_walk!(
     x::AbstractVector{<:AbstractVector},
     seq::AbstractVector{<:Integer},
     xprev,
-    unitcell::Union{UnitCell,AbstractMatrix},
+    unitcell::AbstractMatrix,
     dmax::Real,
 )
     k = firstindex(seq)
@@ -160,7 +162,7 @@ function _reference_coordinates(
         first_frame!(simulation)
         frame = current_frame(simulation)
         p, uc = positions(frame), unitcell(frame)
-        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
+        reconstruct_structure!(p, combined_indices, uc; aux_inds)
         p[indices], p[rmsd_indices]
     elseif reference_frame isa Integer
         if !(reference_frame in frame_range(simulation))
@@ -176,7 +178,7 @@ function _reference_coordinates(
         end
         frame = current_frame(simulation)
         p, uc = positions(frame), unitcell(frame)
-        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
+        reconstruct_structure!(p, combined_indices, uc; aux_inds)
         p[indices], p[rmsd_indices]
     elseif reference_frame == :average
         xm = zeros(3, length(indices))
@@ -187,7 +189,7 @@ function _reference_coordinates(
         for (iframe, frame) in enumerate(simulation)
             next!(prg)
             p, uc = positions(frame), unitcell(frame)
-            reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
+            reconstruct_structure!(p, combined_indices, uc; aux_inds)
             if iframe == 1
                 xalign_ref .= @view(p[indices])
                 xrmsd_ref .= @view(p[rmsd_indices])
@@ -302,7 +304,7 @@ function rmsd(
     for frame in simulation
         next!(prg)
         p, uc = positions(frame), unitcell(frame)
-        reconstruct_structure!(p, combined_indices, uc.matrix; aux_inds)
+        reconstruct_structure!(p, combined_indices, uc; aux_inds)
         # Obtain the transformation that aligns atoms of `indices`
         xalign = @view(p[indices])
         xcm, xref_cm, u = alignment_movements(xalign, xalign_ref; mass, xm, xp)
@@ -637,4 +639,12 @@ end
     @test length(p) == length(p_before)
     protein = findall(Select("protein and name CA"), get_atoms(simulation))
     @test all(norm(p[protein[i+1]] - p[protein[i]]) < 10.0 for i in 1:length(protein)-1)
+
+    # Non-periodic system: the coordinates are not modified
+    simulation = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
+    frame = first_frame!(simulation)
+    p = positions(frame)
+    p_before = copy(p)
+    @test reconstruct_structure!(p, 1:length(p), unitcell(frame)) === p
+    @test p == p_before
 end

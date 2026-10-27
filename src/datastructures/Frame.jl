@@ -22,7 +22,7 @@ Structure that contains the data of a trajectory frame.
 Public interface:
 
 - `positions(::Frame)`: returns an array of positions of atoms in the frame.
-- `unitcell(::Frame)`: returns the `UnitCell` object of the frame.
+- `unitcell(::Frame)`: returns the `UnitCell` object of the frame (or `nothing`, if the system is not periodic).
 
 The fields of `Frame` are considered internal and should not be accessed directly. Use the provided functions instead.
 
@@ -67,29 +67,31 @@ julia> positions(first_frame!(simulation))[1]
 positions(f::Frame) = f.positions
 
 """
-    unitcell(frame::Frame; tol=1e-10)
+    unitcell(frame::Frame)
 
-Returns the unit cell of the current frame in the trajectory. The tolerance defines the relative 
-size of off-diagonal elements that can be ignored to consider the cell as orthorhombic, relative
-the minimum diagonal element.
+Returns the unit cell of the frame, as a `UnitCell` object (the unit cell type of PDBTools),
+or `nothing` if the frame does not have a unit cell (the system is not periodic).
+
+If the `Simulation` was created with a fixed unit cell (with the `unitcell` keyword), that unit
+cell is returned for every frame.
 
 """
-function unitcell(f::Frame; tol=1e-10)
-    mat = SMatrix(f.unitcell_matrix)
-    if all(==(0), mat)
+function unitcell(f::Frame)
+    if all(==(0), f.unitcell_matrix)
         @warn """\n
             Unit cell vectors are zero. The trajectory file may not contain proper unit cell information.
-            Wrapping of coordinates will be disabled for current frame.
-            
-        """ _file = nothing _line = nothing
-        valid = false
-    else
-        valid = true
+            The system will be considered non-periodic. A fixed unit cell can be set with the
+            `unitcell` keyword of the `Simulation` constructor.
+
+        """ _file = nothing _line = nothing maxlog = 1
+        return nothing
     end
-    s = abs(minimum(diag(mat))) # minimum diagonal element
-    orthorhombic = all(abs(mat[i, j]) < tol * s for i in 1:3, j in 1:3 if i != j)
-    return UnitCell(mat, valid, orthorhombic)
+    return UnitCell(f.unitcell_matrix)
 end
+
+# Wrapping of coordinates, ignored if the frame does not have a unit cell
+_wrap(x, _, ::Nothing) = x
+_wrap(x, xref, uc::UnitCell) = wrap(x, xref, uc)
 
 @testitem "unitcell" begin
     using MolSimToolkit
@@ -99,16 +101,16 @@ end
     traj = Chemfiles.Trajectory(test_file("popc_membrane.dcd"))
     frame = Chemfiles.read(traj)
     uc = unitcell(Frame(frame))
-    @test uc.valid == true
-    @test uc.orthorhombic == true
-    @test uc.matrix ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
+    @test uc isa UnitCell
+    @test uc ≈ transpose(Chemfiles.matrix(Chemfiles.UnitCell(frame)))
     sim = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
     first_frame!(sim)
     f = current_frame(sim)
-    uc = unitcell(f)
-    @test all(==(0), uc.matrix)
-    @test uc.valid == false
-    @test uc.orthorhombic == false
+    @test isnothing(unitcell(f))
+    # Wrapping is ignored without unit cell
+    x, xref = Point3D(11.0, 1.0, 1.0), Point3D(0.0, 0.0, 0.0)
+    @test MolSimToolkit._wrap(x, xref, nothing) === x
+    @test MolSimToolkit._wrap(x, xref, UnitCell(10.0, 10.0, 10.0)) ≈ [1.0, 1.0, 1.0]
 end
 
 @testitem "Frame" begin

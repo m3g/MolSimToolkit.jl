@@ -154,7 +154,7 @@ function reweight(
         system = ParticleSystem(
             xpositions = first_coors,
             ypositions = second_coors,
-            unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+            unitcell = uc,
             cutoff = cutoff,
             output = 0.0,
             output_name = :total_energy

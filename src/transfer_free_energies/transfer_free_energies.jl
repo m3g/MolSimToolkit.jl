@@ -50,8 +50,10 @@ conditions before computing the SASA-based transfer free energy via
 
 ## Keyword arguments
 
-- `model`: thermodynamic model. Either `PDBTools.AutonBolen` (default) or
-  `PDBTools.MoeserHorinek`.
+- `model`: thermodynamic model (e. g. `PDBTools.AutonBolen`, `PDBTools.MoeserHorinek` or 
+  `PDBTools.Accessibility`; see the PDBTools documentation for the available models). 
+  Default: `PDBTools.AutonBolen`. Note that this default differs from the default of 
+  `PDBTools.transfer_free_energy` (`PDBTools.Accessibility`, since PDBTools 4.0.1).
 - `protein`: vector of protein atoms. Defaults to all non-hydrogen protein atoms in `sim` selected by `"protein and not element H"`.
 - `backbone`: function that identifies backbone atoms. Default: `PDBTools.isbackbone`.
 - `sidechain`: function that identifies side-chain atoms. Default: `PDBTools.issidechain`.
@@ -202,8 +204,10 @@ energy via `PDBTools.transfer_free_energy`.
 
 ## Keyword arguments
 
-- `model`: thermodynamic model. Either `PDBTools.AutonBolen` (default) or
-  `PDBTools.MoeserHorinek`.
+- `model`: thermodynamic model (e. g. `PDBTools.AutonBolen`, `PDBTools.MoeserHorinek` or 
+  `PDBTools.Accessibility`; see the PDBTools documentation for the available models). 
+  Default: `PDBTools.AutonBolen`. Note that this default differs from the default of 
+  `PDBTools.transfer_free_energy` (`PDBTools.Accessibility`, since PDBTools 4.0.1).
 - `protein`: vector of protein atoms. Defaults to all non-hydrogen protein atoms in `sim` selected by `"protein and not element H"`.
 - `backbone`: function that identifies backbone atoms. Default: `PDBTools.isbackbone`.
 - `sidechain`: function that identifies side-chain atoms. Default: `PDBTools.issidechain`.
@@ -285,7 +289,7 @@ end
     f = first_frame!(sim)
     set_position!.(ats, positions(f))
     protein = select(ats, "protein")
-    tfe_ref = transfer_free_energy(protein, "urea")
+    tfe_ref = transfer_free_energy(protein, "urea"; model=PDBTools.AutonBolen)
 
     @test tfe.tot ≈ tfe_ref.tot
     @test tfe.bb ≈ tfe_ref.bb
@@ -298,7 +302,7 @@ end
     f = get_frame!(sim, 2)
     set_position!.(ats, positions(f))
     protein = select(ats, "protein")
-    tfe_ref2 = transfer_free_energy(protein, "urea")
+    tfe_ref2 = transfer_free_energy(protein, "urea"; model=PDBTools.AutonBolen)
 
     tfe = transfer_free_energy(sim, "urea")
     @test tfe.tot ≈ (tfe_ref.tot + tfe_ref2.tot) / 2

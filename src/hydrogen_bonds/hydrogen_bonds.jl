@@ -119,7 +119,7 @@ function PDBTools.hydrogen_bonds(
                 if sel1 == sel2
                     s1 = selection_data[sel1]
                     sys.xpositions .= @view(current_positions[s1.inds])
-                    update!(sys; unitcell=uc.matrix)
+                    update!(sys; unitcell=uc)
                     number_of_hbonds = count_hbonds(
                         sys, s1, angle_cutoff, electronegative_elements
                     )
@@ -128,7 +128,7 @@ function PDBTools.hydrogen_bonds(
                     s2 = selection_data[sel2]
                     sys.xpositions .= @view(current_positions[s1.inds])
                     sys.ypositions .= @view(current_positions[s2.inds])
-                    update!(sys; unitcell=uc.matrix)
+                    update!(sys; unitcell=uc)
                     number_of_hbonds = count_hbonds(
                         sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements
                     )
@@ -348,14 +348,14 @@ function hydrogen_bond_occupancy(
                 if sel1 == sel2
                     s1 = selection_data[sel1]
                     sys.xpositions .= @view(current_positions[s1.inds])
-                    update!(sys; unitcell=uc.matrix)
+                    update!(sys; unitcell=uc)
                     hblist = list_hbonds(sys, s1, angle_cutoff, electronegative_elements)
                 else
                     s1 = selection_data[sel1]
                     s2 = selection_data[sel2]
                     sys.xpositions .= @view(current_positions[s1.inds])
                     sys.ypositions .= @view(current_positions[s2.inds])
-                    update!(sys; unitcell=uc.matrix)
+                    update!(sys; unitcell=uc)
                     hblist = list_hbonds(sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
                 end
                 raw_lists[key][index_current_frame] = HBondList(copy(hblist.bonds))

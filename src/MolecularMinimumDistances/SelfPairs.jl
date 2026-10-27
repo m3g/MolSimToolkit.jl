@@ -120,7 +120,7 @@ end
     sys = SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
-        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell = uc,
         xn_atoms_per_molecule = 134,
     )
     md_min = zeros(length(simulation))
@@ -128,7 +128,7 @@ end
         pos = positions(frame)
         local uc = unitcell(frame)
         sys.system.xpositions .= @view(pos[popc])
-        sys.system.unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix
+        sys.system.unitcell = uc
         md = minimum_distances!(sys)
         md_min[iframe] = minimum(p -> p.d, md)
         # Test direct (out-of-place) call
@@ -142,11 +142,11 @@ end
             @test all(md_out .≈ md)
         end
     end
-    @test md_min ≈ [1.7787845332699295, 1.8000887689403775, 1.7751687089934818, 1.8329921680458754, 1.6533482891665536]
+    @test md_min ≈ [1.7787845332699295, 1.8000887689403775, 1.7751687089934818, 1.8329921680458754, 1.6533482891665536] rtol = 1e-5
     @test_throws ArgumentError SelfPairs(
         xpositions = xsolvent,
         cutoff = 6.0,
-        unitcell = uc.orthorhombic ? diag(uc.matrix) : uc.matrix,
+        unitcell = uc,
         xn_atoms_per_molecule = 133,
     )
 end

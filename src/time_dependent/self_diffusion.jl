@@ -18,15 +18,14 @@ function _unwrap(raw::AbstractVector{T}, ucs::AbstractVector) where {T}
     isempty(raw) && return unwrapped
     unwrapped[1] = raw[1]
     for i in 2:n
-        unwrapped[i] = wrap(raw[i], unwrapped[i-1], ucs[i])
+        unwrapped[i] = _wrap(raw[i], unwrapped[i-1], ucs[i])
     end
     return unwrapped
 end
 
 @testitem "_warn_on_large_displacements" begin
     using MolSimToolkit: _warn_on_large_displacements, UnitCell, Point3D
-    using StaticArrays: SMatrix
-    uc = UnitCell(SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0), true, true)
+    uc = UnitCell(10.0, 10.0, 10.0)
     ucs = [uc, uc, uc]
 
     # Small displacements: nothing to report.
@@ -39,15 +38,12 @@ end
     @test (@test_logs (:warn,) _warn_on_large_displacements(coms, ucs)) == 2
 
     # Without unit cell information there is nothing to check.
-    invalid = UnitCell(SMatrix{3,3,Float64,9}(ntuple(_ -> 0.0, 9)...), false, false)
-    @test _warn_on_large_displacements(coms, [invalid, invalid, invalid]) == 0
+    @test _warn_on_large_displacements(coms, [nothing, nothing, nothing]) == 0
 end
 
 @testitem "_unwrap" begin
     using MolSimToolkit: _unwrap, UnitCell, Point3D
-    using StaticArrays: SMatrix
-    mat = SMatrix{3,3,Float64,9}(10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0)
-    uc = UnitCell(mat, true, true)
+    uc = UnitCell(10.0, 10.0, 10.0)
     ucs = [uc, uc, uc, uc]
 
     # A particle drifting steadily in +x, wrapped back into [0, 10) by the
@@ -90,7 +86,7 @@ function _warn_on_large_displacements(coms::AbstractMatrix, ucs::AbstractVector)
     count = 0
     for iframe in 2:n_frames
         uc = ucs[iframe]
-        !uc.valid && continue
+        isnothing(uc) && continue
         invmatrix = inv(uc.matrix)
         for imol in 1:n_molecules
             d = maximum(abs, invmatrix * (coms[imol, iframe] - coms[imol, iframe-1]))
@@ -252,7 +248,7 @@ function mean_square_displacement(
     f = first_frame!(sim)
     com_type = typeof(center_of_mass(mol_indices[1], sim, positions(f)))
     raw_coms = Matrix{com_type}(undef, n_molecules, n_frames)
-    ucs = Vector{UnitCell}(undef, n_frames)
+    ucs = Vector{Union{Nothing,UnitCell}}(undef, n_frames)
 
     # Center of mass of the complete system at each frame, to be subtracted from the
     # centers of mass of the molecules. With wrapped coordinates, the center of mass
@@ -279,7 +275,7 @@ function mean_square_displacement(
                 system_coms[iframe] = zero(com_type)
             else
                 system_coms[iframe] = system_coms[iframe-1] +
-                    sum(masses[i] * (wrap(p[i], prev_p[i], ucs[iframe]) - prev_p[i]) for i in eachindex(p, masses)) / total_mass
+                    sum(masses[i] * (_wrap(p[i], prev_p[i], ucs[iframe]) - prev_p[i]) for i in eachindex(p, masses)) / total_mass
                 copyto!(prev_p, p)
             end
         end
@@ -512,7 +508,7 @@ end
     ucs = [unitcell(frame) for frame in sim2]
     syscom_unwrapped = [zero(eltype(ps[1]))]
     for t in 2:length(ps)
-        d = sum(masses[i] * (MolSimToolkit.wrap(ps[t][i], ps[t-1][i], ucs[t]) - ps[t-1][i]) for i in eachindex(masses)) / sum(masses)
+        d = sum(masses[i] * (MolSimToolkit._wrap(ps[t][i], ps[t-1][i], ucs[t]) - ps[t-1][i]) for i in eachindex(masses)) / sum(masses)
         push!(syscom_unwrapped, syscom_unwrapped[end] + d)
     end
     inds_single = [[i] for i in PDBTools.index.(select(get_atoms(sim2), "resname TMAO and name N"))]
