@@ -23,25 +23,30 @@ export get_atoms
     Simulation(pdb_file::String, trajectory_file::String; frames=[1,2,3,5], unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file::String; frames=9:2:20, unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
-    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; first=1, last=nothing, step=1, unitcell=nothing)
     Simulation(pdb_file::String, trajectory_file1::String, trajectory_file2::String, ...; kargs...)
     Simulation(pdb_file::String, trajectory_files::AbstractVector{<:AbstractString}; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file::String; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_file1::String, trajectory_file2::String, ...; kargs...)
+    Simulation(atoms::AbstractVector{<:AtomType}, trajectory_files::AbstractVector{<:AbstractString}; kargs...)
 
-Creates a new `Simulation` object. 
+Creates a new `Simulation` object.
 
-The first constructor creates a `Simulation` object from a PDB or mmCIF file and a trajectory file. It will use the
-`PDBTools.Atom` for the atom type, which will populate the `atoms` vector of the `Simulation` object.
-Currently, other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
-for the atom type.
+The first argument defines the atoms of the simulation, and can be:
 
-With the second constructor, the `atoms` vector is passed as an argument. This is useful when the atoms
-are provided by a different source than the PDB file. 
+- `pdb_file`: the name of a PDB or mmCIF file. The atoms are read with `PDBTools.read_pdb`, and
+  will be of type `PDBTools.Atom`.
+- `atoms`: a vector of atoms. This is useful when the atoms are provided by a different source than
+  a PDB file, or were modified after being read. The atom type is not restricted to `PDBTools.Atom`:
+  other atom types are supported, if the `MolSimToolkit.atomic_mass(::AtomType)` function is defined
+  for the atom type. In this case `path_pdb(simulation)` returns `nothing`.
 
-More than one trajectory file can be provided, either as additional arguments or as a vector of file names
-(with either the `pdb_file` or the `atoms` vector as the first argument). The files are considered sequential
+The following arguments are the trajectory files. More than one trajectory file can be provided,
+either as additional arguments or as a vector of file names. The files are considered sequential
 parts of the same simulation: frames are numbered continuously across files, in the order the files
 were given, and all analyses can be performed on the concatenated trajectory. All files must contain
 the same number of atoms.
+
+The keyword arguments `kargs...` are the same for all constructors.
 
 The `frames` or `first`, `last`, and `step` arguments can be used to specify the frames to be iterated over:
 
@@ -51,7 +56,7 @@ The `frames` or `first`, `last`, and `step` arguments can be used to specify the
 
 By default, the unit cell of each frame is read from the trajectory file. The `unitcell` keyword
 sets a fixed unit cell, which will be used for all frames, ignoring the unit cell of the trajectory
-(useful for trajectories without unit cell information, of constant-volume simulations):
+(useful for trajectories without unit cell information, or of constant-volume simulations):
 
 - `unitcell=true`: use the unit cell of the PDB file (or of the `atoms`, if they are a `PDBTools.Structure` with a unit cell).
 - `unitcell=uc`: use the unit cell `uc`, a `UnitCell` object, which can be created from the sides of
@@ -722,6 +727,10 @@ end
     sim = Simulation(read_pdb(pdb), dcd, dcd)
     @test raw_length(sim) == 10
     @test positions(get_frame!(sim, 10)) ≈ frames[5]
+    sim = Simulation(read_pdb(pdb), [dcd, dcd]; last=7)
+    @test isnothing(path_pdb(sim))
+    @test frame_range(sim) == 1:7
+    @test positions(get_frame!(sim, 7)) ≈ frames[2]
     @test_throws ArgumentError Simulation(pdb, dcd, test_file("short_nopbc.dcd"))
     @test_throws ArgumentError Simulation(pdb, String[])
     sim = Simulation(pdb, dcd, dcd; unitcell=true)
