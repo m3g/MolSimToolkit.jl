@@ -89,6 +89,22 @@ Simulation
 Trajectory
 ```
 
+### Multiple trajectory files
+
+A simulation split into several trajectory files (for example, sequential runs of the
+same system) can be loaded as a single `Simulation`, by providing all files in order:
+
+```julia
+sim = Simulation("system.pdb", "run1.xtc", "run2.xtc", "run3.xtc")
+# or
+sim = Simulation("system.pdb", ["run1.xtc", "run2.xtc", "run3.xtc"])
+```
+
+The frames are numbered continuously across files, so all functions and analyses
+operate on the concatenated trajectory. The `frames`, `first`, `last`, and `step`
+keyword arguments refer to this global frame numbering. All files must contain the
+same number of atoms.
+
 ## Moving around the simulation
 
 The `Simulation` object keeps track of a *current frame*. The functions below
