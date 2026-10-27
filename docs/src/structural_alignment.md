@@ -52,12 +52,12 @@ reconstruct_structure!
 Other routines that allow advanced and fine-tuned structural alignment analyses or implementations, are:
 
 ```@docs
-MolSimToolkitShared.rmsd(::AbstractVector{<:AbstractVector}, ::AbstractVector{<:AbstractVector})
-MolSimToolkitShared.center_of_mass
-MolSimToolkitShared.align
-MolSimToolkitShared.align!
-MolSimToolkitShared.alignment_movements
-MolSimToolkitShared.apply_alignment_transformation!
+PDBToolsBase.rmsd(::AbstractVector{<:AbstractVector}, ::AbstractVector{<:AbstractVector})
+PDBToolsBase.center_of_mass
+PDBToolsBase.align
+PDBToolsBase.align!
+PDBToolsBase.alignment_movements
+PDBToolsBase.apply_alignment_transformation!
 ```
 
 ## Robust rigid-body alignment
