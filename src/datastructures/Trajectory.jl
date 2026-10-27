@@ -49,3 +49,25 @@ function read_step!(t::Trajectory, i_next_frame::Int, f::Frame)
     f.unitcell_matrix .= transpose(Chemfiles.matrix(Chemfiles.UnitCell(f.frame)))
     return f
 end
+
+@testitem "Trajectory" begin
+    using MolSimToolkit, MolSimToolkit.Testing, LazyArtifacts
+    dcd = test_file("popc_membrane.dcd")
+    # single file
+    t = Trajectory(dcd)
+    @test t isa Trajectory
+    @test length(t) == raw_length(t) == 5
+    @test path_trajectory(t) == normpath(dcd)
+    f = read(t)
+    sim = Simulation(test_file("popc_membrane.pdb"), dcd)
+    @test positions(MolSimToolkit.read_step!(t, 3, f)) ≈ positions(get_frame!(sim, 3))
+    close(t)
+    # multiple files
+    t = Trajectory([dcd, dcd])
+    @test length(t) == raw_length(t) == 10
+    @test t.offsets == [0, 5]
+    @test path_trajectory(t) == [normpath(dcd), normpath(dcd)]
+    @test positions(MolSimToolkit.read_step!(t, 8, f)) ≈ positions(get_frame!(sim, 3))
+    close(t)
+    @test_throws ArgumentError Trajectory(String[])
+end
