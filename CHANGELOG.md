@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 2.8.1-DEV
+-------------
+
 Version 2.8.0
 -------------
 - ![FEATURE][badge-feature] A `Simulation` can be built from multiple trajectory files, which are considered sequential parts of the same simulation: `Simulation(pdb_file, traj_file1, traj_file2, ...)` or `Simulation(pdb_file, [traj_file1, traj_file2, ...])` ([#93](https://github.com/m3g/MolSimToolkit.jl/issues/93)).
