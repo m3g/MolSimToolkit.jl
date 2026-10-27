@@ -107,6 +107,10 @@ _wrap(x, xref, uc::UnitCell) = wrap(x, xref, uc)
     first_frame!(sim)
     f = current_frame(sim)
     @test isnothing(unitcell(f))
+    # Wrapping is ignored without unit cell
+    x, xref = Point3D(11.0, 1.0, 1.0), Point3D(0.0, 0.0, 0.0)
+    @test MolSimToolkit._wrap(x, xref, nothing) === x
+    @test MolSimToolkit._wrap(x, xref, UnitCell(10.0, 10.0, 10.0)) ≈ [1.0, 1.0, 1.0]
 end
 
 @testitem "Frame" begin

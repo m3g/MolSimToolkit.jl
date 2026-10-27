@@ -639,4 +639,12 @@ end
     @test length(p) == length(p_before)
     protein = findall(Select("protein and name CA"), get_atoms(simulation))
     @test all(norm(p[protein[i+1]] - p[protein[i]]) < 10.0 for i in 1:length(protein)-1)
+
+    # Non-periodic system: the coordinates are not modified
+    simulation = Simulation(test_file("short_nopbc.pdb"), test_file("short_nopbc.dcd"))
+    frame = first_frame!(simulation)
+    p = positions(frame)
+    p_before = copy(p)
+    @test reconstruct_structure!(p, 1:length(p), unitcell(frame)) === p
+    @test p == p_before
 end

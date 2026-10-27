@@ -134,7 +134,6 @@ a `PDBTools.Structure` carrying the unit cell of the current frame, which is thu
 Frame
 Point3D
 positions
-UnitCell
 unitcell
 ```
 
