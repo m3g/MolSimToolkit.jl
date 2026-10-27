@@ -10,8 +10,8 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 2.8.0-DEV
---------------
+Version 2.8.0
+-------------
 - ![FEATURE][badge-feature] A `Simulation` can be built from multiple trajectory files, which are considered sequential parts of the same simulation: `Simulation(pdb_file, traj_file1, traj_file2, ...)` or `Simulation(pdb_file, [traj_file1, traj_file2, ...])` ([#93](https://github.com/m3g/MolSimToolkit.jl/issues/93)).
 - ![FEATURE][badge-feature] A `Simulation` can hold any `AbstractVector` of atoms, such as the `Structure` returned by `read_pdb` in PDBTools 4 (which keeps its unit cell).
 - ![FEATURE][badge-feature] `get_atoms(simulation)` returns a `PDBTools.Structure` carrying the unit cell of the current frame, such that it is written by `write_pdb` and used by the PDBTools functions that accept `unitcell=true`.
@@ -22,11 +22,11 @@ Version 2.8.0-DEV
 - ![INFO][badge-info] The test files are no longer part of the package installation: they are lazy artifacts (from [MolSimTestFiles](https://github.com/m3g/MolSimTestFiles)), downloaded when needed. They are accessed with `test_file(name)`, exported by `MolSimToolkit.Testing` and available after `using LazyArtifacts` (a package extension, so LazyArtifacts is not loaded with the package). It replaces the path variables of that module (e.g. `Testing.namd_pdb` is now `test_file("popc_membrane.pdb")`; the files are listed in `test/Testing.jl`). The `MolSimToolkit.gmx2019_4_log` and `MolSimToolkit.gmx5_0_4_log` constants are replaced by `test_file("remd_gmx-2019.4.log")` and `test_file("remd_gmx-5.0.4.log")`.
 
 Version 2.7.0
---------------
+-------------
 - ![FEATURE][badge-feature] `read_namd_pressure_tensor` reads the pressure tensors printed in NAMD log files (with `outputPressure`), and `green_kubo_viscosity` computes the shear viscosity from their autocorrelations using the Green-Kubo relation.
 
 Version 2.6.0
---------------
+-------------
 - ![FEATURE][badge-feature] `mean_square_displacement` now subtracts, at each frame, the motion of the center of mass of the complete system from the centers of mass of the molecules. This is controlled by the new `subtract_system_com` keyword, `true` by default.
 
 Version 2.5.0
