@@ -1,7 +1,6 @@
 using Documenter
 using Plots
 using MolSimToolkit
-using MolSimToolkit.PackmolInputCreator
 using PDBToolsBase
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
@@ -42,7 +41,6 @@ makedocs(
             "Self-diffusion coefficient" => "time_dependent/self_diffusion.md",
             "Viscosity (Green-Kubo)" => "time_dependent/viscosity.md",
         ],
-        "System setup" => "system_setup.md",
         "Plotting style" => "plotting_style.md",
 #        "Developer zone" => "Developer.md",
         "Experimental" => Any[

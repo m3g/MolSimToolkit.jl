@@ -14,7 +14,6 @@
 - **Secondary structure mapping and plotting helpers**
 - **Hydrogen bond analysis**
 - **Pairwise and molecular distance analysis / coordination numbers**
-- **Utilities for system setup (integrated with Packmol)** 
 - **Block averaging and replica exchange analysis**
 - **Integration with [PDBTools.jl](https://github.com/m3g/PDBTools.jl)**
 
