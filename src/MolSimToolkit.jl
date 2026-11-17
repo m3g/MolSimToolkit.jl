@@ -107,9 +107,6 @@ include("./gromacs/remd.jl")
 include("./Reweighting/Reweighting.jl")
 @reexport using .Reweighting
 
-# Simulation setup facilities
-include("./PackmolInputCreator/PackmolInputCreator.jl")
-
 # Cluster management
 include("./Coaraci/Coaraci.jl")
 
