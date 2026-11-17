@@ -10,7 +10,7 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 2.8.1-DEV
+Version 3.0.0
 -------------
 - ![BREAKING][badge-breaking] The `PackmolInputCreator` submodule (`SolutionBoxUS`, `SolutionBoxUSC`, `write_packmol_input`, `convert_concentration`, `convert_density_table!`, `density_pure_solvent`, `density_pure_cossolvent`) and the "System setup" documentation page were removed. These system setup tools are now available, extended, in the `Recipes` module of [Packmol.jl](https://m3g.github.io/Packmol.jl/).
 
