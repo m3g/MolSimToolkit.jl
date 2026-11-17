@@ -1,7 +1,6 @@
 module MolecularMinimumDistances
 
 using TestItems: @testitem
-using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 using LinearAlgebra: diag
 using StaticArrays: SVector
