@@ -1,7 +1,6 @@
 module BlockAverages
 
 import LinearAlgebra: dot
-import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Statistics: mean, std
 import StatsBase: autocor
 import EasyFit: fitexp, upper, lower
@@ -9,10 +8,10 @@ export BlockAverageData, BlockDistribution
 export block_average, block_distribution
 
 """
-
-$(TYPEDEF)
+    BlockAverageData{T,DT}
 
 Structure that contains the result of the block-average analysis of the sequence. 
+`T` is the type of the data points, and `DT` the type of the time-step (both can have units).
 
 `x` is the original data set. 
 
@@ -35,7 +34,18 @@ deviation of the estimates divided by the square root of the number of blocks.
 the `lags` parameter of the `block_average` function, as a range. 
 
 `tau`: The characteristic decay time of the autocorrelation function, as obtained by fitting
-of a single exponential, of the form `exp(-t/tau)` to the data. 
+of a single exponential, of the form `exp(-t/tau)` to the data, in units of the time-step `dt`. 
+
+`tau_int`: The integrated autocorrelation time, `1 + 2*sum(autocor)`, where the sum runs over the
+lags before the autocorrelation drops below the 95% significance threshold `1.96/sqrt(length(x))`,
+in units of the time-step `dt`.
+
+`n_effective`: The effective number of independent samples, `length(x)/tau_int`.
+
+`xmean_stderr_neff`: The standard error of the mean computed with the effective number
+of samples, `std(x)/sqrt(n_effective)`.
+
+`dt`: The time-step between data points.
 
 """
 struct BlockAverageData{T,DT}
@@ -265,10 +275,19 @@ function block_average(
 end
 
 """
+    BlockDistribution{N,T}
 
-$(TYPEDEF)
+Structure that contains the distribution of the estimates of a property computed for 
+each block of the data, as returned by `block_distribution`. `N` is the number of blocks, 
+and `T` is the type of the data points.
 
-$(TYPEDFIELDS)
+`mean`: The mean of the complete data set.
+
+`std_of_the_mean`: The standard deviation of the estimates of the property in the blocks.
+
+`block_mean`: Vector with the estimate of the property computed for each block.
+
+`std_err_of_the_mean`: The standard error of the mean, `std_of_the_mean/sqrt(N)`.
 
 """
 struct BlockDistribution{N,T}
