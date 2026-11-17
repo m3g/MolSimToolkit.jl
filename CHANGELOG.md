@@ -12,6 +12,7 @@ MolSimToolkit.jl Changelog
 
 Version 3.0.0
 -------------
+- ![INFO][badge-info] Supports OrderedCollections 2.
 - ![INFO][badge-info] DocStringExtensions is no longer a dependency. The docstrings of `BlockAverageData` and `BlockDistribution` are written explicitly, now describing all their fields.
 - ![BREAKING][badge-breaking] The `PackmolInputCreator` submodule (`SolutionBoxUS`, `SolutionBoxUSC`, `write_packmol_input`, `convert_concentration`, `convert_density_table!`, `density_pure_solvent`, `density_pure_cossolvent`) and the "System setup" documentation page were removed. These system setup tools are now available, extended, in the `Recipes` module of [Packmol.jl](https://m3g.github.io/Packmol.jl/).
 
