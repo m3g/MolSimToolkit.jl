@@ -101,3 +101,46 @@ end
     @test sum(task_finished, task_list) == 4
 
 end
+
+@testitem "Batch host is never released" setup=[CoaraciTests] begin
+    ENV["CLUSTER_INTERFACE_TEST"] = "true"
+    # The task in the batch host (node1) finishes first, while the others are still running
+    task_list = [ TestTask("A", 0.2, tempname()), TestTask("B", 0.8, tempname()), TestTask("C", 0.8, tempname()) ]
+    rm.(getfield.(task_list,:output_file); force=true)
+    Coaraci.simulate(task_list; task_run, task_finished, task_title)
+    log = read("coaraci.log", String)
+    @test sum(task_finished, task_list) == 3
+    @test occursin("Batch host (never released): node1", log)
+    @test occursin("Keeping nodes: node1, node2, node3", log)
+    @test !occursin("Batch host released", log)
+    @test !occursin("Could not release", log)
+
+    # Batch host that is not the first node: it is kept, even if idle
+    ENV["CLUSTER_INTERFACE_TEST_BATCH_HOST"] = "node5"
+    rm.(getfield.(task_list,:output_file); force=true)
+    Coaraci.simulate(task_list[1:2]; task_run, task_finished, task_title)
+    log = read("coaraci.log", String)
+    @test occursin("Keeping nodes: node1, node2, node5", log)
+    @test !occursin("Batch host released", log)
+
+    # Batch host not in the list of nodes: nodes are not released
+    ENV["CLUSTER_INTERFACE_TEST_BATCH_HOST"] = "other"
+    rm.(getfield.(task_list,:output_file); force=true)
+    Coaraci.simulate(task_list; task_run, task_finished, task_title)
+    log = read("coaraci.log", String)
+    @test sum(task_finished, task_list) == 3
+    @test occursin("idle nodes won't be released", log)
+    @test !occursin("nodes released", log)
+    pop!(ENV, "CLUSTER_INTERFACE_TEST_BATCH_HOST")
+
+    # The cluster refuses to release the nodes: the tasks run until the end
+    ENV["CLUSTER_INTERFACE_TEST_FAIL_UPDATE"] = "true"
+    rm.(getfield.(task_list,:output_file); force=true)
+    Coaraci.simulate(task_list; task_run, task_finished, task_title)
+    log = read("coaraci.log", String)
+    @test sum(task_finished, task_list) == 3
+    @test count("Could not release idle nodes", log) == 1
+    @test occursin("Cluster refused to release nodes", log)
+    @test !occursin("nodes released", log)
+    pop!(ENV, "CLUSTER_INTERFACE_TEST_FAIL_UPDATE")
+end

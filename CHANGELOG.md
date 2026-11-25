@@ -12,6 +12,10 @@ MolSimToolkit.jl Changelog
 
 Version 3.0.1-DEV
 -------------
+- ![BUGFIX][badge-bugfix] `Coaraci.simulate` never releases the node that runs the job script (the batch host), which terminated the job, and with it all running tasks, when that node became idle before the others.
+- ![BUGFIX][badge-bugfix] `Coaraci.simulate` keeps running if the cluster refuses to release idle nodes: the failure is reported in the log file and the nodes are kept until the end of the job (previously the error terminated the job).
+- ![BUGFIX][badge-bugfix] Coaraci with SLURM: the trailing newline of the node list is removed before updating the job, and the `SLURM_NNODES` and `SLURM_JOB_NUM_NODES` environment variables are also updated when nodes are released.
+- ![BUGFIX][badge-bugfix] Coaraci with PBS: releasing more than one node at once failed, because the node names were passed to `pbs_release_nodes` as a single argument. The list of nodes is read from `$PBS_NODEFILE` (instead of a fixed spool path), and nodes are no longer released twice.
 
 Version 3.0.0
 -------------

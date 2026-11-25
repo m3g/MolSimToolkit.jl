@@ -19,11 +19,18 @@ function get_nodelist(::Type{SLURM})
     return nodelist
 end
 
+# Node that runs the job script (the first node of the allocation). Releasing it terminates the job.
+batch_host(::Type{SLURM}) = get(ENV, "SLURMD_NODENAME", gethostname())
+
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
-function update_job!(::Type{SLURM}, nodelist::AbstractVector{String})
-    hostlist = read(pipeline(`scontrol show hostlist "$(join(nodelist,","))"`), String)
+function update_job!(::Type{SLURM}, nodes_to_keep::AbstractVector{String}, ::AbstractVector{String})
+    hostlist = strip(read(`scontrol show hostlist $(join(nodes_to_keep, ","))`, String))
     run(`scontrol update JobId=$(ENV["SLURM_JOB_ID"]) NodeList=$hostlist`)
+    # Update the environment variables that describe the job allocation
     ENV["SLURM_JOB_NODELIST"] = hostlist
+    ENV["SLURM_NODELIST"] = hostlist
+    ENV["SLURM_JOB_NUM_NODES"] = string(length(nodes_to_keep))
+    ENV["SLURM_NNODES"] = string(length(nodes_to_keep))
     return nothing
 end
 
