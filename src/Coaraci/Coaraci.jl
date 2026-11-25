@@ -94,6 +94,11 @@ function simulate(
     # Check if all the input arguments are correct
     check_input(task_list, nodelist; task_run, task_finished, task_title)
 
+    # Node that runs the job script (and this process): it is never released
+    host = batch_host(cluster_type)
+    ihost = findfirst(n -> name(n) == host, nodelist)
+    host_node = isnothing(ihost) ? nothing : nodelist[ihost]
+
     # Lock to control access to the list of nodes in use
     lock_nodes = ReentrantLock()
 
@@ -118,6 +123,10 @@ function simulate(
         print_flush(log, "Cluster type: $cluster_type")
         print_flush(log, "JOB ID: $(get_jobid(cluster_type))")
         print_flush(log, "Nodes: $(join(name.(nodelist), ", "))") # print nodelist to log
+        print_flush(log, "Batch host (never released): $host")
+        if isnothing(ihost)
+            print_flush(log, "Batch host is not in the list of nodes: idle nodes won't be released.")
+        end
         print_flush(log, "Number of tasks per node: $(ntasks_per_node)")
         print_flush(log, "-------------------------------------------------------------")
 
@@ -177,16 +186,26 @@ function simulate(
             push!(julia_tasks, t)
         end
         # This loop runs until all tasks finish. If there are free nodes, reconfigure
-        # slurm to release the free nodes and keep only the nodes currently in use.
+        # the job to release the free nodes and keep only the nodes currently in use.
+        # The node running the job script (and this process) is never released, because
+        # that would terminate the job, and with it all running tasks.
+        release_nodes = !isnothing(ihost)
         while any(!istaskdone, julia_tasks)
-            @lock lock_nodes begin 
-                if length(nodes_currently_in_use) < length(nodelist) 
-                    n_released_nodes = length(nodelist) - length(nodes_currently_in_use)
-                    resize!(nodelist, length(nodes_currently_in_use)) 
-                    nodelist .= nodes_currently_in_use
-                    nodelist_names = name.(nodelist)
-                    update_job!(cluster_type, name.(nodelist))
-                    print_flush(log, "> $(n_released_nodes) nodes released. Keeping nodes: $(join(nodelist_names, ", "))")
+            release_nodes && @lock lock_nodes begin
+                nodes_to_keep = copy(nodes_currently_in_use)
+                host_node in nodes_to_keep || push!(nodes_to_keep, host_node)
+                if length(nodes_to_keep) < length(nodelist)
+                    nodes_to_release = filter(!in(nodes_to_keep), nodelist)
+                    try
+                        update_job!(cluster_type, name.(nodes_to_keep), name.(nodes_to_release))
+                        empty!(nodelist)
+                        append!(nodelist, nodes_to_keep)
+                        print_flush(log, "> $(length(nodes_to_release)) nodes released. Keeping nodes: $(join(name.(nodelist), ", "))")
+                    catch err
+                        # If the cluster refuses to release the nodes, keep them and do not try again
+                        release_nodes = false
+                        print_flush(log, "> Could not release idle nodes, which will be kept until the end of the job. Error: $(sprint(showerror, err))")
+                    end
                 end
             end
             sleep(options.sleep)

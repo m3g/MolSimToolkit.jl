@@ -194,8 +194,12 @@ echo "running! $2 in $hname" > $4 # title and output_file name
 
 Note that the delay is passed as the third argument of the execution. The script will run a 30s 
 long task on the first node, and a 2s task on the second node. When the second task finishes, the
-second node is released. Note: PBS does not allow releasing the primary node, thus it will be kept
-even if no task is running on it.
+second node is released. 
+
+The node that runs the job script (the *batch host*, which is the first node of the allocation in SLURM
+and the primary execution host in PBS) is never released, even if no task is running on it, because 
+releasing it would terminate the job, and with it all running tasks. If the cluster refuses to release 
+the idle nodes, a message is printed to the log file, and the nodes are kept until the end of the job.
 
 ## Example log file
 
@@ -208,6 +212,7 @@ Starting Coaraci managed submissions: 2024-10-11 10:48:54
 Cluster type: MolSimToolkit.Coaraci.PBS
 JOB ID: 144830.ada
 Nodes: adano62, adano72
+Batch host (never released): adano62
 Number of tasks per node: 1
 -------------------------------------------------------------
 Number of tasks to run: 2

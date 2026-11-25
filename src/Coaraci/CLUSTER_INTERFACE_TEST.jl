@@ -16,9 +16,19 @@ function get_nodelist(::Type{CLUSTER_INTERFACE_TEST})
     return nodelist
 end
 
+# Node that runs the job script, which cannot be released
+batch_host(::Type{CLUSTER_INTERFACE_TEST}) = get(ENV, "CLUSTER_INTERFACE_TEST_BATCH_HOST", "node1")
+
 # Update the job with the list of nodes currently in use. Release the nodes that are not in use anymore.
-# The nodelist is a list of strings with node names of nodes that ir in use.
-function update_job!(::Type{CLUSTER_INTERFACE_TEST}, nodelist::AbstractVector{String})
+# `nodes_to_keep` are the names of the nodes in use, and `nodes_to_release` the names of the idle nodes.
+# Here, an error is thrown if the batch host would be released (which terminates the job in a real
+# cluster), and the refusal of the cluster to release nodes can be simulated by setting
+# the CLUSTER_INTERFACE_TEST_FAIL_UPDATE environment variable.
+function update_job!(::Type{CLUSTER_INTERFACE_TEST}, nodes_to_keep::AbstractVector{String}, nodes_to_release::AbstractVector{String})
+    if batch_host(CLUSTER_INTERFACE_TEST) in nodes_to_release || !(batch_host(CLUSTER_INTERFACE_TEST) in nodes_to_keep)
+        error("Batch host released: job terminated.")
+    end
+    haskey(ENV, "CLUSTER_INTERFACE_TEST_FAIL_UPDATE") && error("Cluster refused to release nodes.")
     return nothing
 end
 
