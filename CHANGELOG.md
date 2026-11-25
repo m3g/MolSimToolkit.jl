@@ -10,6 +10,9 @@ MolSimToolkit.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.0.2-DEV
+-------------
+
 Version 3.0.1
 -------------
 - ![BUGFIX][badge-bugfix] `Coaraci.simulate` never releases the node that runs the job script (the batch host), which terminated the job, and with it all running tasks, when that node became idle before the others.
